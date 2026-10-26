@@ -1,0 +1,2294 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>GOD DID EXPRESS</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=IBM+Plex+Mono:wght@500;600&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: application mobile façon étiquette de colis. En-tête, puis 5 vues (une par stratégie) commandées par une barre d'onglets en bas. Un seul look, noir et orange, comme la charte. */
+:root {
+  --noir: #0E0D0C;
+  --carbone: #181614;
+  --ligne: #2C2824;
+  --orange: #FF6A13;
+  --orange-vif: #FF8B3E;
+  --papier: #F4EFE9;
+  --encre: #17130F;
+  --brume: #A89F95;
+  --ok: #4CC38A;
+  --sur-orange: #140A03;
+  --f-display: 'Big Shoulders Display', 'Arial Narrow', Impact, sans-serif;
+  --f-body: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--noir);
+  color: var(--papier);
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.5;
+  padding-block: 20px 180px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 640px; margin: 0 auto; display: grid; gap: 28px; }
+h1, h2, h3, p { margin: 0; }
+h1, h2 { font-family: var(--f-display); font-weight: 800; text-transform: uppercase; line-height: .92; text-wrap: balance; letter-spacing: .005em; }
+h1 { font-size: clamp(40px, 12vw, 60px); }
+h2 { font-size: clamp(32px, 9.5vw, 44px); }
+h3 { font-size: 16px; font-weight: 600; }
+.kicker { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--orange); }
+.mute { color: var(--brume); }
+.mono { font-family: var(--f-mono); }
+a { color: var(--orange-vif); }
+:focus-visible { outline: 2px solid var(--orange-vif); outline-offset: 2px; }
+
+/* En-tête */
+.top { display: grid; gap: 12px; }
+.marque { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 14px; border-bottom: 1px dashed var(--ligne); }
+.marque b { font-family: var(--f-display); font-weight: 800; font-size: 22px; letter-spacing: .08em; text-transform: uppercase; }
+.marque b span { color: var(--orange); }
+.base { font-family: var(--f-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--brume); text-align: right; }
+.top h1 em { font-style: normal; color: var(--orange); }
+.top p { max-width: 46ch; color: var(--brume); font-size: 14.5px; }
+
+/* Vues */
+.view { display: grid; gap: 20px; }
+.view > header { display: grid; gap: 10px; }
+.view > header p { max-width: 52ch; color: var(--brume); }
+
+/* Formulaires */
+form { display: grid; gap: 14px; }
+.duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.champ { display: grid; gap: 6px; min-width: 0; }
+label, .lbl { font-size: 12.5px; font-weight: 500; letter-spacing: .02em; color: var(--brume); }
+input, select, textarea {
+  width: 100%; min-width: 0;
+  background: var(--carbone); color: var(--papier);
+  border: 1px solid var(--ligne); border-radius: 6px;
+  padding: 12px; font: inherit; font-size: 16px;
+}
+textarea { min-height: 92px; resize: vertical; }
+input::placeholder, textarea::placeholder { color: #6E665E; }
+input:focus-visible, select:focus-visible, textarea:focus-visible { border-color: var(--orange); outline-offset: 0; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; padding: 12px 18px; border-radius: 8px; border: 1px solid transparent;
+  font: inherit; font-weight: 600; font-size: 15px; text-decoration: none; cursor: pointer;
+  background: var(--orange); color: var(--sur-orange);
+}
+.btn:hover { background: var(--orange-vif); }
+.btn.ghost { background: transparent; color: var(--papier); border-color: var(--ligne); }
+.btn.ghost:hover { border-color: var(--brume); background: var(--carbone); }
+.btn.mini { min-height: 38px; padding: 8px 12px; font-size: 13.5px; }
+.rangee { display: flex; flex-wrap: wrap; gap: 10px; }
+.rangee > * { flex: 1 1 180px; }
+
+/* Cartes */
+.carte { background: var(--carbone); border: 1px solid var(--ligne); border-radius: 8px; padding: 16px; display: grid; gap: 12px; min-width: 0; }
+.acompte { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.acompte div { display: grid; gap: 2px; }
+.acompte strong { font-family: var(--f-display); font-size: 34px; font-weight: 800; line-height: 1; }
+.acompte small { color: var(--brume); font-size: 12.5px; }
+.note { font-size: 13px; color: var(--brume); }
+
+/* Étiquette de colis (résultat de la commande) */
+.etiquette { background: var(--papier); color: var(--encre); border-radius: 4px; padding: 18px 16px 16px; display: grid; gap: 12px; position: relative; }
+.etiquette::before, .etiquette::after { content: ""; position: absolute; top: 58px; width: 18px; height: 18px; border-radius: 50%; background: var(--noir); }
+.etiquette::before { left: -9px; }
+.etiquette::after { right: -9px; }
+.etiquette .tete { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding-bottom: 16px; border-bottom: 2px dashed var(--encre); }
+.etiquette .tete b { font-family: var(--f-display); font-size: 26px; text-transform: uppercase; letter-spacing: .06em; font-weight: 800; }
+.etiquette .ref { font-family: var(--f-mono); font-size: 13px; font-weight: 600; background: var(--orange); color: var(--sur-orange); padding: 3px 8px; border-radius: 3px; }
+.etiquette dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 14px; font-size: 14px; }
+.etiquette dt { font-family: var(--f-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; opacity: .65; padding-top: 3px; }
+.etiquette dd { margin: 0; overflow-wrap: anywhere; font-weight: 500; }
+.barres { height: 38px; background: repeating-linear-gradient(90deg, var(--encre) 0 2px, transparent 2px 5px, var(--encre) 5px 6px, transparent 6px 10px, var(--encre) 10px 13px, transparent 13px 15px); }
+.etiquette .btn.ghost { color: var(--encre); border-color: var(--encre); }
+.etiquette .btn.ghost:hover { background: rgba(23, 19, 15, .08); }
+.etiquette .note { color: var(--encre); opacity: .75; }
+
+/* Achats groupés */
+.groupe { display: grid; gap: 14px; }
+.groupe .l1 { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.pastille { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; border: 1px solid var(--ligne); color: var(--brume); padding: 3px 7px; border-radius: 3px; white-space: nowrap; }
+.prix { font-family: var(--f-display); font-weight: 800; font-size: 46px; line-height: .9; color: var(--orange); }
+.prix small { font-family: var(--f-body); font-size: 13px; font-weight: 400; color: var(--brume); margin-left: 6px; }
+.paliers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.palier { border: 1px solid var(--ligne); border-radius: 6px; padding: 8px 10px; display: grid; gap: 2px; font-size: 12.5px; color: var(--brume); }
+.palier b { font-family: var(--f-mono); font-size: 15px; color: var(--papier); font-weight: 600; }
+.palier.on { border-color: var(--orange); }
+.palier.on b { color: var(--orange-vif); }
+.barre { height: 8px; background: var(--ligne); border-radius: 4px; overflow: hidden; }
+.barre i { display: block; height: 100%; background: var(--orange); }
+
+/* Live */
+.date-live { display: grid; gap: 6px; }
+.date-live strong { font-family: var(--f-display); font-weight: 800; font-size: clamp(40px, 12vw, 58px); text-transform: uppercase; line-height: .95; }
+.etapes3 { display: grid; gap: 10px; counter-reset: e; padding: 0; margin: 0; list-style: none; }
+.etapes3 li { counter-increment: e; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; align-items: start; }
+.etapes3 li::before { content: counter(e); font-family: var(--f-display); font-weight: 800; font-size: 24px; width: 34px; height: 34px; display: grid; place-items: center; background: var(--orange); color: var(--sur-orange); border-radius: 4px; }
+.etapes3 p { color: var(--brume); font-size: 14px; }
+.etapes3 h3 { margin-bottom: 1px; }
+.liste-cases { display: grid; gap: 4px; padding: 0; margin: 0; list-style: none; }
+.liste-cases label { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: start; color: var(--papier); font-size: 14.5px; padding: 6px 0; cursor: pointer; }
+.liste-cases input { width: 20px; height: 20px; padding: 0; margin: 2px 0 0; accent-color: var(--orange); }
+
+/* Suivi */
+.recherche { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+.recherche input { font-family: var(--f-mono); text-transform: uppercase; letter-spacing: .06em; }
+.suivi { list-style: none; margin: 0; padding: 0; display: grid; }
+.suivi li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 14px; position: relative; padding-bottom: 18px; }
+.suivi li::before { content: ""; position: absolute; left: 12px; top: 26px; bottom: 0; width: 2px; background: var(--ligne); }
+.suivi li:last-child { padding-bottom: 0; }
+.suivi li:last-child::before { display: none; }
+.pt { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--ligne); display: grid; place-items: center; background: var(--noir); z-index: 1; }
+.fait .pt { background: var(--ok); border-color: var(--ok); color: var(--sur-orange); }
+.fait::before { background: var(--ok) !important; }
+.cours .pt { border-color: var(--orange); }
+.cours .pt::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--orange); }
+.suivi h3 { font-size: 15.5px; }
+.suivi .todo h3 { color: var(--brume); font-weight: 500; }
+.preuve { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .04em; color: var(--brume); }
+.fait .preuve { color: var(--ok); }
+.cours .preuve { color: var(--orange-vif); }
+
+/* Parrainage et relais */
+.code-parrain { font-family: var(--f-mono); font-size: clamp(24px, 8vw, 34px); font-weight: 600; letter-spacing: .08em; color: var(--orange); overflow-wrap: anywhere; }
+.provinces { display: flex; flex-wrap: wrap; gap: 8px; }
+.prov { font: inherit; font-size: 13px; color: var(--papier); background: transparent; border: 1px solid var(--ligne); border-radius: 4px; padding: 8px 10px; min-height: 38px; cursor: pointer; }
+.prov:hover { border-color: var(--brume); }
+.prov[aria-pressed="true"] { border-color: var(--orange); background: var(--orange); color: var(--sur-orange); font-weight: 600; }
+.prov.base-pt { border-style: dashed; border-color: var(--orange); color: var(--orange-vif); }
+.prov.base-pt[aria-pressed="true"] { color: var(--sur-orange); border-style: solid; }
+.legende { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--brume); }
+
+/* Pied et barre d'onglets */
+footer { display: grid; gap: 8px; padding-top: 18px; border-top: 1px dashed var(--ligne); font-size: 13px; color: var(--brume); }
+footer .tel { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; color: var(--papier); }
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  background: var(--carbone); border-top: 1px solid var(--ligne);
+  padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px));
+}
+.tabbar nav { max-width: 640px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; }
+.tabbar button {
+  display: grid; justify-items: center; gap: 3px; padding: 8px 2px 6px; background: transparent; border: 0; border-radius: 6px;
+  color: var(--brume); font: inherit; font-size: 11px; font-weight: 500; cursor: pointer; min-height: 52px;
+}
+.tabbar svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tabbar button[aria-current="page"] { color: var(--orange-vif); }
+.tabbar button[aria-current="page"] span { border-bottom: 2px solid var(--orange); }
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(140px + env(safe-area-inset-bottom, 0px)); z-index: 50;
+  background: var(--papier); color: var(--encre); font-weight: 600; font-size: 14px; padding: 10px 16px; border-radius: 6px;
+}
+/* Catalogue */
+.cat-tools { display: grid; gap: 12px; }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+.chips.wrap { flex-wrap: wrap; overflow: visible; padding-bottom: 0; }
+.chip { flex: 0 0 auto; font: inherit; font-size: 13px; color: var(--papier); background: transparent; border: 1px solid var(--ligne); border-radius: 4px; padding: 8px 12px; min-height: 38px; cursor: pointer; white-space: nowrap; }
+.chip:hover { border-color: var(--brume); }
+.chip[aria-pressed="true"] { background: var(--orange); border-color: var(--orange); color: var(--sur-orange); font-weight: 600; }
+.chip small { font-family: var(--f-mono); font-size: 11px; opacity: .7; margin-left: 6px; }
+.compte { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--brume); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 168px), 1fr)); gap: 12px; }
+.prod { background: var(--carbone); border: 1px solid var(--ligne); border-radius: 8px; overflow: hidden; display: grid; grid-template-rows: auto 1fr auto; min-width: 0; }
+.prod .ph { position: relative; display: block; width: 100%; aspect-ratio: 16 / 10; padding: 0; border: 0; background: var(--ligne); cursor: pointer; }
+.prod .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tag { position: absolute; left: 8px; top: 8px; font-family: var(--f-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; background: var(--noir); color: var(--papier); padding: 3px 6px; border-radius: 3px; }
+.tag.live { left: auto; right: 8px; background: var(--orange); color: var(--sur-orange); font-weight: 600; }
+.prod .corps { padding: 10px 10px 4px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.prod h3 { font-size: 14.5px; line-height: 1.25; text-wrap: balance; }
+.prod .sub { font-size: 12.5px; line-height: 1.4; color: var(--brume); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.prod .prix-l { font-family: var(--f-mono); font-size: 11.5px; color: var(--orange-vif); }
+.prod .act { padding: 8px 10px 10px; display: grid; gap: 6px; }
+.btn[aria-pressed="true"] { border-color: var(--orange); color: var(--orange-vif); }
+.vide { display: grid; gap: 12px; justify-items: start; }
+.hors { display: grid; gap: 10px; }
+.hors p { color: var(--brume); font-size: 14px; max-width: 52ch; }
+.ent-bloc { display: grid; gap: 10px; }
+.ent-bloc .lbl { color: var(--papier); font-weight: 600; font-size: 13.5px; }
+.listbar { position: fixed; left: 0; right: 0; z-index: 19; bottom: calc(70px + env(safe-area-inset-bottom, 0px)); padding: 0 max(12px, env(safe-area-inset-right, 0px)) 8px max(12px, env(safe-area-inset-left, 0px)); }
+.listbar > div { max-width: 640px; margin: 0 auto; background: var(--papier); color: var(--encre); border-radius: 8px; padding: 8px 8px 8px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; box-shadow: 0 6px 24px rgba(0, 0, 0, .5); font-weight: 600; font-size: 14px; }
+.veil[hidden], .listbar[hidden] { display: none; }
+.veil { position: fixed; inset: 0; z-index: 40; background: rgba(8, 7, 6, .88); display: grid; align-items: end; justify-items: center; padding-top: env(safe-area-inset-top, 0px); }
+.sheet { width: 100%; max-width: 640px; max-height: 92%; overflow: auto; background: var(--carbone); border: 1px solid var(--ligne); border-radius: 12px 12px 0 0; padding: 14px max(16px, env(safe-area-inset-right, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); display: grid; gap: 14px; }
+.sheet-tete { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.sheet .big { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 6px; background: var(--ligne); display: block; }
+.lrow { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--ligne); }
+.lrow img { width: 56px; height: 36px; object-fit: cover; border-radius: 4px; display: block; }
+.lrow b { font-size: 14px; font-weight: 600; line-height: 1.25; }
+.qty { display: inline-flex; align-items: center; gap: 4px; }
+.qty button { width: 34px; height: 34px; border-radius: 4px; border: 1px solid var(--ligne); background: transparent; color: var(--papier); font: inherit; font-size: 18px; cursor: pointer; }
+.qty button:hover { border-color: var(--brume); }
+.qty span { min-width: 24px; text-align: center; font-family: var(--f-mono); }
+.prog-live { display: grid; gap: 8px; }
+.prog-row { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; align-items: center; width: 100%; padding: 0; background: transparent; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.prog-row img { width: 72px; height: 45px; object-fit: cover; border-radius: 4px; display: block; }
+.prog-row b { font-size: 14px; font-weight: 600; }
+/* 2050 : fond vivant, ruban, accueil */
+.fond { position: fixed; inset: 0; z-index: 0; pointer-events: none; background:
+  radial-gradient(620px 420px at 85% -5%, rgba(255, 106, 19, var(--glow, .18)), transparent 70%),
+  radial-gradient(520px 420px at -10% 38%, rgba(255, 139, 62, .07), transparent 70%),
+  linear-gradient(rgba(244, 239, 233, .028) 1px, transparent 1px) 0 0 / 44px 44px,
+  linear-gradient(90deg, rgba(244, 239, 233, .028) 1px, transparent 1px) 0 0 / 44px 44px; }
+.wrap { position: relative; z-index: 1; }
+.ruban { overflow: hidden; border-block: 1px solid var(--ligne); padding: 7px 0; font-family: var(--f-mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--brume); white-space: nowrap; }
+.ruban-in { display: inline-flex; animation: defile 30s linear infinite; }
+.ruban-in span { padding-right: 26px; }
+.ruban-in span::after { content: "◆"; color: var(--orange); margin-left: 26px; }
+@keyframes defile { to { transform: translateX(-50%); } }
+#v-accueil { gap: 40px; }
+.hero { display: grid; gap: 18px; }
+.hud-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.horloge { font-size: 12px; color: var(--brume); letter-spacing: .1em; white-space: nowrap; }
+.horloge::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); margin-right: 8px; box-shadow: 0 0 8px var(--ok); animation: pouls 2s ease-in-out infinite; }
+@keyframes pouls { 50% { opacity: .3; } }
+.hero h1 { font-size: clamp(54px, 17vw, 88px); }
+.hero h1 em { font-style: normal; color: var(--orange); text-shadow: 0 0 28px rgba(255, 106, 19, .45); }
+.lead { max-width: 46ch; color: var(--brume); font-size: 15px; }
+.radar { position: relative; border: 1px solid var(--ligne); border-radius: 10px; background: rgba(24, 22, 20, .72); overflow: hidden; }
+.radar svg { display: block; width: 100%; height: auto; }
+.cadre::before, .cadre::after { content: ""; position: absolute; width: 16px; height: 16px; border: 2px solid var(--orange); pointer-events: none; z-index: 2; }
+.cadre::before { left: 6px; top: 6px; border-right: 0; border-bottom: 0; }
+.cadre::after { right: 6px; bottom: 6px; border-left: 0; border-top: 0; }
+.radar-leg { display: flex; justify-content: space-between; gap: 10px; padding: 8px 14px 10px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--brume); border-top: 1px dashed var(--ligne); }
+.vt { font-family: var(--f-mono); font-size: 8.5px; letter-spacing: .14em; fill: #A89F95; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--ligne); border-radius: 8px; overflow: hidden; background: rgba(24, 22, 20, .6); }
+.stats div { padding: 12px 4px; text-align: center; border-right: 1px solid var(--ligne); }
+.stats div:last-child { border-right: 0; }
+.stats strong { display: block; font-family: var(--f-display); font-size: 32px; font-weight: 800; line-height: 1; color: var(--orange); font-variant-numeric: tabular-nums; }
+.stats small { font-size: 11px; color: var(--brume); line-height: 1.2; display: block; margin-top: 2px; }
+.bloc { display: grid; gap: 14px; min-width: 0; }
+.bloc > header { display: grid; gap: 6px; }
+.bloc h2 { font-size: clamp(30px, 9vw, 40px); }
+.bloc p { color: var(--brume); font-size: 14.5px; max-width: 52ch; }
+.js .rv { opacity: 0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
+.js .rv.in { opacity: 1; transform: none; }
+.champ-ia { position: relative; }
+.champ-ia input { padding-left: 44px; min-height: 52px; border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255, 106, 19, .12), 0 0 28px rgba(255, 106, 19, .18); }
+.champ-ia svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; stroke: var(--orange); fill: none; stroke-width: 2; stroke-linecap: round; pointer-events: none; }
+.res-ia { display: grid; gap: 8px; }
+.res-ia .compte { margin-top: 2px; }
+.res-row { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px; background: var(--carbone); border: 1px solid var(--ligne); border-radius: 8px; width: 100%; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.res-row:hover { border-color: var(--orange); }
+.res-row img { width: 64px; height: 40px; object-fit: cover; border-radius: 4px; display: block; }
+.res-row b { font-size: 14px; font-weight: 600; line-height: 1.25; display: block; }
+.res-row .s { font-size: 12.5px; color: var(--brume); display: block; line-height: 1.3; }
+.res-row i { font-style: normal; color: var(--orange); font-size: 20px; padding-right: 4px; }
+.rail { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 8px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+.mc { flex: 0 0 auto; width: 156px; scroll-snap-align: start; position: relative; display: grid; gap: 6px; align-content: start; padding: 0; background: transparent; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.mc .im { position: relative; display: block; border-radius: 8px; overflow: hidden; border: 1px solid var(--ligne); }
+.mc img { width: 156px; height: 98px; object-fit: cover; display: block; transition: transform .4s ease; }
+.mc:hover img { transform: scale(1.06); }
+.mc b { font-size: 13.5px; font-weight: 600; line-height: 1.25; }
+.mc .rang { position: absolute; left: 6px; bottom: -4px; font-family: var(--f-display); font-weight: 800; font-size: 54px; line-height: 1; color: var(--papier); text-shadow: 0 2px 14px rgba(0, 0, 0, .85); }
+.compte-rebours { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.cr { background: var(--noir); border: 1px solid var(--ligne); border-radius: 8px; padding: 10px 4px 8px; text-align: center; }
+.cr b { display: block; font-family: var(--f-display); font-size: clamp(36px, 11vw, 50px); font-weight: 800; line-height: 1; color: var(--papier); font-variant-numeric: tabular-nums; }
+.cr small { font-family: var(--f-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--brume); }
+.salle { display: grid; gap: 12px; }
+.salle .quand { font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--orange-vif); }
+.mystere { position: relative; display: block; width: 100%; padding: 0; border: 1px solid var(--orange); border-radius: 10px; overflow: hidden; background: var(--carbone); cursor: pointer; color: inherit; font: inherit; text-align: left; }
+.mystere img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; filter: blur(22px) saturate(1.3) brightness(.7); transform: scale(1.15); transition: filter .7s ease, transform .7s ease; }
+.mystere .voile { position: absolute; inset: 0; display: grid; align-content: center; justify-items: center; gap: 6px; text-align: center; font-family: var(--f-display); font-size: 32px; text-transform: uppercase; font-weight: 800; line-height: 1; transition: opacity .4s; }
+.mystere .voile small { font-family: var(--f-mono); font-size: 11px; letter-spacing: .14em; color: var(--orange-vif); font-weight: 500; }
+.mystere.ouvert img { filter: none; transform: none; }
+.mystere.ouvert .voile { opacity: 0; pointer-events: none; }
+.sp-info { display: grid; gap: 8px; }
+.sp-info h3 { font-size: 20px; }
+.avis-c { flex: 0 0 auto; width: 250px; scroll-snap-align: start; background: var(--carbone); border: 1px solid var(--ligne); border-radius: 8px; padding: 14px; display: grid; gap: 10px; align-content: space-between; }
+.avis-c q { font-size: 14px; line-height: 1.45; quotes: "« " " »"; }
+.avis-c .qui { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12.5px; color: var(--brume); }
+.etoiles { color: var(--orange); letter-spacing: 2px; font-size: 13px; }
+.passe { position: relative; border-radius: 14px; padding: 18px; color: var(--sur-orange); background: conic-gradient(from 210deg at 70% 20%, #FF6A13, #FFB27A, #FF6A13 35%, #E24E00 60%, #FF8B3E 85%, #FF6A13); display: grid; gap: 34px; overflow: hidden; transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .15s ease-out; box-shadow: 0 18px 40px rgba(255, 106, 19, .25); }
+.passe::after { content: ""; position: absolute; inset: 0; background: radial-gradient(260px 160px at var(--mx, 70%) var(--my, 10%), rgba(255, 255, 255, .5), transparent 60%); mix-blend-mode: soft-light; pointer-events: none; }
+.passe .l1 { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.passe b { font-family: var(--f-display); font-size: 24px; letter-spacing: .1em; text-transform: uppercase; font-weight: 800; }
+.passe .code { font-family: var(--f-mono); font-size: clamp(22px, 7vw, 30px); font-weight: 600; letter-spacing: .1em; overflow-wrap: anywhere; }
+.passe .nom { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; opacity: .8; }
+.fid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.dia { aspect-ratio: 1; display: grid; place-items: center; border: 1px dashed var(--ligne); border-radius: 8px; color: var(--ligne); }
+.dia svg { width: 52%; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+.dia.on { border-style: solid; border-color: var(--orange); color: var(--orange); background: rgba(255, 106, 19, .08); box-shadow: 0 0 14px rgba(255, 106, 19, .25) inset; }
+.niveaux { display: flex; justify-content: space-between; gap: 6px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--brume); }
+.l1f { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.tuile { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 14px; align-items: center; width: 100%; text-align: left; padding: 14px; background: var(--noir); border: 1px solid var(--ligne); border-radius: 10px; color: inherit; font: inherit; cursor: pointer; }
+.tuile:hover { border-color: var(--orange); }
+.tuile svg { width: 34px; height: 34px; stroke: var(--orange); fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.tuile b { display: block; font-size: 16px; }
+.tuile .s { color: var(--brume); font-size: 13px; }
+.cockpit { display: grid; grid-template-columns: 118px minmax(0, 1fr); gap: 16px; align-items: center; }
+.jauge svg { display: block; width: 118px; height: 118px; }
+.arc { transition: stroke-dasharray 1.1s cubic-bezier(.2, .8, .2, 1); filter: drop-shadow(0 0 5px rgba(255, 106, 19, .6)); }
+.jn { font-family: var(--f-display); font-weight: 800; font-size: 40px; fill: var(--papier); }
+.jd { font-size: 17px; fill: var(--brume); }
+.sceau { position: absolute; right: 16px; top: 70px; width: 86px; height: 86px; border: 3px solid var(--orange); border-radius: 50%; color: var(--orange); display: grid; place-items: center; text-align: center; font-family: var(--f-display); font-weight: 800; font-size: 20px; letter-spacing: .08em; line-height: 1; text-transform: uppercase; transform: rotate(-14deg); opacity: 0; pointer-events: none; box-shadow: inset 0 0 0 3px var(--papier), inset 0 0 0 5px var(--orange); }
+.sceau.frappe { animation: tampon .55s .2s cubic-bezier(.2, 1.5, .4, 1) forwards; }
+@keyframes tampon { 0% { opacity: 0; transform: rotate(-14deg) scale(2.8); } 55% { opacity: 1; } 100% { opacity: .92; transform: rotate(-14deg) scale(1); } }
+.prod { transition: transform .18s ease-out, border-color .2s; transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+.prod:hover { border-color: var(--orange); }
+@media (prefers-reduced-motion: reduce) { .sceau.frappe { opacity: .92; } }
+@media (max-width: 380px) { .cockpit { grid-template-columns: minmax(0, 1fr); justify-items: start; } }
+
+.barre i { transform-origin: left; animation: remplit 1.2s .15s both cubic-bezier(.2, .8, .2, 1); }
+@keyframes remplit { from { transform: scaleX(0); } }
+.boot { position: fixed; inset: 0; z-index: 60; background: var(--noir); display: grid; place-items: center; text-align: center; padding: 24px; cursor: pointer; }
+.boot[hidden] { display: none; }
+.boot-logo { font-family: var(--f-display); font-weight: 800; font-size: clamp(40px, 13vw, 64px); text-transform: uppercase; letter-spacing: .08em; line-height: 1; }
+.boot-logo span { color: var(--orange); text-shadow: 0 0 24px rgba(255, 106, 19, .6); }
+.boot-ligne { height: 3px; width: min(220px, 60vw); background: var(--ligne); margin: 16px auto 12px; overflow: hidden; }
+.boot-ligne i { display: block; height: 100%; background: var(--orange); animation: charge 1.3s ease-out forwards; }
+@keyframes charge { from { transform: translateX(-100%); } }
+.boot-txt { font-family: var(--f-mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--brume); }
+.voie { min-width: 0; }
+[hidden] { display: none !important; }
+.hero h1 { font-size: clamp(44px, 13.5vw, 72px) !important; }
+.ruban { margin-top: 2px; }
+.voie svg { display: block; width: 100%; height: auto; }
+.sheet .rangee .btn { flex: 1 1 140px; }
+@media (max-width: 380px) {
+  .duo { grid-template-columns: minmax(0, 1fr); }
+  .paliers { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+
+/* ===== v2 : globe, assistant, admin, prix, club ===== */
+.globe { display: block; width: 100%; height: clamp(250px, 78vw, 340px); touch-action: pan-y; cursor: grab; }
+.globe:active { cursor: grabbing; }
+.slogan { display: grid; gap: 6px; padding: 14px 16px; border-left: 3px solid var(--orange); background: rgba(255, 106, 19, .07); border-radius: 0 8px 8px 0; }
+.slogan p { font-family: var(--f-display); font-weight: 800; font-size: clamp(24px, 7vw, 32px); line-height: 1.02; text-transform: uppercase; text-wrap: balance; }
+.reseaux { display: flex; flex-wrap: wrap; gap: 10px; }
+.rs { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 14px; border: 1px solid var(--ligne); border-radius: 8px; color: var(--papier); text-decoration: none; font-weight: 600; font-size: 14px; background: var(--carbone); }
+.rs:hover { border-color: var(--orange); }
+.rs svg { width: 20px; height: 20px; fill: none; stroke: var(--orange); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.fab { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 21; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 16px; border-radius: 24px; border: 0; background: var(--orange); color: var(--sur-orange); font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; box-shadow: 0 8px 26px rgba(255, 106, 19, .35); }
+.fab svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+body.has-list .fab { bottom: calc(140px + env(safe-area-inset-bottom, 0px)); }
+.tourbar { position: fixed; left: 0; right: 0; top: 0; z-index: 45; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: calc(8px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px)); background: var(--orange); color: var(--sur-orange); font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+.tourbar .btn { background: var(--sur-orange); color: var(--papier); min-height: 34px; padding: 6px 12px; }
+.hl { padding: 10px 14px; border: 1px dashed var(--orange); border-radius: 8px; font-size: 13.5px; color: var(--orange-vif); background: rgba(255, 106, 19, .06); }
+.hl[hidden], .tourbar[hidden] { display: none; }
+.chat { display: grid; gap: 10px; max-height: 46vh; overflow-y: auto; padding: 2px; align-content: start; }
+.bulle { max-width: 92%; padding: 10px 12px; border-radius: 12px; font-size: 14.5px; line-height: 1.45; display: grid; gap: 8px; min-width: 0; overflow-wrap: anywhere; }
+.bulle.moi { justify-self: end; background: var(--orange); color: var(--sur-orange); border-bottom-right-radius: 3px; font-weight: 500; }
+.bulle.ia { justify-self: start; background: var(--noir); border: 1px solid var(--ligne); border-bottom-left-radius: 3px; }
+.px3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.px3 input { padding: 10px 8px; }
+.arow { grid-template-columns: 76px minmax(0, 1fr); align-items: start; padding: 12px; }
+.arow img { width: 76px; height: 76px; object-fit: cover; border-radius: 6px; display: block; background: var(--ligne); }
+.arow.off { opacity: .55; }
+.pgrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.pgrid .btn { min-height: 40px; padding: 6px 0; font-size: 13px; }
+.pgrid .btn.ok { border-color: var(--ok); color: var(--ok); }
+.pubbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 12; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; background: var(--carbone); border: 1px solid var(--orange); border-radius: 8px; font-size: 14px; font-weight: 600; }
+.pubbar .btn:disabled { opacity: .4; cursor: default; }
+.atabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.srow { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) 28px; gap: 10px; align-items: center; font-size: 13.5px; }
+.srow b { font-family: var(--f-mono); text-align: right; }
+details.carte > summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 28px; }
+details.carte > summary::-webkit-details-marker { display: none; }
+.prow { align-items: end; }
+.vniv { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.vn { display: grid; gap: 2px; padding: 8px 6px; border: 1px solid var(--ligne); border-radius: 6px; text-align: center; }
+.vn b { font-family: var(--f-display); font-size: 20px; letter-spacing: .06em; text-transform: uppercase; color: var(--orange); }
+.vn span { font-size: 11px; color: var(--brume); line-height: 1.25; }
+.vip-lv { display: grid; gap: 2px; }
+.vip-lv b { font-family: var(--f-display); font-weight: 800; font-size: 44px; line-height: 1; text-transform: uppercase; color: var(--orange); }
+.prod .pv { font-weight: 600; font-size: 15px; color: var(--orange); }
+.prod .prix-l small { color: var(--brume); font-size: 11px; }
+.gros { font-family: var(--f-mono); font-size: 11px; color: var(--ok); }
+.calc { background: var(--noir); }
+.calc .acompte strong { font-size: 30px; }
+.img-off { visibility: hidden; }
+.avis-ph { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 6px; display: block; }
+.suivi .ph { display: block; margin-top: 8px; padding: 0; border: 1px solid var(--ligne); border-radius: 6px; overflow: hidden; background: none; cursor: pointer; width: 132px; }
+.suivi .ph img { display: block; width: 132px; height: 82px; object-fit: cover; }
+.statut { display: grid; gap: 4px; }
+.statut b { font-family: var(--f-display); font-weight: 800; font-size: 26px; line-height: 1; text-transform: uppercase; }
+.sheet .chat { max-height: 40vh; }
+@media (max-width: 380px) { .vniv { grid-template-columns: repeat(2, minmax(0, 1fr)); } .pgrid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+</style>
+
+<div class="fond" aria-hidden="true"></div>
+<div class="wrap">
+  <div class="hl" id="hl" hidden>Pas de réseau. Tu peux continuer à parcourir, et ta demande est gardée sur ton téléphone.</div>
+  <header class="top">
+    <div class="marque">
+      <b>God Did <span>Express</span></b>
+      <div class="base">Kinshasa · RDC<br>et le monde</div>
+    </div>
+    <div class="ruban" aria-hidden="true"><div class="ruban-in" id="ruban-in"></div></div>
+  </header>
+
+  <!-- ACCUEIL 2050 -->
+  <section class="view" id="v-accueil">
+    <div class="hero">
+      <div class="hud-bar"><span class="kicker" id="h-salut">Bonjour</span><span class="mono horloge" id="h-heure"></span></div>
+      <h1>Tu choisis.<br><em>On trouve.</em><br>On te livre.</h1>
+      <p class="lead">Dites-nous ce que vous voulez, de la RDC ou de l'étranger. On achète, on importe, on livre. Acompte de 50 % et preuve en photo à chaque étape.</p>
+      <div class="slogan"><div class="kicker" id="slogan-k"></div><p id="slogan-txt"></p></div>
+      <div class="radar cadre"><canvas class="globe" id="g-home" role="img" aria-label="Globe terrestre : trajet du colis de la Chine à Kinshasa"></canvas><div class="radar-leg"><span>Chine → Kinshasa</span><span>Glisse pour tourner</span></div></div>
+      <div class="rangee">
+        <button class="btn" type="button" data-go="catalogue">Voir le catalogue</button>
+        <button class="btn ghost" type="button" data-go="commander">Commander sur mesure</button>
+        <button class="btn ghost" type="button" data-assist>Poser une question</button>
+        <button class="btn ghost" type="button" data-tour>Visite guidée parlée</button>
+      </div>
+      <div class="stats">
+        <div><strong id="st-prod" data-n="0">0</strong><small>produits au catalogue</small></div>
+        <div><strong data-n="26">0</strong><small>provinces visées</small></div>
+        <div><strong data-n="50" data-sfx="%">0</strong><small>d'acompte seulement</small></div>
+        <div><strong data-n="7">0</strong><small>étapes avec preuve</small></div>
+      </div>
+    </div>
+
+    <section class="bloc rv">
+      <header><div class="kicker">Recherche intelligente</div><h2>Dites ce que vous cherchez</h2></header>
+      <div class="champ-ia">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+        <input id="ia-q" type="search" autocomplete="off" aria-label="Que cherchez-vous ?" placeholder="Un laptop pour le bureau">
+      </div>
+      <div class="chips" id="ia-sug" role="group" aria-label="Idées de recherche">
+        <button type="button" class="chip" data-q="laptop">Laptop</button>
+        <button type="button" class="chip" data-q="iPhone">iPhone</button>
+        <button type="button" class="chip" data-q="baskets">Baskets</button>
+        <button type="button" class="chip" data-q="cadeau">Cadeau</button>
+        <button type="button" class="chip" data-q="électroménager">Électroménager</button>
+        <button type="button" class="chip" data-q="déco salon">Déco salon</button>
+      </div>
+      <div class="res-ia" id="ia-res" aria-live="polite"></div>
+    </section>
+
+    <section class="bloc rv">
+      <header><div class="kicker">Pour chaque occasion</div><h2>C'est pour quoi ?</h2></header>
+      <div class="chips" id="occ-chips" role="group" aria-label="Occasions"></div>
+      <div class="rail" id="occ-rail"></div>
+    </section>
+
+    <section class="bloc rv">
+      <header><div class="kicker">Salle d'attente du live</div><h2>Le prochain live arrive</h2></header>
+      <div class="carte salle">
+        <div class="quand" id="lv-quand"></div>
+        <div class="compte-rebours" role="timer" aria-label="Compte à rebours avant le prochain live">
+          <div class="cr"><b id="cr-j">00</b><small>jours</small></div>
+          <div class="cr"><b id="cr-h">00</b><small>heures</small></div>
+          <div class="cr"><b id="cr-m">00</b><small>min</small></div>
+          <div class="cr"><b id="cr-s">00</b><small>sec</small></div>
+        </div>
+        <p class="note">Rendez-vous proposé, horaire confirmé sur WhatsApp. Le produit réel, essayé devant vous, commande en direct avec acompte.</p>
+        <div class="rangee">
+          <a class="btn" id="lv-wa" href="#" target="_blank" rel="noopener">Me prévenir sur WhatsApp</a>
+          <button class="btn ghost" type="button" data-go="live">Voir le programme</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="bloc rv">
+      <header><div class="kicker">Sélection de la semaine</div><h2>Au programme du live</h2></header>
+      <div class="rail" id="tend-rail"></div>
+    </section>
+
+    <section class="bloc rv">
+      <header><div class="kicker">Surprise du jour</div><h2>Un produit chaque jour</h2></header>
+      <button type="button" class="mystere" id="sp-btn" aria-label="Révéler le produit du jour"></button>
+      <div class="sp-info" id="sp-info" hidden></div>
+    </section>
+
+    <section class="bloc rv">
+      <header><div class="kicker">Comment ça marche</div><h2>Quatre gestes, c'est tout</h2></header>
+      <ol class="etapes3">
+        <li><div><h3>Tu choisis</h3><p>Dans le catalogue, ou avec une photo ou un lien envoyé sur WhatsApp.</p></div></li>
+        <li><div><h3>On trouve</h3><p>On identifie le fournisseur et on vous envoie le devis complet avant tout paiement.</p></div></li>
+        <li><div><h3>On importe</h3><p>Acompte de 50 %. Achat, expédition et arrivée sont prouvés en photo.</p></div></li>
+        <li><div><h3>On te livre</h3><p>Vous recevez votre colis, avec une vidéo de remise.</p></div></li>
+      </ol>
+    </section>
+
+    <section class="bloc rv">
+      <header><div class="kicker">Entreprises et PME</div><h2>On vous approvisionne</h2></header>
+      <div class="carte">
+        <p>Restaurants, hôtels, écoles, cliniques, boutiques, chantiers : touchez votre secteur et votre besoin, rien à écrire. Vous recevez une offre sur WhatsApp.</p>
+        <button class="btn" type="button" data-go="catalogue" data-scroll="ent">Demander une offre</button>
+      </div>
+    </section>
+
+    <section class="bloc rv">
+      <header><div class="kicker">Ils parlent de nous</div><h2>Vos avis, en preuve</h2></header>
+      <div class="rail" id="avis-rail"></div>
+      <p class="note" id="avis-note">Ces trois cartes sont des modèles d'affichage. Les vrais avis de nos clients les remplaceront, avec leur accord.</p>
+      <a class="btn ghost" id="avis-wa" href="#" target="_blank" rel="noopener">Envoyer mon témoignage sur WhatsApp</a>
+    </section>
+
+    <section class="bloc rv">
+      <header><div class="kicker">Suis-nous</div><h2>Sur tes réseaux</h2></header>
+      <div class="reseaux" id="reseaux-home"></div>
+    </section>
+
+    <section class="bloc rv">
+      <header><div class="kicker">Membre fondateur</div><h2>Parmi les premiers</h2></header>
+      <div class="carte">
+        <p>Les premiers clients de GOD DID EXPRESS font partie de l'histoire de la marque. Demandez votre badge de membre fondateur.</p>
+        <a class="btn" id="fond-wa" href="#" target="_blank" rel="noopener">Je veux mon badge</a>
+      </div>
+    </section>
+  </section>
+
+
+    <!-- 0. CATALOGUE -->
+  <section class="view" id="v-catalogue" hidden>
+    <header>
+      <div class="kicker">Catalogue</div>
+      <h2>Voyez avant de commander</h2>
+      <p>Touchez un produit pour l'agrandir, voir les prix de gros et calculer votre total. Le devis final vous est envoyé sur WhatsApp avant tout paiement, avec un acompte de 50 %.</p>
+    </header>
+    <div class="cat-tools">
+      <div class="champ"><label for="c-q">Chercher un produit</label>
+        <input id="c-q" type="search" placeholder="Ex. laptop, miroir, sac, iPhone" autocomplete="off"></div>
+      <div class="chips" id="c-chips" role="group" aria-label="Catégories"></div>
+    </div>
+    <div class="carte ent-bloc" id="ent">
+      <div>
+        <div class="kicker">Entreprises et PME</div>
+        <h3 style="margin-top:4px">On vous approvisionne</h3>
+      </div>
+      <p class="note">Restaurants, hôtels, écoles, cliniques, boutiques, chantiers. Touchez ce qui vous concerne, rien à écrire.</p>
+      <div class="lbl">Votre secteur</div>
+      <div class="chips wrap" id="ent-sect" role="group" aria-label="Secteur"></div>
+      <div class="lbl">Ce dont vous avez besoin</div>
+      <div class="chips wrap" id="ent-besoin" role="group" aria-label="Besoins"></div>
+      <a class="btn" id="ent-wa" href="#" target="_blank" rel="noopener">Recevoir une offre sur WhatsApp</a>
+    </div>
+    <div class="compte" id="c-compte" aria-live="polite"></div>
+    <div class="grid" id="c-grid"></div>
+    <div class="carte hors">
+      <h3>Vous ne voyez pas votre produit ?</h3>
+      <p>Envoyez-nous une photo ou un lien sur WhatsApp. On trouve le fournisseur, on négocie, on importe et on vous livre.</p>
+      <a class="btn" id="c-hors" href="#" target="_blank" rel="noopener">Envoyer ma photo sur WhatsApp</a>
+    </div>
+  </section>
+
+<!-- 1. COMMANDER -->
+  <section class="view" id="v-commander" hidden>
+    <header>
+      <div class="kicker">Commande sur mesure</div>
+      <h2>Demandez, on cherche</h2>
+      <p>Décrivez le produit. Vous recevez un devis détaillé : prix fournisseur, transport, douane et notre marge. Vous versez 50 % pour lancer l'achat, le reste à la livraison.</p>
+    </header>
+    <form id="form-cmd" autocomplete="on">
+      <div class="duo">
+        <div class="champ"><label for="o-nom">Votre nom</label><input id="o-nom" name="nom" required placeholder="Ex. Exaucé"></div>
+        <div class="champ"><label for="o-tel">Téléphone WhatsApp</label><input id="o-tel" name="tel" type="tel" inputmode="tel" required placeholder="+243 …"></div>
+      </div>
+      <div class="duo">
+        <div class="champ"><label for="o-commune">Commune de livraison</label>
+          <select id="o-commune" required></select></div>
+        <div class="champ"><label for="o-cat">Catégorie</label>
+          <select id="o-cat" required></select></div>
+      </div>
+      <div class="champ"><label for="o-desc">Produit recherché</label>
+        <textarea id="o-desc" required placeholder="Marque, modèle, taille, couleur, lien du produit. Vous pourrez envoyer la photo dans WhatsApp."></textarea></div>
+      <div class="duo">
+        <div class="champ"><label for="o-qte">Quantité</label><input id="o-qte" type="number" min="1" value="1" inputmode="numeric"></div>
+        <div class="champ"><label for="o-budget">Budget total en USD (facultatif)</label><input id="o-budget" type="number" min="0" step="1" inputmode="decimal" placeholder="Ex. 120"></div>
+      </div>
+      <div class="duo">
+        <div class="champ"><label for="o-promo">Code promo (facultatif)</label><input id="o-promo" autocomplete="off" style="text-transform:uppercase"></div>
+        <div class="champ"><label for="o-membre">Code membre (facultatif)</label><input id="o-membre" autocomplete="off" style="text-transform:uppercase" placeholder="Ex. EXAUCE-4K2"></div>
+      </div>
+      <div class="champ"><label for="o-pay">Paiement de l'acompte</label>
+        <select id="o-pay">
+          <option>Airtel Money</option><option>Orange Money</option><option>M-Pesa</option><option>Africell Money</option><option>Espèces</option>
+        </select></div>
+      <div class="carte" aria-live="polite">
+        <div class="acompte">
+          <div><small>Acompte à la commande (50 %)</small><strong id="ac-acompte">—</strong></div>
+          <div><small>Solde à la livraison</small><strong id="ac-solde">—</strong></div>
+        </div>
+        <p class="note">Estimation sur votre budget, en dollars américains. Le montant exact figure sur le devis, envoyé avant tout paiement.</p>
+      </div>
+      <button class="btn" type="submit">Préparer ma demande</button>
+    </form>
+    <div class="etiquette" id="etiquette" hidden>
+      <div class="sceau" id="sceau" aria-hidden="true">Reçu<br>GDE</div>
+      <div class="tete"><b>Demande de colis</b><span class="ref" id="et-ref">GDE-0000-0000</span></div>
+      <dl>
+        <dt>Client</dt><dd id="et-nom"></dd>
+        <dt>Contact</dt><dd id="et-tel"></dd>
+        <dt>Livraison</dt><dd id="et-commune"></dd>
+        <dt>Produit</dt><dd id="et-prod"></dd>
+        <dt>Quantité</dt><dd id="et-qte"></dd>
+        <dt>Acompte</dt><dd id="et-ac"></dd>
+      </dl>
+      <div class="barres" aria-hidden="true"></div>
+      <div class="rangee">
+        <a class="btn" id="et-wa" href="#" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
+        <button class="btn ghost" type="button" id="et-copy">Copier le message</button>
+      </div>
+      <p class="note">Votre demande n'est envoyée que lorsque vous appuyez sur « Envoyer » dans WhatsApp. Gardez la référence, elle sert au suivi.</p>
+    </div>
+  </section>
+
+  <!-- 2. GROUPÉS -->
+  <section class="view" id="v-groupes" hidden>
+    <header>
+      <div class="kicker">Achats groupés</div>
+      <h2>Ensemble, moins cher</h2>
+      <p>Plus on est nombreux à commander le même produit, plus le prix baisse. Tout le monde paie le prix du palier atteint à la clôture du groupe.</p>
+    </header>
+    <div id="liste-groupes" class="wrap" style="gap:14px"></div>
+    <p class="note">Exemples pour montrer le fonctionnement. Les prix et le nombre de participants réels sont confirmés avant l'ouverture de chaque groupe.</p>
+  </section>
+
+  <!-- 3. LIVE -->
+  <section class="view" id="v-live" hidden>
+    <header>
+      <div class="kicker">Live shopping</div>
+      <h2>Voir avant d'acheter</h2>
+      <p>Le produit réel, entre nos mains, en direct. Vous posez vos questions, vous commandez pendant le live avec un acompte.</p>
+    </header>
+    <div class="carte date-live">
+      <div class="kicker">Prochain rendez-vous proposé</div>
+      <strong id="live-date">Samedi</strong>
+      <div class="mute" id="live-delai"></div>
+      <a class="btn" id="live-wa" href="#" target="_blank" rel="noopener">Me prévenir sur WhatsApp</a>
+    </div>
+    <div class="carte"><div class="kicker">Au programme du prochain live (proposition)</div><div class="prog-live" id="live-prog"></div><p class="note">À confirmer. Les produits montrés en direct restent ensuite dans le catalogue, avec l'étiquette « Au live ».</p></div>
+    <ol class="etapes3">
+      <li><div><h3>On montre</h3><p>Un échantillon par produit vedette, essayé devant la caméra. Pas de stock acheté à l'avance.</p></div></li>
+      <li><div><h3>Vous commandez en direct</h3><p>Vous écrivez votre commande et versez l'acompte de 50 %.</p></div></li>
+      <li><div><h3>On n'achète que le commandé</h3><p>Zéro stock qui dort. Chaque commande reçoit sa référence et son suivi.</p></div></li>
+    </ol>
+    <div class="carte">
+      <h3>Préparer le premier live</h3>
+      <ul class="liste-cases">
+        <li><label for="c1"><input type="checkbox" id="c1"><span>Un échantillon par produit vedette, sans stock</span></label></li>
+        <li><label for="c2"><input type="checkbox" id="c2"><span>Lumière du jour ou lampe face à vous</span></label></li>
+        <li><label for="c3"><input type="checkbox" id="c3"><span>Téléphone fixé sur un support, son clair</span></label></li>
+        <li><label for="c4"><input type="checkbox" id="c4"><span>Une personne qui lit les commentaires et note les commandes</span></label></li>
+        <li><label for="c5"><input type="checkbox" id="c5"><span>Message épinglé : acompte 50 % et numéro WhatsApp</span></label></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 4. SUIVI -->
+  <section class="view" id="v-suivi" hidden>
+    <header>
+      <div class="kicker">Suivi avec preuves</div>
+      <h2>Où est mon colis ?</h2>
+      <p>Chaque étape est confirmée par une preuve : capture, photo ou vidéo. Entrez la référence reçue sur WhatsApp.</p>
+    </header>
+    <form id="form-suivi" class="recherche" autocomplete="off">
+      <label for="s-code" class="lbl" style="position:absolute;left:-9999px">Référence de commande</label>
+      <input id="s-code" value="GDE-2610-0042" aria-label="Référence de commande" spellcheck="false">
+      <button class="btn" type="submit">Voir</button>
+    </form>
+    <div class="radar cadre"><canvas class="globe" id="g-suivi" role="img" aria-label="Globe : position de ton colis"></canvas><div class="radar-leg"><span>Chine → Kinshasa</span><span>Glisse pour tourner</span></div></div>
+    <div class="carte cockpit"><div class="jauge" id="s-jauge"></div><div class="voie statut" id="s-voie"></div></div>
+    <div class="carte">
+      <div class="l1" style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+        <span class="mono" id="s-ref">GDE-2610-0042</span>
+        <span class="pastille" id="s-tag">Exemple</span>
+      </div>
+      <ol class="suivi" id="s-etapes"></ol>
+    </div>
+    <p class="note" id="s-note">Cette version affiche une commande d'exemple. Pour l'état d'une vraie commande, écrivez-nous sur WhatsApp avec votre référence.</p>
+    <div class="rangee"><a class="btn" id="s-notif" href="#" target="_blank" rel="noopener">Me prévenir à chaque étape</a><a class="btn ghost" id="s-wa" href="#" target="_blank" rel="noopener">Demander l'état sur WhatsApp</a></div>
+  </section>
+
+  <!-- 5. PARRAINER -->
+  <section class="view" id="v-parrainer" hidden>
+    <header>
+      <div class="kicker">Club GOD DID EXPRESS</div>
+      <h2>Votre carte membre</h2>
+      <p>Votre carte, vos avantages, votre code à partager. Chaque client peut devenir un messager de la marque, chaque province peut avoir son point relais.</p>
+    </header>
+    <div class="passe" id="passe"><div class="l1"><b>GOD DID EXPRESS</b><span class="nom">Membre</span></div><div><div class="nom" id="p-nom-aff">Votre prénom</div><div class="code" id="p-code">Tapez votre prénom ci-dessous</div></div></div>
+    <div class="carte">
+      <div class="l1f"><h3>Carte fidélité</h3><span class="pastille">Exemple</span></div>
+      <div class="fid" id="fid-grid"></div>
+      <div class="niveaux"><span>Bronze</span><span>Argent</span><span>Or</span><span>Diamant</span></div>
+      <p class="note">2 $ reçus à chaque achat. Après 10 achats (20 $ cumulés) : un produit de 20 $ sans frais de douane et livraison gratuite. Offre limitée à 2 mois. Votre seule limite, c'est votre imagination.</p>
+      <a class="btn" id="fid-wa" href="#" target="_blank" rel="noopener">Activer ma carte sur WhatsApp</a>
+    </div>
+    <div class="carte">
+      <h3>Votre code de parrainage</h3>
+      <div class="champ"><label for="p-nom">Votre prénom</label><input id="p-nom" placeholder="Ex. Exaucé" autocomplete="given-name"></div>
+      <p class="note">Pour chaque ami qui commande avec votre code : 5 % de réduction sur votre prochaine commande.</p>
+      <div class="rangee">
+        <a class="btn" id="p-wa" href="#" target="_blank" rel="noopener" aria-disabled="true">Partager sur WhatsApp</a>
+        <button class="btn ghost" type="button" id="p-copy">Copier le code</button>
+      </div>
+    </div>
+    <div class="carte" id="vip">
+      <div class="l1f"><h3>Club grossiste VIP</h3><span class="pastille">Gros</span></div>
+      <p class="note">Plus tu commandes en gros, plus ton niveau monte : meilleurs prix, priorité sur les arrivages et accès aux produits avant tout le monde.</p>
+      <div class="vniv" id="vip-niv"></div>
+      <div class="champ"><label for="vip-code">Ton code membre</label><input id="vip-code" autocomplete="off" style="text-transform:uppercase" placeholder="Ex. EXAUCE-4K2"></div>
+      <div id="vip-res" aria-live="polite"></div>
+      <a class="btn" id="vip-wa" href="#" target="_blank" rel="noopener">Rejoindre le Club VIP</a>
+    </div>
+    <div class="carte">
+      <h3>Devenir point relais</h3>
+      <p class="note">Un point relais reçoit les colis, remet les commandes et touche une commission. Touchez votre province.</p>
+      <div class="provinces" id="provinces" role="group" aria-label="Provinces"></div>
+      <div class="legende"><span>Contour en pointillés : notre base</span><span>Orange : votre choix</span></div>
+      <form id="form-relais">
+        <div class="duo">
+          <div class="champ"><label for="r-nom">Votre nom</label><input id="r-nom" required></div>
+          <div class="champ"><label for="r-tel">Téléphone WhatsApp</label><input id="r-tel" type="tel" inputmode="tel" required placeholder="+243 …"></div>
+        </div>
+        <div class="duo">
+          <div class="champ"><label for="r-prov">Province</label><select id="r-prov" required></select></div>
+          <div class="champ"><label for="r-ville">Ville ou commune</label><input id="r-ville" required></div>
+        </div>
+        <a class="btn" id="r-wa" href="#" target="_blank" rel="noopener" hidden>Envoyer sur WhatsApp</a>
+        <button class="btn" type="submit" id="r-go">Préparer ma candidature</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ADMIN (visible seulement pour le propriétaire de la page) -->
+  <section class="view" id="v-admin" hidden>
+    <header>
+      <div class="kicker">Espace admin</div>
+      <h2>Tu gères tout ici</h2>
+      <p>Prix, produits, photos, commandes suivies, avis, slogans et réseaux. Tes changements restent sur ton écran jusqu'à ce que tu touches Publier.</p>
+    </header>
+    <div class="pubbar"><span id="pub-txt">Tout est publié</span><button class="btn mini" type="button" id="pub-go" disabled>Publier</button></div>
+    <div class="atabs" id="adm-tabs" role="group" aria-label="Sections">
+      <button type="button" class="chip" data-t="prod" aria-pressed="true">Produits et prix</button>
+      <button type="button" class="chip" data-t="cmd" aria-pressed="false">Commandes</button>
+      <button type="button" class="chip" data-t="avis" aria-pressed="false">Avis</button>
+      <button type="button" class="chip" data-t="reg" aria-pressed="false">Réglages</button>
+      <button type="button" class="chip" data-t="stat" aria-pressed="false">Statistiques</button>
+    </div>
+    <div class="wrap" style="gap:14px" id="adm-body"></div>
+  </section>
+
+  <footer>
+    <div class="reseaux" id="reseaux-pied"></div>
+    <div class="tel"><span class="kicker">WhatsApp</span><span class="mono" id="num">+243 983 129 294</span><button class="btn ghost mini" type="button" id="num-copy">Copier</button></div>
+    <div>Super Lemba, Kinshasa. Repère : Bar ROYAL, en face de GRAND SHOP AIRTEL.</div>
+    <div>Votre plateforme de proximité, ouverte sur le monde.</div>
+  </footer>
+</div>
+
+<div class="tabbar">
+  <nav aria-label="Navigation">
+    <button type="button" id="t-accueil" data-v="accueil"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.8V20h13V9.8"/><path d="M10 20v-5h4v5"/></svg><span>Accueil</span></button>
+    <button type="button" id="t-catalogue" data-v="catalogue"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1"/><rect x="13.5" y="3.5" width="7" height="7" rx="1"/><rect x="3.5" y="13.5" width="7" height="7" rx="1"/><rect x="13.5" y="13.5" width="7" height="7" rx="1"/></svg><span>Catalogue</span></button>
+    <button type="button" id="t-commander" data-v="commander"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg><span>Commander</span></button>
+    <button type="button" id="t-suivi" data-v="suivi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Suivi</span></button>
+    <button type="button" id="t-plus" data-v="plus"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18.5" cy="12" r="1.6"/></svg><span>Plus</span></button>
+  </nav>
+</div>
+<div class="listbar" id="listbar" hidden>
+  <div>
+    <span id="lb-txt">Ma liste</span>
+    <button class="btn mini" type="button" id="lb-open">Voir et envoyer</button>
+  </div>
+</div>
+<div class="veil" id="veil" hidden>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-titre"></div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+<button class="fab" id="fab" type="button" aria-label="Ouvrir l'assistant"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 9.5h7M8.5 12.5h4"/></svg>Assistant</button>
+<div class="tourbar" id="tourbar" hidden><span id="tour-txt">Visite guidée</span><button class="btn mini" type="button" id="tour-stop">Arrêter</button></div>
+<script type="application/json" id="gde-state">{}</script>
+<div class="boot" id="boot" hidden><div><div class="boot-logo">God Did <span>Express</span></div><div class="boot-ligne"><i></i></div><div class="boot-txt">Kinshasa vers le monde</div></div></div>
+
+<script>
+(function () {
+  var WA = '243983129294';
+  var $ = function (id) { return document.getElementById(id); };
+  var smooth = !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  function wa(text) { return 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text); }
+  function usd(n) { return n.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' $'; }
+  var toastTimer;
+  function toast(msg) {
+    var t = $('toast'); t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.hidden = true; }, 1800);
+  }
+  function copy(text) {
+    function fallback() {
+      try {
+        var ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select(); var ok = document.execCommand('copy'); document.body.removeChild(ta);
+        toast(ok ? 'Copié' : 'Sélectionnez et copiez');
+      } catch (e) { toast('Sélectionnez et copiez'); }
+    }
+    try { navigator.clipboard.writeText(text).then(function () { toast('Copié'); }, fallback); } catch (e) { fallback(); }
+  }
+
+  /* 2050 : outils graphiques (trajet du colis, jauge) */
+  document.documentElement.classList.add('js');
+  var REDUIT = !smooth;
+  var ROUTE = [[24, 104], [72, 4], [198, -2], [256, 92]];
+  var CIRC = 2 * Math.PI * 50;
+  function bz(t) {
+    var u = 1 - t, p = ROUTE;
+    return [u * u * u * p[0][0] + 3 * u * u * t * p[1][0] + 3 * u * t * t * p[2][0] + t * t * t * p[3][0],
+            u * u * u * p[0][1] + 3 * u * u * t * p[1][1] + 3 * u * t * t * p[2][1] + t * t * t * p[3][1]];
+  }
+  function lp(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; }
+  function coupe(t) {
+    var p = ROUTE, a = lp(p[0], p[1], t), b = lp(p[1], p[2], t), c = lp(p[2], p[3], t), d = lp(a, b, t), e = lp(b, c, t), f = lp(d, e, t);
+    return [p[0], a, d, f];
+  }
+  function chem(q) { return 'M' + q[0].join(' ') + ' C' + q[1].join(' ') + ', ' + q[2].join(' ') + ', ' + q[3].join(' '); }
+  function voieSVG(anim, cran) {
+    var full = chem(ROUTE), g = '';
+    for (var x = 0; x <= 280; x += 20) g += '<line x1="' + x + '" y1="0" x2="' + x + '" y2="130"/>';
+    for (var y = 0; y <= 130; y += 20) g += '<line x1="0" y1="' + y + '" x2="280" y2="' + y + '"/>';
+    var s = '<svg viewBox="0 0 280 130" role="img" aria-label="Trajet du colis : de Chine à Kinshasa"><g stroke="rgba(244,239,233,.07)" stroke-width="1">' + g + '</g>';
+    s += '<path d="' + full + '" fill="none" stroke="#3A342E" stroke-width="2" stroke-dasharray="3 5"/>';
+    var A = ROUTE[0], B = ROUTE[3];
+    if (anim) {
+      if (REDUIT) {
+        s += '<path d="' + full + '" fill="none" stroke="#FF6A13" stroke-width="2.4" stroke-linecap="round" opacity=".7"/>';
+      } else {
+        s += '<path d="' + full + '" fill="none" stroke="#FF6A13" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="52 600"><animate attributeName="stroke-dashoffset" from="0" to="-652" dur="5s" repeatCount="indefinite"/></path>';
+        s += '<circle r="9" fill="#FF6A13" opacity=".28"><animateMotion dur="5s" repeatCount="indefinite" path="' + full + '"/></circle>';
+        s += '<circle r="4" fill="#FFB27A"><animateMotion dur="5s" repeatCount="indefinite" path="' + full + '"/></circle>';
+        s += '<circle cx="' + B[0] + '" cy="' + B[1] + '" r="4" fill="none" stroke="#FF6A13" stroke-width="1.5"><animate attributeName="r" values="4;16" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".8;0" dur="2.4s" repeatCount="indefinite"/></circle>';
+      }
+    } else {
+      var k = Math.max(0, Math.min(6, cran)) / 6;
+      if (k > 0) s += '<path d="' + chem(coupe(k)) + '" fill="none" stroke="#FF6A13" stroke-width="2.8" stroke-linecap="round"/>';
+      for (var i = 0; i <= 6; i++) {
+        var P = bz(i / 6), on = i <= cran;
+        s += '<circle cx="' + P[0].toFixed(1) + '" cy="' + P[1].toFixed(1) + '" r="' + (on ? 3 : 2.4) + '" fill="' + (on ? '#FF6A13' : '#0E0D0C') + '" stroke="' + (on ? '#FF6A13' : '#5a524a') + '" stroke-width="1.2"/>';
+      }
+      if (cran >= 0 && cran < 7) {
+        var Q = bz(k);
+        s += '<circle cx="' + Q[0].toFixed(1) + '" cy="' + Q[1].toFixed(1) + '" r="5" fill="#FFB27A">' + (REDUIT ? '' : '<animate attributeName="r" values="5;8;5" dur="1.8s" repeatCount="indefinite"/>') + '</circle>';
+      }
+    }
+    s += '<circle cx="' + A[0] + '" cy="' + A[1] + '" r="4.5" fill="#FF6A13"/><circle cx="' + B[0] + '" cy="' + B[1] + '" r="4.5" fill="#FF6A13"/>';
+    s += '<text x="' + A[0] + '" y="122" class="vt">CHINE</text><text x="' + B[0] + '" y="112" text-anchor="end" class="vt">KINSHASA</text></svg>';
+    return s;
+  }
+  function jaugeSVG(fait) {
+    return '<svg viewBox="0 0 120 120" role="img" aria-label="Avancement : ' + fait + ' étapes sur 7"><circle cx="60" cy="60" r="50" fill="none" stroke="#2C2824" stroke-width="10"/>' +
+      '<circle class="arc" cx="60" cy="60" r="50" fill="none" stroke="#FF6A13" stroke-width="10" stroke-linecap="round" stroke-dasharray="0 ' + CIRC + '" transform="rotate(-90 60 60)"/>' +
+      '<text x="60" y="68" text-anchor="middle" class="jn">' + fait + '<tspan class="jd">/7</tspan></text></svg>';
+  }
+
+
+  /* ===== Globe 3D : continents en points, trajet Chine vers Kinshasa ===== */
+  var LAND_POLYS = [
+    /* Afrique */
+    [[-17,21],[-16,28],[-10,35],[-6,36],[10,37],[11,33],[20,32],[32,31],[34,28],[38,18],[43,12],[51,12],[51,10],[45,2],[40,-4],[39,-9],[40,-15],[35,-24],[33,-27],[27,-34],[20,-35],[17,-30],[12,-17],[13,-8],[9,-1],[9,4],[5,6],[-4,5],[-8,4],[-13,8],[-17,14]],
+    /* Eurasie */
+    [[-9,37],[-9,43],[-1,46],[-4,48],[2,51],[5,53],[9,55],[8,58],[5,60],[6,63],[13,67],[20,70],[30,71],[41,67],[44,68],[60,69],[70,73],[80,73],[100,78],[113,74],[130,72],[142,72],[160,70],[180,69],[180,65],[172,61],[163,60],[156,57],[156,51],[142,54],[140,48],[135,43],[129,41],[127,38],[129,35],[126,35],[125,39],[121,40],[122,37],[119,35],[122,30],[120,26],[114,22],[108,21],[106,18],[109,12],[105,9],[100,13],[100,7],[103,1],[98,8],[98,16],[94,17],[91,22],[87,21],[80,15],[77,8],[73,17],[70,21],[67,25],[62,25],[57,26],[56,27],[52,28],[48,30],[50,27],[55,24],[57,24],[60,22],[55,17],[43,13],[39,21],[35,28],[34,31],[36,36],[30,36],[27,37],[26,40],[29,41],[36,41],[41,41],[41,43],[37,45],[33,45],[30,46],[28,43],[24,40],[23,37],[20,40],[19,42],[13,45],[18,40],[16,38],[12,42],[9,44],[3,43],[0,39],[-5,36]],
+    /* Amériques */
+    [[-168,65],[-160,70],[-140,70],[-125,70],[-95,72],[-80,73],[-62,67],[-60,55],[-65,50],[-55,50],[-66,44],[-70,42],[-76,38],[-81,31],[-80,25],[-83,29],[-90,30],[-97,27],[-97,21],[-92,18],[-87,21],[-88,16],[-83,15],[-83,10],[-77,8],[-72,12],[-64,10],[-60,8],[-52,5],[-50,0],[-39,-3],[-35,-7],[-39,-14],[-41,-22],[-48,-26],[-53,-34],[-57,-38],[-65,-42],[-66,-55],[-69,-55],[-74,-50],[-72,-40],[-70,-28],[-71,-18],[-76,-14],[-81,-6],[-80,-3],[-77,2],[-79,8],[-85,10],[-92,15],[-97,16],[-105,20],[-110,24],[-112,29],[-117,33],[-121,35],[-124,41],[-124,48],[-130,54],[-140,60],[-150,61],[-158,57],[-165,54],[-166,60]],
+    /* Groenland */
+    [[-55,60],[-45,60],[-20,70],[-20,82],[-60,82],[-72,78],[-55,70]],
+    /* Australie */
+    [[114,-22],[122,-18],[130,-12],[137,-12],[141,-17],[146,-19],[153,-26],[150,-37],[141,-38],[131,-31],[115,-34]],
+    /* Madagascar, îles britanniques, Japon, Indonésie, Nouvelle-Guinée */
+    [[44,-25],[47,-25],[50,-15],[49,-12],[44,-17]],
+    [[-5,50],[1,51],[2,53],[-2,57],[-5,58],[-6,55],[-3,54]],
+    [[130,31],[135,34],[141,38],[142,45],[140,42],[136,36],[131,34]],
+    [[95,5],[104,-5],[106,-6],[98,0]],
+    [[109,1],[117,7],[119,1],[116,-4],[110,-3]],
+    [[131,-1],[141,-3],[150,-10],[141,-9],[134,-4]]
+  ];
+  function inPoly(x, y, poly) {
+    var c = false;
+    for (var i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      var xi = poly[i][0], yi = poly[i][1], xj = poly[j][0], yj = poly[j][1];
+      if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) c = !c;
+    }
+    return c;
+  }
+  function inLand(lon, lat) {
+    for (var i = 0; i < LAND_POLYS.length; i++) if (inPoly(lon, lat, LAND_POLYS[i])) return true;
+    return false;
+  }
+  function v3(lat, lon) {
+    var la = lat * Math.PI / 180, lo = lon * Math.PI / 180;
+    return [Math.cos(la) * Math.sin(lo), Math.sin(la), Math.cos(la) * Math.cos(lo)];
+  }
+  var LAND_PTS = null;
+  function landPts() {
+    if (LAND_PTS) return LAND_PTS;
+    var pts = [], step = 3.3;
+    for (var lat = -58; lat <= 80; lat += step) {
+      var ds = step / Math.max(Math.cos(lat * Math.PI / 180), .22);
+      for (var lon = -180; lon < 180; lon += ds) if (inLand(lon, lat)) pts.push(v3(lat, lon));
+    }
+    LAND_PTS = pts;
+    return pts;
+  }
+  var G_A = v3(23.1, 113.3), G_B = v3(-4.3, 15.3);
+  var G_OM = Math.acos(Math.max(-1, Math.min(1, G_A[0] * G_B[0] + G_A[1] * G_B[1] + G_A[2] * G_B[2])));
+  function arcPt(t) {
+    var s = Math.sin(G_OM), a = Math.sin((1 - t) * G_OM) / s, b = Math.sin(t * G_OM) / s, k = 1 + .2 * Math.sin(Math.PI * t);
+    return [(a * G_A[0] + b * G_B[0]) * k, (a * G_A[1] + b * G_B[1]) * k, (a * G_A[2] + b * G_B[2]) * k];
+  }
+  var G_LIST = [], G_RUN = false;
+  function makeGlobe(cv, mode) {
+    if (!cv || !cv.getContext) return null;
+    var ctx = cv.getContext('2d'); if (!ctx) return null;
+    var mid = arcPt(.5), ml = Math.hypot(mid[0], mid[1], mid[2]);
+    var cLon = Math.atan2(mid[0], mid[2]), cLat = Math.asin(mid[1] / ml) * .8;
+    var G = { cran: 0, W: 0, H: 0, dpr: 1, lon: cLon, lat: cLat, drag: false, px: 0, idle: 0, last: 0, cv: cv };
+    function size() {
+      var w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return false;
+      var d = Math.min(2, window.devicePixelRatio || 1);
+      if (G.W !== w || G.H !== h || G.dpr !== d) { G.W = w; G.H = h; G.dpr = d; cv.width = Math.round(w * d); cv.height = Math.round(h * d); }
+      return true;
+    }
+    cv.addEventListener('pointerdown', function (e) { G.drag = true; G.px = e.clientX; try { cv.setPointerCapture(e.pointerId); } catch (x) {} });
+    cv.addEventListener('pointermove', function (e) {
+      if (!G.drag) return;
+      var R = Math.min(G.W, G.H) * .4 || 120;
+      G.lon -= (e.clientX - G.px) / R; G.px = e.clientX; G.idle = performance.now();
+    });
+    function fin() { G.drag = false; G.idle = performance.now(); }
+    cv.addEventListener('pointerup', fin); cv.addEventListener('pointercancel', fin);
+    G.setStep = function (c) { G.cran = c; };
+    G.draw = function (now) {
+      if (!size()) return;
+      var w = G.W, h = G.H, d = G.dpr, R = Math.min(w, h) * .4, cx = w / 2, cy = h / 2;
+      if (!G.drag && !REDUIT && now - G.idle > 2200) {
+        var tg = cLon + .32 * Math.sin(now / 2600); G.lon += (tg - G.lon) * .035;
+        G.lat += (cLat - G.lat) * .035;
+      }
+      ctx.setTransform(d, 0, 0, d, 0, 0); ctx.clearRect(0, 0, w, h);
+      var halo = ctx.createRadialGradient(cx, cy, R * .92, cx, cy, R * 1.4);
+      halo.addColorStop(0, 'rgba(255,106,19,.24)'); halo.addColorStop(1, 'rgba(255,106,19,0)');
+      ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(cx, cy, R * 1.4, 0, 7); ctx.fill();
+      var sph = ctx.createRadialGradient(cx - R * .38, cy - R * .42, R * .08, cx, cy, R);
+      sph.addColorStop(0, '#2B2520'); sph.addColorStop(1, '#0A0908');
+      ctx.fillStyle = sph; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,139,62,.6)'; ctx.lineWidth = 1.2; ctx.stroke();
+      var cl = Math.cos(G.lon), sl = Math.sin(G.lon), cp = Math.cos(G.lat), sp = Math.sin(G.lat);
+      function rot(v) { var x1 = v[0] * cl - v[2] * sl, z1 = v[0] * sl + v[2] * cl, y1 = v[1]; return [x1, y1 * cp - z1 * sp, y1 * sp + z1 * cp]; }
+      /* grille de latitudes douce */
+      ctx.lineWidth = .6; ctx.strokeStyle = 'rgba(244,239,233,.07)';
+      [-60, -30, 0, 30, 60].forEach(function (la) {
+        ctx.beginPath(); var pen = false;
+        for (var lo = -180; lo <= 180; lo += 8) {
+          var r = rot(v3(la, lo));
+          if (r[2] <= 0) { pen = false; continue; }
+          var x = cx + r[0] * R, y = cy - r[1] * R; if (pen) ctx.lineTo(x, y); else ctx.moveTo(x, y); pen = true;
+        }
+        ctx.stroke();
+      });
+      /* terres */
+      var pts = landPts(), buckets = [[], [], [], []];
+      for (var i = 0; i < pts.length; i++) {
+        var r = rot(pts[i]); if (r[2] <= 0) continue;
+        buckets[Math.min(3, Math.floor(r[2] * 4))].push(cx + r[0] * R, cy - r[1] * R);
+      }
+      var alph = [.16, .32, .55, .85];
+      for (var b = 0; b < 4; b++) {
+        ctx.fillStyle = 'rgba(244,239,233,' + alph[b] + ')'; ctx.beginPath();
+        var arr = buckets[b], sz = 1.1 + b * .3;
+        for (var k = 0; k < arr.length; k += 2) ctx.rect(arr[k] - sz / 2, arr[k + 1] - sz / 2, sz, sz);
+        ctx.fill();
+      }
+      /* trajet */
+      function scr(t) { var r = rot(arcPt(t)); return { x: cx + r[0] * R, y: cy - r[1] * R, v: r[2] > 0 || (r[0] * r[0] + r[1] * r[1]) > 1 }; }
+      function trace(t0, t1, style, lw, dash, glow) {
+        var n = Math.max(2, Math.round(70 * (t1 - t0)));
+        ctx.save(); ctx.strokeStyle = style; ctx.lineWidth = lw; ctx.lineCap = 'round'; ctx.setLineDash(dash || []);
+        if (glow) { ctx.shadowColor = 'rgba(255,106,19,.95)'; ctx.shadowBlur = glow; }
+        ctx.beginPath(); var pen = false;
+        for (var q = 0; q <= n; q++) {
+          var s = scr(t0 + (t1 - t0) * q / n);
+          if (!s.v) { pen = false; continue; }
+          if (pen) ctx.lineTo(s.x, s.y); else ctx.moveTo(s.x, s.y); pen = true;
+        }
+        ctx.stroke(); ctx.restore();
+      }
+      trace(0, 1, 'rgba(168,159,149,.55)', 1.2, [2, 5]);
+      var pk = null;
+      if (mode === 'home') {
+        var tt = REDUIT ? .55 : (now / 5200) % 1;
+        trace(Math.max(0, tt - .3), tt, '#FF6A13', 2.6, null, 12);
+        pk = tt;
+      } else {
+        var kk = Math.max(0, Math.min(6, G.cran)) / 6;
+        if (G.cran >= 7) kk = 1;
+        if (G.cran > 0) trace(0, kk, '#FF6A13', 2.8, null, 12);
+        for (var st = 0; st <= 6; st++) {
+          var sp2 = scr(st / 6); if (!sp2.v) continue;
+          var on = st <= G.cran || G.cran >= 7;
+          ctx.beginPath(); ctx.arc(sp2.x, sp2.y, on ? 3.4 : 2.6, 0, 7);
+          ctx.fillStyle = on ? '#FF6A13' : '#0E0D0C'; ctx.fill();
+          ctx.lineWidth = 1.2; ctx.strokeStyle = on ? '#FF6A13' : '#6B6259'; ctx.stroke();
+        }
+        if (G.cran >= 0) pk = kk;
+      }
+      if (pk !== null) {
+        var p = scr(pk);
+        if (p.v) {
+          var pul = REDUIT ? 9 : 8 + 5 * Math.sin(now / 280);
+          ctx.beginPath(); ctx.arc(p.x, p.y, pul, 0, 7); ctx.fillStyle = 'rgba(255,106,19,.28)'; ctx.fill();
+          ctx.beginPath(); ctx.arc(p.x, p.y, 4.4, 0, 7); ctx.fillStyle = '#FFB27A'; ctx.fill();
+        }
+      }
+      /* étiquettes des deux villes */
+      ctx.font = '600 10px "IBM Plex Mono", ui-monospace, monospace'; ctx.textBaseline = 'middle';
+      [[G_A, 'CHINE', 12], [G_B, 'KINSHASA', -12]].forEach(function (c) {
+        var r = rot(c[0]); if (r[2] <= .05) return;
+        var x = cx + r[0] * R, y = cy - r[1] * R;
+        ctx.beginPath(); ctx.arc(x, y, 4.6, 0, 7); ctx.fillStyle = '#FF6A13'; ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y, 8, 0, 7); ctx.strokeStyle = 'rgba(255,106,19,.45)'; ctx.lineWidth = 1; ctx.stroke();
+        ctx.fillStyle = '#F4EFE9'; ctx.textAlign = c[2] > 0 ? 'left' : 'right';
+        ctx.fillText(c[1], x + c[2], y + (c[2] > 0 ? -10 : 12));
+      });
+    };
+    G_LIST.push(G);
+    if (!G_RUN) {
+      G_RUN = true;
+      (function tick(now) {
+        G_LIST.forEach(function (g) {
+          if (document.hidden || !g.cv.offsetParent) return;
+          if (REDUIT && now - g.last < 700) return;
+          g.last = now; g.draw(now);
+        });
+        requestAnimationFrame(tick);
+      })(performance.now());
+    }
+    return G;
+  }
+
+
+  /* Onglets */
+  var VUES = ['accueil', 'catalogue', 'commander', 'groupes', 'live', 'suivi', 'parrainer', 'admin'];
+  var IS_ADMIN = false, GS = null, GH = null, curOrd = null;
+  var PRINC = ['accueil', 'catalogue', 'commander', 'suivi'];
+  var curCran = 4;
+  function show(id, push) {
+    if (VUES.indexOf(id) < 0 || (id === 'admin' && !IS_ADMIN)) id = 'accueil';
+    VUES.forEach(function (v) { $('v-' + v).hidden = v !== id; });
+    PRINC.forEach(function (v) { $('t-' + v).setAttribute('aria-current', v === id ? 'page' : 'false'); });
+    $('t-plus').setAttribute('aria-current', PRINC.indexOf(id) < 0 ? 'page' : 'false');
+    if (id === 'suivi' && typeof rendreSuivi === 'function') rendreSuivi(curCran);
+    if (id === 'admin' && typeof rendreAdmin === 'function') rendreAdmin();
+    if (push) { try { history.replaceState(null, '', '#' + id); } catch (e) {} window.scrollTo(0, 0); }
+  }
+  PRINC.forEach(function (v) { $('t-' + v).addEventListener('click', function () { show(v, true); }); });
+  $('t-plus').addEventListener('click', function () { ouvrirPlus(); });
+  window.addEventListener('hashchange', function () { show(location.hash.slice(1), false); });
+
+  /* Données */
+  var CATS = ['Vêtements', 'Chaussures', 'Accessoires de mode', 'Montres & bijoux', 'Sacs & bagagerie', 'Gadgets & objets technologiques', 'Électronique', 'Maison & décoration', 'Cuisine & accessoires', 'Beauté & soins', 'Articles pour enfants', 'Sport & fitness', 'Accessoires automobiles', 'Gadgets, objets pratiques & idées cadeaux', 'Produits & équipements pour entreprises', 'Produits sur commande'];
+  var COMMUNES = ['Bandalungwa', 'Barumbu', 'Bumbu', 'Gombe', 'Kalamu', 'Kasa-Vubu', 'Kimbanseke', 'Kinshasa', 'Kintambo', 'Kisenso', 'Lemba', 'Limete', 'Lingwala', 'Makala', 'Maluku', 'Masina', 'Matete', 'Mont-Ngafula', 'Ndjili', 'Ngaba', 'Ngaliema', 'Ngiri-Ngiri', 'Nsele', 'Selembao', 'Autre ville (hors Kinshasa)'];
+  var PROVINCES = ['Kinshasa', 'Kongo-Central', 'Kwango', 'Kwilu', 'Mai-Ndombe', 'Kasaï', 'Kasaï-Central', 'Kasaï-Oriental', 'Lomami', 'Sankuru', 'Maniema', 'Sud-Kivu', 'Nord-Kivu', 'Ituri', 'Haut-Uélé', 'Bas-Uélé', 'Tshopo', 'Tshuapa', 'Équateur', 'Mongala', 'Nord-Ubangi', 'Sud-Ubangi', 'Tanganyika', 'Haut-Lomami', 'Lualaba', 'Haut-Katanga'];
+
+  function fill(sel, list, placeholder) {
+    var h = placeholder ? '<option value="">' + placeholder + '</option>' : '';
+    sel.innerHTML = h + list.map(function (x) { return '<option>' + x + '</option>'; }).join('');
+  }
+  fill($('o-commune'), COMMUNES, 'Choisir');
+  fill($('o-cat'), CATS, 'Choisir');
+  fill($('r-prov'), PROVINCES, 'Choisir');
+
+  /* 1. Commande */
+  function majAcompte() {
+    var b = parseFloat($('o-budget').value);
+    var pctP = (typeof promoPct === 'function' && $('o-promo')) ? promoPct($('o-promo').value) : 0;
+    if (b > 0) { var tt = b * (1 - pctP / 100); $('ac-acompte').textContent = usd(tt / 2); $('ac-solde').textContent = usd(tt / 2); }
+    else { $('ac-acompte').textContent = '—'; $('ac-solde').textContent = '—'; }
+  }
+  $('o-budget').addEventListener('input', majAcompte);
+  var dernierMsg = '';
+  $('form-cmd').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var d = new Date();
+    var ref = 'GDE-' + String(d.getFullYear()).slice(2) + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(Math.floor(1000 + Math.random() * 9000));
+    var nom = $('o-nom').value.trim(), tel = $('o-tel').value.trim(), commune = $('o-commune').value, cat = $('o-cat').value;
+    var desc = $('o-desc').value.trim(), qte = $('o-qte').value || '1', pay = $('o-pay').value;
+    var b = parseFloat($('o-budget').value);
+    var ac = b > 0 ? usd(b / 2) + ' sur ' + usd(b) : 'selon devis';
+    $('et-ref').textContent = ref; $('et-nom').textContent = nom; $('et-tel').textContent = tel;
+    $('et-commune').textContent = commune; $('et-prod').textContent = cat + ' · ' + desc;
+    $('et-qte').textContent = qte; $('et-ac').textContent = ac + ' (' + pay + ')';
+    dernierMsg = 'Bonjour GOD DID EXPRESS, je veux passer une commande.\n' +
+      'Référence : ' + ref + '\nProduit : ' + desc + '\nCatégorie : ' + cat + '\nQuantité : ' + qte +
+      '\nBudget : ' + (b > 0 ? usd(b) : 'à définir') + '\nAcompte par : ' + pay +
+      (promoPct($('o-promo').value) ? '\nCode promo : ' + $('o-promo').value.trim().toUpperCase() + ' (-' + promoPct($('o-promo').value) + ' %)' : '') + ($('o-membre').value.trim() ? '\nCode membre : ' + $('o-membre').value.trim().toUpperCase() : '') + '\nNom : ' + nom + '\nTéléphone : ' + tel + '\nLivraison : ' + commune;
+    $('et-wa').href = wa(dernierMsg);
+    $('etiquette').hidden = false;
+    var sc = $('sceau'); sc.classList.remove('frappe'); void sc.offsetWidth; sc.classList.add('frappe');
+    $('etiquette').scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+  });
+  $('et-copy').addEventListener('click', function () { copy(dernierMsg); });
+
+  /* 2. Groupés */
+  var GROUPES = [
+    { nom: 'Écouteurs sans fil', n: 14, p: [[1, 12], [10, 10], [20, 8]] },
+    { nom: 'Power bank 10 000 mAh', n: 22, p: [[1, 15], [15, 13], [30, 11]] },
+    { nom: 'Montre connectée', n: 6, p: [[1, 25], [10, 22], [25, 19]] }
+  ];
+  $('liste-groupes').innerHTML = GROUPES.map(function (g) {
+    var actif = 0; g.p.forEach(function (t, i) { if (g.n >= t[0]) actif = i; });
+    var suiv = g.p[actif + 1];
+    var pct = suiv ? Math.min(100, Math.round(g.n / suiv[0] * 100)) : 100;
+    var txt = suiv ? (suiv[0] - g.n) + ' personnes de plus pour passer à ' + usd(suiv[1]) : 'Dernier palier atteint';
+    var pal = g.p.map(function (t, i) {
+      return '<div class="palier' + (i === actif ? ' on' : '') + '"><span>' + t[0] + '+ pers.</span><b>' + usd(t[1]) + '</b></div>';
+    }).join('');
+    var msg = 'Bonjour GOD DID EXPRESS, je rejoins le groupe d\'achat : ' + g.nom + ' (prix actuel ' + usd(g.p[actif][1]) + ').';
+    return '<article class="carte groupe"><div class="l1"><h3>' + g.nom + '</h3><span class="pastille">Exemple</span></div>' +
+      '<div class="prix">' + usd(g.p[actif][1]) + '<small>par pièce, ' + g.n + ' inscrits</small></div>' +
+      '<div class="barre" role="img" aria-label="Progression vers le palier suivant : ' + pct + ' %"><i style="width:' + pct + '%"></i></div>' +
+      '<p class="note">' + txt + '</p><div class="paliers">' + pal + '</div>' +
+      '<a class="btn" href="' + wa(msg) + '" target="_blank" rel="noopener">Rejoindre ce groupe</a></article>';
+  }).join('');
+
+  /* 3. Live */
+  (function () {
+    var n = new Date(), d = new Date(n);
+    d.setDate(n.getDate() + ((6 - n.getDay() + 7) % 7)); d.setHours(18, 0, 0, 0);
+    if (d < n) d.setDate(d.getDate() + 7);
+    $('live-date').textContent = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) + ', 18 h';
+    var a = new Date(n.getFullYear(), n.getMonth(), n.getDate()), b = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    var j = Math.round((b - a) / 864e5);
+    $('live-delai').textContent = (j === 0 ? 'Aujourd\'hui' : j === 1 ? 'Demain' : 'Dans ' + j + ' jours') + ' · heure de Kinshasa · horaire à confirmer';
+    $('live-wa').href = wa('Bonjour GOD DID EXPRESS, prévenez-moi du prochain live shopping.');
+  })();
+
+  /* 4. Suivi */
+  var ETAPES = [
+    ['Demande reçue', 'Message WhatsApp'],
+    ['Devis envoyé', 'Prix fournisseur, transport, douane, marge'],
+    ['Acompte reçu', 'Capture du paiement'],
+    ['Acheté chez le fournisseur', 'Photo du produit'],
+    ['En transit', 'Photo du colis expédié'],
+    ['Arrivé à Kinshasa', 'Photo à l\'arrivée'],
+    ['Livré', 'Vidéo de remise']
+  ];
+  var EXEMPLE = 'GDE-2610-0042';
+  function rendreSuivi(cran) {
+    curCran = cran;
+    var fait = Math.max(0, Math.min(7, cran));
+    $('s-jauge').innerHTML = jaugeSVG(fait);
+    var cur = cran >= 7 ? 'Livré' : cran < 0 ? 'Référence non reliée' : ETAPES[cran][0];
+    $('s-voie').innerHTML = '<span class="kicker">' + (cran >= 7 ? 'Colis livré' : cran < 0 ? 'Suivi' : 'Étape en cours') + '</span><b>' + cur + '</b><span class="note">' + (cran >= 7 ? 'Merci pour ta confiance.' : cran < 0 ? 'Demande son état sur WhatsApp.' : 'Preuve : ' + ETAPES[cran][1]) + '</span>';
+    if (typeof GS !== 'undefined' && GS) GS.setStep(cran);
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      var a = $('s-jauge').querySelector('.arc'); if (a) a.setAttribute('stroke-dasharray', (CIRC * fait / 7) + ' ' + CIRC);
+    }); });
+    $('s-etapes').innerHTML = ETAPES.map(function (e, i) {
+      var cl = i < cran ? 'fait' : i === cran ? 'cours' : 'todo';
+      var pt = i < cran ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : '';
+      var pr = i < cran ? 'Preuve reçue : ' + e[1] : i === cran ? 'En cours : ' + e[1] : 'Preuve prévue : ' + e[1];
+      var pho = (curOrd && curOrd.pr && curOrd.pr[i]) ? '<button type="button" class="ph" data-zoom="' + ea(curOrd.pr[i]) + '" data-t="' + ea(e[0]) + '" aria-label="Voir la photo : ' + ea(e[0]) + '"><img src="' + ea(curOrd.pr[i]) + '" alt="" loading="lazy"></button>' : '';
+      return '<li class="' + cl + '"><span class="pt">' + pt + '</span><div><h3>' + e[0] + '</h3><div class="preuve">' + pr + '</div>' + pho + '</div></li>';
+    }).join('');
+  }
+  rendreSuivi(4);
+  $('s-wa').href = wa('Bonjour GOD DID EXPRESS, je voudrais l\'état de ma commande, référence : ' + EXEMPLE);
+
+  /* 5. Parrainage et relais */
+  function codeParrain(nom) {
+    var base = nom.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 6);
+    if (!base) return '';
+    var h = 0; for (var i = 0; i < base.length; i++) h = (h * 31 + base.charCodeAt(i)) % 46656;
+    return base + '-' + h.toString(36).toUpperCase().padStart(3, '0').slice(-3);
+  }
+  var codeActuel = '';
+  $('p-nom').addEventListener('input', function () {
+    codeActuel = codeParrain(this.value);
+    $('p-code').textContent = codeActuel || 'Tapez votre prénom ci-dessous';
+    $('p-nom-aff').textContent = this.value.trim() || 'Votre prénom';
+    var wb = $('p-wa');
+    if (codeActuel) {
+      wb.setAttribute('aria-disabled', 'false');
+      wb.href = 'https://wa.me/?text=' + encodeURIComponent('Salut ! Je commande chez GOD DID EXPRESS (importation depuis la RDC et le monde). Utilise mon code ' + codeActuel + ' à ta première commande et dis que c\'est moi qui t\'envoie. WhatsApp : +243 983 129 294');
+    } else { wb.setAttribute('aria-disabled', 'true'); wb.removeAttribute('href'); }
+  });
+  $('p-wa').addEventListener('click', function (e) { if (this.getAttribute('aria-disabled') === 'true') { e.preventDefault(); toast('Tapez d\'abord votre prénom'); } });
+  $('p-copy').addEventListener('click', function () { if (codeActuel) copy(codeActuel); else toast('Tapez d\'abord votre prénom'); });
+
+  var provBox = $('provinces');
+  provBox.innerHTML = PROVINCES.map(function (p, i) {
+    return '<button type="button" class="prov' + (i === 0 ? ' base-pt' : '') + '" aria-pressed="false" data-p="' + p + '">' + p + '</button>';
+  }).join('');
+  function choisirProv(p) {
+    $('r-prov').value = p;
+    Array.prototype.forEach.call(provBox.children, function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-p') === p ? 'true' : 'false'); });
+  }
+  provBox.addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) choisirProv(b.getAttribute('data-p')); });
+  $('r-prov').addEventListener('change', function () { choisirProv(this.value); });
+  $('form-relais').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var m = 'Bonjour GOD DID EXPRESS, je veux devenir point relais.\nNom : ' + $('r-nom').value.trim() + '\nTéléphone : ' + $('r-tel').value.trim() + '\nProvince : ' + $('r-prov').value + '\nVille ou commune : ' + $('r-ville').value.trim();
+    var l = $('r-wa'); l.href = wa(m); l.hidden = false; $('r-go').hidden = true;
+  });
+  $('form-relais').addEventListener('input', function () { $('r-wa').hidden = true; $('r-go').hidden = false; });
+
+  /* Catalogue */
+  var PRODUITS = [{"id": "p00", "t": "Bracelet montre en cuir", "s": "Bracelet noir à boucle magnétique", "c": "mon", "l": 0}, {"id": "p01", "t": "Cosmétiques et maquillage", "s": "Rouges à lèvres, fards, vernis et pinceaux", "c": "bea", "l": 0}, {"id": "p02", "t": "Laptops HP en lot", "s": "Ordinateurs portables HP emballés un par un", "c": "ele", "l": 0}, {"id": "p03", "t": "Écrans OLED pour iPhone", "s": "Gamme GX, de l'iPhone X au 15 Pro Max", "c": "ele", "l": 0}, {"id": "p04", "t": "Électroménager cuisine et buanderie", "s": "Réfrigérateur, cuisinière, lave-linge, aspirateur", "c": "cui", "l": 0}, {"id": "p05", "t": "Évier inox sur pied", "s": "Bac avec égouttoir et étagère basse", "c": "cui", "l": 0}, {"id": "p06", "t": "Déco et mobilier salon", "s": "Canapés, fauteuils, luminaires et décoration", "c": "mai", "l": 0}, {"id": "p07", "t": "Chemises homme, 7 coloris", "s": "Coupe classique à col boutonné", "c": "vet", "l": 0}, {"id": "p08", "t": "Ensemble T-shirt + pantalon", "s": "Coupe ample, effet délavé", "c": "vet", "l": 0}, {"id": "p09", "t": "Boîtes à chaussures", "s": "Boîtes transparentes empilables, magnétiques", "c": "mai", "l": 0}, {"id": "p10", "t": "Coffret 5 outils sans fil", "s": "Perforateur, meuleuse, perceuse, 2 batteries et chargeur", "c": "pro", "l": 0}, {"id": "p11", "t": "Bottes de travail cuir isolé", "s": "Bottes cuir chaudes, semelle robuste, pour chantier", "c": "cha", "l": 0}, {"id": "p12", "t": "Mobilier enfant en bois rose", "s": "Chaise haute pour poupée, meuble et chariot de jeu", "c": "enf", "l": 0}, {"id": "p13", "t": "Gaufrier et croque-monsieur", "s": "Gaufres, sandwichs et grill en un seul appareil", "c": "cui", "l": 0}, {"id": "p14", "t": "Matériaux de construction", "s": "Ciment, tôles, briques, isolants et outillage", "c": "pro", "l": 0}, {"id": "p15", "t": "Maillot Léopards RDC", "s": "Maillot bleu aux couleurs de la RD Congo", "c": "spo", "l": 0}, {"id": "p16", "t": "Cadeaux d'entreprise", "s": "Gourdes, montres, casques, carnets et coffrets", "c": "pro", "l": 0}, {"id": "p17", "t": "Maillot vert style sport n°23", "s": "T-shirt à col en V, look basket et streetwear", "c": "spo", "l": 0}, {"id": "p18", "t": "Défroisseur vapeur portable", "s": "Repassage rapide, sec et humide", "c": "cad", "l": 1}, {"id": "p19", "t": "Crocs personnalisées", "s": "Sabots Crocs avec breloques et lacets", "c": "cha", "l": 0}, {"id": "p20", "t": "Valises et sacs de voyage", "s": "Valises cabine rigides à roulettes, plusieurs coloris", "c": "sac", "l": 0}, {"id": "p21", "t": "Miroir sur pied, cadre doré", "s": "Grand miroir pleine hauteur, à poser ou à fixer", "c": "mai", "l": 0}, {"id": "p22", "t": "Baskets tendance", "s": "Large choix de modèles et de coloris", "c": "cha", "l": 0}, {"id": "p23", "t": "Pièces auto et accessoires", "s": "Moteurs, freins, amortisseurs, sièges et jantes", "c": "aut", "l": 0}, {"id": "p24", "t": "Accessoires mode femme", "s": "Sacs, bijoux dorés, foulards, ceintures et lunettes", "c": "mod", "l": 0}, {"id": "p25", "t": "Coupe-légumes multifonction", "s": "Dés, julienne, tranches et râpe", "c": "cui", "l": 0}, {"id": "p26", "t": "Tente gonflable 12 m², vert armée", "s": "Camping et famille, toile Oxford 600D", "c": "spo", "l": 0}, {"id": "p27", "t": "iPhone 13, 128 Go, bleu", "s": "Débloqué, grade A, test réussi", "c": "ele", "l": 0}, {"id": "p28", "t": "Bureau enfant + chaise réglables", "s": "Ensemble d'étude à hauteur ajustable", "c": "enf", "l": 0}, {"id": "p29", "t": "Laptops Lenovo ThinkPad occasion", "s": "Ordinateurs portables d'occasion, Core i7", "c": "ele", "l": 0}, {"id": "p30", "t": "Jeu de clés et douilles", "s": "Mallette de mécanicien avec cliquet et clés mixtes", "c": "pro", "l": 0}, {"id": "p31", "t": "Lampe de bureau multifonction", "s": "LED avec horloge, port USB et pot à crayons", "c": "mai", "l": 0}, {"id": "p32", "t": "Blouse médicale, tunique + pantalon", "s": "Tenue de soins extensible, plusieurs coloris", "c": "pro", "l": 0}, {"id": "p33", "t": "iPhone, nouvelle gamme", "s": "Plusieurs modèles et coloris, sur commande", "c": "ele", "l": 0}, {"id": "p34", "t": "Film de couleur pour voiture", "s": "Change la couleur de ta voiture, modèle BYD Seagull", "c": "aut", "l": 0}, {"id": "p35", "t": "Chaussures de football", "s": "Tige haute en chaussette, crampons, noir, bleu ou blanc", "c": "cha", "l": 0}, {"id": "p36", "t": "Sacs à main pour femmes", "s": "Lot de modèles variés, emballage d'origine", "c": "sac", "l": 0}, {"id": "p37", "t": "Écouteurs filaires argent", "s": "Look métal chromé, style rétro", "c": "ele", "l": 1}, {"id": "p38", "t": "Chaussures 5 orteils sport", "s": "Légères, antidérapantes et respirantes", "c": "cha", "l": 0}, {"id": "p39", "t": "Bancs d'attente 3 places", "s": "Sièges rembourrés pour salle d'attente et bureaux", "c": "pro", "l": 0}, {"id": "p40", "t": "Électroménager, sélection maison", "s": "Réfrigérateur, lave-linge, robots, bouilloires et plus", "c": "cui", "l": 0}, {"id": "p41", "t": "Sticker arbre à photos 3D", "s": "Décoration murale acrylique avec cadres photo", "c": "mai", "l": 0}, {"id": "p42", "t": "T-shirt singe, coton épais oversize", "s": "T-shirt tendance à motif singe, coupe ample", "c": "vet", "l": 0}, {"id": "p43", "t": "Tablette enfant 10 pouces", "s": "Double SIM + WiFi, avec coque antichoc colorée", "c": "enf", "l": 1}, {"id": "p44", "t": "Cadres photo, mur football", "s": "Composition murale de cadres, thème football", "c": "mai", "l": 0}, {"id": "p45", "t": "Protection d'ailes, drone DJI Neo 2", "s": "Accessoire imprimé 3D, look avion de chasse", "c": "tec", "l": 0}, {"id": "p46", "t": "Maison conteneur 2 niveaux", "s": "Bureau ou logement démontable, escalier et balcon", "c": "cmd", "l": 0}, {"id": "p47", "t": "Colis importés de Chine vers la RDC", "s": "Vos commandes groupées, emballées et expédiées", "c": "cmd", "l": 0}, {"id": "p48", "t": "Chaussettes en gros lot", "s": "Lots de chaussettes variées, idéal revente", "c": "vet", "l": 0}, {"id": "p50", "t": "Canapé 3 places noir", "s": "Look moderne, assise capitonnée", "c": "mai", "l": 0}, {"id": "p51", "t": "Presse à chaud, transfert textile", "s": "Pour imprimer vos logos sur t-shirts", "c": "pro", "l": 0}, {"id": "p52", "t": "Sac à dos tactique 50 L", "s": "Grande capacité, système MOLLE, tissu résistant", "c": "sac", "l": 1}, {"id": "p53", "t": "Équipement de fitness", "s": "Haltères, bancs et matériel de salle de sport", "c": "spo", "l": 0}, {"id": "p54", "t": "Protège-matelas matelassé", "s": "Drap-housse doux, plusieurs coloris", "c": "mai", "l": 0}, {"id": "p55", "t": "Châssis iPhone 11 multicolores", "s": "Coques arrière et cadres pour iPhone 11, plusieurs coloris", "c": "tec", "l": 0}, {"id": "p56", "t": "Ensemble chemise + pantalon", "s": "Coton-lin vert, léger et élégant", "c": "vet", "l": 0}, {"id": "p57", "t": "Tricycle électrique à benne", "s": "Cabine fermée et benne basculante pour le transport", "c": "cmd", "l": 0}, {"id": "p59", "t": "Range-chaussures empilable", "s": "Étagère en X, plusieurs niveaux et coloris", "c": "mai", "l": 0}, {"id": "p60", "t": "Armoire métal, portes vitrées", "s": "Structure en acier, portes cannelées", "c": "mai", "l": 0}, {"id": "p61", "t": "Lustre LED 3 anneaux", "s": "Suspension moderne pour salon et salle à manger", "c": "mai", "l": 1}, {"id": "p62", "t": "Moteur moto refroidi par eau", "s": "Moteur monocylindre avec embrayage automatique", "c": "aut", "l": 0}, {"id": "p63", "t": "Sticker marbre pour cuisine", "s": "Autocollant pour plan de travail et murs", "c": "mai", "l": 0}, {"id": "p64", "t": "Colliers photo personnalisés", "s": "Ta photo et ton prénom gravés sur pendentif doré", "c": "mon", "l": 0}, {"id": "p65", "t": "Mocassins en cuir homme", "s": "Style chic, noir et marron", "c": "cha", "l": 0}, {"id": "p66", "t": "Porte-brosses à dents mural", "s": "Avec gobelets et distributeur de dentifrice", "c": "cad", "l": 0}, {"id": "p67", "t": "Gants noirs jetables", "s": "Boîte de 100, sans poudre", "c": "pro", "l": 0}, {"id": "p68", "t": "Sticker mural, carte du monde 3D", "s": "Acrylique 3D pour décorer salon et bureau", "c": "mai", "l": 0}, {"id": "p69", "t": "Coques iPhone transparentes", "s": "Motifs singes en duo, pour tous les modèles", "c": "tec", "l": 1}, {"id": "p70", "t": "Dalles de moquette", "s": "Mousse douce, à assembler comme un puzzle", "c": "mai", "l": 0}, {"id": "p71", "t": "Ballons de football", "s": "Ballons cousus main PU pour entraînement et match", "c": "spo", "l": 0}, {"id": "p72", "t": "Ruban néon LED blanc", "s": "Rouleau lumineux pour déco et enseignes", "c": "mai", "l": 0}, {"id": "p73", "t": "Horloge murale 3D", "s": "Chiffres autocollants, sans perçage", "c": "mai", "l": 0}, {"id": "p74", "t": "Coque iPhone, singe urbain", "s": "Coque rigide à motif, pour iPhone 13 jusqu'au 17 Pro Max", "c": "tec", "l": 0}, {"id": "p75", "t": "Plafonnier LED, style feu d'artifice", "s": "Luminaire design pour salon et chambre", "c": "mai", "l": 0}];
+  var CATL = { vet: 'Vêtements', cha: 'Chaussures', mod: 'Accessoires mode', mon: 'Montres et bijoux', sac: 'Sacs et bagages', tec: 'Gadgets tech', ele: 'Électronique', mai: 'Maison et déco', cui: 'Cuisine', bea: 'Beauté', enf: 'Enfants', spo: 'Sport et fitness', aut: 'Auto et moto', cad: 'Idées cadeaux', pro: 'Entreprises', cmd: 'Sur commande' };
+  var BY = {};
+  /* ===== v2 : données publiées par l'admin (prix, produits, photos, commandes) ===== */
+  var BASE = PRODUITS.map(function (p) { return Object.assign({}, p); });
+  var STATE = {};
+  try { STATE = JSON.parse(document.getElementById('gde-state').textContent) || {}; } catch (e) { STATE = {}; }
+  function defState(s) {
+    s = s || {};
+    s.rev = s.rev || 0; s.prod = s.prod || {}; s.extra = s.extra || []; s.slog = s.slog || {};
+    s.soc = s.soc || { tiktok: '', instagram: '', facebook: '' }; s.promo = s.promo || []; s.avis = s.avis || [];
+    s.cmd = s.cmd || {}; s.vip = (s.vip && s.vip.length === 3) ? s.vip : [3, 6, 10]; s.lien = s.lien || '';
+    return s;
+  }
+  STATE = defState(STATE);
+  var QP = [1, 5, 10];
+  function h(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function ea(s) { return h(s); }
+  function pic(p) { return p.photo || ('img/' + p.id + '.jpg'); }
+  function buildProduits() {
+    var out = [];
+    BASE.forEach(function (b) {
+      var o = STATE.prod[b.id] || {};
+      if (o.cache) return;
+      var p = Object.assign({}, b);
+      if (o.px) p.px = o.px;
+      if (o.photo) p.photo = o.photo;
+      out.push(p);
+    });
+    STATE.extra.forEach(function (e) { if (!e.cache) out.push(Object.assign({ l: 0 }, e)); });
+    return out;
+  }
+  function pxList(p) { return p.px || [null, null, null]; }
+  function okPx(v) { return v !== null && v !== undefined && v !== '' && !isNaN(Number(v)) && Number(v) > 0; }
+  function prixPour(p, q) {
+    var px = pxList(p), u = null;
+    for (var i = 0; i < QP.length; i++) if (q >= QP[i] && okPx(px[i])) u = Number(px[i]);
+    return u;
+  }
+  function prixMin(p) {
+    var m = null;
+    pxList(p).forEach(function (v) { if (okPx(v) && (m === null || Number(v) < m)) m = Number(v); });
+    return m;
+  }
+  function promoPct(code) {
+    code = String(code || '').trim().toUpperCase(); if (!code) return 0;
+    var r = STATE.promo.filter(function (x) { return x.actif !== false && String(x.code).trim().toUpperCase() === code; })[0];
+    return r ? (Number(r.pct) || 0) : 0;
+  }
+  function prixLigne(p) {
+    var px = pxList(p), main = null, i;
+    for (i = 0; i < 3; i++) if (okPx(px[i])) { main = i; break; }
+    if (main === null) return '<span class="prix-l">Prix sur demande</span>';
+    var s = '<span class="prix-l"><b class="pv">' + usd(Number(px[main])) + '</b>' + (main === 0 ? '' : ' <small>dès ' + QP[main] + ' pièces</small>') + '</span>';
+    var mn = prixMin(p);
+    if (mn !== null && mn < Number(px[main])) s += '<span class="gros">Gros : ' + usd(mn) + ' la pièce</span>';
+    return s;
+  }
+  function fichePrix(p) {
+    var px = pxList(p), s = '<p class="note" style="font-size:14px">' + p.s + '.</p>';
+    if (prixMin(p) === null) return s + '<p class="note">Prix sur demande, envoyé sur WhatsApp avant tout paiement. Acompte de 50 %.</p>';
+    s += '<div class="paliers">' + QP.map(function (q, i) {
+      return '<div class="palier" data-pal="' + i + '"><span>' + (i === QP.length - 1 ? q + '+' : 'dès ' + q) + ' pièce' + (q > 1 ? 's' : '') + '</span><b>' + (okPx(px[i]) ? usd(Number(px[i])) : '—') + '</b></div>';
+    }).join('') + '</div>';
+    s += '<div class="carte calc" data-calc="' + p.id + '"><div class="duo">' +
+      '<div class="champ"><label for="k-q">Quantité</label><input id="k-q" type="number" min="1" value="1" inputmode="numeric" data-k="q"></div>' +
+      '<div class="champ"><label for="k-c">Code promo</label><input id="k-c" data-k="c" autocomplete="off" placeholder="Facultatif" style="text-transform:uppercase"></div></div>' +
+      '<div class="acompte"><div><small>Total estimé</small><strong data-o="tot">—</strong></div><div><small>Acompte à verser (50 %)</small><strong data-o="ac">—</strong></div></div>' +
+      '<p class="note" data-o="info"></p></div>';
+    return s;
+  }
+  function majCalc() {
+    var box = document.querySelector('#sheet [data-calc]'); if (!box) return;
+    var p = BY[box.getAttribute('data-calc')]; if (!p) return;
+    var q = Math.max(1, parseInt(box.querySelector('[data-k="q"]').value, 10) || 1), code = box.querySelector('[data-k="c"]').value;
+    var u = prixPour(p, q), pct = promoPct(code);
+    function o(k) { return box.querySelector('[data-o="' + k + '"]'); }
+    var act = -1, px = pxList(p);
+    QP.forEach(function (x, i) { if (q >= x && okPx(px[i])) act = i; });
+    Array.prototype.forEach.call(document.querySelectorAll('#sheet [data-pal]'), function (t) { t.classList.toggle('on', Number(t.getAttribute('data-pal')) === act); });
+    var a = document.querySelector('#sheet [data-cmd-wa]');
+    if (u === null) {
+      o('tot').textContent = '—'; o('ac').textContent = '—';
+      o('info').textContent = 'Prix pour ' + q + ' pièce' + (q > 1 ? 's' : '') + ' : sur devis.';
+      if (a) a.href = wa(msgProduit(p) + ' Quantité : ' + q + '.');
+      return;
+    }
+    var tot = u * q * (1 - pct / 100);
+    o('tot').textContent = usd(tot); o('ac').textContent = usd(tot / 2);
+    o('info').textContent = usd(u) + ' la pièce' + (pct ? ' · promo −' + pct + ' %' : (String(code).trim() ? ' · code inconnu' : '')) + ' · solde de ' + usd(tot / 2) + ' à la livraison.';
+    if (a) a.href = wa('Bonjour GOD DID EXPRESS, je veux commander : ' + p.t + '.\nQuantité : ' + q + '\nPrix : ' + usd(u) + ' la pièce\nTotal estimé : ' + usd(tot) + (pct ? ' (code ' + String(code).trim().toUpperCase() + ', −' + pct + ' %)' : '') + '\nAcompte 50 % : ' + usd(tot / 2) + '\nMerci de confirmer le prix et le délai.');
+  }
+  PRODUITS = buildProduits();
+  var BY = {};
+  PRODUITS.forEach(function (p) { BY[p.id] = p; });
+  var filtreCat = 'all', requete = '';
+  var liste = {};
+  try {
+    var brut = JSON.parse(localStorage.getItem('gde-liste') || '{}');
+    if (brut && typeof brut === 'object') Object.keys(brut).forEach(function (k) {
+      var n = parseInt(brut[k], 10);
+      if (BY[k] && n > 0 && n < 100) liste[k] = n;
+    });
+  } catch (e) {}
+  function sauve() { try { localStorage.setItem('gde-liste', JSON.stringify(liste)); } catch (e) {} }
+  function norm(s) { return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+  function nbListe() { var n = 0; Object.keys(liste).forEach(function (k) { n += liste[k]; }); return n; }
+  function msgProduit(p) { return 'Bonjour GOD DID EXPRESS, je veux commander : ' + p.t + ' (' + p.s + '). Pouvez-vous me donner le prix et le délai de livraison ?'; }
+
+  function rendreChips() {
+    var cnt = {};
+    PRODUITS.forEach(function (p) { cnt[p.c] = (cnt[p.c] || 0) + 1; });
+    var h = '<button type="button" class="chip" data-cat="all" aria-pressed="' + (filtreCat === 'all') + '">Tout<small>' + PRODUITS.length + '</small></button>';
+    Object.keys(CATL).forEach(function (k) {
+      if (cnt[k]) h += '<button type="button" class="chip" data-cat="' + k + '" aria-pressed="' + (filtreCat === k) + '">' + CATL[k] + '<small>' + cnt[k] + '</small></button>';
+    });
+    $('c-chips').innerHTML = h;
+  }
+  function carte(p) {
+    var dans = !!liste[p.id];
+    return '<article class="prod"><button class="ph" type="button" data-open="' + p.id + '" aria-label="Agrandir : ' + p.t + '">' +
+      '<img src="' + ea(pic(p)) + '" alt="' + ea(p.t) + '" loading="lazy" width="960" height="600">' +
+      '<span class="tag">Sourcing Chine</span>' + (p.l ? '<span class="tag live">Au live</span>' : '') + '</button>' +
+      '<div class="corps"><h3>' + p.t + '</h3><p class="sub">' + p.s + '</p>' + prixLigne(p) + '</div>' +
+      '<div class="act"><a class="btn mini" href="' + wa(msgProduit(p)) + '" target="_blank" rel="noopener">Commander</a>' +
+      '<button class="btn ghost mini" type="button" data-add="' + p.id + '" aria-pressed="' + dans + '">' + (dans ? 'Dans ma liste' : '+ Ma liste') + '</button></div></article>';
+  }
+  function rendreGrille() {
+    var q = norm(requete).trim();
+    var res = PRODUITS.filter(function (p) {
+      if (filtreCat !== 'all' && p.c !== filtreCat) return false;
+      if (!q) return true;
+      return norm(p.t + ' ' + p.s + ' ' + CATL[p.c]).indexOf(q) >= 0;
+    });
+    $('c-compte').textContent = res.length + (res.length > 1 ? ' produits' : ' produit');
+    if (!res.length) {
+      $('c-grid').innerHTML = '<div class="carte vide" style="grid-column:1/-1"><h3>Aucun produit trouvé</h3><p class="note">Demandez-le directement : on le cherche chez nos fournisseurs.</p><a class="btn" href="' + wa('Bonjour GOD DID EXPRESS, je cherche : ' + requete.trim()) + '" target="_blank" rel="noopener">Demander « ' + requete.trim().replace(/[<>&"]/g, '') + ' » sur WhatsApp</a></div>';
+      return;
+    }
+    $('c-grid').innerHTML = res.map(carte).join('');
+  }
+  function majBarre() {
+    var n = nbListe();
+    $('listbar').hidden = n === 0; document.body.classList.toggle('has-list', n > 0);
+    $('lb-txt').textContent = 'Ma liste · ' + n + (n > 1 ? ' articles' : ' article');
+  }
+  function bascule(id) {
+    if (liste[id]) delete liste[id]; else liste[id] = 1;
+    sauve(); majBarre(); rendreGrille();
+  }
+
+  /* Fenêtre (produit ou liste) */
+  var dernierFocus = null;
+  function ouvrir(html) {
+    if ($('veil').hidden) dernierFocus = document.activeElement;
+    $('sheet').innerHTML = html;
+    $('veil').hidden = false;
+    var f = $('sheet').querySelector('[data-close]'); if (f) f.focus();
+  }
+  function fermer() {
+    $('veil').hidden = true; $('sheet').innerHTML = '';
+    if (dernierFocus && dernierFocus.focus) { try { dernierFocus.focus(); } catch (e) {} }
+  }
+  function ouvrirProduit(id) {
+    var p = BY[id]; if (!p) return;
+    var dans = !!liste[id];
+    var partage = 'Regarde ce produit chez GOD DID EXPRESS : ' + p.t + ' (' + p.s + '). Commande sur WhatsApp : +243 983 129 294';
+    ouvrir('<div class="sheet-tete"><div><div class="kicker">' + CATL[p.c] + '</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">' + p.t + '</h3></div>' +
+      '<button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
+      '<img class="big" src="' + ea(pic(p)) + '" alt="' + ea(p.t) + '">' +
+      fichePrix(p) +
+      '<div class="rangee"><a class="btn" data-cmd-wa href="' + wa(msgProduit(p)) + '" target="_blank" rel="noopener">Commander sur WhatsApp</a>' +
+      '<button class="btn ghost" type="button" data-add="' + p.id + '" data-sheet="1" aria-pressed="' + dans + '">' + (dans ? 'Dans ma liste' : 'Ajouter à ma liste') + '</button>' +
+      '<a class="btn ghost" href="https://wa.me/?text=' + encodeURIComponent(partage) + '" target="_blank" rel="noopener">Partager à un ami</a>' +
+      '<button class="btn ghost" type="button" data-parle="' + p.id + '">Écouter la fiche</button></div>');
+    majCalc();
+  }
+  function messageListe() {
+    var l = ['Bonjour GOD DID EXPRESS, je voudrais un devis pour :'];
+    Object.keys(liste).forEach(function (k) { l.push('- ' + BY[k].t + ' x' + liste[k]); });
+    l.push('Merci de me donner les prix et le délai de livraison.');
+    return l.join('\n');
+  }
+  function ouvrirListe() {
+    var ids = Object.keys(liste);
+    if (!ids.length) { fermer(); return; }
+    var rows = ids.map(function (k) {
+      var p = BY[k];
+      return '<div class="lrow"><img src="' + ea(pic(p)) + '" alt=""><b>' + p.t + '</b>' +
+        '<span class="qty"><button type="button" data-moins="' + k + '" aria-label="Moins">−</button><span>' + liste[k] + '</span><button type="button" data-plus="' + k + '" aria-label="Plus">+</button></span></div>';
+    }).join('');
+    ouvrir('<div class="sheet-tete"><div><div class="kicker">Devis</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Ma liste</h3></div>' +
+      '<button class="btn ghost mini" type="button" data-close>Fermer</button></div>' + rows +
+      '<a class="btn" href="' + wa(messageListe()) + '" target="_blank" rel="noopener">Envoyer ma liste sur WhatsApp</a>' +
+      '<button class="btn ghost" type="button" data-vider>Vider la liste</button>' +
+      '<p class="note">Vous recevez les prix avant tout paiement. Acompte de 50 % pour lancer l\'achat.</p>');
+  }
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('veil').hidden) fermer(); });
+  $('veil').addEventListener('click', function (e) {
+    if (e.target === $('veil')) { fermer(); return; }
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.hasAttribute('data-close')) fermer();
+    else if (b.hasAttribute('data-vider')) { liste = {}; sauve(); majBarre(); rendreGrille(); fermer(); }
+    else if (b.hasAttribute('data-plus')) { var k = b.getAttribute('data-plus'); if (liste[k] < 99) liste[k]++; sauve(); majBarre(); ouvrirListe(); }
+    else if (b.hasAttribute('data-moins')) {
+      var m = b.getAttribute('data-moins'); liste[m]--; if (liste[m] < 1) delete liste[m];
+      sauve(); majBarre(); rendreGrille(); ouvrirListe();
+    }
+    else if (b.hasAttribute('data-add')) { var a = b.getAttribute('data-add'); bascule(a); ouvrirProduit(a); }
+    else if (b.hasAttribute('data-parle')) parle(b.getAttribute('data-parle'));
+    else if (b.hasAttribute('data-go')) { fermer(); show(b.getAttribute('data-go'), true); }
+  });
+  $('lb-open').addEventListener('click', ouvrirListe);
+  $('c-grid').addEventListener('click', function (e) {
+    var o = e.target.closest('[data-open]'); if (o) { ouvrirProduit(o.getAttribute('data-open')); return; }
+    var a = e.target.closest('[data-add]'); if (a) bascule(a.getAttribute('data-add'));
+  });
+  $('c-chips').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-cat]'); if (!b) return;
+    filtreCat = b.getAttribute('data-cat'); rendreChips(); rendreGrille();
+  });
+  $('c-q').addEventListener('input', function () { requete = this.value; rendreGrille(); });
+  $('c-hors').href = wa('Bonjour GOD DID EXPRESS, je cherche un produit que je ne vois pas dans le catalogue. Je vous envoie la photo.');
+
+  /* Bloc entreprises : on touche, on envoie */
+  var SECT = ['Restaurant, fast-food', 'Hôtel', 'École', 'Clinique, pharmacie', 'Boutique, revendeur', 'Chantier, BTP', 'Bureau, ONG', 'Autre'];
+  var BESOIN = ['Emballages', 'Équipements', 'Uniformes et protection', 'Informatique', 'Mobilier', 'Électroménager', 'Autre'];
+  var choixS = {}, choixB = {};
+  function chipsEnt(el, liste_, etat) {
+    el.innerHTML = liste_.map(function (x, i) { return '<button type="button" class="chip" data-i="' + i + '" aria-pressed="' + !!etat[i] + '">' + x + '</button>'; }).join('');
+  }
+  function majEnt() {
+    var s = SECT.filter(function (x, i) { return choixS[i]; }), b = BESOIN.filter(function (x, i) { return choixB[i]; });
+    var m = 'Bonjour GOD DID EXPRESS, nous sommes une entreprise' + (s.length ? ' (secteur : ' + s.join(', ') + ')' : '') + '. ' +
+      (b.length ? 'Nous cherchons : ' + b.join(', ') + '. ' : '') + 'Pouvez-vous nous proposer une offre d\'approvisionnement ?';
+    $('ent-wa').href = wa(m);
+  }
+  chipsEnt($('ent-sect'), SECT, choixS); chipsEnt($('ent-besoin'), BESOIN, choixB); majEnt();
+  $('ent-sect').addEventListener('click', function (e) { var b = e.target.closest('[data-i]'); if (!b) return; var i = b.getAttribute('data-i'); choixS[i] = !choixS[i]; chipsEnt($('ent-sect'), SECT, choixS); majEnt(); });
+  $('ent-besoin').addEventListener('click', function (e) { var b = e.target.closest('[data-i]'); if (!b) return; var i = b.getAttribute('data-i'); choixB[i] = !choixB[i]; chipsEnt($('ent-besoin'), BESOIN, choixB); majEnt(); });
+
+  /* Programme du live : produits proposés */
+  (function () {
+    var l = PRODUITS.filter(function (p) { return p.l; });
+    $('live-prog').innerHTML = l.map(function (p) {
+      return '<button type="button" class="prog-row" data-open="' + p.id + '"><img src="' + ea(pic(p)) + '" alt=""><span><b>' + p.t + '</b><br><span class="note">' + p.s + '</span></span></button>';
+    }).join('');
+    $('live-prog').addEventListener('click', function (e) { var o = e.target.closest('[data-open]'); if (o) ouvrirProduit(o.getAttribute('data-open')); });
+  })();
+
+  /* ===== 2050 : accueil vivant ===== */
+  function img(p) { return pic(p); }
+  function esc(s) { return String(s).replace(/[<>&"]/g, ''); }
+
+  /* Salutation, lueur selon l'heure, horloge */
+  function heure() {
+    var d = new Date(), h = d.getHours();
+    $('h-salut').textContent = (h < 12 ? 'Bonjour' : h < 18 ? 'Bon après-midi' : 'Bonsoir') + ' · bienvenue';
+    var glow = (h >= 5 && h < 11) ? .2 : (h >= 11 && h < 17) ? .14 : (h >= 17 && h < 22) ? .25 : .1;
+    document.documentElement.style.setProperty('--glow', glow);
+    var t = '';
+    try { t = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Kinshasa' }); } catch (e) { t = String(h).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+    $('h-heure').textContent = 'Kinshasa ' + t;
+  }
+  heure(); setInterval(heure, 30000);
+
+  /* Ruban de la marque */
+  (function () {
+    var it = ['Tu choisis', 'On trouve', 'On approvisionne', 'On importe', 'On te livre', 'Acompte 50 %', 'Preuve photo à chaque étape'];
+    var h = it.map(function (x) { return '<span>' + x + '</span>'; }).join('');
+    $('ruban-in').innerHTML = h + h;
+  })();
+
+  /* Trajet animé et chiffres */
+  $('st-prod').setAttribute('data-n', PRODUITS.length);
+  Array.prototype.forEach.call(document.querySelectorAll('#v-accueil .stats strong'), function (el) {
+    var to = parseInt(el.getAttribute('data-n'), 10), sfx = el.getAttribute('data-sfx') || '';
+    if (REDUIT) { el.textContent = to + sfx; return; }
+    var t0 = null;
+    requestAnimationFrame(function step(now) {
+      if (t0 === null) t0 = now;
+      var k = Math.min(1, (now - t0) / 1400);
+      el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))) + sfx;
+      if (k < 1) requestAnimationFrame(step);
+    });
+  });
+
+  /* Recherche intelligente (locale, sans formulaire) */
+  var SYN = {
+    pc: 'laptop ordinateur', ordinateur: 'laptop', portable: 'laptop', telephone: 'iphone', phone: 'iphone', smartphone: 'iphone', mobile: 'iphone',
+    chaussure: 'baskets bottes mocassins crocs', soulier: 'chaussures', basket: 'baskets', habit: 'chemise tshirt ensemble', vetement: 'chemise tshirt ensemble blouse',
+    foot: 'football maillot ballon', maison: 'deco mobilier canape lustre', meuble: 'mobilier canape armoire', salon: 'canape lustre deco', cuisine: 'electromenager gaufrier evier',
+    frigo: 'refrigerateur electromenager', tele: 'ecran', musique: 'ecouteurs', casque: 'ecouteurs', bijou: 'collier bracelet', montre: 'bracelet',
+    sac: 'sacs valises', valise: 'voyage', bebe: 'enfant', cadeau: 'cadeaux gourdes', voiture: 'auto film pieces', construction: 'materiaux ciment outils',
+    outil: 'outils cles coffret', sport: 'fitness ballon maillot tente', camping: 'tente', beaute: 'cosmetiques maquillage', femme: 'sacs mode', homme: 'chemises mocassins'
+  };
+  function jetons(q) {
+    var base = norm(q).split(/[^a-z0-9]+/).filter(function (x) { return x.length > 1; }), out = [];
+    base.forEach(function (t) {
+      out.push([t, 3]);
+      if (t.length > 3 && t.slice(-1) === 's') out.push([t.slice(0, -1), 3]);
+      if (SYN[t]) SYN[t].split(' ').forEach(function (w) { out.push([w, 1]); });
+    });
+    return out;
+  }
+  function cherche(q) {
+    var js = jetons(q); if (!js.length) return [];
+    return PRODUITS.map(function (p) {
+      var t = norm(p.t), s = norm(p.s), c = norm(CATL[p.c]), sc = 0;
+      js.forEach(function (j) {
+        if (t.indexOf(j[0]) >= 0) sc += j[1] * 2; else if (s.indexOf(j[0]) >= 0 || c.indexOf(j[0]) >= 0) sc += j[1];
+      });
+      return { p: p, sc: sc };
+    }).filter(function (x) { return x.sc > 0; }).sort(function (a, b) { return b.sc - a.sc; }).slice(0, 5);
+  }
+  function rendreIA() {
+    var q = $('ia-q').value.trim(), box = $('ia-res');
+    if (!q) { box.innerHTML = ''; return; }
+    var r = cherche(q);
+    if (!r.length) {
+      box.innerHTML = '<div class="carte vide"><h3>Pas encore dans le catalogue</h3><p class="note">On le cherche chez nos fournisseurs et on vous envoie le devis.</p><a class="btn" href="' + wa('Bonjour GOD DID EXPRESS, je cherche : ' + q) + '" target="_blank" rel="noopener">Demander « ' + esc(q) + ' » sur WhatsApp</a></div>';
+      return;
+    }
+    box.innerHTML = '<div class="compte">' + r.length + (r.length > 1 ? ' propositions' : ' proposition') + '</div>' + r.map(function (x) {
+      return '<button type="button" class="res-row" data-open="' + x.p.id + '"><img src="' + img(x.p) + '" alt=""><span><b>' + x.p.t + '</b><span class="s">' + x.p.s + '</span></span><i aria-hidden="true">›</i></button>';
+    }).join('') + '<button type="button" class="btn ghost" data-tout="' + esc(q) + '">Voir tout dans le catalogue</button>';
+  }
+  $('ia-q').addEventListener('input', rendreIA);
+  (function () {
+    var ex = ['Un laptop pour le bureau', 'Des baskets de sport', 'Un cadeau pour maman', 'Un frigo pour la maison', 'Une coque pour mon iPhone'], i = 0;
+    if (REDUIT) return;
+    setInterval(function () { i = (i + 1) % ex.length; if (!$('ia-q').value) $('ia-q').placeholder = ex[i]; }, 2800);
+  })();
+
+  /* Occasions */
+  var OCC = [
+    ['Mariage', ['cad', 'mon', 'mod', 'vet']], ['Anniversaire', ['cad', 'bea', 'mon']], ['Rentrée', ['sac', 'ele', 'tec', 'enf']],
+    ['Maison neuve', ['mai', 'cui']], ['Bébé et enfants', ['enf']], ['Sport', ['spo']], ['Bureau', ['pro', 'ele']], ['Voiture et moto', ['aut']]
+  ];
+  var occActuel = 0;
+  function mini(p, rang) {
+    return '<button type="button" class="mc" data-open="' + p.id + '"><span class="im"><img src="' + img(p) + '" alt="" loading="lazy" width="156" height="98">' + (rang ? '<span class="rang">' + rang + '</span>' : '') + '</span><b>' + p.t + '</b></button>';
+  }
+  function rendreOcc() {
+    $('occ-chips').innerHTML = OCC.map(function (o, i) { return '<button type="button" class="chip" data-occ="' + i + '" aria-pressed="' + (i === occActuel) + '">' + o[0] + '</button>'; }).join('');
+    var set = OCC[occActuel][1];
+    $('occ-rail').innerHTML = PRODUITS.filter(function (p) { return set.indexOf(p.c) >= 0; }).slice(0, 10).map(function (p) { return mini(p); }).join('');
+  }
+  rendreOcc();
+
+  /* Salle d'attente du live */
+  function prochainLive() {
+    var n = new Date(), d = new Date(n);
+    d.setDate(n.getDate() + ((6 - n.getDay() + 7) % 7)); d.setHours(18, 0, 0, 0);
+    if (d < n) d.setDate(d.getDate() + 7);
+    return d;
+  }
+  function tic() {
+    var d = prochainLive(), s = Math.max(0, Math.floor((d - Date.now()) / 1000));
+    function z(n) { return String(n).padStart(2, '0'); }
+    $('cr-j').textContent = z(Math.floor(s / 86400)); $('cr-h').textContent = z(Math.floor(s % 86400 / 3600));
+    $('cr-m').textContent = z(Math.floor(s % 3600 / 60)); $('cr-s').textContent = z(s % 60);
+  }
+  $('lv-quand').textContent = prochainLive().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) + ' · 18 h (à confirmer)';
+  $('lv-wa').href = wa('Bonjour GOD DID EXPRESS, prévenez-moi du prochain live shopping.');
+  tic(); setInterval(tic, 1000);
+
+  /* Tendances : les produits montrés au live */
+  $('tend-rail').innerHTML = PRODUITS.filter(function (p) { return p.l; }).map(function (p, i) { return mini(p, '0' + (i + 1)); }).join('');
+
+  /* Surprise du jour */
+  var jourN = Math.floor((Date.now() + 36e5) / 864e5), SP = PRODUITS[jourN % PRODUITS.length];
+  $('sp-btn').innerHTML = '<img src="' + img(SP) + '" alt=""><span class="voile"><small>Touchez</small>Révéler le produit du jour</span>';
+  $('sp-btn').addEventListener('click', function () {
+    if (this.classList.contains('ouvert')) { ouvrirProduit(SP.id); return; }
+    this.classList.add('ouvert'); this.setAttribute('aria-label', 'Voir la fiche : ' + SP.t);
+    var i = $('sp-info'); i.hidden = false;
+    i.innerHTML = '<div class="kicker">' + CATL[SP.c] + '</div><h3>' + SP.t + '</h3><p class="note">' + SP.s + '</p>' +
+      '<div class="rangee"><a class="btn" href="' + wa(msgProduit(SP)) + '" target="_blank" rel="noopener">Commander</a><button class="btn ghost" type="button" data-open="' + SP.id + '">Voir la fiche</button></div>';
+  });
+
+  /* Témoignages (modèles d'affichage) et badge fondateur */
+  var AVIS = [
+    ['Rapide et sérieux : j\'ai vu la photo de mon colis avant la livraison.', 'Client de Limete'],
+    ['Le devis était clair, aucune mauvaise surprise sur le prix.', 'Cliente de Ngaliema'],
+    ['Pour mon commerce, ils trouvent exactement ce que je demande.', 'Commerçant de Lemba']
+  ];
+  $('avis-rail').innerHTML = AVIS.map(function (a) {
+    return '<div class="avis-c"><span class="etoiles" aria-hidden="true">★★★★★</span><q>' + a[0] + '</q><div class="qui"><span>' + a[1] + '</span><span class="pastille">Modèle</span></div></div>';
+  }).join('');
+  $('avis-wa').href = wa('Bonjour GOD DID EXPRESS, je veux laisser mon témoignage (avec ma photo ou une vidéo).');
+  $('fond-wa').href = wa('Bonjour GOD DID EXPRESS, je veux faire partie des premiers clients : mon badge de membre fondateur, s\'il vous plaît.');
+
+  /* Fidélité : 10 diamants, 4 remplis en exemple */
+  (function () {
+    var d = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12l4 6-10 11L2 10z"/><path d="M2 10h20M9 4l-2 6 5 11 5-11-2-6"/></svg>', h = '';
+    for (var i = 0; i < 10; i++) h += '<div class="dia' + (i < 4 ? ' on' : '') + '">' + d + '</div>';
+    $('fid-grid').innerHTML = h;
+    $('fid-wa').href = wa('Bonjour GOD DID EXPRESS, je veux activer ma carte fidélité.');
+  })();
+
+  /* Fenêtre « Plus » */
+  function tuile(v, ico, t, s) { return '<button type="button" class="tuile" data-go="' + v + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + ico + '</svg><span><b>' + t + '</b><span class="s">' + s + '</span></span></button>'; }
+  function ouvrirPlus() {
+    ouvrir('<div class="sheet-tete"><div><div class="kicker">Plus</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Aller plus loin</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
+      tuile('groupes', '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.6.2 4.5 2.3 4.5 5.1"/>', 'Achats groupés', 'Plus on est nombreux, moins c\'est cher') +
+      tuile('live', '<circle cx="12" cy="12" r="2.4"/><path d="M7.5 7.5a6.4 6.4 0 0 0 0 9M16.5 7.5a6.4 6.4 0 0 1 0 9M4.5 4.5a10.6 10.6 0 0 0 0 15M19.5 4.5a10.6 10.6 0 0 1 0 15"/>', 'Live shopping', 'Voir le produit réel avant d\'acheter') +
+      tuile('parrainer', '<rect x="3" y="9" width="18" height="4" rx="1"/><path d="M12 9v12M5 13v7h14v-7M12 9c-3 0-4.5-1-4.5-2.6S9 4 10.2 4C11.6 4 12 6 12 9zm0 0c3 0 4.5-1 4.5-2.6S15 4 13.8 4C12.4 4 12 6 12 9z"/>', 'Membre, fidélité, parrainage', 'Votre carte, le Club VIP, devenir point relais') + (IS_ADMIN ? tuile('admin', '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>', 'Espace admin', 'Prix, produits, photos, commandes') : ''));
+  }
+
+  /* Lecture à voix haute d'une fiche produit */
+  function parle(id) {
+    var p = BY[id]; if (!p) return;
+    try {
+      speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(p.t + '. ' + p.s + '. Prix sur demande, envoyé sur WhatsApp avant tout paiement.');
+      u.lang = 'fr-FR'; speechSynthesis.speak(u); toast('Lecture en cours');
+    } catch (e) { toast('Lecture indisponible'); }
+  }
+
+  /* Commandes de l'accueil et des boutons de navigation */
+  document.addEventListener('click', function (e) {
+    var go = e.target.closest('[data-go]');
+    if (go && !$('veil').contains(go)) {
+      show(go.getAttribute('data-go'), true);
+      var sc = go.getAttribute('data-scroll');
+      if (sc) setTimeout(function () { var el = $(sc); if (el) el.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' }); }, 60);
+      return;
+    }
+    var o = e.target.closest('#v-accueil [data-open]'); if (o) { ouvrirProduit(o.getAttribute('data-open')); return; }
+    var q = e.target.closest('[data-q]'); if (q) { $('ia-q').value = q.getAttribute('data-q'); rendreIA(); return; }
+    var oc = e.target.closest('[data-occ]'); if (oc) { occActuel = parseInt(oc.getAttribute('data-occ'), 10); rendreOcc(); return; }
+    var t = e.target.closest('[data-tout]');
+    if (t) { requete = t.getAttribute('data-tout'); filtreCat = 'all'; $('c-q').value = requete; rendreChips(); rendreGrille(); show('catalogue', true); }
+  });
+
+  /* Inclinaison douce des cartes (souris), reflet de la carte membre */
+  document.addEventListener('pointermove', function (e) {
+    if (e.pointerType === 'touch' || REDUIT || !e.target.closest) return;
+    var c = e.target.closest('.prod, .passe'); if (!c) return;
+    var r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    c.style.setProperty('--ry', ((x - .5) * 8) + 'deg'); c.style.setProperty('--rx', ((.5 - y) * 8) + 'deg');
+    c.style.setProperty('--mx', (x * 100) + '%'); c.style.setProperty('--my', (y * 100) + '%');
+  });
+  document.addEventListener('pointerout', function (e) {
+    var c = e.target.closest && e.target.closest('.prod, .passe');
+    if (c && !c.contains(e.relatedTarget)) { c.style.setProperty('--rx', '0deg'); c.style.setProperty('--ry', '0deg'); }
+  });
+  if (!REDUIT && window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission !== 'function') {
+    window.addEventListener('deviceorientation', function (e) {
+      var p = $('passe'); if (!p || $('v-parrainer').hidden || e.gamma == null || e.beta == null) return;
+      p.style.setProperty('--ry', Math.max(-10, Math.min(10, e.gamma / 4)) + 'deg');
+      p.style.setProperty('--rx', Math.max(-10, Math.min(10, (e.beta - 45) / -5)) + 'deg');
+      p.style.setProperty('--mx', (50 + e.gamma) + '%');
+    });
+  }
+
+  /* Apparition douce des blocs */
+  (function () {
+    var rv = document.querySelectorAll('.rv');
+    if (!('IntersectionObserver' in window) || REDUIT) { Array.prototype.forEach.call(rv, function (el) { el.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, { threshold: .06 });
+    Array.prototype.forEach.call(rv, function (el) { io.observe(el); });
+  })();
+
+
+  /* Écran d'ouverture, une fois par visite */
+  (function () {
+    if (REDUIT) return;
+    var vu = false;
+    try { vu = sessionStorage.getItem('gde-boot') === '1'; sessionStorage.setItem('gde-boot', '1'); } catch (e) {}
+    if (vu) return;
+    var b = $('boot'); b.hidden = false;
+    function fin() { b.hidden = true; }
+    b.addEventListener('click', fin); setTimeout(fin, 1500);
+  })();
+
+  rendreChips(); rendreGrille(); majBarre();
+  GH = makeGlobe($('g-home'), 'home'); GS = makeGlobe($('g-suivi'), 'suivi'); if (GS) GS.setStep(curCran);
+
+  /* Pied */
+  $('num-copy').addEventListener('click', function () { copy('+243 983 129 294'); });
+
+  /* =====================================================================
+     v2 : slogans, réseaux, avis, club VIP, hors-ligne, assistant, admin
+     ===================================================================== */
+  function clean(s) { return String(s == null ? '' : s).replace(/[<>"]/g, '').replace(/&/g, ' et ').replace(/\s+/g, ' ').trim(); }
+
+  /* Slogan du mois */
+  var MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+  var SLOG_DEF = [
+    'Janvier : un nouveau départ, de nouveaux produits',
+    'Février : fais plaisir, on livre l\'attention',
+    'Mars : tout ce qu\'elles méritent, livré chez elles',
+    'Avril : on renouvelle ta maison',
+    'Mai : ton commerce grandit, on t\'approvisionne',
+    'Juin : le monde à portée de main',
+    'Juillet : les vacances, on s\'occupe du reste',
+    'Août : prépare la rentrée en avance',
+    'Septembre : la rentrée, tout pour bien démarrer',
+    'Octobre : on trouve, on livre, tu vois la preuve',
+    'Novembre : prépare les fêtes avant tout le monde',
+    'Décembre : offre le monde, on s\'occupe de la livraison'
+  ];
+  function slogan() { var m = new Date().getMonth(); return { mois: MOIS[m], txt: STATE.slog[String(m + 1)] || SLOG_DEF[m] }; }
+  function rendreSlogan() {
+    var s = slogan();
+    $('slogan-k').textContent = 'Le slogan de ' + s.mois.toLowerCase();
+    $('slogan-txt').textContent = s.txt;
+  }
+
+  /* Réseaux sociaux */
+  var ICO = {
+    whatsapp: '<path d="M4 20l1.3-4.2A8 8 0 1 1 8.4 18.8z"/><path d="M9.2 9.2c.4 2 2.4 4 4.4 4.5l1.1-1.2-1.7-1-.8.7a3.6 3.6 0 0 1-1.9-1.9l.7-.8-1-1.7z"/>',
+    instagram: '<rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".6"/>',
+    tiktok: '<path d="M14 4v10.2a3.6 3.6 0 1 1-3.6-3.6"/><path d="M14 4c.3 2.5 2 4.2 4.6 4.4"/>',
+    facebook: '<path d="M14 21v-7.5h2.6l.5-3H14V8.6c0-.9.4-1.6 1.7-1.6h1.5V4.3C16.8 4.2 15.9 4 15 4c-2.4 0-4 1.5-4 4.1v2.4H8.5v3H11V21z"/>'
+  };
+  function lienReseau(k, v) {
+    v = String(v || '').trim(); if (!v) return '';
+    if (/^https:\/\//i.test(v)) return v;
+    v = v.replace(/^@/, '').replace(/[^A-Za-z0-9._\-]/g, '');
+    if (!v) return '';
+    return k === 'tiktok' ? 'https://www.tiktok.com/@' + v : k === 'instagram' ? 'https://www.instagram.com/' + v : 'https://www.facebook.com/' + v;
+  }
+  function rendreReseaux() {
+    var items = [['whatsapp', 'WhatsApp', 'https://wa.me/' + WA]];
+    [['tiktok', 'TikTok'], ['instagram', 'Instagram'], ['facebook', 'Facebook']].forEach(function (r) {
+      var u = lienReseau(r[0], STATE.soc && STATE.soc[r[0]]); if (u) items.push([r[0], r[1], u]);
+    });
+    var out = items.map(function (i) { return '<a class="rs" href="' + ea(i[2]) + '" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true">' + ICO[i[0]] + '</svg>' + i[1] + '</a>'; }).join('');
+    ['reseaux-home', 'reseaux-pied'].forEach(function (id) { if ($(id)) $(id).innerHTML = out; });
+  }
+
+  /* Avis clients (vrais avis publiés, sinon modèles) */
+  function rendreAvis() {
+    var reels = STATE.avis || [];
+    if (reels.length) {
+      $('avis-rail').innerHTML = reels.map(function (a) {
+        return '<div class="avis-c">' + (a.photo ? '<img class="avis-ph" src="' + ea(a.photo) + '" alt="" loading="lazy">' : '') + '<span class="etoiles" aria-hidden="true">★★★★★</span><q>' + h(a.txt) + '</q><div class="qui"><span>' + h(a.nom) + '</span></div></div>';
+      }).join('');
+      $('avis-note').hidden = true;
+    } else {
+      $('avis-rail').innerHTML = AVIS.map(function (a) {
+        return '<div class="avis-c"><span class="etoiles" aria-hidden="true">★★★★★</span><q>' + a[0] + '</q><div class="qui"><span>' + a[1] + '</span><span class="pastille">Modèle</span></div></div>';
+      }).join('');
+      $('avis-note').hidden = false;
+    }
+  }
+
+  /* Club grossiste VIP */
+  var NIV = ['Bronze', 'Argent', 'Or', 'Diamant'];
+  var AVANT = ['Prix de gros dès 5 pièces', 'Priorité sur les nouveaux arrivages', 'Accès aux produits avant tout le monde', 'Prix négociés et suivi prioritaire'];
+  function niveauPour(code) {
+    code = String(code || '').trim().toUpperCase();
+    var n = 0;
+    if (code) Object.keys(STATE.cmd).forEach(function (k) {
+      var o = STATE.cmd[k];
+      if (o.club && String(o.club).trim().toUpperCase() === code && o.cran >= 7) n++;
+    });
+    var th = STATE.vip, lv = -1;
+    if (n > 0) { lv = 0; if (n >= th[0]) lv = 1; if (n >= th[1]) lv = 2; if (n >= th[2]) lv = 3; }
+    return { n: n, lv: lv };
+  }
+  function rendreVip() {
+    var th = STATE.vip;
+    $('vip-niv').innerHTML = NIV.map(function (nm, i) {
+      return '<div class="vn"><b>' + nm + '</b><span>' + (i === 0 ? '1re commande livrée' : th[i - 1] + ' commandes livrées') + '</span></div>';
+    }).join('');
+    var code = $('vip-code').value.trim(), box = $('vip-res');
+    if (!code) { box.innerHTML = '<p class="note">Entre ton code membre (le même que ton code de parrainage) pour voir ton niveau.</p>'; return; }
+    var r = niveauPour(code);
+    if (r.lv < 0) { box.innerHTML = '<p class="note">Aucune commande livrée n\'est liée à ce code pour l\'instant. Ta première commande livrée t\'ouvre le niveau Bronze.</p>'; return; }
+    var nxt = r.lv < 3 ? th[r.lv] : null, pct = nxt ? Math.min(100, Math.round(r.n / nxt * 100)) : 100, reste = nxt ? Math.max(0, nxt - r.n) : 0;
+    box.innerHTML = '<div class="vip-lv"><span class="kicker">Ton niveau</span><b>' + NIV[r.lv] + '</b><span class="note">' + r.n + ' commande' + (r.n > 1 ? 's' : '') + ' livrée' + (r.n > 1 ? 's' : '') + ' · ' + AVANT[r.lv] + '</span></div>' +
+      '<div class="barre" role="img" aria-label="Progression vers le niveau suivant : ' + pct + ' %"><i style="width:' + pct + '%"></i></div>' +
+      '<p class="note">' + (nxt ? 'Encore ' + reste + ' commande' + (reste > 1 ? 's' : '') + ' livrée' + (reste > 1 ? 's' : '') + ' pour passer ' + NIV[r.lv + 1] + '.' : 'Niveau maximal atteint. Merci pour ta fidélité.') + '</p>';
+  }
+  $('vip-code').addEventListener('input', rendreVip);
+  $('p-nom').addEventListener('input', function () { if (codeActuel && !$('vip-code').dataset.manuel) { $('vip-code').value = codeActuel; rendreVip(); } });
+  $('vip-code').addEventListener('input', function () { $('vip-code').dataset.manuel = '1'; });
+  $('vip-wa').href = wa('Bonjour GOD DID EXPRESS, je suis grossiste et je veux rejoindre le Club VIP.');
+
+  /* Code promo dans la demande sur mesure */
+  $('o-promo').addEventListener('input', majAcompte);
+
+  /* Hors-ligne léger : bandeau, brouillon de la demande, images de secours */
+  function majHL() { $('hl').hidden = navigator.onLine !== false; }
+  window.addEventListener('offline', majHL);
+  window.addEventListener('online', function () { majHL(); toast('Connexion revenue'); });
+  majHL();
+  var BR = ['o-nom', 'o-tel', 'o-commune', 'o-cat', 'o-desc', 'o-qte', 'o-budget', 'o-pay', 'o-promo', 'o-membre'];
+  function sauveBr() { var d = {}; BR.forEach(function (i) { d[i] = $(i).value; }); try { localStorage.setItem('gde-brouillon', JSON.stringify(d)); } catch (e) {} }
+  try {
+    var dbr = JSON.parse(localStorage.getItem('gde-brouillon') || 'null');
+    if (dbr) BR.forEach(function (i) { if (dbr[i]) $(i).value = dbr[i]; });
+    majAcompte();
+  } catch (e) {}
+  $('form-cmd').addEventListener('input', sauveBr);
+  $('form-cmd').addEventListener('change', sauveBr);
+  $('form-cmd').addEventListener('submit', function () {
+    try { localStorage.removeItem('gde-brouillon'); } catch (e) {}
+    if (navigator.onLine === false) toast('Hors ligne : ta demande est prête, envoie-la dès que le réseau revient');
+  });
+  window.addEventListener('error', function (e) {
+    var t = e.target;
+    if (t && t.tagName === 'IMG') { t.classList.add('img-off'); }
+  }, true);
+
+  /* Suivi : recherche d'une commande publiée */
+  function chercherCmd(raw) {
+    var v = String(raw || '').trim().toUpperCase();
+    if (!v) { toast('Entrez une référence'); return; }
+    $('s-ref').textContent = v;
+    var o = STATE.cmd[v];
+    if (o) {
+      curOrd = o;
+      $('s-tag').textContent = 'En direct';
+      rendreSuivi(o.cran);
+      $('s-note').textContent = 'Commande de ' + o.nom + (o.prod ? ' · ' + o.prod : '') + '. Touchez une photo pour la voir en grand.';
+      try { localStorage.setItem('gde-ref', v); } catch (e) {}
+    } else if (v === EXEMPLE) {
+      curOrd = null; $('s-tag').textContent = 'Exemple'; rendreSuivi(4);
+      $('s-note').textContent = 'Ceci est une commande d\'exemple. Pour l\'état d\'une vraie commande, entrez votre référence.';
+    } else {
+      curOrd = null; $('s-tag').textContent = 'Non reliée'; rendreSuivi(-1);
+      $('s-note').textContent = 'Cette référence n\'est pas encore reliée au suivi en ligne. Demandez son état sur WhatsApp, on vous répond avec la dernière preuve.';
+    }
+    $('s-wa').href = wa('Bonjour GOD DID EXPRESS, je voudrais l\'état de ma commande, référence : ' + v);
+    $('s-notif').href = wa('Bonjour GOD DID EXPRESS, prévenez-moi sur WhatsApp à chaque étape de ma commande ' + v + '.');
+  }
+  $('form-suivi').addEventListener('submit', function (e) { e.preventDefault(); chercherCmd($('s-code').value); });
+  $('s-etapes').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-zoom]'); if (!b) return;
+    ouvrir('<div class="sheet-tete"><div><div class="kicker">Preuve</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">' + h(b.getAttribute('data-t')) + '</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div><img class="big" src="' + ea(b.getAttribute('data-zoom')) + '" alt="Preuve en photo">');
+  });
+  $('s-notif').href = wa('Bonjour GOD DID EXPRESS, prévenez-moi sur WhatsApp à chaque étape de ma commande.');
+  try {
+    var dr = localStorage.getItem('gde-ref');
+    if (dr && STATE.cmd[dr]) { $('s-code').value = dr; chercherCmd(dr); }
+  } catch (e) {}
+
+  /* ---------------------------- Assistant ---------------------------- */
+  var CHAT = [], VOIX = false, SM = undefined;
+  var SAV = [
+    { k: ['acompte', 'avance', 'payer', 'paiement', 'payement', 'airtel', 'orange money', 'mpesa', 'm-pesa', 'africell', 'solde'], r: 'Tu verses 50 % à la commande pour lancer l\'achat, et le solde à la livraison. Paiement par Airtel Money, Orange Money, M-Pesa, Africell Money ou en espèces. Le devis détaillé t\'est envoyé avant tout paiement.', g: [['commander', 'Faire une demande']] },
+    { k: ['livraison', 'livrer', 'delai', 'combien de temps', 'commune', 'transport'], r: 'On livre dans toutes les communes de Kinshasa, avec une vidéo de remise du colis. Le délai exact figure sur ton devis, car il dépend du produit et du transport.', g: [['commander', 'Faire une demande']] },
+    { k: ['suivi', 'suivre', 'colis', 'reference', 'ou est', 'preuve', 'globe'], r: 'Chaque commande a une référence GDE. Dans l\'onglet Suivi, tu la tapes : le globe avance de la Chine à Kinshasa et tu vois la photo de preuve de chaque étape.', g: [['suivi', 'Suivre mon colis']] },
+    { k: ['gros', 'grossiste', 'revente', 'revendeur', 'lot', 'palier', 'quantite', 'carton', 'revendre'], r: 'Pour le gros, le prix baisse par paliers : 1 pièce, dès 5 pièces, dès 10 pièces. Ouvre un produit pour voir les prix et calculer ton total avec l\'acompte. Le Club VIP récompense les grossistes fidèles.', g: [['catalogue', 'Voir les prix'], ['parrainer', 'Club VIP']] },
+    { k: ['prix', 'cout', 'coute', 'combien', 'tarif', 'cher', 'remise', 'promo', 'reduction'], r: 'Chaque produit affiche son prix quand il est fixé, avec les prix de gros. Sinon, le prix t\'est envoyé sur WhatsApp avant tout paiement. Si tu as un code promo, tu le tapes dans la fiche du produit.', g: [['catalogue', 'Voir le catalogue']] },
+    { k: ['parrain', 'filleul', 'ami', 'invite'], r: 'Dans l\'onglet Membre, tu tapes ton prénom et tu reçois ton code de parrainage. Pour chaque ami qui commande avec ton code, tu gagnes 5 % de réduction sur ta prochaine commande.', g: [['parrainer', 'Mon code']] },
+    { k: ['fidelite', 'diamant', 'membre', 'vip', 'niveau', 'bronze', 'argent'], r: 'La carte fidélité te donne 2 $ à chaque achat. Le Club VIP a quatre niveaux : Bronze, Argent, Or et Diamant, avec de meilleurs prix et la priorité sur les arrivages.', g: [['parrainer', 'Voir mon niveau']] },
+    { k: ['live', 'direct', 'video'], r: 'Le live shopping te montre le produit réel avant d\'acheter. Tu poses tes questions et tu commandes pendant le live avec l\'acompte de 50 %.', g: [['live', 'Voir le programme']] },
+    { k: ['contact', 'whatsapp', 'numero', 'adresse', 'ou etes', 'localisation', 'lemba', 'telephone'], r: 'WhatsApp : +243 983 129 294. Nous sommes à Super Lemba, Kinshasa, repère : Bar ROYAL, en face de GRAND SHOP AIRTEL.', w: true },
+    { k: ['entreprise', 'pme', 'restaurant', 'hotel', 'ecole', 'clinique', 'chantier', 'bureau'], r: 'On approvisionne les entreprises : restaurants, hôtels, écoles, cliniques, boutiques, chantiers. Tu touches ton secteur et ton besoin, et tu reçois une offre sur WhatsApp.', g: [['catalogue', 'Demander une offre']] },
+    { k: ['bonjour', 'salut', 'bonsoir', 'hello', 'coucou'], r: 'Bonjour ! Dis-moi ce que tu cherches, ou demande-moi comment fonctionne l\'application.' },
+    { k: ['merci'], r: 'Avec plaisir ! Je reste là si tu as une autre question.' },
+    { k: ['comment', 'fonctionne', 'marche', 'explique', 'appli', 'application', 'aide', 'visite'], r: 'C\'est simple : tu choisis, on trouve, on importe, on te livre. Acompte de 50 %, preuve en photo à chaque étape. Touche « Visite guidée » et je t\'explique l\'application à voix haute.', t: true }
+  ];
+  function repLocale(q) {
+    var n = norm(q), best = null, bs = 0;
+    SAV.forEach(function (s) {
+      var sc = 0; s.k.forEach(function (k) { if (n.indexOf(norm(k)) >= 0) sc += k.length > 3 ? 2 : 1; });
+      if (sc > bs) { bs = sc; best = s; }
+    });
+    var prods = cherche(q).filter(function (x) { return x.sc >= 4; }).slice(0, 3).map(function (x) { return x.p.id; });
+    if (!best && !prods.length) return null;
+    var rep = { t: '', p: prods, g: [], w: false, tour: false };
+    if (best) { rep.t = best.r; rep.g = best.g || []; rep.w = !!best.w; rep.tour = !!best.t; }
+    if (prods.length) rep.t = (rep.t ? rep.t + ' ' : '') + 'Voici ce que j\'ai trouvé au catalogue :';
+    return rep;
+  }
+  async function repIA(q) {
+    try {
+      if (SM === undefined) SM = (window.claude && claude.use) ? await claude.use('sample') : null;
+      if (!SM) return null;
+      var cat = PRODUITS.slice(0, 80).map(function (p) { var m = prixMin(p); return p.t + (m !== null ? ' (dès ' + m + ' $)' : ''); }).join('; ');
+      var ins = 'Tu es l\'assistant de GOD DID EXPRESS, plateforme d\'importation et de sourcing basée à Kinshasa (RDC). Tutoie le client, réponds en français, en 3 phrases maximum, ton chaleureux et clair. Faits sûrs : acompte de 50 % puis solde à la livraison ; paiement Airtel Money, Orange Money, M-Pesa, Africell Money ou espèces ; devis détaillé avant tout paiement ; preuve en photo à chaque étape du suivi ; prix de gros par paliers (1, 5, 10 pièces) ; WhatsApp +243 983 129 294 ; Super Lemba, Kinshasa. N\'invente jamais un prix, un délai ou une promesse : si tu ne sais pas, invite à écrire sur WhatsApp. Produits au catalogue : ' + cat + '.\n\nQuestion du client : ' + q;
+      var r = await SM(ins, { modelTier: 'quick' });
+      return r && r.text ? String(r.text).trim().slice(0, 700) : null;
+    } catch (e) { return null; }
+  }
+  function parler(t, fin) {
+    try {
+      speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(t); u.lang = 'fr-FR';
+      u.onend = function () { if (fin) fin(); }; u.onerror = function () { if (fin) fin(); };
+      speechSynthesis.speak(u); return true;
+    } catch (e) { return false; }
+  }
+  function bulle(m) {
+    if (m.moi) return '<div class="bulle moi">' + h(m.t) + '</div>';
+    var s = '<div class="bulle ia"><span>' + h(m.t) + '</span>';
+    (m.p || []).forEach(function (id) {
+      var p = BY[id]; if (!p) return; var mn = prixMin(p);
+      s += '<button type="button" class="res-row" data-open="' + p.id + '"><img src="' + ea(pic(p)) + '" alt=""><span><b>' + p.t + '</b><span class="s">' + (mn !== null ? 'Dès ' + usd(mn) : 'Prix sur demande') + '</span></span><i aria-hidden="true">›</i></button>';
+    });
+    if (m.g && m.g.length || m.w || m.tour) {
+      s += '<div class="rangee">';
+      (m.g || []).forEach(function (g) { s += '<button type="button" class="btn mini" data-go="' + g[0] + '">' + g[1] + '</button>'; });
+      if (m.w) s += '<a class="btn mini" href="' + wa('Bonjour GOD DID EXPRESS') + '" target="_blank" rel="noopener">Écrire sur WhatsApp</a>';
+      if (m.tour) s += '<button type="button" class="btn mini" data-tour>Visite guidée</button>';
+      s += '</div>';
+    }
+    if (m.wq) s += '<div class="rangee"><a class="btn mini" href="' + wa('Bonjour GOD DID EXPRESS, ' + m.wq) + '" target="_blank" rel="noopener">Demander sur WhatsApp</a></div>';
+    return s + '</div>';
+  }
+  function rendreChat() {
+    var c = $('chat'); if (!c) return;
+    c.innerHTML = CHAT.map(bulle).join('');
+    c.scrollTop = c.scrollHeight;
+  }
+  async function poser(q) {
+    q = String(q || '').trim(); if (!q) return;
+    CHAT.push({ moi: true, t: q }); rendreChat();
+    var rep = repLocale(q);
+    if (!rep) {
+      CHAT.push({ t: 'Je réfléchis…' }); rendreChat();
+      var ia = await repIA(q);
+      CHAT.pop();
+      rep = ia ? { t: ia, p: cherche(q).filter(function (x) { return x.sc >= 4; }).slice(0, 2).map(function (x) { return x.p.id; }), w: true }
+               : { t: 'Je n\'ai pas la réponse exacte. Écris-nous sur WhatsApp : on te répond avec le prix et le délai.', wq: q };
+    }
+    CHAT.push(rep); rendreChat();
+    if (VOIX) parler(rep.t);
+  }
+  function ouvrirAssistant() {
+    if (!CHAT.length) CHAT.push({ t: 'Bonjour ! Je suis l\'assistant de GOD DID EXPRESS. Demande-moi un produit, un prix, comment payer, ou touche « Visite guidée » pour que je t\'explique l\'application à voix haute.' });
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    ouvrir('<div class="sheet-tete"><div><div class="kicker">Assistant</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Demande à GOD DID EXPRESS</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
+      '<div class="chat" id="chat" aria-live="polite"></div>' +
+      '<div class="chips" role="group" aria-label="Questions fréquentes"><button type="button" class="chip" data-ask="Comment payer ?">Comment payer ?</button><button type="button" class="chip" data-ask="Prix de gros">Prix de gros</button><button type="button" class="chip" data-ask="Où est mon colis ?">Où est mon colis ?</button><button type="button" class="chip" data-ask="Un laptop">Un laptop</button></div>' +
+      '<form id="chat-form" class="recherche" autocomplete="off"><input id="chat-q" placeholder="Pose ta question" aria-label="Ta question"><button class="btn" type="submit">Envoyer</button></form>' +
+      '<div class="rangee"><button type="button" class="btn ghost mini" data-tour>Visite guidée parlée</button>' + (SR ? '<button type="button" class="btn ghost mini" data-mic>Parler</button>' : '') + '<button type="button" class="btn ghost mini" data-voix aria-pressed="' + VOIX + '">Voix : ' + (VOIX ? 'oui' : 'non') + '</button></div>');
+    rendreChat();
+  }
+  $('sheet').addEventListener('submit', function (e) {
+    if (e.target.id === 'chat-form') { e.preventDefault(); var i = $('chat-q'); var q = i.value; i.value = ''; poser(q); }
+  });
+  $('sheet').addEventListener('input', function (e) { if (e.target.closest && e.target.closest('[data-calc]')) majCalc(); });
+  $('sheet').addEventListener('click', function (e) {
+    var op = e.target.closest('[data-open]'); if (op) { ouvrirProduit(op.getAttribute('data-open')); return; }
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.hasAttribute('data-ask')) poser(b.getAttribute('data-ask'));
+    else if (b.hasAttribute('data-voix')) { VOIX = !VOIX; b.setAttribute('aria-pressed', VOIX); b.textContent = 'Voix : ' + (VOIX ? 'oui' : 'non'); if (!VOIX) { try { speechSynthesis.cancel(); } catch (x) {} } }
+    else if (b.hasAttribute('data-mic')) {
+      var SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return;
+      try {
+        var r = new SR(); r.lang = 'fr-FR'; r.interimResults = false;
+        r.onresult = function (ev) { var t = ev.results[0][0].transcript; VOIX = true; poser(t); };
+        r.onerror = function () { toast('Micro indisponible'); };
+        r.start(); toast('Je t\'écoute');
+      } catch (x) { toast('Micro indisponible'); }
+    }
+  });
+  $('fab').addEventListener('click', ouvrirAssistant);
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-assist]')) { ouvrirAssistant(); return; }
+    if (e.target.closest('[data-tour]')) { fermer(); visite(); }
+  });
+
+  /* Visite guidée parlée */
+  var TOUR = [
+    ['accueil', 'Bienvenue sur GOD DID EXPRESS. Tu choisis, on trouve, on importe et on te livre. Sur l\'accueil, le globe montre ton colis qui voyage de la Chine jusqu\'à Kinshasa.'],
+    ['catalogue', 'Dans le catalogue, chaque produit affiche son prix. Touche une photo pour l\'agrandir, choisis ta quantité et vois ton total avec l\'acompte de cinquante pour cent. Pour le gros, le prix baisse dès cinq et dix pièces.'],
+    ['commander', 'Tu ne trouves pas ton produit ? Décris-le ici. Tu reçois un devis détaillé avant de payer quoi que ce soit.'],
+    ['suivi', 'Dans Suivi, tu tapes ta référence. Tu vois le globe avancer étape par étape, avec la photo de preuve à chaque étape.'],
+    ['parrainer', 'Dans Membre, tu as ta carte fidélité, ton code de parrainage, et le Club VIP des grossistes : Bronze, Argent, Or et Diamant.'],
+    ['accueil', 'Et si tu as une question, je suis là avec le bouton Assistant. Bonne visite !']
+  ];
+  var tourN = -1;
+  function visiteStop() { tourN = -1; $('tourbar').hidden = true; try { speechSynthesis.cancel(); } catch (e) {} }
+  function visiteEtape() {
+    if (tourN < 0) return;
+    if (tourN >= TOUR.length) { visiteStop(); return; }
+    var st = TOUR[tourN], k = tourN;
+    show(st[0], true);
+    $('tour-txt').textContent = 'Visite guidée ' + (k + 1) + '/' + TOUR.length;
+    function suite() { if (tourN === k) { tourN++; setTimeout(visiteEtape, 500); } }
+    if (!parler(st[1], suite)) { toast(st[1].slice(0, 90)); setTimeout(suite, 5500); }
+  }
+  function visite() { tourN = 0; $('tourbar').hidden = false; visiteEtape(); }
+  $('tour-stop').addEventListener('click', visiteStop);
+
+  /* ---------------------------- Espace admin ---------------------------- */
+  var admTab = 'prod', admQ = '', dirty = 0, admOpen = {};
+  function montants() { try { return JSON.parse(localStorage.getItem('gde-montants') || '{}') || {}; } catch (e) { return {}; } }
+  function setMontant(ref, v) { var m = montants(); if (v > 0) m[ref] = v; else delete m[ref]; try { localStorage.setItem('gde-montants', JSON.stringify(m)); } catch (e) {} }
+  function majPub() {
+    $('pub-txt').textContent = dirty ? dirty + ' modification' + (dirty > 1 ? 's' : '') + ' non publiée' + (dirty > 1 ? 's' : '') : 'Tout est publié';
+    $('pub-go').disabled = !dirty;
+  }
+  function brouillon() { try { localStorage.setItem('gde-draft', JSON.stringify({ rev: STATE.rev, s: STATE })); } catch (e) {} }
+  function rafraichir() {
+    PRODUITS = buildProduits(); BY = {}; PRODUITS.forEach(function (p) { BY[p.id] = p; });
+    Object.keys(liste).forEach(function (k) { if (!BY[k]) delete liste[k]; });
+    sauve(); rendreChips(); rendreGrille(); majBarre(); rendreOcc();
+    $('st-prod').textContent = PRODUITS.length;
+    $('tend-rail').innerHTML = PRODUITS.filter(function (p) { return p.l; }).map(function (p, i) { return mini(p, '0' + (i + 1)); }).join('');
+    rendreAvis(); rendreSlogan(); rendreReseaux(); rendreVip();
+  }
+  function touch(re) { dirty++; brouillon(); majPub(); rafraichir(); if (re) rendreAdmin(); }
+  function nbOk(v) { v = parseFloat(String(v).replace(',', '.')); return isFinite(v) && v > 0 ? Math.round(v * 100) / 100 : null; }
+  function reduire(file, max) {
+    return new Promise(function (res, rej) {
+      var fr = new FileReader(); fr.onerror = rej;
+      fr.onload = function () {
+        var im = new Image(); im.onerror = rej;
+        im.onload = function () {
+          var s = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement('canvas');
+          c.width = Math.round(im.width * s); c.height = Math.round(im.height * s);
+          c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+          c.toBlob(function (b) { b ? res(b) : rej(new Error('image')); }, 'image/jpeg', .82);
+        };
+        im.src = fr.result;
+      };
+      fr.readAsDataURL(file);
+    });
+  }
+  async function envoyerPhoto(file) {
+    var a = (window.claude && claude.use) ? await claude.use('assets') : null;
+    if (!a) throw new Error('téléversement indisponible');
+    var b = await reduire(file, 1280), r = await a.upload(b);
+    return r.url;
+  }
+  async function publier() {
+    var btn = $('pub-go'); btn.disabled = true; $('pub-txt').textContent = 'Publication en cours';
+    try {
+      var art = (window.claude && claude.use) ? await claude.use('artifact') : null;
+      if (!art) throw new Error('publication indisponible ici');
+      var r = await fetch('index.html', { cache: 'no-store' });
+      if (!r.ok) throw new Error('source introuvable');
+      var src = await r.text();
+      if (src.indexOf('id="gde-state"') < 0 || src.indexOf('</html>') < 0 || src.length < 60000 || (src.match(new RegExp('<' + 'html', 'gi')) || []).length !== 1 || !/^\s*<!doctype html>/i.test(src)) throw new Error('source inattendue, rien n\'a été publié');
+      var out = JSON.parse(JSON.stringify(STATE)); out.rev = (STATE.rev || 0) + 1;
+      var js = JSON.stringify(out).replace(/</g, '\\u003c');
+      src = src.replace(/(<script type="application\/json" id="gde-state">)[\s\S]*?(<\/script>)/, function (m, a, b) { return a + js + b; });
+      await art.publish(src);
+      try { localStorage.removeItem('gde-draft'); } catch (e) {}
+      dirty = 0; toast('Publié : les clients voient ta mise à jour');
+    } catch (err) {
+      toast(err && err.code === 'conflict' ? 'Une autre version vient d\'être publiée, recharge la page' : 'Publication impossible : ' + ((err && err.message) || 'erreur'));
+      btn.disabled = false; majPub();
+    }
+  }
+  function chargerBrouillon() {
+    try {
+      var d = JSON.parse(localStorage.getItem('gde-draft') || 'null');
+      if (d && d.s && d.rev === STATE.rev) { STATE = defState(d.s); dirty = 1; rafraichir(); majPub(); toast('Brouillon non publié retrouvé'); }
+    } catch (e) {}
+  }
+  function lienNotif(ref) {
+    var o = STATE.cmd[ref], tel = '';
+    try { tel = (localStorage.getItem('gde-tel-' + ref) || '').replace(/\D/g, ''); } catch (e) {}
+    var c = o.cran, m = 'Bonjour ' + o.nom + ', ';
+    if (c >= 7) m += 'ta commande ' + ref + ' est livrée. Merci pour ta confiance !';
+    else if (c <= 0) m += 'nous avons bien reçu ta demande ' + ref + '.';
+    else m += 'ta commande ' + ref + ' avance. Étape validée : ' + ETAPES[c - 1][0] + '. Prochaine étape : ' + ETAPES[c][0] + '.';
+    m += ' Tu vois la preuve en photo dans l\'application GOD DID EXPRESS, onglet Suivi, avec ta référence.' + (STATE.lien ? '\n' + STATE.lien : '');
+    return 'https://wa.me/' + tel + '?text=' + encodeURIComponent(m);
+  }
+
+  function admProd() {
+    var all = BASE.map(function (b) {
+      var o = STATE.prod[b.id] || {};
+      return Object.assign({}, b, { px: o.px || b.px, photo: o.photo, cache: !!o.cache, extra: false });
+    }).concat(STATE.extra.map(function (e) { return Object.assign({}, e, { extra: true, cache: !!e.cache }); }));
+    var q = norm(admQ).trim();
+    if (q) all = all.filter(function (p) { return norm(p.t + ' ' + p.s).indexOf(q) >= 0; });
+    var sans = all.filter(function (p) { return !p.cache && prixMin(p) === null; }).length;
+    var f = '<details class="carte" id="adm-new"><summary><b>+ Ajouter un produit</b></summary><form data-f="newprod" autocomplete="off" style="margin-top:12px">' +
+      '<div class="champ"><label for="n-t">Nom du produit</label><input id="n-t" required></div>' +
+      '<div class="champ"><label for="n-s">Description courte</label><input id="n-s"></div>' +
+      '<div class="champ"><label for="n-c">Catégorie</label><select id="n-c">' + Object.keys(CATL).map(function (k) { return '<option value="' + k + '">' + CATL[k] + '</option>'; }).join('') + '</select></div>' +
+      '<div class="px3"><div class="champ"><label for="n-p0">1 pièce ($)</label><input id="n-p0" type="number" min="0" step="0.01" inputmode="decimal"></div><div class="champ"><label for="n-p1">Dès 5 ($)</label><input id="n-p1" type="number" min="0" step="0.01" inputmode="decimal"></div><div class="champ"><label for="n-p2">Dès 10 ($)</label><input id="n-p2" type="number" min="0" step="0.01" inputmode="decimal"></div></div>' +
+      '<div class="champ"><label for="n-f">Photo</label><input id="n-f" type="file" accept="image/*"></div>' +
+      '<button class="btn" type="submit">Ajouter au catalogue</button></form></details>';
+    var auto = '<details class="carte"><summary><b>Remplir les prix de gros d\'un coup</b></summary><div style="display:grid;gap:12px;margin-top:12px"><p class="note">Pour tous les produits qui ont un prix à 1 pièce mais aucun prix de gros. Tu pourras ensuite corriger chaque produit.</p><div class="duo"><div class="champ"><label for="au-5">Remise dès 5 pièces (%)</label><input id="au-5" type="number" min="0" max="60" value="10"></div><div class="champ"><label for="au-10">Remise dès 10 pièces (%)</label><input id="au-10" type="number" min="0" max="70" value="20"></div></div><button type="button" class="btn ghost" data-a="autogros">Appliquer</button></div></details>';
+    var s = f + auto + '<div class="champ"><label for="adm-q">Chercher un produit</label><input id="adm-q" type="search" value="' + ea(admQ) + '" placeholder="Nom du produit" autocomplete="off"></div>' +
+      '<div class="compte">' + all.length + ' produits · ' + sans + ' sans prix</div><div id="adm-list">';
+    s += all.map(function (p) {
+      var px = pxList(p);
+      return '<div class="carte arow' + (p.cache ? ' off' : '') + '" data-pid="' + p.id + '"><img src="' + ea(pic(p)) + '" alt="">' +
+        '<div style="display:grid;gap:8px;min-width:0"><b>' + p.t + (p.cache ? ' (masqué)' : '') + '</b>' +
+        '<div class="px3">' + QP.map(function (qq, i) { return '<div class="champ"><label for="px-' + p.id + '-' + i + '">' + (i === 0 ? '1 pièce' : 'Dès ' + qq) + ' ($)</label><input id="px-' + p.id + '-' + i + '" type="number" min="0" step="0.01" inputmode="decimal" data-a="px" data-id="' + p.id + '" data-i="' + i + '" value="' + (okPx(px[i]) ? Number(px[i]) : '') + '"></div>'; }).join('') + '</div>' +
+        '<div class="rangee"><label class="btn ghost mini">Changer la photo<input type="file" accept="image/*" hidden data-a="photo" data-id="' + p.id + '"></label>' +
+        '<button type="button" class="btn ghost mini" data-a="hide" data-id="' + p.id + '">' + (p.cache ? 'Afficher' : 'Masquer') + '</button>' +
+        (p.extra ? '<button type="button" class="btn ghost mini" data-a="delprod" data-id="' + p.id + '">Supprimer</button>' : '') + '</div></div></div>';
+    }).join('') + '</div>';
+    $('adm-body').innerHTML = s;
+  }
+  function admCmd() {
+    var refs = Object.keys(STATE.cmd).sort().reverse();
+    var s = '<form class="carte" data-f="cmd" autocomplete="off"><h3>Nouvelle commande suivie</h3>' +
+      '<div class="duo"><div class="champ"><label for="a-ref">Référence</label><input id="a-ref" required placeholder="GDE-2610-0001" style="text-transform:uppercase"></div><div class="champ"><label for="a-nom">Prénom du client</label><input id="a-nom" required></div></div>' +
+      '<div class="champ"><label for="a-prod">Produit</label><input id="a-prod" placeholder="Ex. Laptops HP x5"></div>' +
+      '<div class="duo"><div class="champ"><label for="a-mt">Montant total ($, reste sur cet appareil)</label><input id="a-mt" type="number" min="0" step="0.01" inputmode="decimal"></div><div class="champ"><label for="a-club">Code membre du client</label><input id="a-club" placeholder="Ex. EXAUCE-4K2" style="text-transform:uppercase"></div></div>' +
+      '<div class="champ"><label for="a-tel">WhatsApp du client (reste sur cet appareil)</label><input id="a-tel" type="tel" inputmode="tel" placeholder="+243 …"></div>' +
+      '<div class="rangee"><button class="btn ghost" type="button" data-a="genref">Générer une référence</button><button class="btn" type="submit">Enregistrer</button></div></form>';
+    s += '<div class="compte">' + refs.length + ' commande' + (refs.length > 1 ? 's' : '') + ' suivie' + (refs.length > 1 ? 's' : '') + '</div>';
+    s += refs.map(function (ref) {
+      var o = STATE.cmd[ref], pr = o.pr || {};
+      return '<details class="carte" data-ref="' + ea(ref) + '"' + (admOpen[ref] ? ' open' : '') + '><summary><b>' + h(ref) + '</b> · ' + h(o.nom) + ' <span class="pastille">' + Math.min(7, o.cran) + '/7</span></summary>' +
+        '<div style="display:grid;gap:12px;margin-top:12px"><div class="champ"><label for="e-' + ea(ref) + '">Étape en cours</label><select id="e-' + ea(ref) + '" data-a="cran" data-ref="' + ea(ref) + '">' +
+        ETAPES.map(function (e, i) { return '<option value="' + i + '"' + (o.cran === i ? ' selected' : '') + '>' + (i + 1) + '. ' + e[0] + '</option>'; }).join('') + '<option value="7"' + (o.cran >= 7 ? ' selected' : '') + '>Terminé : livré</option></select></div>' +
+        '<div class="lbl">Photo de preuve par étape</div><div class="pgrid">' +
+        ETAPES.map(function (e, i) { return '<label class="btn ghost mini' + (pr[i] ? ' ok' : '') + '" title="' + ea(e[0]) + '">' + (pr[i] ? '✓ ' : '+ ') + (i + 1) + '<input type="file" accept="image/*" hidden data-a="stepphoto" data-ref="' + ea(ref) + '" data-i="' + i + '"></label>'; }).join('') + '</div>' +
+        '<p class="note">1 Demande · 2 Devis · 3 Acompte · 4 Achat · 5 Transit · 6 Arrivée · 7 Livraison</p>' +
+        '<div class="rangee"><a class="btn" data-a="notif" data-ref="' + ea(ref) + '" href="' + ea(lienNotif(ref)) + '" target="_blank" rel="noopener">Prévenir le client sur WhatsApp</a><button type="button" class="btn ghost" data-a="delcmd" data-ref="' + ea(ref) + '">Supprimer</button></div></div></details>';
+    }).join('');
+    $('adm-body').innerHTML = s;
+  }
+  function admAvis() {
+    var s = '<form class="carte" data-f="avis" autocomplete="off"><h3>Ajouter un avis client</h3><div class="champ"><label for="v-t">Ce que le client a dit</label><textarea id="v-t" required></textarea></div><div class="duo"><div class="champ"><label for="v-n">Nom affiché</label><input id="v-n" required placeholder="Ex. Client de Limete"></div><div class="champ"><label for="v-f">Photo (facultatif)</label><input id="v-f" type="file" accept="image/*"></div></div><p class="note">Publie un avis seulement avec l\'accord du client.</p><button class="btn" type="submit">Ajouter</button></form>';
+    s += STATE.avis.map(function (a, i) { return '<div class="carte"><q>' + h(a.txt) + '</q><div class="rangee" style="align-items:center"><span class="note">' + h(a.nom) + '</span><button type="button" class="btn ghost mini" data-a="delavis" data-i="' + i + '">Supprimer</button></div></div>'; }).join('');
+    $('adm-body').innerHTML = s;
+  }
+  function admReg() {
+    var s = '<div class="carte"><h3>Slogan de chaque mois</h3><p class="note">Laisse vide pour garder le slogan proposé. Le slogan du mois en cours s\'affiche sur l\'accueil.</p>' +
+      MOIS.map(function (m, i) { return '<div class="champ"><label for="sl-' + i + '">' + m + '</label><input id="sl-' + i + '" data-a="slog" data-m="' + (i + 1) + '" value="' + ea(STATE.slog[String(i + 1)] || '') + '" placeholder="' + ea(SLOG_DEF[i]) + '"></div>'; }).join('') + '</div>';
+    s += '<div class="carte"><h3>Réseaux sociaux</h3><p class="note">Colle le lien complet ou juste le nom du compte. Un réseau vide n\'apparaît pas.</p>' +
+      [['tiktok', 'TikTok'], ['instagram', 'Instagram'], ['facebook', 'Facebook']].map(function (r) { return '<div class="champ"><label for="so-' + r[0] + '">' + r[1] + '</label><input id="so-' + r[0] + '" data-a="soc" data-k="' + r[0] + '" value="' + ea(STATE.soc[r[0]] || '') + '" placeholder="@godidexpress"></div>'; }).join('') +
+      '<div class="champ"><label for="so-lien">Lien public de l\'application</label><input id="so-lien" data-a="lien" value="' + ea(STATE.lien || '') + '" placeholder="https://…"></div></div>';
+    s += '<div class="carte"><h3>Codes promo</h3><p class="note">Le client tape le code dans la fiche du produit ou dans la demande sur mesure.</p>' +
+      STATE.promo.map(function (p, i) { return '<div class="px3 prow"><div class="champ"><label for="pc-' + i + '">Code</label><input id="pc-' + i + '" data-a="pcode" data-i="' + i + '" value="' + ea(p.code) + '" style="text-transform:uppercase"></div><div class="champ"><label for="pp-' + i + '">Remise %</label><input id="pp-' + i + '" type="number" min="0" max="90" data-a="ppct" data-i="' + i + '" value="' + ea(p.pct) + '"></div><div class="champ"><label for="pa-' + i + '">Actif</label><select id="pa-' + i + '" data-a="pact" data-i="' + i + '"><option value="1"' + (p.actif !== false ? ' selected' : '') + '>Oui</option><option value="0"' + (p.actif === false ? ' selected' : '') + '>Non</option></select></div></div>'; }).join('') +
+      '<button type="button" class="btn ghost" data-a="addpromo">+ Ajouter un code</button></div>';
+    s += '<div class="carte"><h3>Seuils du Club VIP</h3><p class="note">Nombre de commandes livrées pour atteindre chaque niveau. Valeurs de départ à ajuster.</p><div class="px3">' +
+      ['Argent', 'Or', 'Diamant'].map(function (n, i) { return '<div class="champ"><label for="vp-' + i + '">' + n + ' (commandes)</label><input id="vp-' + i + '" type="number" min="1" data-a="vip" data-i="' + i + '" value="' + STATE.vip[i] + '"></div>'; }).join('') + '</div></div>';
+    $('adm-body').innerHTML = s;
+  }
+  function admStat() {
+    var refs = Object.keys(STATE.cmd), cm = refs.map(function (k) { return STATE.cmd[k]; });
+    var priced = PRODUITS.filter(function (p) { return prixMin(p) !== null; }).length;
+    var liv = cm.filter(function (o) { return o.cran >= 7; }).length;
+    var enc = 0, reste = 0;
+    var mt = montants();
+    refs.forEach(function (k) { var o = STATE.cmd[k], m = Number(mt[k]) || 0; if (o.cran >= 7) enc += m; else if (o.cran >= 3) { enc += m / 2; reste += m / 2; } });
+    var clubs = {}; cm.forEach(function (o) { if (o.club) clubs[String(o.club).toUpperCase()] = 1; });
+    var nv = [0, 0, 0, 0]; Object.keys(clubs).forEach(function (c) { var r = niveauPour(c); if (r.lv >= 0) nv[r.lv]++; });
+    var etapes = ETAPES.map(function (e, i) { return cm.filter(function (o) { return Math.min(6, o.cran) === i && o.cran < 7; }).length; });
+    var mx = Math.max(1, Math.max.apply(null, etapes));
+    var sans = PRODUITS.filter(function (p) { return prixMin(p) === null; }).slice(0, 6);
+    function t(l, v) { return '<div><small>' + l + '</small><strong>' + v + '</strong></div>'; }
+    var s = '<div class="carte"><h3>Vue d\'ensemble</h3><div class="acompte">' + t('Produits visibles', PRODUITS.length) + t('Avec un prix', priced + '/' + PRODUITS.length) + t('Commandes suivies', cm.length) + t('Livrées', liv) + '</div></div>';
+    s += '<div class="carte"><h3>Argent (estimation)</h3><div class="acompte">' + t('Déjà encaissé', usd(enc)) + t('Solde à encaisser', usd(reste)) + '</div><p class="note">Calculé à partir des montants saisis sur cet appareil : 50 % dès l\'acompte reçu, 100 % à la livraison. Ces montants ne sont jamais publiés.</p></div>';
+    s += '<div class="carte"><h3>Où en sont les colis</h3>' + ETAPES.map(function (e, i) { return '<div class="srow"><span>' + (i + 1) + '. ' + e[0] + '</span><div class="barre"><i style="width:' + Math.round(etapes[i] / mx * 100) + '%"></i></div><b>' + etapes[i] + '</b></div>'; }).join('') + '</div>';
+    s += '<div class="carte"><h3>Club VIP</h3><div class="acompte">' + t('Bronze', nv[0]) + t('Argent', nv[1]) + t('Or', nv[2]) + t('Diamant', nv[3]) + '</div></div>';
+    if (sans.length) s += '<div class="carte"><h3>Produits sans prix</h3><p class="note">' + sans.map(function (p) { return p.t; }).join(' · ') + '…</p><button type="button" class="btn ghost" data-a="gotoprod">Fixer les prix</button></div>';
+    $('adm-body').innerHTML = s;
+  }
+  function rendreAdmin() {
+    Array.prototype.forEach.call($('adm-tabs').children, function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-t') === admTab ? 'true' : 'false'); });
+    ({ prod: admProd, cmd: admCmd, avis: admAvis, reg: admReg, stat: admStat })[admTab]();
+    majPub();
+  }
+  $('adm-tabs').addEventListener('click', function (e) { var b = e.target.closest('[data-t]'); if (!b) return; admTab = b.getAttribute('data-t'); rendreAdmin(); });
+  $('pub-go').addEventListener('click', publier);
+  $('adm-body').addEventListener('input', function (e) {
+    if (e.target.id === 'adm-q') {
+      admQ = e.target.value; var pos = e.target.selectionStart; admProd();
+      var q = $('adm-q'); q.focus(); try { q.setSelectionRange(pos, pos); } catch (x) {}
+    }
+  });
+  $('adm-body').addEventListener('toggle', function (e) { var d = e.target; if (d.tagName === 'DETAILS' && d.getAttribute('data-ref')) admOpen[d.getAttribute('data-ref')] = d.open; }, true);
+  function prodEdit(id) {
+    var ex = STATE.extra.filter(function (x) { return x.id === id; })[0];
+    if (ex) return ex;
+    if (!STATE.prod[id]) STATE.prod[id] = {};
+    return STATE.prod[id];
+  }
+  $('adm-body').addEventListener('change', async function (e) {
+    var t = e.target, a = t.getAttribute && t.getAttribute('data-a'); if (!a) return;
+    var id = t.getAttribute('data-id'), i = parseInt(t.getAttribute('data-i'), 10), ref = t.getAttribute('data-ref');
+    try {
+      if (a === 'px') {
+        var o = prodEdit(id), cur = (o.px || (BY[id] && BY[id].px) || [null, null, null]).slice(0, 3);
+        while (cur.length < 3) cur.push(null);
+        cur[i] = nbOk(t.value); o.px = cur; touch(false);
+      } else if (a === 'photo') {
+        if (!t.files[0]) return; toast('Envoi de la photo…');
+        var url = await envoyerPhoto(t.files[0]); prodEdit(id).photo = url; touch(true);
+      } else if (a === 'stepphoto') {
+        if (!t.files[0]) return; toast('Envoi de la photo…');
+        var u2 = await envoyerPhoto(t.files[0]), c = STATE.cmd[ref]; c.pr = c.pr || {}; c.pr[i] = u2; c.maj = new Date().toISOString().slice(0, 10); touch(true);
+      } else if (a === 'cran') { var cc = STATE.cmd[ref]; cc.cran = parseInt(t.value, 10); cc.maj = new Date().toISOString().slice(0, 10); touch(true); }
+      else if (a === 'slog') { var m = t.getAttribute('data-m'), v = clean(t.value); if (v) STATE.slog[m] = v; else delete STATE.slog[m]; touch(false); }
+      else if (a === 'soc') { STATE.soc[t.getAttribute('data-k')] = t.value.trim(); touch(false); }
+      else if (a === 'lien') { STATE.lien = /^https:\/\//i.test(t.value.trim()) ? t.value.trim() : ''; touch(false); }
+      else if (a === 'pcode') { STATE.promo[i].code = clean(t.value).toUpperCase(); touch(false); }
+      else if (a === 'ppct') { STATE.promo[i].pct = Math.max(0, Math.min(90, parseFloat(t.value) || 0)); touch(false); }
+      else if (a === 'pact') { STATE.promo[i].actif = t.value === '1'; touch(false); }
+      else if (a === 'vip') { var vv = parseFloat(t.value); if (vv > 0) { STATE.vip[i] = vv; touch(false); } }
+    } catch (err) { toast('Impossible : ' + ((err && err.message) || 'erreur')); }
+  });
+  $('adm-body').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-a]'); if (!b || b.tagName === 'INPUT' || b.tagName === 'SELECT') return;
+    var a = b.getAttribute('data-a'), id = b.getAttribute('data-id'), ref = b.getAttribute('data-ref');
+    if (a === 'hide') { var o = prodEdit(id); o.cache = !o.cache; touch(true); }
+    else if (a === 'delprod') { STATE.extra = STATE.extra.filter(function (x) { return x.id !== id; }); touch(true); }
+    else if (a === 'genref') { var d = new Date(); $('a-ref').value = 'GDE-' + String(d.getFullYear()).slice(2) + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(Math.floor(1000 + Math.random() * 9000)); }
+    else if (a === 'delcmd') { delete STATE.cmd[ref]; setMontant(ref, 0); touch(true); }
+    else if (a === 'delavis') { STATE.avis.splice(parseInt(b.getAttribute('data-i'), 10), 1); touch(true); }
+    else if (a === 'addpromo') { STATE.promo.push({ code: '', pct: 10, actif: true }); touch(true); }
+    else if (a === 'gotoprod') { admTab = 'prod'; rendreAdmin(); }
+    else if (a === 'autogros') {
+      var r5 = Math.max(0, Math.min(60, parseFloat($('au-5').value) || 0)), r10 = Math.max(0, Math.min(70, parseFloat($('au-10').value) || 0)), nb = 0;
+      PRODUITS.forEach(function (p) {
+        var px = pxList(p);
+        if (okPx(px[0]) && !okPx(px[1]) && !okPx(px[2])) {
+          var o = prodEdit(p.id), u = Number(px[0]);
+          o.px = [u, Math.round(u * (1 - r5 / 100) * 100) / 100, Math.round(u * (1 - r10 / 100) * 100) / 100]; nb++;
+        }
+      });
+      touch(true); toast(nb + ' produit' + (nb > 1 ? 's' : '') + ' mis à jour');
+    }
+    else if (a === 'notif') { /* le lien WhatsApp s'ouvre tout seul */ }
+  });
+  $('adm-body').addEventListener('submit', async function (e) {
+    var f = e.target.getAttribute('data-f'); if (!f) return; e.preventDefault();
+    try {
+      if (f === 'newprod') {
+        var t = clean($('n-t').value); if (!t) return;
+        var p = { id: 'x' + Date.now().toString(36), t: t, s: clean($('n-s').value) || 'Produit sur commande', c: $('n-c').value, l: 0, px: [nbOk($('n-p0').value), nbOk($('n-p1').value), nbOk($('n-p2').value)] };
+        var fl = $('n-f').files[0]; if (fl) { toast('Envoi de la photo…'); p.photo = await envoyerPhoto(fl); }
+        STATE.extra.push(p); touch(true); toast('Produit ajouté');
+      } else if (f === 'cmd') {
+        var ref = clean($('a-ref').value).toUpperCase(); if (!ref) return;
+        var old = STATE.cmd[ref] || {};
+        setMontant(ref, nbOk($('a-mt').value) || 0);
+        STATE.cmd[ref] = { nom: clean($('a-nom').value), prod: clean($('a-prod').value), club: clean($('a-club').value).toUpperCase(), cran: old.cran != null ? old.cran : 1, pr: old.pr || {}, maj: new Date().toISOString().slice(0, 10) };
+        try { var tl = $('a-tel').value.trim(); if (tl) localStorage.setItem('gde-tel-' + ref, tl); } catch (x) {}
+        admOpen[ref] = true; touch(true); toast('Commande enregistrée');
+      } else if (f === 'avis') {
+        var av = { txt: clean($('v-t').value), nom: clean($('v-n').value) };
+        var fa = $('v-f').files[0]; if (fa) { toast('Envoi de la photo…'); av.photo = await envoyerPhoto(fa); }
+        if (av.txt && av.nom) { STATE.avis.push(av); touch(true); toast('Avis ajouté'); }
+      }
+    } catch (err) { toast('Impossible : ' + ((err && err.message) || 'erreur')); }
+  });
+
+  /* Qui est admin ? Seul le propriétaire de la page voit l'espace admin. */
+  (async function () {
+    try {
+      if (!(window.claude && claude.use)) return;
+      var u = await claude.use('user');
+      if (u && (u.isOwner() || u.canEdit())) {
+        IS_ADMIN = true; chargerBrouillon();
+        if (location.hash.slice(1) === 'admin') show('admin', false);
+      }
+    } catch (e) {}
+  })();
+
+  /* Premier affichage */
+  rendreSlogan(); rendreReseaux(); rendreVip(); rendreAvis(); majPub();
+
+  show(location.hash.slice(1), false);
+})();
+</script>
+
+</body></html>
