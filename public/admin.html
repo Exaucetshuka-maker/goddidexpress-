@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="GDE Admin">
+<meta name="theme-color" content="#0E0D0C">
+<link rel="apple-touch-icon" href="/icon-admin.png">
+<link rel="icon" href="/icon-admin.png">
+<title>GDE Admin</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=IBM+Plex+Mono:wght@500;600&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+:root { --noir:#0E0D0C; --carbone:#181614; --ligne:#2C2824; --orange:#FF6A13; --papier:#F4EFE9; --brume:#A89F95; --ok:#4CC38A; --mal:#FF5B5B; --sur:#140A03; color-scheme: dark; }
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--noir); color: var(--papier); font: 15px/1.45 'Instrument Sans', system-ui, -apple-system, sans-serif; padding: env(safe-area-inset-top) 0 calc(96px + env(safe-area-inset-bottom)); }
+h1, h2, h3 { margin: 0; font-family: 'Big Shoulders Display', 'Arial Narrow', Impact, sans-serif; text-transform: uppercase; letter-spacing: .02em; }
+h1 { font-size: 26px; } h2 { font-size: 22px; } h3 { font-size: 17px; }
+.wrap { max-width: 720px; margin: 0 auto; padding: 0 16px; }
+.mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+.kicker { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--brume); }
+button, input, select, textarea { font: inherit; color: inherit; }
+input, select, textarea { width: 100%; min-height: 44px; padding: 10px 12px; background: var(--noir); border: 1px solid var(--ligne); border-radius: 8px; }
+textarea { min-height: 120px; resize: vertical; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--orange); outline-offset: 1px; }
+label { display: block; font-size: 12.5px; color: var(--brume); margin-bottom: 4px; }
+.btn { min-height: 44px; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--orange); background: var(--orange); color: var(--sur); font-weight: 600; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--papier); border-color: var(--ligne); }
+.btn.mini { min-height: 36px; padding: 6px 12px; font-size: 13.5px; }
+.btn.danger { border-color: var(--mal); color: var(--mal); background: transparent; }
+.btn:disabled { opacity: .45; cursor: default; }
+.carte { background: var(--carbone); border: 1px solid var(--ligne); border-radius: 10px; padding: 14px; display: grid; gap: 12px; }
+.grille { display: grid; gap: 10px; }
+.g2 { grid-template-columns: 1fr 1fr; } .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.haut { position: sticky; top: 0; z-index: 20; background: rgba(14,13,12,.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--ligne); padding: calc(10px + env(safe-area-inset-top)) 0 10px; margin-top: calc(-1 * env(safe-area-inset-top)); }
+.haut .wrap { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.onglets { display: flex; gap: 8px; padding: 12px 0; flex-wrap: wrap; }
+.onglets button { flex: 1; min-width: 96px; }
+.onglets button[aria-selected="true"] { background: var(--orange); color: var(--sur); border-color: var(--orange); }
+.ligne { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: start; }
+.ligne img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; background: var(--ligne); display: block; }
+.ligne.off { opacity: .5; }
+.pied { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: rgba(24,22,20,.96); border-top: 1px solid var(--orange); padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); }
+.pied .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.msg { font-size: 14px; } .msg.ok { color: var(--ok); } .msg.mal { color: var(--mal); }
+.cache { display: none !important; }
+.note { font-size: 13px; color: var(--brume); margin: 0; }
+.rang { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.compteur { display: flex; align-items: center; gap: 8px; }
+.compteur input { text-align: center; width: 72px; }
+.compteur .btn { min-width: 44px; padding: 0; }
+.ecran { min-height: 100vh; display: grid; align-content: center; gap: 14px; padding: 24px 16px; max-width: 420px; margin: 0 auto; }
+details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display: flex; align-items: center; }
+.pastille { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 12px; border: 1px solid var(--ligne); color: var(--brume); }
+.pastille.on { border-color: var(--ok); color: var(--ok); }
+@media (max-width: 380px) { .g2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- Connexion / choix du mot de passe -->
+<main class="ecran cache" id="ecran">
+  <div><div class="kicker">GOD DID EXPRESS</div><h1>Espace admin</h1></div>
+  <p class="note" id="ecran-note"></p>
+  <form id="f-login" class="carte" autocomplete="on">
+    <input type="text" name="username" value="admin" autocomplete="username" class="cache" tabindex="-1" aria-hidden="true">
+    <div><label for="mdp">Mot de passe</label><input id="mdp" name="password" type="password" autocomplete="current-password" required></div>
+    <div id="bloc-conf" class="cache"><label for="mdp2">Répète le mot de passe</label><input id="mdp2" type="password" autocomplete="new-password"></div>
+    <button class="btn" id="b-login" type="submit">Entrer</button>
+    <p class="msg mal" id="login-msg" role="alert"></p>
+  </form>
+  <a class="note" href="/">← Retour au site</a>
+</main>
+
+<!-- Application admin -->
+<div id="app" class="cache">
+  <div class="haut"><div class="wrap">
+    <div><div class="kicker">GOD DID EXPRESS</div><h1>Admin</h1></div>
+    <div class="rang"><a class="btn ghost mini" href="/" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Voir le site</a><button class="btn ghost mini" id="b-quit" type="button">Quitter</button></div>
+  </div></div>
+
+  <div class="wrap">
+    <div class="onglets" role="tablist">
+      <button class="btn ghost" role="tab" data-t="prod" aria-selected="true">Produits</button>
+      <button class="btn ghost" role="tab" data-t="grp" aria-selected="false">Achats groupés</button>
+      <button class="btn ghost" role="tab" data-t="reg" aria-selected="false">Réglages</button>
+    </div>
+
+    <section id="t-prod" class="grille" style="gap:12px">
+      <details class="carte" id="ajout">
+        <summary>+ Ajouter un produit</summary>
+        <div class="grille" style="margin-top:10px">
+          <div><label for="n-t">Nom du produit</label><input id="n-t" maxlength="120"></div>
+          <div><label for="n-s">Description courte</label><input id="n-s" maxlength="240"></div>
+          <div><label for="n-c">Catégorie</label><select id="n-c"></select></div>
+          <div class="grille g3">
+            <div><label for="n-p1">Prix 1 pièce ($)</label><input id="n-p1" inputmode="decimal"></div>
+            <div><label for="n-p5">Dès 5 pièces</label><input id="n-p5" inputmode="decimal"></div>
+            <div><label for="n-p10">Dès 10 pièces</label><input id="n-p10" inputmode="decimal"></div>
+          </div>
+          <div><label for="n-f">Photo</label><input id="n-f" type="file" accept="image/*"></div>
+          <button class="btn" id="n-ok" type="button">Ajouter ce produit</button>
+        </div>
+      </details>
+      <div class="grille g2">
+        <div><label for="q">Chercher</label><input id="q" type="search" placeholder="Nom du produit"></div>
+        <div><label for="qc">Catégorie</label><select id="qc"></select></div>
+      </div>
+      <p class="note" id="prod-info"></p>
+      <div id="liste" class="grille"></div>
+    </section>
+
+    <section id="t-grp" class="grille cache" style="gap:12px">
+      <p class="note">Jusqu'à 10 achats groupés en même temps. Le site affiche le compte à rebours tout seul. Les « inscrits » sont les vrais clients : monte le chiffre avec le bouton + à chaque nouvelle personne qui rejoint par WhatsApp.</p>
+      <div id="groupes" class="grille"></div>
+    </section>
+
+    <section id="t-reg" class="grille cache" style="gap:12px">
+      <div class="carte">
+        <h3>Contact</h3>
+        <p class="note">Ces deux champs s'affichent en bas de chaque page dès qu'ils sont remplis.</p>
+        <div><label for="r-tel2">Deuxième numéro</label><input id="r-tel2" inputmode="tel" placeholder="+243 …"></div>
+        <div><label for="r-adr2">Deuxième adresse</label><input id="r-adr2" placeholder="Rue, commune, repère"></div>
+      </div>
+      <div class="carte">
+        <h3>Communauté WhatsApp</h3>
+        <div><label for="r-wag">Lien du groupe</label><input id="r-wag" inputmode="url" placeholder="https://chat.whatsapp.com/…"></div>
+        <div><label for="r-wac">Lien de la chaîne</label><input id="r-wac" inputmode="url" placeholder="https://whatsapp.com/channel/…"></div>
+      </div>
+      <div class="carte">
+        <h3>Réseaux sociaux</h3>
+        <p class="note">Colle le lien complet ou seulement le nom du compte. Une icône sans compte reste grisée sur le site.</p>
+        <div><label for="r-tiktok">TikTok</label><input id="r-tiktok" placeholder="@godidexpress"></div>
+        <div><label for="r-instagram">Instagram</label><input id="r-instagram" placeholder="godidexpress"></div>
+        <div><label for="r-facebook">Facebook</label><input id="r-facebook" placeholder="godidexpress"></div>
+        <div><label for="r-lien">Adresse publique du site</label><input id="r-lien" inputmode="url" placeholder="https://…"></div>
+      </div>
+      <div class="carte">
+        <h3>Phrases du globe</h3>
+        <p class="note">Une phrase par ligne. Elles apparaissent à tour de rôle sur le globe de l'accueil. Laisse vide pour garder les phrases d'origine.</p>
+        <textarea id="r-phr" maxlength="1600"></textarea>
+      </div>
+      <div class="carte">
+        <h3>Slogan de chaque mois</h3>
+        <div id="r-slog" class="grille"></div>
+      </div>
+      <div class="carte">
+        <h3>Codes promo</h3>
+        <div id="r-promo" class="grille"></div>
+        <button class="btn ghost" id="r-addpromo" type="button">+ Ajouter un code</button>
+      </div>
+      <div class="carte">
+        <h3>Changer mon mot de passe</h3>
+        <div><label for="m-a">Mot de passe actuel</label><input id="m-a" type="password" autocomplete="current-password"></div>
+        <div><label for="m-n">Nouveau mot de passe (8 caractères minimum)</label><input id="m-n" type="password" autocomplete="new-password"></div>
+        <button class="btn ghost" id="m-ok" type="button">Changer le mot de passe</button>
+        <p class="msg" id="m-msg" role="status"></p>
+      </div>
+    </section>
+  </div>
+
+  <div class="pied"><div class="wrap">
+    <span class="msg" id="etat" role="status">Rien à enregistrer</span>
+    <button class="btn" id="b-save" type="button" disabled>Enregistrer et publier</button>
+  </div></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var CATL = { vet: 'Vêtements', cha: 'Chaussures', mod: 'Accessoires mode', mon: 'Montres et bijoux', sac: 'Sacs et bagages', tec: 'Gadgets tech', ele: 'Électronique', mai: 'Maison et déco', cui: 'Cuisine', bea: 'Beauté', enf: 'Enfants', spo: 'Sport et fitness', aut: 'Auto et moto', cad: 'Idées cadeaux', pro: 'Entreprises', cmd: 'Sur commande' };
+  var MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+  var WAG0 = 'https://chat.whatsapp.com/HqYKKnNnbhE7iIG0j2UYuB?s=cl&p=i&mlu=4&ilr=4&iam=2';
+  var WAC0 = 'https://whatsapp.com/channel/0029VbBNd5S1Xqubidwc9Y3E';
+  var TOK = ''; try { TOK = localStorage.getItem('gde-admin-token') || ''; } catch (e) {}
+  var STATE = null, PRODS = [], dirty = false, modeSetup = false;
+
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function setTok(t) { TOK = t || ''; try { if (t) localStorage.setItem('gde-admin-token', t); else localStorage.removeItem('gde-admin-token'); } catch (e) {} }
+
+  function api(path, opt) {
+    opt = opt || {}; opt.headers = Object.assign({}, opt.headers || {});
+    if (TOK) opt.headers.authorization = 'Bearer ' + TOK;
+    return fetch(path, opt).then(function (r) {
+      return r.text().then(function (t) { var j = {}; try { j = JSON.parse(t); } catch (e) {} return { ok: r.ok, status: r.status, j: j }; });
+    });
+  }
+
+  function defState(s) {
+    s = s || {};
+    s.rev = s.rev || 0; s.prod = s.prod || {}; s.extra = s.extra || []; s.slog = s.slog || {};
+    s.soc = Object.assign({ tiktok: '', instagram: '', facebook: '' }, s.soc || {});
+    s.promo = s.promo || []; s.avis = s.avis || []; s.vip = (s.vip && s.vip.length === 3) ? s.vip : [3, 6, 10]; s.lien = s.lien || '';
+    s.wag = s.wag || WAG0; s.wac = s.wac || WAC0; s.tel2 = s.tel2 || ''; s.adr2 = s.adr2 || ''; s.phr = s.phr || [];
+    s.grp = (s.grp || []).slice(0, 10);
+    while (s.grp.length < 10) s.grp.push({ id: 'g' + (s.grp.length + 1), on: false, nom: '', pid: '', durj: 3, fin: 0, n: 0, max: 0, p: [[1, 0], [5, 0], [10, 0]] });
+    s.grp.forEach(function (g) { while (g.p.length < 3) g.p.push([[1, 5, 10][g.p.length], 0]); });
+    return s;
+  }
+
+  /* ---------- Écrans ---------- */
+  function montrerEcran(note, setup) {
+    modeSetup = setup;
+    $('app').classList.add('cache'); $('ecran').classList.remove('cache');
+    $('ecran-note').textContent = note;
+    $('bloc-conf').classList.toggle('cache', !setup);
+    $('mdp').autocomplete = setup ? 'new-password' : 'current-password';
+    $('b-login').textContent = setup ? 'Choisir ce mot de passe' : 'Entrer';
+    $('login-msg').textContent = '';
+    setTimeout(function () { $('mdp').focus(); }, 50);
+  }
+
+  function marquer(v) {
+    dirty = v;
+    $('b-save').disabled = !v;
+    $('etat').className = 'msg';
+    $('etat').textContent = v ? 'Modifications non enregistrées' : 'Rien à enregistrer';
+  }
+
+  function demarrer() {
+    return Promise.all([api('/api/state'), fetch('/products.json').then(function (r) { return r.json(); })]).then(function (rs) {
+      STATE = defState(rs[0].j); PRODS = rs[1];
+      $('ecran').classList.add('cache'); $('app').classList.remove('cache');
+      remplirSelects(); rendreProduits(); rendreGroupes(); rendreReglages(); marquer(false);
+    });
+  }
+
+  function boot() {
+    api('/api/statut').then(function (r) {
+      if (!r.j.pret) return montrerEcran('Première visite. Choisis ton mot de passe : toi seul le connais. Garde-le bien, ne le partage avec personne.', true);
+      if (!TOK) return montrerEcran('Entre ton mot de passe.', false);
+      api('/api/moi').then(function (m) { if (m.ok) demarrer(); else { setTok(''); montrerEcran('Entre ton mot de passe.', false); } });
+    }).catch(function () { montrerEcran('Pas de connexion. Réessaie dans un instant.', false); });
+  }
+
+  $('f-login').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var mdp = $('mdp').value, msg = $('login-msg'); msg.textContent = '';
+    if (modeSetup) {
+      if (mdp.length < 8) { msg.textContent = 'Au moins 8 caractères.'; return; }
+      if (mdp !== $('mdp2').value) { msg.textContent = 'Les deux mots de passe sont différents.'; return; }
+    }
+    $('b-login').disabled = true;
+    api(modeSetup ? '/api/setup' : '/api/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ password: mdp }) }).then(function (r) {
+      $('b-login').disabled = false;
+      if (!r.ok) { msg.textContent = (r.j && r.j.erreur) || 'Impossible pour le moment.'; return; }
+      setTok(r.j.token); $('mdp').value = ''; $('mdp2').value = ''; demarrer();
+    }).catch(function () { $('b-login').disabled = false; msg.textContent = 'Pas de connexion.'; });
+  });
+
+  $('b-quit').addEventListener('click', function () { if (dirty && !confirm('Des modifications ne sont pas enregistrées. Quitter quand même ?')) return; setTok(''); location.reload(); });
+  window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+  /* ---------- Onglets ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll('.onglets button'), function (b) {
+    b.addEventListener('click', function () {
+      Array.prototype.forEach.call(document.querySelectorAll('.onglets button'), function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+      ['prod', 'grp', 'reg'].forEach(function (t) { $('t-' + t).classList.toggle('cache', t !== b.getAttribute('data-t')); });
+      window.scrollTo(0, 0);
+    });
+  });
+
+  /* ---------- Produits ---------- */
+  function remplirSelects() {
+    var opts = Object.keys(CATL).map(function (k) { return '<option value="' + k + '">' + esc(CATL[k]) + '</option>'; }).join('');
+    $('n-c').innerHTML = opts;
+    $('qc').innerHTML = '<option value="">Toutes</option>' + opts;
+  }
+  function tous() {
+    var base = PRODS.map(function (p) {
+      var o = STATE.prod[p.id] || {};
+      return { id: p.id, t: p.t, s: p.s, c: p.c, px: o.px || [null, null, null], photo: o.photo || ('img/' + p.id + '.jpg'), cache: !!o.cache, extra: false };
+    });
+    var ex = STATE.extra.map(function (e) { return { id: e.id, t: e.t, s: e.s, c: e.c, px: e.px || [null, null, null], photo: e.photo || '', cache: !!e.cache, extra: true }; });
+    return ex.concat(base);
+  }
+  function rendreProduits() {
+    var q = $('q').value.trim().toLowerCase(), qc = $('qc').value;
+    var L = tous().filter(function (p) { return (!q || (p.t + ' ' + p.s).toLowerCase().indexOf(q) >= 0) && (!qc || p.c === qc); });
+    var sans = tous().filter(function (p) { return !p.cache && !(p.px || []).some(function (v) { return v > 0; }); }).length;
+    $('prod-info').textContent = L.length + ' produit' + (L.length > 1 ? 's' : '') + ' affiché' + (L.length > 1 ? 's' : '') + ' · ' + sans + ' sans prix';
+    $('liste').innerHTML = L.map(function (p) {
+      var v = function (i) { return p.px[i] > 0 ? p.px[i] : ''; };
+      return '<div class="carte ligne' + (p.cache ? ' off' : '') + '" data-id="' + esc(p.id) + '">' +
+        '<img src="' + esc(p.photo) + '" alt="" loading="lazy">' +
+        '<div class="grille" style="gap:8px;min-width:0"><div><strong>' + esc(p.t) + '</strong><div class="note">' + esc(CATL[p.c] || '') + (p.extra ? ' · ajouté par toi' : '') + '</div></div>' +
+        '<div class="grille g3"><div><label>1 pièce $</label><input data-k="px" data-i="0" inputmode="decimal" value="' + esc(v(0)) + '"></div>' +
+        '<div><label>Dès 5</label><input data-k="px" data-i="1" inputmode="decimal" value="' + esc(v(1)) + '"></div>' +
+        '<div><label>Dès 10</label><input data-k="px" data-i="2" inputmode="decimal" value="' + esc(v(2)) + '"></div></div>' +
+        '<div class="rang"><button class="btn ghost mini" data-a="photo" type="button">Changer la photo</button>' +
+        '<button class="btn ghost mini" data-a="cache" type="button">' + (p.cache ? 'Remettre en ligne' : 'Masquer') + '</button>' +
+        (p.extra ? '<button class="btn danger mini" data-a="suppr" type="button">Supprimer</button>' : '') +
+        '<input type="file" accept="image/*" class="cache" data-k="file"></div></div></div>';
+    }).join('') || '<p class="note">Aucun produit trouvé.</p>';
+  }
+  $('q').addEventListener('input', rendreProduits);
+  $('qc').addEventListener('change', rendreProduits);
+
+  function nb(v) { v = parseFloat(String(v).replace(',', '.')); return isFinite(v) && v > 0 ? Math.round(v * 100) / 100 : null; }
+  function refProd(id) {
+    var e = STATE.extra.filter(function (x) { return x.id === id; })[0];
+    if (e) return e;
+    return STATE.prod[id] || (STATE.prod[id] = {});
+  }
+
+  $('liste').addEventListener('input', function (e) {
+    var t = e.target, row = t.closest('[data-id]'); if (!row || t.getAttribute('data-k') !== 'px') return;
+    var o = refProd(row.getAttribute('data-id'));
+    o.px = o.px || [null, null, null]; o.px[Number(t.getAttribute('data-i'))] = nb(t.value);
+    marquer(true);
+  });
+
+  /* Réduit une photo (1000 px max, JPEG) avant l'envoi */
+  function reduire(file) {
+    return new Promise(function (res, rej) {
+      var url = URL.createObjectURL(file), im = new Image();
+      im.onload = function () {
+        var k = Math.min(1, 1000 / Math.max(im.width, im.height)), c = document.createElement('canvas');
+        c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(im, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        c.toBlob(function (b) { b ? res(b) : rej(new Error('Photo illisible')); }, 'image/jpeg', 0.82);
+      };
+      im.onerror = function () { URL.revokeObjectURL(url); rej(new Error('Photo illisible')); };
+      im.src = url;
+    });
+  }
+  function envoyerPhoto(id, file) {
+    return reduire(file).then(function (blob) {
+      return api('/api/img/' + encodeURIComponent(id), { method: 'PUT', headers: { 'content-type': 'image/jpeg' }, body: blob });
+    }).then(function (r) {
+      if (!r.ok) throw new Error((r.j && r.j.erreur) || 'Envoi impossible');
+      return '/api/img/' + id + '?v=' + Date.now();
+    });
+  }
+  function infoEtat(t, cls) { $('etat').textContent = t; $('etat').className = 'msg ' + (cls || ''); }
+
+  $('liste').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-a]'); if (!b) return;
+    var row = b.closest('[data-id]'), id = row.getAttribute('data-id'), a = b.getAttribute('data-a');
+    if (a === 'photo') { row.querySelector('input[data-k="file"]').click(); }
+    else if (a === 'cache') { var o = refProd(id); o.cache = !o.cache; if (!o.cache) delete o.cache; marquer(true); rendreProduits(); }
+    else if (a === 'suppr') { if (confirm('Supprimer ce produit pour de bon ?')) { STATE.extra = STATE.extra.filter(function (x) { return x.id !== id; }); marquer(true); rendreProduits(); } }
+  });
+  $('liste').addEventListener('change', function (e) {
+    var t = e.target; if (t.getAttribute('data-k') !== 'file' || !t.files[0]) return;
+    var row = t.closest('[data-id]'), id = row.getAttribute('data-id');
+    infoEtat('Envoi de la photo…');
+    envoyerPhoto(id, t.files[0]).then(function (u) {
+      refProd(id).photo = u; row.querySelector('img').src = u; marquer(true); infoEtat('Photo envoyée. Pense à enregistrer.', 'ok');
+    }).catch(function (er) { infoEtat(er.message, 'mal'); });
+  });
+
+  $('n-ok').addEventListener('click', function () {
+    var t = $('n-t').value.trim(); if (!t) { alert('Écris le nom du produit.'); return; }
+    var id = 'x' + Date.now().toString(36), f = $('n-f').files[0];
+    var p = { id: id, t: t, s: $('n-s').value.trim(), c: $('n-c').value, px: [nb($('n-p1').value), nb($('n-p5').value), nb($('n-p10').value)] };
+    function fin() {
+      STATE.extra.unshift(p); marquer(true);
+      ['n-t', 'n-s', 'n-p1', 'n-p5', 'n-p10', 'n-f'].forEach(function (k) { $(k).value = ''; });
+      $('ajout').open = false; rendreProduits(); infoEtat('Produit ajouté. Pense à enregistrer.', 'ok');
+    }
+    if (f) { infoEtat('Envoi de la photo…'); envoyerPhoto(id, f).then(function (u) { p.photo = u; fin(); }).catch(function (er) { infoEtat(er.message, 'mal'); }); }
+    else fin();
+  });
+
+  /* ---------- Achats groupés ---------- */
+  function reste(g) {
+    var ms = g.fin - Date.now(); if (!g.fin) return 'Pas encore lancé';
+    if (ms <= 0) return 'Terminé';
+    var j = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), m = Math.floor(ms % 36e5 / 6e4);
+    return 'Se termine dans ' + (j ? j + ' j ' : '') + h + ' h ' + m + ' min';
+  }
+  function rendreGroupes() {
+    var opts = '<option value="">— Autre produit (écris le nom) —</option>' + tous().map(function (p) { return '<option value="' + esc(p.id) + '">' + esc(p.t) + '</option>'; }).join('');
+    $('groupes').innerHTML = STATE.grp.map(function (g, i) {
+      var pal = g.p.map(function (t, k) {
+        return '<div class="grille g2"><div><label>Palier ' + (k + 1) + ' : dès combien de personnes</label><input data-g="' + i + '" data-f="pmin" data-k="' + k + '" inputmode="numeric" value="' + esc(t[0]) + '"></div>' +
+          '<div><label>Prix par pièce ($)</label><input data-g="' + i + '" data-f="pprix" data-k="' + k + '" inputmode="decimal" value="' + esc(t[1] > 0 ? t[1] : '') + '"></div></div>';
+      }).join('');
+      var actif = g.on && g.fin > Date.now();
+      return '<details class="carte" ' + (g.on ? 'open' : '') + ' data-gi="' + i + '"><summary><span>Groupe ' + (i + 1) + (g.nom ? ' · ' + esc(g.nom) : '') + ' <span class="pastille ' + (actif ? 'on' : '') + '" data-rest="' + i + '">' + esc(g.on ? reste(g) : 'Désactivé') + '</span></span></summary>' +
+        '<div class="grille" style="margin-top:10px">' +
+        '<div class="rang"><label style="display:flex;gap:8px;align-items:center;margin:0;color:var(--papier)"><input type="checkbox" style="width:22px;min-height:22px" data-g="' + i + '" data-f="on"' + (g.on ? ' checked' : '') + '> Groupe actif sur le site</label></div>' +
+        '<div><label>Produit du catalogue</label><select data-g="' + i + '" data-f="pid">' + opts.replace('value="' + esc(g.pid) + '"', 'value="' + esc(g.pid) + '" selected') + '</select></div>' +
+        '<div><label>Nom affiché</label><input data-g="' + i + '" data-f="nom" maxlength="120" value="' + esc(g.nom) + '" placeholder="Ex. Robes d\'été"></div>' +
+        '<div class="grille g2"><div><label>Durée (jours)</label><input data-g="' + i + '" data-f="durj" inputmode="decimal" value="' + esc(g.durj) + '"></div>' +
+        '<div><label>Places maximum (facultatif)</label><input data-g="' + i + '" data-f="max" inputmode="numeric" value="' + esc(g.max || '') + '" placeholder="Illimité"></div></div>' +
+        '<div class="rang"><button class="btn mini" data-ga="lancer" data-g="' + i + '" type="button">Lancer maintenant</button><span class="note">Démarre le compte à rebours et remet les inscrits à 0.</span></div>' +
+        '<div><label>Inscrits</label><div class="compteur"><button class="btn ghost" data-ga="moins" data-g="' + i + '" type="button" aria-label="Moins un">−</button><input data-g="' + i + '" data-f="n" inputmode="numeric" value="' + esc(g.n) + '"><button class="btn" data-ga="plus" data-g="' + i + '" type="button" aria-label="Plus un">+</button></div></div>' +
+        pal + '</div></details>';
+    }).join('');
+  }
+  $('groupes').addEventListener('input', function (e) { champGroupe(e.target, false); });
+  $('groupes').addEventListener('change', function (e) { champGroupe(e.target, true); });
+  function champGroupe(t, change) {
+    var gi = t.getAttribute('data-g'); if (gi == null) return;
+    var g = STATE.grp[Number(gi)], f = t.getAttribute('data-f'), k = Number(t.getAttribute('data-k'));
+    if (f === 'on') { if (!change) return; g.on = t.checked; if (g.on && !g.fin) g.fin = Date.now() + (g.durj || 3) * 864e5; }
+    else if (f === 'pid') { if (!change) return; g.pid = t.value; var p = tous().filter(function (x) { return x.id === g.pid; })[0]; if (p) { if (!g.nom) g.nom = p.t; var pr = p.px || []; [0, 1, 2].forEach(function (i) { if (pr[i] > 0 && !(g.p[i][1] > 0)) g.p[i][1] = pr[i]; }); } rendreGroupes(); marquer(true); return; }
+    else if (f === 'nom') g.nom = t.value;
+    else if (f === 'durj') g.durj = Math.max(0.04, parseFloat(String(t.value).replace(',', '.')) || 3);
+    else if (f === 'max') g.max = Math.max(0, parseInt(t.value, 10) || 0);
+    else if (f === 'n') g.n = Math.max(0, parseInt(t.value, 10) || 0);
+    else if (f === 'pmin') g.p[k][0] = Math.max(1, parseInt(t.value, 10) || 1);
+    else if (f === 'pprix') g.p[k][1] = nb(t.value) || 0;
+    else return;
+    marquer(true);
+  }
+  $('groupes').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-ga]'); if (!b) return;
+    var i = Number(b.getAttribute('data-g')), g = STATE.grp[i], a = b.getAttribute('data-ga');
+    if (a === 'plus') g.n = (g.n || 0) + 1;
+    else if (a === 'moins') g.n = Math.max(0, (g.n || 0) - 1);
+    else if (a === 'lancer') {
+      if (g.fin > Date.now() && g.n > 0 && !confirm('Ce groupe est en cours avec ' + g.n + ' inscrit(s). Le relancer remet tout à zéro. Continuer ?')) return;
+      g.fin = Date.now() + (g.durj || 3) * 864e5; g.n = 0; g.on = true;
+    }
+    marquer(true); rendreGroupes();
+  });
+  setInterval(function () {
+    if (!STATE) return;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-rest]'), function (el) {
+      var g = STATE.grp[Number(el.getAttribute('data-rest'))]; if (g) { el.textContent = g.on ? reste(g) : 'Désactivé'; el.classList.toggle('on', g.on && g.fin > Date.now()); }
+    });
+  }, 30000);
+
+  /* ---------- Réglages ---------- */
+  function rendreReglages() {
+    $('r-tel2').value = STATE.tel2; $('r-adr2').value = STATE.adr2;
+    $('r-wag').value = STATE.wag; $('r-wac').value = STATE.wac;
+    ['tiktok', 'instagram', 'facebook'].forEach(function (k) { $('r-' + k).value = STATE.soc[k] || ''; });
+    $('r-lien').value = STATE.lien; $('r-phr').value = (STATE.phr || []).join('\n');
+    $('r-slog').innerHTML = MOIS.map(function (m, i) { return '<div><label for="sl-' + i + '">' + m + '</label><input id="sl-' + i + '" data-sl="' + (i + 1) + '" maxlength="160" value="' + esc(STATE.slog[String(i + 1)] || '') + '" placeholder="Slogan d\'origine"></div>'; }).join('');
+    rendrePromo();
+  }
+  function rendrePromo() {
+    $('r-promo').innerHTML = STATE.promo.map(function (p, i) {
+      return '<div class="grille g3" style="align-items:end"><div><label>Code</label><input data-pr="' + i + '" data-f="code" style="text-transform:uppercase" value="' + esc(p.code) + '"></div>' +
+        '<div><label>Remise %</label><input data-pr="' + i + '" data-f="pct" inputmode="numeric" value="' + esc(p.pct) + '"></div>' +
+        '<div class="rang"><label style="display:flex;gap:6px;align-items:center;margin:0"><input type="checkbox" style="width:22px;min-height:22px" data-pr="' + i + '" data-f="actif"' + (p.actif !== false ? ' checked' : '') + '>Actif</label><button class="btn danger mini" data-prdel="' + i + '" type="button">Retirer</button></div></div>';
+    }).join('') || '<p class="note">Aucun code promo.</p>';
+  }
+  [['r-tel2', function (v) { STATE.tel2 = v; }], ['r-adr2', function (v) { STATE.adr2 = v; }], ['r-wag', function (v) { STATE.wag = v.trim(); }], ['r-wac', function (v) { STATE.wac = v.trim(); }],
+   ['r-tiktok', function (v) { STATE.soc.tiktok = v.trim(); }], ['r-instagram', function (v) { STATE.soc.instagram = v.trim(); }], ['r-facebook', function (v) { STATE.soc.facebook = v.trim(); }],
+   ['r-lien', function (v) { STATE.lien = v.trim(); }], ['r-phr', function (v) { STATE.phr = v.split('\n').map(function (x) { return x.trim(); }).filter(Boolean); }]
+  ].forEach(function (c) { $(c[0]).addEventListener('input', function () { c[1](this.value); marquer(true); }); });
+  $('r-slog').addEventListener('input', function (e) {
+    var m = e.target.getAttribute('data-sl'); if (!m) return;
+    var v = e.target.value.trim(); if (v) STATE.slog[m] = v; else delete STATE.slog[m]; marquer(true);
+  });
+  $('r-promo').addEventListener('input', function (e) {
+    var t = e.target, i = t.getAttribute('data-pr'); if (i == null) return; var p = STATE.promo[Number(i)], f = t.getAttribute('data-f');
+    if (f === 'code') p.code = t.value.trim().toUpperCase(); else if (f === 'pct') p.pct = Math.max(0, Math.min(90, parseFloat(t.value) || 0)); else if (f === 'actif') p.actif = t.checked;
+    marquer(true);
+  });
+  $('r-promo').addEventListener('click', function (e) { var d = e.target.getAttribute('data-prdel'); if (d == null) return; STATE.promo.splice(Number(d), 1); marquer(true); rendrePromo(); });
+  $('r-addpromo').addEventListener('click', function () { STATE.promo.push({ code: '', pct: 10, actif: true }); marquer(true); rendrePromo(); });
+
+  $('m-ok').addEventListener('click', function () {
+    var m = $('m-msg'); m.className = 'msg'; m.textContent = '';
+    api('/api/password', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ancien: $('m-a').value, nouveau: $('m-n').value }) }).then(function (r) {
+      if (!r.ok) { m.className = 'msg mal'; m.textContent = (r.j && r.j.erreur) || 'Impossible.'; return; }
+      setTok(r.j.token); $('m-a').value = ''; $('m-n').value = ''; m.className = 'msg ok'; m.textContent = 'Mot de passe changé.';
+    });
+  });
+
+  /* ---------- Enregistrer ---------- */
+  $('b-save').addEventListener('click', function () {
+    $('b-save').disabled = true; infoEtat('Enregistrement…');
+    api('/api/state', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(STATE) }).then(function (r) {
+      if (r.status === 401) { setTok(''); montrerEcran('Ta connexion a expiré. Entre ton mot de passe : tes modifications sont gardées.', false); $('b-save').disabled = false; return; }
+      if (!r.ok) { $('b-save').disabled = false; infoEtat((r.j && r.j.erreur) || 'Échec de l\'enregistrement', 'mal'); return; }
+      STATE = defState(r.j); marquer(false); infoEtat('Publié sur le site ✓', 'ok');
+      rendreProduits(); rendreGroupes();
+    }).catch(function () { $('b-save').disabled = false; infoEtat('Pas de connexion', 'mal'); });
+  });
+
+  boot();
+})();
+</script>
+</body>
+</html>

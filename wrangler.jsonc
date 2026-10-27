@@ -1,6 +1,14 @@
 {
   "name": "goddidexpress",
+  "main": "worker.js",
   "compatibility_date": "2026-10-01",
   "workers_dev": true,
-  "assets": { "directory": "./public" }
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "kv_namespaces": [
+    { "binding": "GDE" }
+  ]
 }

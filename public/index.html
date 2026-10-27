@@ -1,5 +1,8 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>GOD DID EXPRESS</title>
+<link rel="apple-touch-icon" href="/icon.png">
+<link rel="icon" href="/icon.png">
+<meta name="apple-mobile-web-app-title" content="GOD DID EXPRESS">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -411,6 +414,39 @@ details.carte > summary::-webkit-details-marker { display: none; }
 .statut b { font-family: var(--f-display); font-weight: 800; font-size: 26px; line-height: 1; text-transform: uppercase; }
 .sheet .chat { max-height: 40vh; }
 @media (max-width: 380px) { .vniv { grid-template-columns: repeat(2, minmax(0, 1fr)); } .pgrid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+/* ===== v3 : réseaux, groupes vivants, globe animé, WhatsApp flottant ===== */
+.rsg { flex: 1 1 calc(50% - 10px); min-width: 138px; display: grid; justify-items: center; gap: 4px; padding: 16px 10px; border: 1px solid var(--ligne); border-radius: 12px; background: var(--carbone); color: var(--papier); text-decoration: none; text-align: center; min-height: 44px; }
+.rsg svg { width: 34px; height: 34px; fill: none; stroke: var(--orange); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.rsg b { font-family: var(--f-display); font-weight: 800; font-size: 18px; letter-spacing: .06em; text-transform: uppercase; line-height: 1.1; }
+.rsg small { font-size: 12px; color: var(--brume); }
+a.rsg:hover, a.rsg:focus-visible { border-color: var(--orange); }
+.rsg.off { opacity: .42; }
+.bandeau { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 0 0 12px; padding: 10px 14px; border: 1px solid var(--orange); border-radius: 10px; background: rgba(255, 106, 19, .1); }
+.bandeau[hidden] { display: none; }
+.bd-t { display: grid; gap: 2px; min-width: 0; }
+.bd-t b { font-size: 15px; overflow-wrap: anywhere; }
+.cpt { font-family: var(--f-mono); color: var(--orange-vif); font-size: 13px; }
+.phr { position: absolute; left: 14px; right: 14px; top: 12px; z-index: 2; pointer-events: none; font-family: var(--f-display); font-weight: 800; font-size: clamp(20px, 6vw, 28px); line-height: 1.05; text-transform: uppercase; text-shadow: 0 2px 14px #000, 0 0 3px #000; color: var(--papier); min-height: 2.1em; }
+.phr.in { animation: phrIn 3.8s ease both; }
+@keyframes phrIn { 0% { opacity: 0; transform: translateY(8px); } 12% { opacity: 1; transform: none; } 85% { opacity: 1; } 100% { opacity: 0; } }
+.puce { position: absolute; z-index: 2; pointer-events: none; padding: 4px 10px; border: 1px dashed var(--orange); border-radius: 6px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--orange-vif); background: rgba(14, 13, 12, .72); animation: flot 4.2s ease-in-out infinite; }
+.puce.p1 { left: 10px; bottom: 56px; }
+.puce.p2 { left: 50%; margin-left: -34px; top: 46%; animation-delay: -1.4s; }
+.puce.p3 { right: 10px; bottom: 56px; animation-delay: -2.8s; }
+@keyframes flot { 50% { transform: translateY(-6px); } }
+@media (prefers-reduced-motion: reduce) { .puce, .phr.in { animation: none; } }
+a.fab-wa { left: max(16px, env(safe-area-inset-left, 0px)); right: auto; background: var(--carbone); color: var(--papier); border: 1px solid var(--orange); box-shadow: none; text-decoration: none; }
+a.fab-wa svg { stroke: var(--orange); }
+body.has-list a.fab-wa { bottom: calc(140px + env(safe-area-inset-bottom, 0px)); }
+.groupe .gtete { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 12px; align-items: center; }
+.groupe .gimg { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; background: var(--ligne); display: block; }
+.groupe .gcpt { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.places { font-size: 13px; color: var(--orange-vif); }
+.places.urgent { color: #FF7B5B; font-weight: 600; }
+.g-act { display: flex; flex-wrap: wrap; gap: 10px; }
+.g-act > * { flex: 1 1 150px; }
+.vide-g { text-align: left; }
 </style>
 
 <div class="fond" aria-hidden="true"></div>
@@ -424,6 +460,8 @@ details.carte > summary::-webkit-details-marker { display: none; }
     <div class="ruban" aria-hidden="true"><div class="ruban-in" id="ruban-in"></div></div>
   </header>
 
+  <div class="bandeau" id="bandeau" hidden><div class="bd-t"><span class="kicker">Achat groupé en cours</span><b id="bd-nom"></b><span class="cpt" id="bd-cpt"></span></div><button class="btn mini" type="button" data-go="groupes">Rejoindre</button></div>
+
   <!-- ACCUEIL 2050 -->
   <section class="view" id="v-accueil">
     <div class="hero">
@@ -431,7 +469,7 @@ details.carte > summary::-webkit-details-marker { display: none; }
       <h1>Tu choisis.<br><em>On trouve.</em><br>On te livre.</h1>
       <p class="lead">Dites-nous ce que vous voulez, de la RDC ou de l'étranger. On achète, on importe, on livre. Acompte de 50 % et preuve en photo à chaque étape.</p>
       <div class="slogan"><div class="kicker" id="slogan-k"></div><p id="slogan-txt"></p></div>
-      <div class="radar cadre"><canvas class="globe" id="g-home" role="img" aria-label="Globe terrestre : trajet du colis de la Chine à Kinshasa"></canvas><div class="radar-leg"><span>Chine → Kinshasa</span><span>Glisse pour tourner</span></div></div>
+      <div class="radar cadre"><div class="phr" id="phr" aria-hidden="true"></div><span class="puce p1" aria-hidden="true">Chine</span><span class="puce p2" aria-hidden="true">En route</span><span class="puce p3" aria-hidden="true">Kinshasa</span><canvas class="globe" id="g-home" role="img" aria-label="Globe terrestre : trajet du colis de la Chine à Kinshasa"></canvas><div class="radar-leg"><span>Chine → Kinshasa</span><span>Glisse pour tourner</span></div></div>
       <div class="rangee">
         <button class="btn" type="button" data-go="catalogue">Voir le catalogue</button>
         <button class="btn ghost" type="button" data-go="commander">Commander sur mesure</button>
@@ -521,6 +559,11 @@ details.carte > summary::-webkit-details-marker { display: none; }
       <div class="rail" id="avis-rail"></div>
       <p class="note" id="avis-note">Ces trois cartes sont des modèles d'affichage. Les vrais avis de nos clients les remplaceront, avec leur accord.</p>
       <a class="btn ghost" id="avis-wa" href="#" target="_blank" rel="noopener">Envoyer mon témoignage sur WhatsApp</a>
+    </section>
+
+    <section class="bloc rv">
+      <header><div class="kicker">Communauté</div><h2>Rejoins-nous sur WhatsApp</h2></header>
+      <div class="rangee"><a class="btn js-wag" href="#" target="_blank" rel="noopener" hidden>Rejoindre le groupe</a><a class="btn ghost js-wac" href="#" target="_blank" rel="noopener" hidden>Suivre la chaîne</a></div>
     </section>
 
     <section class="bloc rv">
@@ -640,7 +683,8 @@ details.carte > summary::-webkit-details-marker { display: none; }
       <p>Plus on est nombreux à commander le même produit, plus le prix baisse. Tout le monde paie le prix du palier atteint à la clôture du groupe.</p>
     </header>
     <div id="liste-groupes" class="wrap" style="gap:14px"></div>
-    <p class="note">Exemples pour montrer le fonctionnement. Les prix et le nombre de participants réels sont confirmés avant l'ouverture de chaque groupe.</p>
+    <p class="note">Le prix final est celui du palier atteint à la clôture. Tout est confirmé sur WhatsApp avant le paiement, avec un acompte de 50 %.</p>
+    <div class="rangee"><a class="btn ghost js-wag" href="#" target="_blank" rel="noopener" hidden>Rejoindre le groupe WhatsApp</a><a class="btn ghost js-wac" href="#" target="_blank" rel="noopener" hidden>Suivre la chaîne</a></div>
   </section>
 
   <!-- 3. LIVE -->
@@ -772,7 +816,9 @@ details.carte > summary::-webkit-details-marker { display: none; }
   <footer>
     <div class="reseaux" id="reseaux-pied"></div>
     <div class="tel"><span class="kicker">WhatsApp</span><span class="mono" id="num">+243 983 129 294</span><button class="btn ghost mini" type="button" id="num-copy">Copier</button></div>
+    <div class="tel" id="tel2-ligne" hidden></div>
     <div>Super Lemba, Kinshasa. Repère : Bar ROYAL, en face de GRAND SHOP AIRTEL.</div>
+    <div id="adr2-ligne" hidden></div>
     <div>Votre plateforme de proximité, ouverte sur le monde.</div>
   </footer>
 </div>
@@ -797,6 +843,7 @@ details.carte > summary::-webkit-details-marker { display: none; }
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
 <button class="fab" id="fab" type="button" aria-label="Ouvrir l'assistant"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 9.5h7M8.5 12.5h4"/></svg>Assistant</button>
+<a class="fab fab-wa" id="fab-wa" href="#" target="_blank" rel="noopener" aria-label="Écrire sur WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4.2A8 8 0 1 1 8.4 18.8z"/><path d="M9.2 9.2c.4 2 2.4 4 4.4 4.5l1.1-1.2-1.7-1-.8.7a3.6 3.6 0 0 1-1.9-1.9l.7-.8-1-1.7z"/></svg>WhatsApp</a>
 <div class="tourbar" id="tourbar" hidden><span id="tour-txt">Visite guidée</span><button class="btn mini" type="button" id="tour-stop">Arrêter</button></div>
 <script type="application/json" id="gde-state">{}</script>
 <div class="boot" id="boot" hidden><div><div class="boot-logo">God Did <span>Express</span></div><div class="boot-ligne"><i></i></div><div class="boot-txt">Kinshasa vers le monde</div></div></div>
@@ -1125,27 +1172,7 @@ details.carte > summary::-webkit-details-marker { display: none; }
   });
   $('et-copy').addEventListener('click', function () { copy(dernierMsg); });
 
-  /* 2. Groupés */
-  var GROUPES = [
-    { nom: 'Écouteurs sans fil', n: 14, p: [[1, 12], [10, 10], [20, 8]] },
-    { nom: 'Power bank 10 000 mAh', n: 22, p: [[1, 15], [15, 13], [30, 11]] },
-    { nom: 'Montre connectée', n: 6, p: [[1, 25], [10, 22], [25, 19]] }
-  ];
-  $('liste-groupes').innerHTML = GROUPES.map(function (g) {
-    var actif = 0; g.p.forEach(function (t, i) { if (g.n >= t[0]) actif = i; });
-    var suiv = g.p[actif + 1];
-    var pct = suiv ? Math.min(100, Math.round(g.n / suiv[0] * 100)) : 100;
-    var txt = suiv ? (suiv[0] - g.n) + ' personnes de plus pour passer à ' + usd(suiv[1]) : 'Dernier palier atteint';
-    var pal = g.p.map(function (t, i) {
-      return '<div class="palier' + (i === actif ? ' on' : '') + '"><span>' + t[0] + '+ pers.</span><b>' + usd(t[1]) + '</b></div>';
-    }).join('');
-    var msg = 'Bonjour GOD DID EXPRESS, je rejoins le groupe d\'achat : ' + g.nom + ' (prix actuel ' + usd(g.p[actif][1]) + ').';
-    return '<article class="carte groupe"><div class="l1"><h3>' + g.nom + '</h3><span class="pastille">Exemple</span></div>' +
-      '<div class="prix">' + usd(g.p[actif][1]) + '<small>par pièce, ' + g.n + ' inscrits</small></div>' +
-      '<div class="barre" role="img" aria-label="Progression vers le palier suivant : ' + pct + ' %"><i style="width:' + pct + '%"></i></div>' +
-      '<p class="note">' + txt + '</p><div class="paliers">' + pal + '</div>' +
-      '<a class="btn" href="' + wa(msg) + '" target="_blank" rel="noopener">Rejoindre ce groupe</a></article>';
-  }).join('');
+  /* 2. Groupés : voir rendreGroupes() plus bas */
 
   /* 3. Live */
   (function () {
@@ -1234,6 +1261,9 @@ details.carte > summary::-webkit-details-marker { display: none; }
   var CATL = { vet: 'Vêtements', cha: 'Chaussures', mod: 'Accessoires mode', mon: 'Montres et bijoux', sac: 'Sacs et bagages', tec: 'Gadgets tech', ele: 'Électronique', mai: 'Maison et déco', cui: 'Cuisine', bea: 'Beauté', enf: 'Enfants', spo: 'Sport et fitness', aut: 'Auto et moto', cad: 'Idées cadeaux', pro: 'Entreprises', cmd: 'Sur commande' };
   var BY = {};
   /* ===== v2 : données publiées par l'admin (prix, produits, photos, commandes) ===== */
+  var WAG0 = 'https://chat.whatsapp.com/HqYKKnNnbhE7iIG0j2UYuB?s=cl&p=i&mlu=4&ilr=4&iam=2';
+  var WAC0 = 'https://whatsapp.com/channel/0029VbBNd5S1Xqubidwc9Y3E';
+  var PROD_COUR = null;
   var BASE = PRODUITS.map(function (p) { return Object.assign({}, p); });
   var STATE = {};
   try { STATE = JSON.parse(document.getElementById('gde-state').textContent) || {}; } catch (e) { STATE = {}; }
@@ -1242,6 +1272,7 @@ details.carte > summary::-webkit-details-marker { display: none; }
     s.rev = s.rev || 0; s.prod = s.prod || {}; s.extra = s.extra || []; s.slog = s.slog || {};
     s.soc = s.soc || { tiktok: '', instagram: '', facebook: '' }; s.promo = s.promo || []; s.avis = s.avis || [];
     s.cmd = s.cmd || {}; s.vip = (s.vip && s.vip.length === 3) ? s.vip : [3, 6, 10]; s.lien = s.lien || '';
+    s.wag = s.wag || WAG0; s.wac = s.wac || WAC0; s.tel2 = s.tel2 || ''; s.adr2 = s.adr2 || ''; s.phr = s.phr || []; s.grp = s.grp || [];
     return s;
   }
   STATE = defState(STATE);
@@ -1395,6 +1426,7 @@ details.carte > summary::-webkit-details-marker { display: none; }
   }
   function ouvrirProduit(id) {
     var p = BY[id]; if (!p) return;
+    PROD_COUR = p;
     var dans = !!liste[id];
     var partage = 'Regarde ce produit chez GOD DID EXPRESS : ' + p.t + ' (' + p.s + '). Commande sur WhatsApp : +243 983 129 294';
     ouvrir('<div class="sheet-tete"><div><div class="kicker">' + CATL[p.c] + '</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">' + p.t + '</h3></div>' +
@@ -1757,14 +1789,104 @@ details.carte > summary::-webkit-details-marker { display: none; }
     if (!v) return '';
     return k === 'tiktok' ? 'https://www.tiktok.com/@' + v : k === 'instagram' ? 'https://www.instagram.com/' + v : 'https://www.facebook.com/' + v;
   }
+  function urlHttps(v) { v = String(v || '').trim(); return /^https:\/\//i.test(v) ? v : ''; }
   function rendreReseaux() {
     var items = [['whatsapp', 'WhatsApp', 'https://wa.me/' + WA]];
     [['tiktok', 'TikTok'], ['instagram', 'Instagram'], ['facebook', 'Facebook']].forEach(function (r) {
-      var u = lienReseau(r[0], STATE.soc && STATE.soc[r[0]]); if (u) items.push([r[0], r[1], u]);
+      items.push([r[0], r[1], lienReseau(r[0], STATE.soc && STATE.soc[r[0]])]);
     });
-    var out = items.map(function (i) { return '<a class="rs" href="' + ea(i[2]) + '" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true">' + ICO[i[0]] + '</svg>' + i[1] + '</a>'; }).join('');
+    var out = items.map(function (i) {
+      var ic = '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICO[i[0]] + '</svg><b>GOD DID EXPRESS</b><small>' + i[1] + (i[2] ? '' : ' · bientôt') + '</small>';
+      return i[2] ? '<a class="rsg" href="' + ea(i[2]) + '" target="_blank" rel="noopener" aria-label="' + i[1] + ' GOD DID EXPRESS">' + ic + '</a>' : '<span class="rsg off">' + ic + '</span>';
+    }).join('');
     ['reseaux-home', 'reseaux-pied'].forEach(function (id) { if ($(id)) $(id).innerHTML = out; });
+    var G = urlHttps(STATE.wag), C = urlHttps(STATE.wac);
+    Array.prototype.forEach.call(document.querySelectorAll('.js-wag'), function (a) { a.hidden = !G; if (G) a.href = G; });
+    Array.prototype.forEach.call(document.querySelectorAll('.js-wac'), function (a) { a.hidden = !C; if (C) a.href = C; });
+    var t2 = String(STATE.tel2 || '').trim(), a2 = String(STATE.adr2 || '').trim();
+    $('tel2-ligne').hidden = !t2;
+    if (t2) $('tel2-ligne').innerHTML = '<span class="kicker">Deuxième numéro</span><a class="mono" style="color:var(--papier)" href="tel:' + ea(t2.replace(/[^\d+]/g, '')) + '">' + h(t2) + '</a>';
+    $('adr2-ligne').hidden = !a2;
+    if (a2) $('adr2-ligne').textContent = 'Autre adresse : ' + a2;
   }
+
+  /* Achats groupés vivants : le compte à rebours tourne seul, les chiffres viennent de l'admin */
+  function cpt(ms) {
+    if (ms <= 0) return 'Terminé';
+    var s = Math.floor(ms / 1000), j = Math.floor(s / 86400), hh = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), ss = s % 60;
+    function z(n) { return (n < 10 ? '0' : '') + n; }
+    return (j ? j + ' j ' : '') + z(hh) + ' h ' + z(m) + ' min ' + z(ss) + ' s';
+  }
+  function groupesActifs() {
+    var now = Date.now();
+    return (STATE.grp || []).filter(function (g) { return g && g.on && g.nom && g.fin > now; }).sort(function (a, b) { return a.fin - b.fin; });
+  }
+  function rendreGroupes() {
+    var L = groupesActifs(), box = $('liste-groupes');
+    if (!L.length) {
+      box.innerHTML = '<article class="carte vide-g"><h3>Les prochains groupes ouvrent bientôt</h3><p>Rejoins le groupe WhatsApp : on y annonce chaque nouvel achat groupé en premier.</p></article>';
+      majBandeau(); return;
+    }
+    box.innerHTML = L.map(function (g) {
+      var p = (g.p || []).filter(function (x) { return x[1] > 0; }).sort(function (x, y) { return x[0] - y[0]; });
+      if (!p.length) p = [[1, 0]];
+      var actif = -1; p.forEach(function (x, i) { if (g.n >= x[0]) actif = i; });
+      var cur = p[Math.max(actif, 0)], suiv = p[actif + 1];
+      var pct = suiv ? Math.min(100, Math.round(g.n / suiv[0] * 100)) : 100;
+      var txt = suiv ? (suiv[0] - g.n) + ' personne' + (suiv[0] - g.n > 1 ? 's' : '') + ' de plus pour passer à ' + usd(suiv[1]) : 'Dernier palier atteint';
+      var pal = p.map(function (x, i) { return '<div class="palier' + (i === actif ? ' on' : '') + '"><span>' + x[0] + '+ pers.</span><b>' + usd(x[1]) + '</b></div>'; }).join('');
+      var restePl = g.max > 0 ? g.max - g.n : null, plein = restePl !== null && restePl <= 0;
+      var places = restePl === null ? '' : plein ? '<span class="places urgent">Complet</span>' : '<span class="places' + (restePl <= 3 ? ' urgent' : '') + '">Il reste ' + restePl + ' place' + (restePl > 1 ? 's' : '') + '</span>';
+      var prod = g.pid && BY[g.pid] ? BY[g.pid] : null;
+      var lien = location.origin + '/#groupes';
+      var msg = 'Bonjour GOD DID EXPRESS, je rejoins le groupe d\'achat : ' + g.nom + (cur[1] > 0 ? ' (prix actuel ' + usd(cur[1]) + ')' : '') + '.';
+      var part = 'Achat groupé chez GOD DID EXPRESS : ' + g.nom + (cur[1] > 0 ? ', ' + usd(cur[1]) + ' la pièce' : '') + '. Plus on est nombreux, moins c\'est cher. Rejoins-nous : ' + lien;
+      return '<article class="carte groupe"><div class="gtete"' + (prod ? '' : ' style="grid-template-columns:1fr"') + '>' + (prod ? '<img class="gimg" src="' + ea(pic(prod)) + '" alt="" loading="lazy">' : '') +
+        '<div><h3>' + h(g.nom) + '</h3><div class="gcpt"><span class="cpt" data-fin="' + g.fin + '">' + cpt(g.fin - Date.now()) + '</span>' + places + '</div></div></div>' +
+        (cur[1] > 0 ? '<div class="prix">' + usd(cur[1]) + '<small>par pièce, ' + g.n + ' inscrit' + (g.n > 1 ? 's' : '') + '</small></div>' : '<div class="prix"><small>' + g.n + ' inscrit' + (g.n > 1 ? 's' : '') + ' · prix annoncé sur WhatsApp</small></div>') +
+        '<div class="barre" role="img" aria-label="Progression vers le palier suivant : ' + pct + ' %"><i style="width:' + pct + '%"></i></div>' +
+        '<p class="note">' + txt + '</p><div class="paliers">' + pal + '</div>' +
+        '<div class="g-act">' + (plein ? '' : '<a class="btn" href="' + ea(wa(msg)) + '" target="_blank" rel="noopener">Rejoindre ce groupe</a>') +
+        '<a class="btn ghost" href="https://wa.me/?text=' + encodeURIComponent(part) + '" target="_blank" rel="noopener">Partager ce groupe sur WhatsApp</a></div></article>';
+    }).join('');
+    majBandeau();
+  }
+  function majBandeau() {
+    var L = groupesActifs(), b = $('bandeau');
+    if (!L.length) { b.hidden = true; return; }
+    var g = L[0]; b.hidden = false; $('bd-nom').textContent = g.nom;
+    $('bd-cpt').setAttribute('data-fin', g.fin); $('bd-cpt').textContent = cpt(g.fin - Date.now());
+  }
+  function tickGroupes() {
+    var now = Date.now(), fini = false;
+    Array.prototype.forEach.call(document.querySelectorAll('.cpt[data-fin]'), function (el) {
+      var f = Number(el.getAttribute('data-fin')); el.textContent = cpt(f - now); if (f <= now) fini = true;
+    });
+    if (fini) rendreGroupes();
+  }
+  setInterval(tickGroupes, 1000);
+
+  /* Globe : phrases qui apparaissent seules */
+  var PHR0 = ['La Chine à ta porte', 'Tu rêves, on trouve', 'De Guangzhou à Kinshasa, en direct', 'Ce que personne ne t\'apporte, on l\'apporte', 'Chaque colis, preuve en photo', 'Tu choisis. On trouve. On te livre.'];
+  var phrI = 0, phrT = null;
+  function rendrePhrases() {
+    var el = $('phr'); if (!el) return;
+    var L = (STATE.phr && STATE.phr.length) ? STATE.phr : PHR0;
+    if (phrT) clearInterval(phrT);
+    function aff() { el.classList.remove('in'); void el.offsetWidth; el.textContent = L[phrI % L.length]; if (smooth) el.classList.add('in'); phrI++; }
+    phrI = 0; aff();
+    if (smooth && L.length > 1) phrT = setInterval(aff, 3800);
+  }
+
+  /* Bouton WhatsApp flottant : prend le produit ouvert, sinon un message simple */
+  (function () {
+    var f = $('fab-wa');
+    f.href = wa('Bonjour GOD DID EXPRESS, j\'ai une question.');
+    f.addEventListener('click', function () {
+      var p = (PROD_COUR && !$('veil').hidden) ? PROD_COUR : null;
+      f.href = wa(p ? msgProduit(p) : 'Bonjour GOD DID EXPRESS, j\'ai une question.');
+    });
+  })();
 
   /* Avis clients (vrais avis publiés, sinon modèles) */
   function rendreAvis() {
@@ -2285,7 +2407,7 @@ details.carte > summary::-webkit-details-marker { display: none; }
   })();
 
   /* Premier affichage */
-  rendreSlogan(); rendreReseaux(); rendreVip(); rendreAvis(); majPub();
+  rendreSlogan(); rendreReseaux(); rendreVip(); rendreAvis(); majPub(); rendreGroupes(); rendrePhrases();
 
   show(location.hash.slice(1), false);
 })();
