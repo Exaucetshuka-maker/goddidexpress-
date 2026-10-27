@@ -11,17 +11,17 @@
 <link rel="apple-touch-icon" href="/icon-admin.png">
 <link rel="icon" href="/icon-admin.png">
 <title>GDE Admin</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=IBM+Plex+Mono:wght@500;600&family=Instrument+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Bricolage+Grotesque:opsz,wght@12..96,400..700&display=swap">
 <style>
 :root { --noir:#0E0D0C; --carbone:#181614; --ligne:#2C2824; --orange:#FF6A13; --papier:#F4EFE9; --brume:#A89F95; --ok:#4CC38A; --mal:#FF5B5B; --sur:#140A03; color-scheme: dark; }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--noir); color: var(--papier); font: 15px/1.45 'Instrument Sans', system-ui, -apple-system, sans-serif; padding: env(safe-area-inset-top) 0 calc(96px + env(safe-area-inset-bottom)); }
+body { margin: 0; background: var(--noir); color: var(--papier); font: 15px/1.45 'Bricolage Grotesque', system-ui, -apple-system, sans-serif; padding: env(safe-area-inset-top) 0 calc(96px + env(safe-area-inset-bottom)); }
 h1, h2, h3 { margin: 0; font-family: 'Big Shoulders Display', 'Arial Narrow', Impact, sans-serif; text-transform: uppercase; letter-spacing: .02em; }
 h1 { font-size: 26px; } h2 { font-size: 22px; } h3 { font-size: 17px; }
 .wrap { max-width: 720px; margin: 0 auto; padding: 0 16px; }
-.mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
-.kicker { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--brume); }
+
+.kicker { font-size: 13px; color: var(--brume); }
 button, input, select, textarea { font: inherit; color: inherit; }
 input, select, textarea { width: 100%; min-height: 44px; padding: 10px 12px; background: var(--noir); border: 1px solid var(--ligne); border-radius: 8px; }
 textarea { min-height: 120px; resize: vertical; }
@@ -282,12 +282,12 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     var q = $('q').value.trim().toLowerCase(), qc = $('qc').value;
     var L = tous().filter(function (p) { return (!q || (p.t + ' ' + p.s).toLowerCase().indexOf(q) >= 0) && (!qc || p.c === qc); });
     var sans = tous().filter(function (p) { return !p.cache && !(p.px || []).some(function (v) { return v > 0; }); }).length;
-    $('prod-info').textContent = L.length + ' produit' + (L.length > 1 ? 's' : '') + ' affiché' + (L.length > 1 ? 's' : '') + ' · ' + sans + ' sans prix';
+    $('prod-info').textContent = L.length + ' produit' + (L.length > 1 ? 's' : '') + ' affiché' + (L.length > 1 ? 's' : '') + ', ' + sans + ' sans prix';
     $('liste').innerHTML = L.map(function (p) {
       var v = function (i) { return p.px[i] > 0 ? p.px[i] : ''; };
       return '<div class="carte ligne' + (p.cache ? ' off' : '') + '" data-id="' + esc(p.id) + '">' +
         '<img src="' + esc(p.photo) + '" alt="" loading="lazy">' +
-        '<div class="grille" style="gap:8px;min-width:0"><div><strong>' + esc(p.t) + '</strong><div class="note">' + esc(CATL[p.c] || '') + (p.extra ? ' · ajouté par toi' : '') + '</div></div>' +
+        '<div class="grille" style="gap:8px;min-width:0"><div><strong>' + esc(p.t) + '</strong><div class="note">' + esc(CATL[p.c] || '') + (p.extra ? ', ajouté par toi' : '') + '</div></div>' +
         '<div class="grille g3"><div><label>1 pièce $</label><input data-k="px" data-i="0" inputmode="decimal" value="' + esc(v(0)) + '"></div>' +
         '<div><label>Dès 5</label><input data-k="px" data-i="1" inputmode="decimal" value="' + esc(v(1)) + '"></div>' +
         '<div><label>Dès 10</label><input data-k="px" data-i="2" inputmode="decimal" value="' + esc(v(2)) + '"></div></div>' +
@@ -383,7 +383,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
           '<div><label>Prix par pièce ($)</label><input data-g="' + i + '" data-f="pprix" data-k="' + k + '" inputmode="decimal" value="' + esc(t[1] > 0 ? t[1] : '') + '"></div></div>';
       }).join('');
       var actif = g.on && g.fin > Date.now();
-      return '<details class="carte" ' + (g.on ? 'open' : '') + ' data-gi="' + i + '"><summary><span>Groupe ' + (i + 1) + (g.nom ? ' · ' + esc(g.nom) : '') + ' <span class="pastille ' + (actif ? 'on' : '') + '" data-rest="' + i + '">' + esc(g.on ? reste(g) : 'Désactivé') + '</span></span></summary>' +
+      return '<details class="carte" ' + (g.on ? 'open' : '') + ' data-gi="' + i + '"><summary><span>Groupe ' + (i + 1) + (g.nom ? ', ' + esc(g.nom) : '') + ' <span class="pastille ' + (actif ? 'on' : '') + '" data-rest="' + i + '">' + esc(g.on ? reste(g) : 'Désactivé') + '</span></span></summary>' +
         '<div class="grille" style="margin-top:10px">' +
         '<div class="rang"><label style="display:flex;gap:8px;align-items:center;margin:0;color:var(--papier)"><input type="checkbox" style="width:22px;min-height:22px" data-g="' + i + '" data-f="on"' + (g.on ? ' checked' : '') + '> Groupe actif sur le site</label></div>' +
         '<div><label>Produit du catalogue</label><select data-g="' + i + '" data-f="pid">' + opts.replace('value="' + esc(g.pid) + '"', 'value="' + esc(g.pid) + '" selected') + '</select></div>' +

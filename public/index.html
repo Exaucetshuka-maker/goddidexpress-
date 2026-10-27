@@ -6,7 +6,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=IBM+Plex+Mono:wght@500;600&family=Instrument+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Bricolage+Grotesque:opsz,wght@12..96,400..700&display=swap">
 <style>
 /* Layout: application mobile façon étiquette de colis. En-tête, puis 5 vues (une par stratégie) commandées par une barre d'onglets en bas. Un seul look, noir et orange, comme la charte. */
 :root {
@@ -447,6 +447,36 @@ body.has-list a.fab-wa { bottom: calc(140px + env(safe-area-inset-bottom, 0px));
 .g-act { display: flex; flex-wrap: wrap; gap: 10px; }
 .g-act > * { flex: 1 1 150px; }
 .vide-g { text-align: left; }
+
+/* ===== v4 : passe design. Une seule police de texte, pas de mono, pas d'étiquettes en capitales, pas d'animations décoratives ===== */
+:root { --f-body: 'Bricolage Grotesque', system-ui, -apple-system, 'Segoe UI', sans-serif; --f-mono: var(--f-body); }
+.kicker { font-family: var(--f-body); font-size: 13.5px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--brume); }
+section header > .kicker, .bloc header > .kicker { display: none; }
+.hud-bar .kicker { color: var(--papier); font-size: 15px; font-weight: 600; }
+.horloge { font-family: var(--f-body); font-size: 13px; color: var(--brume); }
+.mono { font-family: var(--f-body); }
+.ruban { display: none; }
+.stats { display: none; }
+.js .rv { opacity: 1; transform: none; transition: none; }
+.hero h1 em { color: inherit; font-style: normal; }
+.mc .rang { display: none; }
+.radar-leg { font-family: var(--f-body); font-size: 12.5px; letter-spacing: 0; text-transform: none; }
+.puce { font-family: var(--f-body); font-size: 12px; letter-spacing: 0; text-transform: none; border-radius: 3px; }
+.cpt { font-family: var(--f-display); font-weight: 800; font-size: 18px; letter-spacing: .03em; color: var(--orange-vif); font-variant-numeric: tabular-nums; }
+.carte, .bandeau, .radar, .rsg, .tuile, .palier, .cadre, .slogan { border-radius: 3px; }
+.btn, input, select, textarea, .chip, .rs { border-radius: 4px; }
+.base, .compte, .pastille, .etiquette dt, .tag, .cr small, .salle .quand, .passe .nom, .niveaux, .boot-txt, .mystere .voile small { text-transform: none; letter-spacing: 0; font-family: var(--f-body); }
+.base { font-size: 13px; }
+.compte { font-size: 13.5px; }
+.tag, .cr small, .pastille, .niveaux, .etiquette dt, .passe .nom { font-size: 12px; }
+.tag { font-weight: 600; }
+.salle .quand { font-size: 15px; font-weight: 600; }
+.mystere .voile small { font-size: 14px; }
+.recherche input { font-family: var(--f-body); text-transform: none; letter-spacing: 0; }
+.stats strong, .cr b, .date-live strong, .cpt, .prix, .pv { font-variant-numeric: tabular-nums; }
+.hero .rangee .btn[data-go="commander"] { flex: 1 1 100%; }
+.hero .rangee .btn.ghost[data-assist], .hero .rangee .btn.ghost[data-tour] { flex: 1 1 40%; border: 0; background: none; min-height: 44px; padding-left: 0; padding-right: 0; justify-content: flex-start; text-decoration: underline; text-decoration-color: var(--ligne); text-underline-offset: 5px; color: var(--papier); font-weight: 500; }
+.hero .rangee .btn.ghost[data-assist]:hover, .hero .rangee .btn.ghost[data-tour]:hover { text-decoration-color: var(--orange); }
 </style>
 
 <div class="fond" aria-hidden="true"></div>
@@ -455,7 +485,7 @@ body.has-list a.fab-wa { bottom: calc(140px + env(safe-area-inset-bottom, 0px));
   <header class="top">
     <div class="marque">
       <b>God Did <span>Express</span></b>
-      <div class="base">Kinshasa · RDC<br>et le monde</div>
+      <div class="base">Kinshasa, RDC<br>et le monde</div>
     </div>
     <div class="ruban" aria-hidden="true"><div class="ruban-in" id="ruban-in"></div></div>
   </header>
@@ -1159,7 +1189,7 @@ body.has-list a.fab-wa { bottom: calc(140px + env(safe-area-inset-bottom, 0px));
     var b = parseFloat($('o-budget').value);
     var ac = b > 0 ? usd(b / 2) + ' sur ' + usd(b) : 'selon devis';
     $('et-ref').textContent = ref; $('et-nom').textContent = nom; $('et-tel').textContent = tel;
-    $('et-commune').textContent = commune; $('et-prod').textContent = cat + ' · ' + desc;
+    $('et-commune').textContent = commune; $('et-prod').textContent = cat + ', ' + desc;
     $('et-qte').textContent = qte; $('et-ac').textContent = ac + ' (' + pay + ')';
     dernierMsg = 'Bonjour GOD DID EXPRESS, je veux passer une commande.\n' +
       'Référence : ' + ref + '\nProduit : ' + desc + '\nCatégorie : ' + cat + '\nQuantité : ' + qte +
@@ -1182,7 +1212,7 @@ body.has-list a.fab-wa { bottom: calc(140px + env(safe-area-inset-bottom, 0px));
     $('live-date').textContent = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) + ', 18 h';
     var a = new Date(n.getFullYear(), n.getMonth(), n.getDate()), b = new Date(d.getFullYear(), d.getMonth(), d.getDate());
     var j = Math.round((b - a) / 864e5);
-    $('live-delai').textContent = (j === 0 ? 'Aujourd\'hui' : j === 1 ? 'Demain' : 'Dans ' + j + ' jours') + ' · heure de Kinshasa · horaire à confirmer';
+    $('live-delai').textContent = (j === 0 ? 'Aujourd\'hui' : j === 1 ? 'Demain' : 'Dans ' + j + ' jours') + ', heure de Kinshasa, horaire à confirmer';
     $('live-wa').href = wa('Bonjour GOD DID EXPRESS, prévenez-moi du prochain live shopping.');
   })();
 
@@ -1350,7 +1380,7 @@ body.has-list a.fab-wa { bottom: calc(140px + env(safe-area-inset-bottom, 0px));
     }
     var tot = u * q * (1 - pct / 100);
     o('tot').textContent = usd(tot); o('ac').textContent = usd(tot / 2);
-    o('info').textContent = usd(u) + ' la pièce' + (pct ? ' · promo −' + pct + ' %' : (String(code).trim() ? ' · code inconnu' : '')) + ' · solde de ' + usd(tot / 2) + ' à la livraison.';
+    o('info').textContent = usd(u) + ' la pièce' + (pct ? ', promo −' + pct + ' %' : (String(code).trim() ? ', code inconnu' : '')) + ', solde de ' + usd(tot / 2) + ' à la livraison.';
     if (a) a.href = wa('Bonjour GOD DID EXPRESS, je veux commander : ' + p.t + '.\nQuantité : ' + q + '\nPrix : ' + usd(u) + ' la pièce\nTotal estimé : ' + usd(tot) + (pct ? ' (code ' + String(code).trim().toUpperCase() + ', −' + pct + ' %)' : '') + '\nAcompte 50 % : ' + usd(tot / 2) + '\nMerci de confirmer le prix et le délai.');
   }
   PRODUITS = buildProduits();
@@ -1405,7 +1435,7 @@ body.has-list a.fab-wa { bottom: calc(140px + env(safe-area-inset-bottom, 0px));
   function majBarre() {
     var n = nbListe();
     $('listbar').hidden = n === 0; document.body.classList.toggle('has-list', n > 0);
-    $('lb-txt').textContent = 'Ma liste · ' + n + (n > 1 ? ' articles' : ' article');
+    $('lb-txt').textContent = 'Ma liste, ' + n + (n > 1 ? ' articles' : ' article');
   }
   function bascule(id) {
     if (liste[id]) delete liste[id]; else liste[id] = 1;
@@ -1519,7 +1549,7 @@ body.has-list a.fab-wa { bottom: calc(140px + env(safe-area-inset-bottom, 0px));
   /* Salutation, lueur selon l'heure, horloge */
   function heure() {
     var d = new Date(), h = d.getHours();
-    $('h-salut').textContent = (h < 12 ? 'Bonjour' : h < 18 ? 'Bon après-midi' : 'Bonsoir') + ' · bienvenue';
+    $('h-salut').textContent = (h < 12 ? 'Bonjour' : h < 18 ? 'Bon après-midi' : 'Bonsoir') + ', bienvenue';
     var glow = (h >= 5 && h < 11) ? .2 : (h >= 11 && h < 17) ? .14 : (h >= 17 && h < 22) ? .25 : .1;
     document.documentElement.style.setProperty('--glow', glow);
     var t = '';
@@ -1625,7 +1655,7 @@ body.has-list a.fab-wa { bottom: calc(140px + env(safe-area-inset-bottom, 0px));
     $('cr-j').textContent = z(Math.floor(s / 86400)); $('cr-h').textContent = z(Math.floor(s % 86400 / 3600));
     $('cr-m').textContent = z(Math.floor(s % 3600 / 60)); $('cr-s').textContent = z(s % 60);
   }
-  $('lv-quand').textContent = prochainLive().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) + ' · 18 h (à confirmer)';
+  $('lv-quand').textContent = prochainLive().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) + ', 18 h (à confirmer)';
   $('lv-wa').href = wa('Bonjour GOD DID EXPRESS, prévenez-moi du prochain live shopping.');
   tic(); setInterval(tic, 1000);
 
@@ -1796,7 +1826,7 @@ body.has-list a.fab-wa { bottom: calc(140px + env(safe-area-inset-bottom, 0px));
       items.push([r[0], r[1], lienReseau(r[0], STATE.soc && STATE.soc[r[0]])]);
     });
     var out = items.map(function (i) {
-      var ic = '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICO[i[0]] + '</svg><b>GOD DID EXPRESS</b><small>' + i[1] + (i[2] ? '' : ' · bientôt') + '</small>';
+      var ic = '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICO[i[0]] + '</svg><b>GOD DID EXPRESS</b><small>' + i[1] + (i[2] ? '' : ', bientôt') + '</small>';
       return i[2] ? '<a class="rsg" href="' + ea(i[2]) + '" target="_blank" rel="noopener" aria-label="' + i[1] + ' GOD DID EXPRESS">' + ic + '</a>' : '<span class="rsg off">' + ic + '</span>';
     }).join('');
     ['reseaux-home', 'reseaux-pied'].forEach(function (id) { if ($(id)) $(id).innerHTML = out; });
@@ -1843,7 +1873,7 @@ body.has-list a.fab-wa { bottom: calc(140px + env(safe-area-inset-bottom, 0px));
       var part = 'Achat groupé chez GOD DID EXPRESS : ' + g.nom + (cur[1] > 0 ? ', ' + usd(cur[1]) + ' la pièce' : '') + '. Plus on est nombreux, moins c\'est cher. Rejoins-nous : ' + lien;
       return '<article class="carte groupe"><div class="gtete"' + (prod ? '' : ' style="grid-template-columns:1fr"') + '>' + (prod ? '<img class="gimg" src="' + ea(pic(prod)) + '" alt="" loading="lazy">' : '') +
         '<div><h3>' + h(g.nom) + '</h3><div class="gcpt"><span class="cpt" data-fin="' + g.fin + '">' + cpt(g.fin - Date.now()) + '</span>' + places + '</div></div></div>' +
-        (cur[1] > 0 ? '<div class="prix">' + usd(cur[1]) + '<small>par pièce, ' + g.n + ' inscrit' + (g.n > 1 ? 's' : '') + '</small></div>' : '<div class="prix"><small>' + g.n + ' inscrit' + (g.n > 1 ? 's' : '') + ' · prix annoncé sur WhatsApp</small></div>') +
+        (cur[1] > 0 ? '<div class="prix">' + usd(cur[1]) + '<small>par pièce, ' + g.n + ' inscrit' + (g.n > 1 ? 's' : '') + '</small></div>' : '<div class="prix"><small>' + g.n + ' inscrit' + (g.n > 1 ? 's' : '') + ', prix annoncé sur WhatsApp</small></div>') +
         '<div class="barre" role="img" aria-label="Progression vers le palier suivant : ' + pct + ' %"><i style="width:' + pct + '%"></i></div>' +
         '<p class="note">' + txt + '</p><div class="paliers">' + pal + '</div>' +
         '<div class="g-act">' + (plein ? '' : '<a class="btn" href="' + ea(wa(msg)) + '" target="_blank" rel="noopener">Rejoindre ce groupe</a>') +
@@ -1928,7 +1958,7 @@ body.has-list a.fab-wa { bottom: calc(140px + env(safe-area-inset-bottom, 0px));
     var r = niveauPour(code);
     if (r.lv < 0) { box.innerHTML = '<p class="note">Aucune commande livrée n\'est liée à ce code pour l\'instant. Ta première commande livrée t\'ouvre le niveau Bronze.</p>'; return; }
     var nxt = r.lv < 3 ? th[r.lv] : null, pct = nxt ? Math.min(100, Math.round(r.n / nxt * 100)) : 100, reste = nxt ? Math.max(0, nxt - r.n) : 0;
-    box.innerHTML = '<div class="vip-lv"><span class="kicker">Ton niveau</span><b>' + NIV[r.lv] + '</b><span class="note">' + r.n + ' commande' + (r.n > 1 ? 's' : '') + ' livrée' + (r.n > 1 ? 's' : '') + ' · ' + AVANT[r.lv] + '</span></div>' +
+    box.innerHTML = '<div class="vip-lv"><span class="kicker">Ton niveau</span><b>' + NIV[r.lv] + '</b><span class="note">' + r.n + ' commande' + (r.n > 1 ? 's' : '') + ' livrée' + (r.n > 1 ? 's' : '') + ', ' + AVANT[r.lv] + '</span></div>' +
       '<div class="barre" role="img" aria-label="Progression vers le niveau suivant : ' + pct + ' %"><i style="width:' + pct + '%"></i></div>' +
       '<p class="note">' + (nxt ? 'Encore ' + reste + ' commande' + (reste > 1 ? 's' : '') + ' livrée' + (reste > 1 ? 's' : '') + ' pour passer ' + NIV[r.lv + 1] + '.' : 'Niveau maximal atteint. Merci pour ta fidélité.') + '</p>';
   }
@@ -1973,7 +2003,7 @@ body.has-list a.fab-wa { bottom: calc(140px + env(safe-area-inset-bottom, 0px));
       curOrd = o;
       $('s-tag').textContent = 'En direct';
       rendreSuivi(o.cran);
-      $('s-note').textContent = 'Commande de ' + o.nom + (o.prod ? ' · ' + o.prod : '') + '. Touchez une photo pour la voir en grand.';
+      $('s-note').textContent = 'Commande de ' + o.nom + (o.prod ? ', ' + o.prod : '') + '. Touchez une photo pour la voir en grand.';
       try { localStorage.setItem('gde-ref', v); } catch (e) {}
     } else if (v === EXEMPLE) {
       curOrd = null; $('s-tag').textContent = 'Exemple'; rendreSuivi(4);
@@ -2233,7 +2263,7 @@ body.has-list a.fab-wa { bottom: calc(140px + env(safe-area-inset-bottom, 0px));
       '<button class="btn" type="submit">Ajouter au catalogue</button></form></details>';
     var auto = '<details class="carte"><summary><b>Remplir les prix de gros d\'un coup</b></summary><div style="display:grid;gap:12px;margin-top:12px"><p class="note">Pour tous les produits qui ont un prix à 1 pièce mais aucun prix de gros. Tu pourras ensuite corriger chaque produit.</p><div class="duo"><div class="champ"><label for="au-5">Remise dès 5 pièces (%)</label><input id="au-5" type="number" min="0" max="60" value="10"></div><div class="champ"><label for="au-10">Remise dès 10 pièces (%)</label><input id="au-10" type="number" min="0" max="70" value="20"></div></div><button type="button" class="btn ghost" data-a="autogros">Appliquer</button></div></details>';
     var s = f + auto + '<div class="champ"><label for="adm-q">Chercher un produit</label><input id="adm-q" type="search" value="' + ea(admQ) + '" placeholder="Nom du produit" autocomplete="off"></div>' +
-      '<div class="compte">' + all.length + ' produits · ' + sans + ' sans prix</div><div id="adm-list">';
+      '<div class="compte">' + all.length + ' produits, ' + sans + ' sans prix</div><div id="adm-list">';
     s += all.map(function (p) {
       var px = pxList(p);
       return '<div class="carte arow' + (p.cache ? ' off' : '') + '" data-pid="' + p.id + '"><img src="' + ea(pic(p)) + '" alt="">' +
@@ -2256,12 +2286,12 @@ body.has-list a.fab-wa { bottom: calc(140px + env(safe-area-inset-bottom, 0px));
     s += '<div class="compte">' + refs.length + ' commande' + (refs.length > 1 ? 's' : '') + ' suivie' + (refs.length > 1 ? 's' : '') + '</div>';
     s += refs.map(function (ref) {
       var o = STATE.cmd[ref], pr = o.pr || {};
-      return '<details class="carte" data-ref="' + ea(ref) + '"' + (admOpen[ref] ? ' open' : '') + '><summary><b>' + h(ref) + '</b> · ' + h(o.nom) + ' <span class="pastille">' + Math.min(7, o.cran) + '/7</span></summary>' +
+      return '<details class="carte" data-ref="' + ea(ref) + '"' + (admOpen[ref] ? ' open' : '') + '><summary><b>' + h(ref) + '</b>, ' + h(o.nom) + ' <span class="pastille">' + Math.min(7, o.cran) + '/7</span></summary>' +
         '<div style="display:grid;gap:12px;margin-top:12px"><div class="champ"><label for="e-' + ea(ref) + '">Étape en cours</label><select id="e-' + ea(ref) + '" data-a="cran" data-ref="' + ea(ref) + '">' +
         ETAPES.map(function (e, i) { return '<option value="' + i + '"' + (o.cran === i ? ' selected' : '') + '>' + (i + 1) + '. ' + e[0] + '</option>'; }).join('') + '<option value="7"' + (o.cran >= 7 ? ' selected' : '') + '>Terminé : livré</option></select></div>' +
         '<div class="lbl">Photo de preuve par étape</div><div class="pgrid">' +
         ETAPES.map(function (e, i) { return '<label class="btn ghost mini' + (pr[i] ? ' ok' : '') + '" title="' + ea(e[0]) + '">' + (pr[i] ? '✓ ' : '+ ') + (i + 1) + '<input type="file" accept="image/*" hidden data-a="stepphoto" data-ref="' + ea(ref) + '" data-i="' + i + '"></label>'; }).join('') + '</div>' +
-        '<p class="note">1 Demande · 2 Devis · 3 Acompte · 4 Achat · 5 Transit · 6 Arrivée · 7 Livraison</p>' +
+        '<p class="note">1 Demande, 2 Devis, 3 Acompte, 4 Achat, 5 Transit, 6 Arrivée, 7 Livraison</p>' +
         '<div class="rangee"><a class="btn" data-a="notif" data-ref="' + ea(ref) + '" href="' + ea(lienNotif(ref)) + '" target="_blank" rel="noopener">Prévenir le client sur WhatsApp</a><button type="button" class="btn ghost" data-a="delcmd" data-ref="' + ea(ref) + '">Supprimer</button></div></div></details>';
     }).join('');
     $('adm-body').innerHTML = s;
@@ -2301,7 +2331,7 @@ body.has-list a.fab-wa { bottom: calc(140px + env(safe-area-inset-bottom, 0px));
     s += '<div class="carte"><h3>Argent (estimation)</h3><div class="acompte">' + t('Déjà encaissé', usd(enc)) + t('Solde à encaisser', usd(reste)) + '</div><p class="note">Calculé à partir des montants saisis sur cet appareil : 50 % dès l\'acompte reçu, 100 % à la livraison. Ces montants ne sont jamais publiés.</p></div>';
     s += '<div class="carte"><h3>Où en sont les colis</h3>' + ETAPES.map(function (e, i) { return '<div class="srow"><span>' + (i + 1) + '. ' + e[0] + '</span><div class="barre"><i style="width:' + Math.round(etapes[i] / mx * 100) + '%"></i></div><b>' + etapes[i] + '</b></div>'; }).join('') + '</div>';
     s += '<div class="carte"><h3>Club VIP</h3><div class="acompte">' + t('Bronze', nv[0]) + t('Argent', nv[1]) + t('Or', nv[2]) + t('Diamant', nv[3]) + '</div></div>';
-    if (sans.length) s += '<div class="carte"><h3>Produits sans prix</h3><p class="note">' + sans.map(function (p) { return p.t; }).join(' · ') + '…</p><button type="button" class="btn ghost" data-a="gotoprod">Fixer les prix</button></div>';
+    if (sans.length) s += '<div class="carte"><h3>Produits sans prix</h3><p class="note">' + sans.map(function (p) { return p.t; }).join(', ') + '…</p><button type="button" class="btn ghost" data-a="gotoprod">Fixer les prix</button></div>';
     $('adm-body').innerHTML = s;
   }
   function rendreAdmin() {
