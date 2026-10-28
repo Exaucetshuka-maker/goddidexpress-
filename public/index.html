@@ -477,6 +477,38 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 .hero .rangee .btn[data-go="commander"] { flex: 1 1 100%; }
 .hero .rangee .btn.ghost[data-assist], .hero .rangee .btn.ghost[data-tour] { flex: 1 1 40%; border: 0; background: none; min-height: 44px; padding-left: 0; padding-right: 0; justify-content: flex-start; text-decoration: underline; text-decoration-color: var(--ligne); text-underline-offset: 5px; color: var(--papier); font-weight: 500; }
 .hero .rangee .btn.ghost[data-assist]:hover, .hero .rangee .btn.ghost[data-tour]:hover { text-decoration-color: var(--orange); }
+#vip .champ, #vip-res { display: none; }
+.metier h3 { font-size: 22px; }
+.metier p { margin: 6px 0 0; }
+.voyage { list-style: none; margin: 0; padding: 0; display: grid; }
+.voyage li { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; padding: 9px 0; position: relative; }
+.voyage li::before { content: attr(data-n); display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--ligne); background: var(--noir); color: var(--brume); font-weight: 600; font-size: 13px; position: relative; z-index: 1; transition: background .4s, color .4s, border-color .4s; }
+.voyage li::after { content: ""; position: absolute; left: 14.5px; top: 39px; bottom: -9px; width: 1px; background: var(--ligne); }
+.voyage li:last-child::after { display: none; }
+.voyage li b { display: block; font-size: 15px; }
+.voyage li span { color: var(--brume); font-size: 13.5px; }
+.voyage.go li::before { background: var(--orange); border-color: var(--orange); color: var(--sur-orange); transition-delay: calc(var(--i) * .45s); }
+@media (prefers-reduced-motion: reduce) { .voyage li::before { transition: none; transition-delay: 0s; } }
+.flag, .drap { font-family: "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Emoji", sans-serif; }
+.marches { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.marche { display: grid; justify-items: center; gap: 6px; padding: 12px 2px; background: var(--carbone); border: 1px solid var(--ligne); border-radius: 3px; color: var(--papier); font: inherit; cursor: pointer; min-height: 44px; }
+.marche .flag { font-size: 30px; line-height: 1; }
+.marche span:last-child { font-size: 12.5px; font-weight: 600; }
+.marche:hover, .marche:focus-visible { border-color: var(--orange); }
+.activites { color: var(--brume); font-size: 14px; margin: 12px 0 0; }
+.trois { display: grid; border-top: 1px solid var(--ligne); margin-top: 16px; }
+.trois button { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 0; background: none; border: 0; border-bottom: 1px solid var(--ligne); color: var(--papier); font: inherit; text-align: left; cursor: pointer; min-height: 44px; }
+.trois b { font-family: var(--f-display); font-weight: 800; font-size: 24px; text-transform: uppercase; letter-spacing: .02em; }
+.trois span { color: var(--brume); font-size: 13.5px; text-align: right; }
+.trois button:hover b, .trois button:focus-visible b { color: var(--orange); }
+.drap { position: absolute; z-index: 2; pointer-events: none; font-size: 30px; line-height: 1; filter: drop-shadow(0 3px 8px rgba(0, 0, 0, .75)); animation: flot 4.6s ease-in-out infinite; }
+.drap.d-cd { left: 12px; bottom: 54px; }
+.drap.d-cn { right: 14px; top: 92px; animation-delay: -1.2s; }
+.drap.d-ae { left: 16px; top: 128px; animation-delay: -2.4s; }
+.drap.d-tr { right: 36px; top: 150px; animation-delay: -3.4s; }
+.drap.d-wd { right: 16px; bottom: 54px; animation-delay: -0.6s; }
+@media (prefers-reduced-motion: reduce) { .drap { animation: none; } }
+@media (max-width: 340px) { .marche .flag { font-size: 24px; } .trois span { display: none; } }
 </style>
 
 <div class="fond" aria-hidden="true"></div>
@@ -499,7 +531,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <h1>Tu choisis.<br><em>On trouve.</em><br>On te livre.</h1>
       <p class="lead">Dites-nous ce que vous voulez, de la RDC ou de l'étranger. On achète, on importe, on livre. Acompte de 50 % et preuve en photo à chaque étape.</p>
       <div class="slogan"><div class="kicker" id="slogan-k"></div><p id="slogan-txt"></p></div>
-      <div class="radar cadre"><div class="phr" id="phr" aria-hidden="true"></div><span class="puce p1" aria-hidden="true">Chine</span><span class="puce p2" aria-hidden="true">En route</span><span class="puce p3" aria-hidden="true">Kinshasa</span><canvas class="globe" id="g-home" role="img" aria-label="Globe terrestre : trajet du colis de la Chine à Kinshasa"></canvas><div class="radar-leg"><span>Chine → Kinshasa</span><span>Glisse pour tourner</span></div></div>
+      <div class="radar cadre"><div class="phr" id="phr" aria-hidden="true"></div><span class="drap d-cd" aria-hidden="true">🇨🇩</span><span class="drap d-cn" aria-hidden="true">🇨🇳</span><span class="drap d-ae" aria-hidden="true">🇦🇪</span><span class="drap d-tr" aria-hidden="true">🇹🇷</span><span class="drap d-wd" aria-hidden="true">🌍</span><canvas class="globe" id="g-home" role="img" aria-label="Globe terrestre : trajet du colis de la Chine à Kinshasa"></canvas><div class="radar-leg"><span>Chine → Kinshasa</span><span>Glisse pour tourner</span></div></div>
       <div class="rangee">
         <button class="btn" type="button" data-go="catalogue">Voir le catalogue</button>
         <button class="btn ghost" type="button" data-go="commander">Commander sur mesure</button>
@@ -513,6 +545,17 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         <div><strong data-n="7">0</strong><small>étapes avec preuve</small></div>
       </div>
     </div>
+
+    <section class="bloc rv" id="marches-bloc">
+      <header><h2>D'où viennent tes produits</h2></header>
+      <div class="marches" id="marches"></div>
+      <p class="activites">Commerce, sourcing, importation, approvisionnement, distribution. <a href="#methode" style="color:var(--papier)">Voir comment on travaille</a></p>
+      <div class="trois">
+        <button type="button" data-go="catalogue"><b>Acheter</b><span>Le catalogue et les achats groupés</span></button>
+        <button type="button" data-go="commander"><b>Faire venir</b><span>Un produit sur mesure, d'où tu veux</span></button>
+        <button type="button" data-go="suivi"><b>Suivre</b><span>Ta commande jusqu'à Kinshasa</span></button>
+      </div>
+    </section>
 
     <section class="bloc rv">
       <header><div class="kicker">Recherche intelligente</div><h2>Dites ce que vous cherchez</h2></header>
@@ -717,6 +760,24 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     <div class="rangee"><a class="btn ghost js-wag" href="#" target="_blank" rel="noopener" hidden>Rejoindre le groupe WhatsApp</a><a class="btn ghost js-wac" href="#" target="_blank" rel="noopener" hidden>Suivre la chaîne</a></div>
   </section>
 
+  <!-- MÉTHODE -->
+  <section class="view" id="v-methode" hidden>
+    <header>
+      <h2>Comment on travaille</h2>
+      <p>De ta demande jusqu'à ta porte : cinq métiers, une seule commande.</p>
+    </header>
+    <div class="wrap" style="gap:14px">
+      <article class="carte metier"><h3>Commerce</h3><p>Le catalogue affiche le prix par paliers : plus tu prends de pièces, moins chaque pièce coûte. Les achats groupés font baisser le prix encore plus.</p></article>
+      <article class="carte metier"><h3>Sourcing</h3><p>Envoie une photo, un lien ou une description sur WhatsApp. On cherche le fournisseur et on t'envoie un devis complet avant tout paiement.</p></article>
+      <article class="carte metier"><h3>Importation</h3><p>Acompte de 50 %, achat chez le fournisseur, expédition, arrivée à Kinshasa. Tu vois la preuve en photo à chaque étape.</p></article>
+      <article class="carte metier"><h3>Approvisionnement</h3><p>Restaurants, boutiques, hôtels, écoles : dis-nous ce dont ton activité a besoin, on prépare une offre sur WhatsApp.</p></article>
+      <article class="carte metier"><h3>Distribution</h3><p>Ta commande est remise avec une vidéo de remise.</p></article>
+      <div class="carte" id="m-info" hidden></div>
+      <div class="carte"><h3>Le voyage de ton colis</h3><ol class="voyage" id="voyage"></ol></div>
+      <a class="btn" id="m-wa" href="#" target="_blank" rel="noopener">Demander un produit sur WhatsApp</a>
+    </div>
+  </section>
+
   <!-- 3. LIVE -->
   <section class="view" id="v-live" hidden>
     <header>
@@ -782,7 +843,9 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     </header>
     <div class="passe" id="passe"><div class="l1"><b>GOD DID EXPRESS</b><span class="nom">Membre</span></div><div><div class="nom" id="p-nom-aff">Votre prénom</div><div class="code" id="p-code">Tapez votre prénom ci-dessous</div></div></div>
     <div class="carte">
-      <div class="l1f"><h3>Carte fidélité</h3><span class="pastille">Exemple</span></div>
+      <div class="l1f"><h3>Carte fidélité</h3><span class="pastille" id="fid-pastille">Exemple</span></div>
+      <div class="champ"><label for="fid-code">Ton numéro de carte</label><input id="fid-code" autocomplete="off" style="text-transform:uppercase" placeholder="Ex. GDE-K7M2-9QXP"></div>
+      <p class="note" id="fid-res" aria-live="polite">Entre ton numéro pour voir tes achats. Sans carte, demande-la sur WhatsApp.</p>
       <div class="fid" id="fid-grid"></div>
       <div class="niveaux"><span>Bronze</span><span>Argent</span><span>Or</span><span>Diamant</span></div>
       <p class="note">2 $ reçus à chaque achat. Après 10 achats (20 $ cumulés) : un produit de 20 $ sans frais de douane et livraison gratuite. Offre limitée à 2 mois. Votre seule limite, c'est votre imagination.</p>
@@ -847,6 +910,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     <div class="reseaux" id="reseaux-pied"></div>
     <div class="tel"><span class="kicker">WhatsApp</span><span class="mono" id="num">+243 983 129 294</span><button class="btn ghost mini" type="button" id="num-copy">Copier</button></div>
     <div class="tel" id="tel2-ligne" hidden></div>
+    <div class="tel" id="mail-ligne" hidden></div>
     <div>Super Lemba, Kinshasa. Repère : Bar ROYAL, en face de GRAND SHOP AIRTEL.</div>
     <div id="adr2-ligne" hidden></div>
     <div>Votre plateforme de proximité, ouverte sur le monde.</div>
@@ -1141,7 +1205,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 
 
   /* Onglets */
-  var VUES = ['accueil', 'catalogue', 'commander', 'groupes', 'live', 'suivi', 'parrainer', 'admin'];
+  var VUES = ['accueil', 'catalogue', 'commander', 'groupes', 'live', 'suivi', 'parrainer', 'methode', 'admin'];
   var IS_ADMIN = false, GS = null, GH = null, curOrd = null;
   var PRINC = ['accueil', 'catalogue', 'commander', 'suivi'];
   var curCran = 4;
@@ -1151,6 +1215,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     PRINC.forEach(function (v) { $('t-' + v).setAttribute('aria-current', v === id ? 'page' : 'false'); });
     $('t-plus').setAttribute('aria-current', PRINC.indexOf(id) < 0 ? 'page' : 'false');
     if (id === 'suivi' && typeof rendreSuivi === 'function') rendreSuivi(curCran);
+    if (id === 'methode' && typeof animerVoyage === 'function') animerVoyage();
     if (id === 'admin' && typeof rendreAdmin === 'function') rendreAdmin();
     if (push) { try { history.replaceState(null, '', '#' + id); } catch (e) {} window.scrollTo(0, 0); }
   }
@@ -1302,7 +1367,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     s.rev = s.rev || 0; s.prod = s.prod || {}; s.extra = s.extra || []; s.slog = s.slog || {};
     s.soc = s.soc || { tiktok: '', instagram: '', facebook: '' }; s.promo = s.promo || []; s.avis = s.avis || [];
     s.cmd = s.cmd || {}; s.vip = (s.vip && s.vip.length === 3) ? s.vip : [3, 6, 10]; s.lien = s.lien || '';
-    s.wag = s.wag || WAG0; s.wac = s.wac || WAC0; s.tel2 = s.tel2 || ''; s.adr2 = s.adr2 || ''; s.phr = s.phr || []; s.grp = s.grp || [];
+    s.info = s.info || {}; s.mail = s.mail || ''; s.wag = s.wag || WAG0; s.wac = s.wac || WAC0; s.tel2 = s.tel2 || ''; s.adr2 = s.adr2 || ''; s.phr = s.phr || []; s.grp = s.grp || [];
     return s;
   }
   STATE = defState(STATE);
@@ -1318,6 +1383,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       var p = Object.assign({}, b);
       if (o.px) p.px = o.px;
       if (o.photo) p.photo = o.photo;
+      if (o.desc) p.desc = o.desc;
       out.push(p);
     });
     STATE.extra.forEach(function (e) { if (!e.cache) out.push(Object.assign({ l: 0 }, e)); });
@@ -1350,7 +1416,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     return s;
   }
   function fichePrix(p) {
-    var px = pxList(p), s = '<p class="note" style="font-size:14px">' + p.s + '.</p>';
+    var px = pxList(p), s = '<p class="note" style="font-size:14px">' + p.s + '.</p>' + (p.desc ? '<p style="font-size:14.5px;margin:8px 0 0">' + h(p.desc) + '</p>' : '');
     if (prixMin(p) === null) return s + '<p class="note">Prix sur demande, envoyé sur WhatsApp avant tout paiement. Acompte de 50 %.</p>';
     s += '<div class="paliers">' + QP.map(function (q, i) {
       return '<div class="palier" data-pal="' + i + '"><span>' + (i === QP.length - 1 ? q + '+' : 'dès ' + q) + ' pièce' + (q > 1 ? 's' : '') + '</span><b>' + (okPx(px[i]) ? usd(Number(px[i])) : '—') + '</b></div>';
@@ -1685,13 +1751,29 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   $('avis-wa').href = wa('Bonjour GOD DID EXPRESS, je veux laisser mon témoignage (avec ma photo ou une vidéo).');
   $('fond-wa').href = wa('Bonjour GOD DID EXPRESS, je veux faire partie des premiers clients : mon badge de membre fondateur, s\'il vous plaît.');
 
-  /* Fidélité : 10 diamants, 4 remplis en exemple */
-  (function () {
-    var d = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12l4 6-10 11L2 10z"/><path d="M2 10h20M9 4l-2 6 5 11 5-11-2-6"/></svg>', h = '';
-    for (var i = 0; i < 10; i++) h += '<div class="dia' + (i < 4 ? ' on' : '') + '">' + d + '</div>';
-    $('fid-grid').innerHTML = h;
-    $('fid-wa').href = wa('Bonjour GOD DID EXPRESS, je veux activer ma carte fidélité.');
-  })();
+  /* Fidélité : carte numérotée, 10 diamants */
+  var DIA = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12l4 6-10 11L2 10z"/><path d="M2 10h20M9 4l-2 6 5 11 5-11-2-6"/></svg>';
+  function diamants(n) {
+    var o = ''; for (var i = 0; i < 10; i++) o += '<div class="dia' + (i < n ? ' on' : '') + '">' + DIA + '</div>';
+    $('fid-grid').innerHTML = o;
+  }
+  diamants(4);
+  $('fid-wa').href = wa('Bonjour GOD DID EXPRESS, je veux ma carte fidélité.');
+  var fidT = null;
+  $('fid-code').addEventListener('input', function () {
+    clearTimeout(fidT);
+    var c = this.value.trim().toUpperCase().replace(/\s+/g, '');
+    if (c.length < 6) { $('fid-pastille').textContent = 'Exemple'; $('fid-res').textContent = 'Entre ton numéro pour voir tes achats. Sans carte, demande-la sur WhatsApp.'; diamants(4); return; }
+    fidT = setTimeout(function () {
+      fetch('/api/carte/' + encodeURIComponent(c)).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, s: r.status, j: j }; }); }).then(function (r) {
+        if (!r.ok) { $('fid-pastille').textContent = 'Exemple'; $('fid-res').textContent = r.s === 429 ? 'Trop d\'essais. Réessaie dans quelques minutes.' : 'Carte introuvable. Vérifie le numéro.'; diamants(4); return; }
+        var n = r.j.achats || 0, th = STATE.vip, lv = n >= th[2] ? 3 : n >= th[1] ? 2 : n >= th[0] ? 1 : n >= 1 ? 0 : -1;
+        $('fid-pastille').textContent = 'Ta carte'; diamants(Math.min(10, n));
+        $('fid-res').textContent = 'Bonjour ' + (r.j.nom || '') + '. ' + n + ' achat' + (n > 1 ? 's' : '') + ', ' + usd(n * 2) + ' reçus' + (lv >= 0 ? ', niveau ' + NIV[lv] : '') + '. ' +
+          (n >= 10 ? 'Tu as droit à ton produit de 20 $. Écris-nous sur WhatsApp.' : 'Encore ' + (10 - n) + ' achat' + (10 - n > 1 ? 's' : '') + ' pour ton produit de 20 $.');
+      }).catch(function () { $('fid-res').textContent = 'Pas de connexion. Réessaie.'; });
+    }, 500);
+  });
 
   /* Fenêtre « Plus » */
   function tuile(v, ico, t, s) { return '<button type="button" class="tuile" data-go="' + v + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + ico + '</svg><span><b>' + t + '</b><span class="s">' + s + '</span></span></button>'; }
@@ -1699,7 +1781,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Plus</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Aller plus loin</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
       tuile('groupes', '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.6.2 4.5 2.3 4.5 5.1"/>', 'Achats groupés', 'Plus on est nombreux, moins c\'est cher') +
       tuile('live', '<circle cx="12" cy="12" r="2.4"/><path d="M7.5 7.5a6.4 6.4 0 0 0 0 9M16.5 7.5a6.4 6.4 0 0 1 0 9M4.5 4.5a10.6 10.6 0 0 0 0 15M19.5 4.5a10.6 10.6 0 0 1 0 15"/>', 'Live shopping', 'Voir le produit réel avant d\'acheter') +
-      tuile('parrainer', '<rect x="3" y="9" width="18" height="4" rx="1"/><path d="M12 9v12M5 13v7h14v-7M12 9c-3 0-4.5-1-4.5-2.6S9 4 10.2 4C11.6 4 12 6 12 9zm0 0c3 0 4.5-1 4.5-2.6S15 4 13.8 4C12.4 4 12 6 12 9z"/>', 'Membre, fidélité, parrainage', 'Votre carte, le Club VIP, devenir point relais') + (IS_ADMIN ? tuile('admin', '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>', 'Espace admin', 'Prix, produits, photos, commandes') : ''));
+      tuile('parrainer', '<rect x="3" y="9" width="18" height="4" rx="1"/><path d="M12 9v12M5 13v7h14v-7M12 9c-3 0-4.5-1-4.5-2.6S9 4 10.2 4C11.6 4 12 6 12 9zm0 0c3 0 4.5-1 4.5-2.6S15 4 13.8 4C12.4 4 12 6 12 9z"/>', 'Membre, fidélité, parrainage', 'Votre carte, le Club VIP, devenir point relais') + tuile('methode', '<circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8.2 18H13a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h4.8"/>', 'Comment on travaille', 'Les cinq métiers et le voyage du colis') + (IS_ADMIN ? tuile('admin', '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>', 'Espace admin', 'Prix, produits, photos, commandes') : ''));
   }
 
   /* Lecture à voix haute d'une fiche produit */
@@ -1836,6 +1918,9 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var t2 = String(STATE.tel2 || '').trim(), a2 = String(STATE.adr2 || '').trim();
     $('tel2-ligne').hidden = !t2;
     if (t2) $('tel2-ligne').innerHTML = '<span class="kicker">Deuxième numéro</span><a class="mono" style="color:var(--papier)" href="tel:' + ea(t2.replace(/[^\d+]/g, '')) + '">' + h(t2) + '</a>';
+    var ml = String(STATE.mail || '').trim(), me = $('mail-ligne');
+    me.hidden = !ml; me.textContent = '';
+    if (ml) { var k = document.createElement('span'); k.className = 'kicker'; k.textContent = 'E-mail'; var l = document.createElement('a'); l.href = 'mailto:' + ml; l.textContent = ml; l.style.color = 'var(--papier)'; me.appendChild(k); me.appendChild(l); }
     $('adr2-ligne').hidden = !a2;
     if (a2) $('adr2-ligne').textContent = 'Autre adresse : ' + a2;
   }
@@ -1906,6 +1991,46 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     function aff() { el.classList.remove('in'); void el.offsetWidth; el.textContent = L[phrI % L.length]; if (smooth) el.classList.add('in'); phrI++; }
     phrI = 0; aff();
     if (smooth && L.length > 1) phrT = setInterval(aff, 3800);
+  }
+
+
+  /* Marchés : cinq drapeaux, une fiche par pays */
+  var MARCHES = [
+    { f: '🇨🇩', n: 'RDC', t: 'Des produits trouvés et livrés en RDC.', m: 'Bonjour GOD DID EXPRESS, je cherche un produit disponible en RDC. Voici ce que je veux : ' },
+    { f: '🇨🇳', n: 'Chine', t: 'Électronique, vêtements, maison, emballages et tout ce qui se fabrique en gros.', cat: true, m: 'Bonjour GOD DID EXPRESS, je veux faire venir un produit de Chine. Voici ce que je veux : ' },
+    { f: '🇦🇪', n: 'Dubaï', t: 'Téléphones, électronique, parfums et produits haut de gamme.', m: 'Bonjour GOD DID EXPRESS, je veux faire venir un produit de Dubaï. Voici ce que je veux : ' },
+    { f: '🇹🇷', n: 'Turquie', t: 'Vêtements, tissus, chaussures et meubles.', m: 'Bonjour GOD DID EXPRESS, je veux faire venir un produit de Turquie. Voici ce que je veux : ' },
+    { f: '🌍', n: 'Monde', t: 'Un autre pays ? Dis-nous le produit, on cherche le fournisseur.', m: 'Bonjour GOD DID EXPRESS, je cherche un produit dans un autre pays. Voici ce que je veux : ' }
+  ];
+  function rendreMarches() {
+    $('marches').innerHTML = MARCHES.map(function (x, i) {
+      return '<button type="button" class="marche" data-marche="' + i + '" aria-label="' + x.n + '"><span class="flag" aria-hidden="true">' + x.f + '</span><span>' + x.n + '</span></button>';
+    }).join('');
+  }
+  $('marches').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-marche]'); if (!b) return;
+    var x = MARCHES[Number(b.getAttribute('data-marche'))];
+    ouvrir('<div class="sheet-tete"><div><h3 id="sheet-titre" style="font-size:22px"><span class="flag" aria-hidden="true">' + x.f + '</span> ' + x.n + '</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
+      '<p>' + x.t + '</p><div class="rangee">' + (x.cat ? '<button class="btn" type="button" data-go="catalogue">Voir le catalogue</button>' : '') +
+      '<a class="btn' + (x.cat ? ' ghost' : '') + '" href="' + ea(wa(x.m)) + '" target="_blank" rel="noopener">Demander sur WhatsApp</a></div>');
+  });
+
+  /* Méthode : voyage du colis et infos remplies par l'admin */
+  function rendreInfo() {
+    var i = STATE.info || {}, l = [];
+    if (i.avion) l.push('<p><b>Par avion :</b> ' + h(i.avion) + '</p>');
+    if (i.bateau) l.push('<p><b>Par bateau :</b> ' + h(i.bateau) + '</p>');
+    if (i.zones) l.push('<p><b>On livre :</b> ' + h(i.zones) + '</p>');
+    if (i.introuvable) l.push('<p><b>Si on ne trouve pas le produit :</b> ' + h(i.introuvable) + '</p>');
+    $('m-info').hidden = !l.length;
+    $('m-info').innerHTML = l.length ? '<h3>À savoir</h3>' + l.join('') : '';
+    $('m-wa').href = wa('Bonjour GOD DID EXPRESS, je voudrais faire venir un produit. Voici ce que je cherche : ');
+    $('voyage').innerHTML = ETAPES.map(function (e, k) { return '<li data-n="' + (k + 1) + '" style="--i:' + k + '"><div><b>' + e[0] + '</b><span>' + e[1] + '</span></div></li>'; }).join('');
+  }
+  function animerVoyage() {
+    var v = $('voyage'); v.classList.remove('go');
+    if (!smooth) { v.classList.add('go'); return; }
+    void v.offsetWidth; setTimeout(function () { v.classList.add('go'); }, 150);
   }
 
   /* Bouton WhatsApp flottant : prend le produit ouvert, sinon un message simple */
@@ -2437,7 +2562,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   })();
 
   /* Premier affichage */
-  rendreSlogan(); rendreReseaux(); rendreVip(); rendreAvis(); majPub(); rendreGroupes(); rendrePhrases();
+  rendreSlogan(); rendreReseaux(); rendreVip(); rendreAvis(); majPub(); rendreGroupes(); rendrePhrases(); rendreMarches(); rendreInfo();
 
   show(location.hash.slice(1), false);
 })();

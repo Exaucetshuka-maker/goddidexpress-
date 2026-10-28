@@ -81,6 +81,7 @@ function nettoyer(s) {
     const r = {};
     if (Array.isArray(p.px)) r.px = [0, 1, 2].map((i) => (p.px[i] === null || p.px[i] === '' || p.px[i] === undefined ? null : nombre(p.px[i], null)));
     if (p.cache) r.cache = true;
+    if (p.desc) r.desc = txt(p.desc, 600);
     if (p.photo && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(p.photo)) r.photo = p.photo;
     o.prod[id] = r;
   });
@@ -92,6 +93,7 @@ function nettoyer(s) {
     };
     if (e.photo && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(e.photo)) r.photo = e.photo;
     if (e.cache) r.cache = true;
+    if (e.desc) r.desc = txt(e.desc, 600);
     return r;
   });
   o.slog = {};
@@ -103,8 +105,11 @@ function nettoyer(s) {
   o.avis = (Array.isArray(s.avis) ? s.avis : []).slice(0, 30).map((a) => ({ txt: txt(a.txt, 400), nom: txt(a.nom, 80), photo: a.photo && /^\/api\/img\//.test(a.photo) ? a.photo : undefined }));
   o.vip = Array.isArray(s.vip) && s.vip.length === 3 ? s.vip.map((v) => nombre(v, 0)) : [3, 6, 10];
   o.lien = /^https:\/\//i.test(s.lien || '') ? txt(s.lien, 300) : '';
+  o.mail = /^[^\s@<>"']{1,64}@[^\s@<>"']{1,120}\.[^\s@<>"']{2,20}$/.test(String(s.mail || '').trim()) ? String(s.mail).trim() : '';
   o.wag = /^https:\/\//i.test(s.wag || '') ? txt(s.wag, 300) : '';
   o.wac = /^https:\/\//i.test(s.wac || '') ? txt(s.wac, 300) : '';
+  const inf = s.info && typeof s.info === 'object' ? s.info : {};
+  o.info = { avion: txt(inf.avion, 120), bateau: txt(inf.bateau, 120), zones: txt(inf.zones, 300), introuvable: txt(inf.introuvable, 300) };
   o.tel2 = txt(s.tel2, 40);
   o.adr2 = txt(s.adr2, 200);
   o.phr = (Array.isArray(s.phr) ? s.phr : []).slice(0, 20).map((x) => txt(x, 80)).filter(Boolean);
@@ -120,6 +125,12 @@ function nettoyer(s) {
     p: (Array.isArray(g.p) ? g.p : []).slice(0, 3).map((t) => [Math.max(1, Math.round(nombre(t && t[0], 1))), Math.max(0, nombre(t && t[1]))]),
   }));
   return o;
+}
+
+async function lireListe(env, cle) {
+  if (!env.GDE) return [];
+  const t = await env.GDE.get(cle);
+  try { return t ? JSON.parse(t) : []; } catch (e) { return []; }
 }
 
 async function lireEtat(env) {
@@ -207,6 +218,19 @@ export default {
       return json({ token: await faireToken(env, auth) });
     }
 
+    /* Consultation d'une carte de fidélité par son numéro (public, limité) */
+    const mc = /^\/api\/carte\/([A-Za-z0-9-]{4,30})$/.exec(p);
+    if (mc && request.method === 'GET') {
+      const ip = request.headers.get('cf-connecting-ip') || 'x', k = 'look:' + ip;
+      const n = Number((await env.GDE.get(k)) || 0);
+      if (n >= 40) return json({ erreur: 'Trop d\'essais' }, 429);
+      await env.GDE.put(k, String(n + 1), { expirationTtl: 600 });
+      const cartes = await lireListe(env, 'cartes');
+      const c = cartes.find((x) => x.code === mc[1].toUpperCase());
+      if (!c) return json({ erreur: 'Carte introuvable' }, 404);
+      return json({ nom: c.nom, achats: c.achats });
+    }
+
     /* Tout ce qui suit demande d'être connecté */
     if (!(await verifierToken(env, request))) return json({ erreur: 'Connexion requise' }, 401);
 
@@ -229,6 +253,35 @@ export default {
       if (!(u[0] === 0xff && u[1] === 0xd8)) return json({ erreur: 'Photo JPEG attendue' }, 415);
       await env.GDE.put('img:' + mi[1], d);
       return json({ ok: true });
+    }
+
+    if (p === '/api/cartes' && request.method === 'GET') return json({ cartes: await lireListe(env, 'cartes') });
+    if (p === '/api/cartes' && request.method === 'PUT') {
+      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const vues = new Set();
+      const propre = (Array.isArray(b.cartes) ? b.cartes : []).slice(0, 3000).map((c) => ({
+        code: String(c.code || '').toUpperCase(), nom: txt(c.nom, 40), achats: Math.max(0, Math.min(999, Math.round(nombre(c.achats)))), maj: nombre(c.maj, Date.now()),
+      })).filter((c) => /^[A-Z0-9-]{4,30}$/.test(c.code) && !vues.has(c.code) && vues.add(c.code));
+      await env.GDE.put('cartes', JSON.stringify(propre));
+      return json({ cartes: propre });
+    }
+
+    if (p === '/api/couts' && request.method === 'GET') {
+      const t = await env.GDE.get('couts'); let j = {}; try { j = t ? JSON.parse(t) : {}; } catch (e) {}
+      return json({ reglages: j.reglages || {}, produits: j.produits || {} });
+    }
+    if (p === '/api/couts' && request.method === 'PUT') {
+      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const r = b.reglages || {}, num = (v) => (v === '' || v == null || !isFinite(Number(v)) ? '' : Math.max(0, Math.min(1e6, Number(v))));
+      const reglages = { devise: r.devise === 'CNY' ? 'CNY' : 'USD', taux: num(r.taux), kgAvion: num(r.kgAvion), kgBateau: num(r.kgBateau), douane: num(r.douane), m1: num(r.m1), m5: num(r.m5), m10: num(r.m10), arrondi: ['0.01', '0.5', '1'].includes(String(r.arrondi)) ? String(r.arrondi) : '0.5' };
+      const produits = {};
+      Object.keys(b.produits || {}).slice(0, 1500).forEach((id) => {
+        if (!/^[A-Za-z0-9_-]{1,40}$/.test(id)) return;
+        const c = b.produits[id] || {};
+        produits[id] = { cout: num(c.cout), poids: num(c.poids), mode: c.mode === 'bateau' ? 'bateau' : 'avion' };
+      });
+      await env.GDE.put('couts', JSON.stringify({ reglages, produits }));
+      return json({ reglages, produits });
     }
 
     if (p === '/api/password' && request.method === 'POST') {
