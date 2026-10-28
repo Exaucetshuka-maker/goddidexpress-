@@ -85,6 +85,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   <div class="wrap">
     <div class="onglets" role="tablist">
       <button class="btn ghost" role="tab" data-t="prod" aria-selected="true">Produits</button>
+      <button class="btn ghost" role="tab" data-t="voy" aria-selected="false">Voyages</button>
       <button class="btn ghost" role="tab" data-t="grp" aria-selected="false">Achats groupés</button>
       <button class="btn ghost" role="tab" data-t="avis" aria-selected="false">Avis</button>
       <button class="btn ghost" role="tab" data-t="prix" aria-selected="false">Calcul des prix</button>
@@ -133,6 +134,12 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         </div>
       </details>
       <div id="av-liste" class="grille"></div>
+    </section>
+
+    <section id="t-voy" class="grille cache" style="gap:12px">
+      <p class="note">Un voyage = un départ (Chine, Dubaï, Istanbul…). Les commandes ferment automatiquement la veille du départ. Les dates d'arrivée et le pourcentage de remplissage, c'est toi qui les écris : rien n'est inventé.</p>
+      <button class="btn" id="v-add" type="button">+ Ajouter un voyage</button>
+      <div id="voyages" class="grille" style="gap:12px"></div>
     </section>
 
     <section id="t-prix" class="grille cache" style="gap:12px">
@@ -259,7 +266,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     s.rev = s.rev || 0; s.prod = s.prod || {}; s.extra = s.extra || []; s.slog = s.slog || {};
     s.soc = Object.assign({ tiktok: '', instagram: '', facebook: '' }, s.soc || {});
     s.promo = s.promo || []; s.avis = s.avis || []; s.vip = (s.vip && s.vip.length === 3) ? s.vip : [3, 6, 10]; s.lien = s.lien || '';
-    s.info = s.info || {}; s.mail = s.mail || ''; s.wag = s.wag || WAG0; s.wac = s.wac || WAC0; s.tel2 = s.tel2 || ''; s.adr2 = s.adr2 || ''; s.phr = s.phr || [];
+    s.voy = s.voy || []; s.info = s.info || {}; s.mail = s.mail || ''; s.wag = s.wag || WAG0; s.wac = s.wac || WAC0; s.tel2 = s.tel2 || ''; s.adr2 = s.adr2 || ''; s.phr = s.phr || [];
     s.grp = (s.grp || []).slice(0, 10);
     while (s.grp.length < 10) s.grp.push({ id: 'g' + (s.grp.length + 1), on: false, nom: '', pid: '', durj: 3, fin: 0, n: 0, max: 0, p: [[1, 0], [5, 0], [10, 0]] });
     s.grp.forEach(function (g) { while (g.p.length < 3) g.p.push([[1, 5, 10][g.p.length], 0]); });
@@ -292,7 +299,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       if (rs[2].ok) COUTS = { reglages: Object.assign(COUTS.reglages, rs[2].j.reglages || {}), produits: rs[2].j.produits || {} };
       if (rs[3].ok) CARTES = rs[3].j.cartes || [];
       $('ecran').classList.add('cache'); $('app').classList.remove('cache');
-      remplirSelects(); rendreProduits(); rendreGroupes(); rendreAvisAdmin(); rendreReglagesPrix(); rendrePrix(); rendreCartes(); rendreReglages(); marquer(false);
+      remplirSelects(); rendreProduits(); rendreGroupes(); rendreVoyages(); rendreAvisAdmin(); rendreReglagesPrix(); rendrePrix(); rendreCartes(); rendreReglages(); marquer(false);
     });
   }
 
@@ -326,7 +333,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   Array.prototype.forEach.call(document.querySelectorAll('.onglets button'), function (b) {
     b.addEventListener('click', function () {
       Array.prototype.forEach.call(document.querySelectorAll('.onglets button'), function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
-      ['prod', 'grp', 'avis', 'prix', 'fid', 'reg'].forEach(function (t) { $('t-' + t).classList.toggle('cache', t !== b.getAttribute('data-t')); });
+      ['prod', 'voy', 'grp', 'avis', 'prix', 'fid', 'reg'].forEach(function (t) { $('t-' + t).classList.toggle('cache', t !== b.getAttribute('data-t')); });
       window.scrollTo(0, 0);
     });
   });
@@ -521,6 +528,43 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     else fin();
   });
 
+  /* ---------- Voyages ---------- */
+  function rendreVoyages() {
+    $('voyages').innerHTML = STATE.voy.map(function (v, i) {
+      var orig = ['Chine', 'Dubaï', 'Istanbul'];
+      var sel = orig.indexOf(v.orig) >= 0 ? v.orig : '__autre';
+      return '<details class="carte" ' + (v.dep ? '' : 'open') + ' data-vi="' + i + '"><summary><b>' + esc(v.orig || 'Nouveau voyage') + '</b>' + (v.dep ? ' · départ ' + esc(v.dep) : '') + (v.on === false ? ' · caché' : '') + '</summary>' +
+        '<div class="grille" style="margin-top:10px">' +
+        '<div><label>Origine</label><select data-vf="osel"><option value="Chine"' + (sel === 'Chine' ? ' selected' : '') + '>Chine</option><option value="Dubaï"' + (sel === 'Dubaï' ? ' selected' : '') + '>Dubaï</option><option value="Istanbul"' + (sel === 'Istanbul' ? ' selected' : '') + '>Istanbul</option><option value="__autre"' + (sel === '__autre' ? ' selected' : '') + '>Autre</option></select></div>' +
+        (sel === '__autre' ? '<div><label>Nom de l\'origine</label><input data-vf="orig" maxlength="40" value="' + esc(v.orig) + '"></div>' : '') +
+        '<div class="grille g2"><div><label>Date de départ</label><input type="date" data-vf="dep" value="' + esc(v.dep) + '"></div><div><label>Arrivée estimée</label><input type="date" data-vf="arr" value="' + esc(v.arr) + '"></div></div>' +
+        '<div class="grille g2"><div><label>État</label><select data-vf="etat"><option value="auto"' + (v.etat === 'auto' ? ' selected' : '') + '>Automatique (ouvert, puis fermé la veille)</option><option value="route"' + (v.etat === 'route' ? ' selected' : '') + '>En route</option><option value="arrive"' + (v.etat === 'arrive' ? ' selected' : '') + '>Arrivé</option></select></div>' +
+        '<div><label>Voyage rempli (%)</label><input data-vf="rempl" inputmode="numeric" placeholder="Vide = pas affiché" value="' + esc(v.rempl == null ? '' : v.rempl) + '"></div></div>' +
+        '<div><label>Note (facultatif)</label><input data-vf="note" maxlength="160" value="' + esc(v.note) + '" placeholder="Ex. Vêtements et électronique"></div>' +
+        '<div class="rang"><label style="display:flex;gap:8px;align-items:center;margin:0;color:var(--papier)"><input type="checkbox" style="width:22px;min-height:22px" data-vf="on"' + (v.on !== false ? ' checked' : '') + '> Visible sur le site</label><button class="btn danger mini" data-va="suppr" type="button">Supprimer</button></div>' +
+        '</div></details>';
+    }).join('') || '<p class="note">Aucun voyage. Appuie sur « Ajouter un voyage ».</p>';
+  }
+  $('v-add').addEventListener('click', function () {
+    if (STATE.voy.length >= 24) { alert('24 voyages au maximum.'); return; }
+    STATE.voy.push({ id: 'v' + Date.now().toString(36), on: true, orig: 'Chine', dep: '', arr: '', etat: 'auto', rempl: null, note: '' }); marquer(true); rendreVoyages();
+  });
+  function voyChamp(e) {
+    var t = e.target, f = t.getAttribute('data-vf'), row = t.closest('[data-vi]'); if (!f || !row) return;
+    var v = STATE.voy[Number(row.getAttribute('data-vi'))];
+    if (f === 'osel') { v.orig = t.value === '__autre' ? '' : t.value; marquer(true); rendreVoyages(); return; }
+    if (f === 'on') v.on = t.checked;
+    else if (f === 'rempl') { var n = parseInt(t.value, 10); v.rempl = isFinite(n) ? Math.max(0, Math.min(100, n)) : null; }
+    else v[f] = t.value;
+    marquer(true);
+  }
+  $('voyages').addEventListener('input', voyChamp); $('voyages').addEventListener('change', voyChamp);
+  $('voyages').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-va]'); if (!b) return;
+    var i = Number(b.closest('[data-vi]').getAttribute('data-vi'));
+    if (confirm('Supprimer ce voyage ?')) { STATE.voy.splice(i, 1); marquer(true); rendreVoyages(); }
+  });
+
   /* ---------- Calcul des prix (données privées, jamais publiées) ---------- */
   var COUTS = { reglages: { devise: 'USD', taux: '', kgAvion: '', kgBateau: '', douane: '', m1: '', m5: '', m10: '', arrondi: '0.5' }, produits: {} }, couDirty = false;
   var CFIELDS = ['taux', 'kgAvion', 'kgBateau', 'douane', 'm1', 'm5', 'm10'];
@@ -684,7 +728,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         CARTES = r.j.cartes; carDirty = false;
       }
       marquer(false); infoEtat('Publié sur le site ✓', 'ok');
-      rendreProduits(); rendreGroupes(); rendreAvisAdmin(); rendrePrix(); rendreCartes();
+      rendreProduits(); rendreGroupes(); rendreVoyages(); rendreAvisAdmin(); rendrePrix(); rendreCartes();
     } catch (er) { $('b-save').disabled = false; infoEtat(er.message || 'Pas de connexion', 'mal'); }
   });
 

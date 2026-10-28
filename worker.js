@@ -124,6 +124,16 @@ function nettoyer(s) {
     max: Math.max(0, Math.round(nombre(g.max))),
     p: (Array.isArray(g.p) ? g.p : []).slice(0, 3).map((t) => [Math.max(1, Math.round(nombre(t && t[0], 1))), Math.max(0, nombre(t && t[1]))]),
   }));
+  o.voy = (Array.isArray(s.voy) ? s.voy : []).slice(0, 24).map((v, i) => ({
+    id: txt(v.id || 'v' + (i + 1), 20),
+    on: v.on !== false,
+    orig: txt(v.orig, 40),
+    dep: /^\d{4}-\d{2}-\d{2}$/.test(String(v.dep || '')) ? String(v.dep) : '',
+    arr: /^\d{4}-\d{2}-\d{2}$/.test(String(v.arr || '')) ? String(v.arr) : '',
+    etat: ['auto', 'route', 'arrive'].indexOf(v.etat) >= 0 ? v.etat : 'auto',
+    rempl: v.rempl === '' || v.rempl == null ? null : Math.max(0, Math.min(100, Math.round(nombre(v.rempl)))),
+    note: txt(v.note, 160),
+  }));
   return o;
 }
 
