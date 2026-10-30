@@ -28,6 +28,7 @@
 .suivi li.fait::before{background:var(--orange)}
 .suivi li.cours h3{color:var(--orange-vif)}
 .nv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.nv div{border:1px solid var(--ligne);border-radius:4px;padding:12px 8px;text-align:center}.nv b{font-family:var(--f-display);font-size:20px;text-transform:uppercase;display:block}.nv small{color:var(--brume);font-size:12px}
+.tk-img{width:100%;max-height:56vh;object-fit:contain;border-radius:6px;background:#F4EFE9;display:block}
 </style>
 </head><body>
 <title>GOD DID EXPRESS</title>
@@ -1002,6 +1003,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 <div class="boot" id="boot" hidden><div><div class="boot-logo">God Did <span>Express</span></div><div class="boot-ligne"><i></i></div><div class="boot-txt">Kinshasa vers le monde</div></div></div>
 
 <script src="holo.js"></script>
+<script src="ticket.js"></script>
 <script>
 (function () {
   var WA = '243983129294';
@@ -1321,11 +1323,66 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       '\nBudget : ' + (b > 0 ? usd(b) : 'à définir') + '\nAcompte par : ' + pay +
       (promoPct($('o-promo').value) ? '\nCode promo : ' + $('o-promo').value.trim().toUpperCase() + ' (-' + promoPct($('o-promo').value) + ' %)' : '') + ($('o-membre').value.trim() ? '\nCode membre : ' + $('o-membre').value.trim().toUpperCase() : '') + '\nNom : ' + nom + '\nTéléphone : ' + tel + '\nLivraison : ' + commune;
     $('et-wa').href = wa(dernierMsg);
+    dernierTicket = { titre: 'Demande de colis', ref: ref, stamp: ['REÇU', 'GDE'], rows: [['Client', nom], ['Contact', tel], ['Livraison', commune], ['Produit', cat + ', ' + desc], ['Quantité', qte], ['Acompte', ac + ' (' + pay + ')']], note: 'Envoie cette image à GOD DID EXPRESS sur WhatsApp. Garde la référence, elle sert au suivi.' };
     $('etiquette').hidden = false;
     var sc = $('sceau'); sc.classList.remove('frappe'); void sc.offsetWidth; sc.classList.add('frappe');
     $('etiquette').scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
   });
   $('et-copy').addEventListener('click', function () { copy(dernierMsg); });
+  /* ---------- Tickets en image pour WhatsApp ---------- */
+  var TK = null, dernierTicket = null;
+  var MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  function dateFr() { var d = new Date(); return d.getDate() + ' ' + MOIS[d.getMonth()] + ' ' + d.getFullYear(); }
+  function tkRef() { var d = new Date(); return 'GDE-' + String(d.getFullYear()).slice(2) + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(Math.floor(1000 + Math.random() * 9000)); }
+  function aCommande(t) { return /(commander|commande|devis|rejoindre|voyage|grossiste|liste)/i.test(t) && !/(état de ma commande|à chaque étape|prochaines dates|prochain live|j'ai une question|cherche un produit que je ne vois pas)/i.test(t); }
+  function ticketDepuisTexte(txt) {
+    var L = txt.split('\n').map(function (x) { return x.trim(); }).filter(Boolean), rows = [['Date', dateFr()]], art = [];
+    var first = (L[0] || '').replace(/^Bonjour GOD DID EXPRESS,?\s*/i, '');
+    var m = /commander\s*:\s*(.+?)(?:\.\s+(?:Pouvez|Voici).*)?\.?$/i.exec(first);
+    if (m) rows.push(['Produit', m[1].replace(/\.$/, '')]);
+    else if (/^[a-zéèêà']+ .+:$/i.test(first) === false && first && L.length === 1) rows.push(['Demande', first.charAt(0).toUpperCase() + first.slice(1)]);
+    L.slice(1).forEach(function (l) {
+      var k = /^([^:]{2,32}) : (.+)$/.exec(l);
+      if (/^- /.test(l)) art.push(l.slice(2));
+      else if (k) rows.push([k[1], k[2]]);
+      else if (!/^Merci/.test(l)) rows.push(['Note', l]);
+    });
+    if (art.length) rows.push(['Articles', art.join(' · ')]);
+    if (rows.length === 1 && first) rows.push(['Demande', first.charAt(0).toUpperCase() + first.slice(1)]);
+    var titre = /devis/i.test(txt) ? 'Demande de devis' : /rejoindre|groupe/i.test(txt) ? 'Achat groupé' : /voyage/i.test(txt) ? 'Commande voyage' : /grossiste|VIP/i.test(txt) ? 'Club VIP' : 'Demande de commande';
+    return { titre: titre, ref: tkRef(), stamp: ['REÇU', 'GDE'], rows: rows, note: 'Envoie cette image à GOD DID EXPRESS sur WhatsApp. Garde la référence, elle sert au suivi.' };
+  }
+  function montrerTicket(spec, urlTexte) {
+    if (!window.GDETicket) { window.open(urlTexte, '_blank'); return; }
+    toast('Je prépare ton ticket…');
+    GDETicket.draw(spec).then(function (c) { return GDETicket.blob(c).then(function (b) {
+      var url = URL.createObjectURL(b), nom = spec.ref + '.png', f = null; try { f = new File([b], nom, { type: 'image/png' }); } catch (e) {}
+      TK = { file: f, url: url, nom: nom, ref: spec.ref, texte: urlTexte };
+      ouvrir('<div class="sheet-tete"><div><div class="kicker">Ton ticket</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">' + h(spec.titre) + ' · ' + h(spec.ref) + '</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
+        '<img class="tk-img" src="' + url + '" alt="Ticket ' + ea(spec.ref) + '">' +
+        '<p class="note">Appuie sur « Envoyer l\'image », choisis WhatsApp, puis le contact GOD DID EXPRESS (+243 983 129 294).</p>' +
+        '<div class="rangee"><button class="btn" type="button" data-tk="share">Envoyer l\'image sur WhatsApp</button>' +
+        '<a class="btn ghost" data-tk="save" href="' + url + '" download="' + ea(nom) + '">Enregistrer l\'image</a>' +
+        '<a class="btn ghost" data-noimg href="' + ea(urlTexte) + '" target="_blank" rel="noopener">Ouvrir WhatsApp avec le texte</a></div>');
+    }); }).catch(function () { window.open(urlTexte, '_blank'); });
+  }
+  document.addEventListener('click', function (e) {
+    var s = e.target.closest('[data-tk="share"]');
+    if (s && TK) {
+      e.preventDefault();
+      if (TK.file && navigator.canShare && navigator.canShare({ files: [TK.file] })) navigator.share({ files: [TK.file], title: 'GOD DID EXPRESS', text: 'Ma demande ' + TK.ref }).catch(function () {});
+      else { var sv = document.querySelector('#sheet [data-tk="save"]'); if (sv) sv.click(); toast('Image enregistrée. Envoie-la dans WhatsApp.'); setTimeout(function () { window.open('https://wa.me/' + WA, '_blank'); }, 700); }
+      return;
+    }
+    var a = e.target.closest('a[href]'); if (!a || a.hasAttribute('data-noimg') || a.hasAttribute('data-tk')) return;
+    var href = a.getAttribute('href') || '', m = /^https:\/\/wa\.me\/\d+\?text=(.*)$/.exec(href); if (!m) return;
+    var txt; try { txt = decodeURIComponent(m[1]); } catch (x) { return; }
+    var spec = null;
+    if (a.id === 'et-wa' && dernierTicket) spec = dernierTicket; else if (aCommande(txt)) spec = ticketDepuisTexte(txt);
+    if (!spec) return;
+    e.preventDefault(); e.stopPropagation(); montrerTicket(spec, href);
+  }, true);
+
 
   /* 2. Groupés : voir rendreGroupes() plus bas */
 

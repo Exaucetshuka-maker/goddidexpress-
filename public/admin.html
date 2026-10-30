@@ -78,7 +78,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
 <!-- Application admin -->
 <div id="app" class="cache">
   <div class="haut"><div class="wrap">
-    <div><div class="kicker">GOD DID EXPRESS</div><h1>Admin</h1><div class="note" id="ver">Version du 29 octobre, n° 2</div></div>
+    <div><div class="kicker">GOD DID EXPRESS</div><h1>Admin</h1><div class="note" id="ver">Version du 30 octobre, n° 3</div></div>
     <div class="rang"><a class="btn ghost mini" href="/" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Voir le site</a><button class="btn ghost mini" id="b-quit" type="button">Quitter</button></div>
   </div></div>
 
@@ -89,6 +89,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       <button class="btn ghost" role="tab" data-t="grp" aria-selected="false">Achats groupés</button>
       <button class="btn ghost" role="tab" data-t="avis" aria-selected="false">Avis</button>
       <button class="btn ghost" role="tab" data-t="prix" aria-selected="false">Calcul des prix</button>
+      <button class="btn ghost" role="tab" data-t="fac" aria-selected="false">Factures</button>
       <button class="btn ghost" role="tab" data-t="fid" aria-selected="false">Fidélité</button>
       <button class="btn ghost" role="tab" data-t="reg" aria-selected="false">Réglages</button>
     </div>
@@ -169,6 +170,33 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       <div id="c-liste" class="grille"></div>
     </section>
 
+    <section id="t-fac" class="grille cache" style="gap:12px">
+      <p class="note">Crée un devis, une facture ou un reçu d'acompte. Il sort en image, comme un ticket, prêt à envoyer sur WhatsApp. Tout reste sur ce téléphone : rien n'est publié sur le site.</p>
+      <div class="carte">
+        <div class="grille g2">
+          <div><label for="fa-type">Document</label><select id="fa-type"><option value="devis">Devis</option><option value="facture">Facture</option><option value="recu">Reçu d'acompte</option></select></div>
+          <div><label for="fa-mode">Paiement par</label><select id="fa-mode"><option>Airtel Money</option><option>M-Pesa</option><option>Orange Money</option><option>Espèces</option><option>Virement</option></select></div>
+        </div>
+        <div><label for="fa-nom">Nom du client</label><input id="fa-nom" maxlength="60"></div>
+        <div class="grille g2"><div><label for="fa-tel">Téléphone du client</label><input id="fa-tel" inputmode="tel" placeholder="0810000000"></div><div><label for="fa-liv">Livraison</label><input id="fa-liv" maxlength="80" placeholder="Commune, repère"></div></div>
+        <div id="fa-lignes" class="grille"></div>
+        <button class="btn ghost mini" id="fa-add" type="button">+ Ajouter un article</button>
+        <div class="grille g3">
+          <div><label for="fa-trans">Transport et douane ($)</label><input id="fa-trans" inputmode="decimal"></div>
+          <div><label for="fa-pct">Acompte (%)</label><input id="fa-pct" inputmode="numeric" value="50"></div>
+          <div><label>&nbsp;</label><label style="display:flex;gap:8px;align-items:center;margin:0;color:var(--papier)"><input type="checkbox" id="fa-recu" style="width:22px;min-height:22px"> Acompte déjà reçu</label></div>
+        </div>
+        <div><label for="fa-note">Note (facultatif)</label><input id="fa-note" maxlength="160" placeholder="Ex. Livraison sous 3 semaines"></div>
+        <div class="rang"><button class="btn" id="fa-go" type="button">Créer le ticket</button><button class="btn ghost" id="fa-new" type="button">Nouveau document</button></div>
+      </div>
+      <div id="fa-sortie" class="carte cache">
+        <img id="fa-img" alt="Ticket" style="width:100%;border-radius:6px;background:#F4EFE9">
+        <div class="rang"><button class="btn" id="fa-share" type="button">Envoyer l'image sur WhatsApp</button><a class="btn ghost" id="fa-save" download="ticket.png" style="text-decoration:none;display:inline-flex;align-items:center">Enregistrer l'image</a><a class="btn ghost" id="fa-chat" target="_blank" rel="noopener" style="text-decoration:none;display:none;align-items:center">Ouvrir la discussion du client</a></div>
+        <p class="note">« Envoyer l'image » ouvre la liste de partage du téléphone : choisis WhatsApp puis ton client.</p>
+      </div>
+      <div class="carte"><h3>Historique sur ce téléphone</h3><div id="fa-hist" class="grille"></div></div>
+    </section>
+
     <section id="t-fid" class="grille cache" style="gap:12px">
       <p class="note">Chaque client reçoit un numéro de carte. Tu ajoutes un achat à chaque commande livrée. Le client tape son numéro sur le site (Plus, puis Membre) pour voir ses achats : 2 $ par achat, un produit de 20 $ à 10 achats. Seul le prénom est gardé, pas le numéro de téléphone.</p>
       <div class="carte">
@@ -239,6 +267,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   </div></div>
 </div>
 
+<script src="ticket.js"></script>
 <script>
 (function () {
   'use strict';
@@ -333,7 +362,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   Array.prototype.forEach.call(document.querySelectorAll('.onglets button'), function (b) {
     b.addEventListener('click', function () {
       Array.prototype.forEach.call(document.querySelectorAll('.onglets button'), function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
-      ['prod', 'voy', 'grp', 'avis', 'prix', 'fid', 'reg'].forEach(function (t) { $('t-' + t).classList.toggle('cache', t !== b.getAttribute('data-t')); });
+      ['prod', 'voy', 'grp', 'avis', 'prix', 'fac', 'fid', 'reg'].forEach(function (t) { $('t-' + t).classList.toggle('cache', t !== b.getAttribute('data-t')); });
       window.scrollTo(0, 0);
     });
   });
@@ -628,6 +657,63 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     var n = 0; Object.keys(COUTS.produits).forEach(function (id) { if (appliquerPrix(id)) n++; });
     if (n) { marquer(true); rendrePrix(); rendreProduits(); infoEtat(n + ' prix appliqué' + (n > 1 ? 's' : '') + '. Pense à enregistrer.', 'ok'); } else infoEtat('Aucun produit n\'a assez de chiffres.', 'mal');
   });
+
+  /* ---------- Factures en image (données gardées sur ce téléphone) ---------- */
+  var FAC = { ref: '', blob: null, file: null }, FKEY = 'gde-fac';
+  function facLoad() { try { return JSON.parse(localStorage.getItem(FKEY) || '[]'); } catch (e) { return []; } }
+  function facSave(l) { try { localStorage.setItem(FKEY, JSON.stringify(l.slice(0, 40))); } catch (e) {} }
+  function fnum(v) { v = parseFloat(String(v).replace(',', '.')); return isFinite(v) && v >= 0 ? v : 0; }
+  function facLigne(l) {
+    l = l || {};
+    return '<div class="grille" data-fl style="grid-template-columns:minmax(0,1fr) 62px 86px 40px;align-items:end"><div><label>Article</label><input data-ff="t" maxlength="80" value="' + esc(l.t || '') + '"></div><div><label>Qté</label><input data-ff="q" inputmode="numeric" value="' + esc(l.q || 1) + '"></div><div><label>Prix ($)</label><input data-ff="p" inputmode="decimal" value="' + esc(l.p || '') + '"></div><button class="btn danger mini" data-fx type="button" aria-label="Retirer">×</button></div>';
+  }
+  function facLignes() { return Array.prototype.map.call(document.querySelectorAll('#fa-lignes [data-fl]'), function (r) { return { t: r.querySelector('[data-ff=t]').value.trim(), q: Math.max(1, Math.round(fnum(r.querySelector('[data-ff=q]').value) || 1)), p: fnum(r.querySelector('[data-ff=p]').value) }; }).filter(function (l) { return l.t; }); }
+  function facRef() { var d = new Date(); return 'GDE-' + String(d.getFullYear()).slice(2) + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(Math.floor(1000 + Math.random() * 9000)); }
+  var MOISF = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  function facSpec(f) {
+    var L = f.lignes, sous = L.reduce(function (s, l) { return s + l.q * l.p; }, 0), tr = fnum(f.trans), total = sous + tr, pct = Math.max(0, Math.min(100, fnum(f.pct))), ac = total * pct / 100, U = GDETicket.usd;
+    var tot = [['Sous-total', U(sous)]]; if (tr > 0) tot.push(['Transport et douane', U(tr)]);
+    var titre, stamp, note, d = new Date(f.date || Date.now());
+    if (f.type === 'devis') { titre = 'Devis'; stamp = ['DEVIS', 'GDE']; tot.push(['Total', U(total)]); tot.push(['Acompte à payer (' + pct + ' %)', U(ac), true]); note = 'Devis valable 7 jours. Le colis est acheté dès réception de l\'acompte.'; }
+    else if (f.type === 'facture') { titre = 'Facture'; stamp = ['FACTURE', 'GDE']; tot.push(['Total', U(total)]); if (f.recu) { tot.push(['Acompte reçu (' + pct + ' %)', U(ac)]); tot.push(['Reste à payer', U(total - ac), true]); } else tot.push(['Total à payer', U(total), true]); note = 'Merci pour votre confiance.'; }
+    else { titre = 'Reçu d\'acompte'; stamp = ['PAYÉ', 'GDE']; tot.push(['Total de la commande', U(total)]); tot.push(['Reste à payer à la livraison', U(total - ac)]); tot.push(['Acompte reçu (' + pct + ' %)', U(ac), true]); note = 'Reçu d\'acompte. Le reste est à payer à la livraison.'; }
+    var rows = [['Client', f.nom || '—']]; if (f.tel) rows.push(['Contact', f.tel]); if (f.liv) rows.push(['Livraison', f.liv]);
+    rows.push(['Date', d.getDate() + ' ' + MOISF[d.getMonth()] + ' ' + d.getFullYear()]); if (f.type !== 'devis') rows.push(['Paiement', f.mode]);
+    return { titre: titre, ref: f.ref, stamp: stamp, rows: rows, lignes: L, totaux: tot, note: (f.note ? f.note + ' ' : '') + note, _total: total };
+  }
+  function facForm() { return { type: $('fa-type').value, mode: $('fa-mode').value, nom: $('fa-nom').value.trim(), tel: $('fa-tel').value.trim(), liv: $('fa-liv').value.trim(), lignes: facLignes(), trans: $('fa-trans').value, pct: $('fa-pct').value, recu: $('fa-recu').checked, note: $('fa-note').value.trim() }; }
+  function facRemplir(f) { $('fa-type').value = f.type; $('fa-mode').value = f.mode || 'Airtel Money'; $('fa-nom').value = f.nom || ''; $('fa-tel').value = f.tel || ''; $('fa-liv').value = f.liv || ''; $('fa-trans').value = f.trans || ''; $('fa-pct').value = f.pct || 50; $('fa-recu').checked = !!f.recu; $('fa-note').value = f.note || ''; $('fa-lignes').innerHTML = (f.lignes && f.lignes.length ? f.lignes : [{}]).map(facLigne).join(''); FAC.ref = f.ref || ''; }
+  function facHist() {
+    var l = facLoad(), TY = { devis: 'Devis', facture: 'Facture', recu: 'Reçu' };
+    $('fa-hist').innerHTML = l.map(function (f, i) { return '<div class="rang" style="justify-content:space-between"><span><b>' + esc(f.ref) + '</b> · ' + TY[f.type] + ' · ' + esc(f.nom || '—') + ' · ' + esc(GDETicket.usd(f.total || 0)) + '</span><span class="rang"><button class="btn ghost mini" data-fh="open" data-i="' + i + '" type="button">Rouvrir</button><button class="btn danger mini" data-fh="del" data-i="' + i + '" type="button">Suppr.</button></span></div>'; }).join('') || '<p class="note">Aucun document pour le moment.</p>';
+  }
+  function facTel(t) { var x = String(t || '').replace(/\D/g, ''); if (!x) return ''; if (x.indexOf('243') === 0) return x; if (x.charAt(0) === '0') return '243' + x.slice(1); return x; }
+  $('fa-add').addEventListener('click', function () { $('fa-lignes').insertAdjacentHTML('beforeend', facLigne()); });
+  $('fa-lignes').addEventListener('click', function (e) { var x = e.target.closest('[data-fx]'); if (!x) return; if (document.querySelectorAll('#fa-lignes [data-fl]').length > 1) x.closest('[data-fl]').remove(); else x.closest('[data-fl]').querySelectorAll('input').forEach(function (i) { i.value = ''; }); });
+  $('fa-new').addEventListener('click', function () { facRemplir({ type: $('fa-type').value, mode: $('fa-mode').value, pct: 50 }); $('fa-sortie').classList.add('cache'); });
+  $('fa-go').addEventListener('click', function () {
+    var f = facForm(); if (!f.nom) { alert('Écris le nom du client.'); return; } if (!f.lignes.length) { alert('Ajoute au moins un article avec son prix.'); return; }
+    f.ref = FAC.ref || facRef(); f.date = Date.now(); FAC.ref = f.ref;
+    var spec = facSpec(f); f.total = spec._total;
+    $('fa-go').disabled = true; $('fa-go').textContent = 'Création…';
+    GDETicket.draw(spec).then(function (c) { return GDETicket.blob(c); }).then(function (b) {
+      FAC.blob = b; try { FAC.file = new File([b], f.ref + '.png', { type: 'image/png' }); } catch (e) { FAC.file = null; }
+      var url = URL.createObjectURL(b); $('fa-img').src = url; $('fa-save').href = url; $('fa-save').setAttribute('download', f.ref + '.png');
+      var t = facTel(f.tel), ch = $('fa-chat'); if (t) { ch.href = 'https://wa.me/' + t; ch.style.display = 'inline-flex'; } else ch.style.display = 'none';
+      $('fa-sortie').classList.remove('cache'); $('fa-sortie').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      var l = facLoad().filter(function (x) { return x.ref !== f.ref; }); l.unshift(f); facSave(l); facHist();
+    }).catch(function () { alert('Le ticket n\'a pas pu être créé.'); }).then(function () { $('fa-go').disabled = false; $('fa-go').textContent = 'Créer le ticket'; });
+  });
+  $('fa-share').addEventListener('click', function () {
+    if (FAC.file && navigator.canShare && navigator.canShare({ files: [FAC.file] })) navigator.share({ files: [FAC.file], title: 'GOD DID EXPRESS', text: FAC.ref }).catch(function () {});
+    else { $('fa-save').click(); alert('Image enregistrée. Envoie-la dans WhatsApp depuis ta galerie.'); }
+  });
+  $('fa-hist').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-fh]'); if (!b) return; var l = facLoad(), i = Number(b.getAttribute('data-i'));
+    if (b.getAttribute('data-fh') === 'del') { if (confirm('Supprimer ce document de l\'historique ?')) { l.splice(i, 1); facSave(l); facHist(); } }
+    else { facRemplir(l[i]); $('fa-sortie').classList.add('cache'); window.scrollTo(0, 0); }
+  });
+  facRemplir({ type: 'devis', pct: 50 }); facHist();
 
   /* ---------- Fidélité (cartes numérotées, données privées) ---------- */
   var CARTES = [], carDirty = false;
