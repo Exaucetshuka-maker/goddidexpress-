@@ -591,7 +591,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     <section class="bloc rv" id="marches-bloc">
       <header><h2>D'où viennent tes produits</h2></header>
       <div class="marches" id="marches"></div>
-      <p class="activites">Commerce, sourcing, importation, approvisionnement, distribution. <a href="#methode" style="color:var(--papier)">Voir comment on travaille</a></p>
+      <p class="activites">Commerce, sourcing, importation, exportation, approvisionnement, distribution. <a href="#services" style="color:var(--papier)">Voir les fiches services</a> · <a href="#methode" style="color:var(--papier)">Comment on travaille</a></p>
       <div class="trois">
         <button type="button" data-go="catalogue"><b>Acheter</b><span>Le catalogue et les achats groupés</span></button>
         <button type="button" data-go="commander"><b>Faire venir</b><span>Un produit sur mesure, d'où tu veux</span></button>
@@ -813,6 +813,15 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <p class="note">Les commandes ferment la veille du départ. Si tu rates un voyage, ta commande part avec le suivant.</p>
       <a class="btn ghost" id="voy-wa" href="#" target="_blank" rel="noopener">Demander les prochaines dates sur WhatsApp</a>
     </div>
+  </section>
+
+  <section class="view" id="v-services" hidden>
+    <header>
+      <div class="kicker">Nos services</div>
+      <h2>Fiches services</h2>
+      <p>Que tu aies des marchandises à l'étranger, des produits congolais à envoyer ou un produit à trouver : choisis ta fiche, on s'occupe du reste.</p>
+    </header>
+    <div class="wrap" style="gap:14px" id="svc-liste"></div>
   </section>
 
   <section class="view" id="v-methode" hidden>
@@ -1294,7 +1303,31 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 
 
   /* Onglets */
-  var VUES = ['accueil', 'catalogue', 'commander', 'groupes', 'voyages', 'live', 'suivi', 'parrainer', 'methode', 'admin'];
+  var VUES = ['accueil', 'catalogue', 'commander', 'groupes', 'voyages', 'services', 'live', 'suivi', 'parrainer', 'methode', 'admin'];
+  var SERVICES = [
+    { id: 'venir', ico: '📥', t: 'Faire venir ma marchandise en RDC', d: 'Tu as déjà des marchandises à Dubaï, à Istanbul ou en Chine (téléphones, électronique, vêtements, chaussures…) ? On les amène jusqu\'à Kinshasa, avec le suivi et la preuve en photo à chaque étape.',
+      etapes: ['Tu nous envoies la liste des marchandises, les photos, les quantités et l\'adresse où elles se trouvent.', 'On te donne un devis détaillé : transport, douane et marge, avant tout paiement.', 'Tu verses l\'acompte de 50 %. On récupère et on regroupe ta marchandise.', 'Elle part sur le prochain voyage. Tu suis chaque étape avec ta référence GDE.', 'Livraison à Kinshasa, tu règles le solde à la réception.'],
+      besoin: ['Le type de produit (ex. téléphones, parfums, tissus)', 'La quantité, le poids ou le volume', 'Des photos et la facture du fournisseur si tu l\'as', 'La ville de départ : Dubaï, Istanbul ou Chine'],
+      m: 'Bonjour GOD DID EXPRESS, j\'ai des marchandises à l\'étranger à faire venir en RDC. Ville de départ : ... Produits : ... Quantité : ... ' },
+    { id: 'export', ico: '📤', t: 'Envoyer des produits congolais à l\'étranger', d: 'Tu produis ou tu vends en RDC et tu veux atteindre des clients à l\'étranger ? Dis-nous ton produit et le pays visé : on étudie ce qui est possible et on organise l\'envoi.',
+      etapes: ['Tu décris ton produit, les quantités, les photos et le pays où tu veux vendre.', 'On vérifie ensemble ce qui est possible : règles d\'exportation, documents demandés, emballage. Ça dépend du produit et du pays, on te le confirme avant tout engagement.', 'On te donne un devis clair, tu verses l\'acompte.', 'On prépare et on expédie. Tu reçois les preuves en photo.', 'On te confirme l\'arrivée chez ton client.'],
+      besoin: ['Le nom du produit et sa description', 'La quantité disponible et la fréquence d\'envoi', 'Des photos et, si possible, un échantillon', 'Le pays ou la ville de destination'],
+      m: 'Bonjour GOD DID EXPRESS, je veux envoyer un produit congolais à l\'étranger. Produit : ... Quantité : ... Pays visé : ... ' },
+    { id: 'trouver', ico: '🔎', t: 'Trouver un produit pour moi', d: 'Tu cherches un produit précis et tu ne sais pas où l\'acheter ? Tu choisis, on trouve le fournisseur, on achète, on importe et on te livre.',
+      etapes: ['Tu nous dis le produit : photo, lien ou description, et ton budget.', 'On cherche le fournisseur et on te donne un devis avant tout paiement.', 'Acompte de 50 %, puis on achète chez le fournisseur.', 'Départ sur le prochain voyage Chine, Dubaï ou Istanbul, avec suivi.', 'Livraison et solde à la réception.'],
+      besoin: ['Une photo, un lien ou une description du produit', 'La quantité souhaitée', 'Ton budget approximatif', 'Ta commune à Kinshasa pour la livraison'],
+      m: 'Bonjour GOD DID EXPRESS, je cherche un produit. Produit : ... Quantité : ... Budget : ... ' }
+  ];
+  function rendreServices() {
+    $('svc-liste').innerHTML = SERVICES.map(function (s, i) {
+      return '<details class="carte" id="svc-' + s.id + '"' + (i === 0 ? ' open' : '') + '><summary style="cursor:pointer;display:flex;gap:12px;align-items:center;list-style:none"><span style="font-size:28px" aria-hidden="true">' + s.ico + '</span><b style="font-family:var(--f-display);font-size:22px;text-transform:uppercase;letter-spacing:.02em">' + h(s.t) + '</b></summary>' +
+        '<p style="margin:10px 0 0">' + h(s.d) + '</p>' +
+        '<div class="kicker" style="margin-top:12px">Comment ça se passe</div><ol style="margin:6px 0 0;padding-left:20px;display:grid;gap:6px">' + s.etapes.map(function (e) { return '<li>' + h(e) + '</li>'; }).join('') + '</ol>' +
+        '<div class="kicker" style="margin-top:12px">Ce qu\'il nous faut</div><ul style="margin:6px 0 0;padding-left:20px;display:grid;gap:4px">' + s.besoin.map(function (e) { return '<li>' + h(e) + '</li>'; }).join('') + '</ul>' +
+        '<p class="note" style="margin-top:10px">Aucun prix n\'est promis à l\'avance : tu reçois un devis détaillé avant de payer. Acompte de 50 %, solde à la livraison.</p>' +
+        '<a class="btn" style="margin-top:6px" href="' + ea(wa(s.m)) + '" target="_blank" rel="noopener">Démarrer sur WhatsApp</a></details>';
+    }).join('');
+  }
   var IS_ADMIN = false, GS = null, GH = null, curOrd = null;
   var PRINC = ['accueil', 'catalogue', 'commander', 'suivi'];
   var curCran = 4;
@@ -1304,6 +1337,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     PRINC.forEach(function (v) { $('t-' + v).setAttribute('aria-current', v === id ? 'page' : 'false'); });
     $('t-plus').setAttribute('aria-current', PRINC.indexOf(id) < 0 ? 'page' : 'false');
     if (id === 'suivi' && typeof rendreSuivi === 'function') rendreSuivi(curCran);
+    if (id === 'services' && typeof rendreServices === 'function') rendreServices();
     if (id === 'methode' && typeof animerVoyage === 'function') animerVoyage();
     if (id === 'admin' && typeof rendreAdmin === 'function') rendreAdmin();
     if (push) { try { history.replaceState(null, '', '#' + id); } catch (e) {} window.scrollTo(0, 0); }
@@ -1962,6 +1996,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Plus</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Aller plus loin</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
       tuile('groupes', '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.6.2 4.5 2.3 4.5 5.1"/>', 'Achats groupés', 'Plus on est nombreux, moins c\'est cher') +
       tuile('voyages', '<path d="M3 17l18-6-6 9-3-4-5 1z"/><path d="M12 16v4"/>', 'Nos voyages', 'Départs, dates limites et arrivées') +
+      tuile('services', '<path d="M4 7h16v12H4z"/><path d="M9 7V4h6v3M4 12h16"/>', 'Fiches services', 'Faire venir, exporter, trouver un produit') +
       tuile('live', '<circle cx="12" cy="12" r="2.4"/><path d="M7.5 7.5a6.4 6.4 0 0 0 0 9M16.5 7.5a6.4 6.4 0 0 1 0 9M4.5 4.5a10.6 10.6 0 0 0 0 15M19.5 4.5a10.6 10.6 0 0 1 0 15"/>', 'Live shopping', 'Voir le produit réel avant d\'acheter') +
       tuile('parrainer', '<rect x="3" y="9" width="18" height="4" rx="1"/><path d="M12 9v12M5 13v7h14v-7M12 9c-3 0-4.5-1-4.5-2.6S9 4 10.2 4C11.6 4 12 6 12 9zm0 0c3 0 4.5-1 4.5-2.6S15 4 13.8 4C12.4 4 12 6 12 9z"/>', 'Membre, fidélité, parrainage', 'Votre carte, le Club VIP, devenir point relais') + tuile('methode', '<circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8.2 18H13a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h4.8"/>', 'Comment on travaille', 'Les cinq métiers et le voyage du colis') + (IS_ADMIN ? tuile('admin', '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>', 'Espace admin', 'Prix, produits, photos, commandes') : ''));
   }
