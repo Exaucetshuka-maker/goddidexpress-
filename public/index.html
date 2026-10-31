@@ -735,7 +735,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     </header>
     <form id="form-cmd" autocomplete="on">
       <div class="duo">
-        <div class="champ"><label for="o-nom">Votre nom</label><input id="o-nom" name="nom" required placeholder="Ex. Exaucé"></div>
+        <div class="champ"><label for="o-nom">Votre nom</label><input id="o-nom" name="nom" required placeholder="Ex. Marie"></div>
         <div class="champ"><label for="o-tel">Téléphone WhatsApp</label><input id="o-tel" name="tel" type="tel" inputmode="tel" required placeholder="+243 …"></div>
       </div>
       <div class="duo">
@@ -752,7 +752,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       </div>
       <div class="duo">
         <div class="champ"><label for="o-promo">Code promo (facultatif)</label><input id="o-promo" autocomplete="off" style="text-transform:uppercase"></div>
-        <div class="champ"><label for="o-membre">Code membre (facultatif)</label><input id="o-membre" autocomplete="off" style="text-transform:uppercase" placeholder="Ex. EXAUCE-4K2"></div>
+        <div class="champ"><label for="o-membre">Code membre (facultatif)</label><input id="o-membre" autocomplete="off" style="text-transform:uppercase" placeholder="Ex. MARIE-4K2"></div>
       </div>
       <div class="champ"><label for="o-pay">Paiement de l'acompte</label>
         <select id="o-pay">
@@ -890,6 +890,11 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       </div>
       <ol class="suivi" id="s-etapes"></ol>
     </div>
+    <div class="carte" id="s-photo-c">
+      <div class="kicker">Photo de position</div>
+      <img id="s-photo" alt="Position de ton colis entre la Chine et Kinshasa" style="width:100%;border-radius:6px;background:#05080f;margin-top:8px">
+      <div class="rangee" style="margin-top:10px"><button class="btn" id="s-photo-share" type="button">Envoyer cette photo</button><a class="btn ghost" id="s-photo-save" download="position-colis.png" style="text-decoration:none">Enregistrer</a></div>
+    </div>
     <p class="note" id="s-note">Cette version affiche une commande d'exemple. Pour l'état d'une vraie commande, écrivez-nous sur WhatsApp avec votre référence.</p>
     <div class="rangee"><a class="btn" id="s-notif" href="#" target="_blank" rel="noopener">Me prévenir à chaque étape</a><a class="btn ghost" id="s-wa" href="#" target="_blank" rel="noopener">Demander l'état sur WhatsApp</a></div>
   </section>
@@ -913,7 +918,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     </div>
     <div class="carte">
       <h3>Votre code de parrainage</h3>
-      <div class="champ"><label for="p-nom">Votre prénom</label><input id="p-nom" placeholder="Ex. Exaucé" autocomplete="given-name"></div>
+      <div class="champ"><label for="p-nom">Votre prénom</label><input id="p-nom" placeholder="Ex. Marie" autocomplete="given-name"></div>
       <p class="note">Pour chaque ami qui commande avec votre code : 5 % de réduction sur votre prochaine commande.</p>
       <div class="rangee">
         <a class="btn" id="p-wa" href="#" target="_blank" rel="noopener" aria-disabled="true">Partager sur WhatsApp</a>
@@ -924,7 +929,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <div class="l1f"><h3>Club grossiste VIP</h3><span class="pastille">Gros</span></div>
       <p class="note">Plus tu commandes en gros, plus ton niveau monte : meilleurs prix, priorité sur les arrivages et accès aux produits avant tout le monde.</p>
       <div class="vniv" id="vip-niv"></div>
-      <div class="champ"><label for="vip-code">Ton code membre</label><input id="vip-code" autocomplete="off" style="text-transform:uppercase" placeholder="Ex. EXAUCE-4K2"></div>
+      <div class="champ"><label for="vip-code">Ton code membre</label><input id="vip-code" autocomplete="off" style="text-transform:uppercase" placeholder="Ex. MARIE-4K2"></div>
       <div id="vip-res" aria-live="polite"></div>
       <a class="btn" id="vip-wa" href="#" target="_blank" rel="noopener">Rejoindre le Club VIP</a>
     </div>
@@ -969,10 +974,8 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   <footer>
     <div class="reseaux" id="reseaux-pied"></div>
     <div class="tel"><span class="kicker">WhatsApp</span><span class="mono" id="num">+243 983 129 294</span><button class="btn ghost mini" type="button" id="num-copy">Copier</button></div>
-    <div class="tel" id="tel2-ligne" hidden></div>
-    <div class="tel" id="mail-ligne" hidden></div>
+    <div id="contacts-pied" style="display:grid;gap:8px"></div>
     <div>Super Lemba, Kinshasa. Repère : Bar ROYAL, en face de GRAND SHOP AIRTEL.</div>
-    <div id="adr2-ligne" hidden></div>
     <div>Votre plateforme de proximité, ouverte sur le monde.</div>
   </footer>
 </div>
@@ -1007,6 +1010,8 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 <script>
 (function () {
   var WA = '243983129294';
+  var TELTXT = '+243 983 129 294';
+  (function () { var d = ''; try { d = String((JSON.parse(document.getElementById('gde-state').textContent) || {}).wanum || '').replace(/\D/g, ''); } catch (e) {} if (d.length >= 8) { WA = d; TELTXT = (d.indexOf('243') === 0 && d.length === 12) ? '+243 ' + d.slice(3, 6) + ' ' + d.slice(6, 9) + ' ' + d.slice(9) : '+' + d; } try { window.GDETicket && (GDETicket.tel = TELTXT); } catch (e) {} })();
   var $ = function (id) { return document.getElementById(id); };
   var smooth = !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   function wa(text) { return 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text); }
@@ -1360,7 +1365,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       TK = { file: f, url: url, nom: nom, ref: spec.ref, texte: urlTexte };
       ouvrir('<div class="sheet-tete"><div><div class="kicker">Ton ticket</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">' + h(spec.titre) + ' · ' + h(spec.ref) + '</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
         '<img class="tk-img" src="' + url + '" alt="Ticket ' + ea(spec.ref) + '">' +
-        '<p class="note">Appuie sur « Envoyer l\'image », choisis WhatsApp, puis le contact GOD DID EXPRESS (+243 983 129 294).</p>' +
+        '<p class="note">Appuie sur « Envoyer l\'image », choisis WhatsApp, puis le contact GOD DID EXPRESS (' + TELTXT + ').</p>' +
         '<div class="rangee"><button class="btn" type="button" data-tk="share">Envoyer l\'image sur WhatsApp</button>' +
         '<a class="btn ghost" data-tk="save" href="' + url + '" download="' + ea(nom) + '">Enregistrer l\'image</a>' +
         '<a class="btn ghost" data-noimg href="' + ea(urlTexte) + '" target="_blank" rel="noopener">Ouvrir WhatsApp avec le texte</a></div>');
@@ -1449,7 +1454,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var wb = $('p-wa');
     if (codeActuel) {
       wb.setAttribute('aria-disabled', 'false');
-      wb.href = 'https://wa.me/?text=' + encodeURIComponent('Salut ! Je commande chez GOD DID EXPRESS (importation depuis la RDC et le monde). Utilise mon code ' + codeActuel + ' à ta première commande et dis que c\'est moi qui t\'envoie. WhatsApp : +243 983 129 294');
+      wb.href = 'https://wa.me/?text=' + encodeURIComponent('Salut ! Je commande chez GOD DID EXPRESS (importation depuis la RDC et le monde). Utilise mon code ' + codeActuel + ' à ta première commande et dis que c\'est moi qui t\'envoie. WhatsApp : ' + TELTXT);
     } else { wb.setAttribute('aria-disabled', 'true'); wb.removeAttribute('href'); }
   });
   $('p-wa').addEventListener('click', function (e) { if (this.getAttribute('aria-disabled') === 'true') { e.preventDefault(); toast('Tapez d\'abord votre prénom'); } });
@@ -1488,7 +1493,8 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     s.rev = s.rev || 0; s.prod = s.prod || {}; s.extra = s.extra || []; s.slog = s.slog || {};
     s.soc = s.soc || { tiktok: '', instagram: '', facebook: '' }; s.promo = s.promo || []; s.avis = s.avis || [];
     s.cmd = s.cmd || {}; s.vip = (s.vip && s.vip.length === 3) ? s.vip : [3, 6, 10]; s.lien = s.lien || '';
-    s.info = s.info || {}; s.mail = s.mail || ''; s.wag = s.wag || WAG0; s.wac = s.wac || WAC0; s.tel2 = s.tel2 || ''; s.adr2 = s.adr2 || ''; s.phr = s.phr || []; s.grp = s.grp || []; s.voy = s.voy || [];
+    s.info = s.info || {}; s.mail = s.mail || ''; s.wag = s.wag || WAG0; s.wac = s.wac || WAC0; s.tel2 = s.tel2 || ''; s.adr2 = s.adr2 || ''; s.phr = s.phr || []; s.grp = s.grp || []; s.voy = s.voy || []; s.wanum = s.wanum || ''; s.contacts = s.contacts || [];
+    if (!s.contacts.length) { if (s.tel2) s.contacts.push({ type: 'tel', label: 'Deuxième numéro', v: s.tel2 }); if (s.mail) s.contacts.push({ type: 'mail', label: 'E-mail', v: s.mail }); if (s.adr2) s.contacts.push({ type: 'adresse', label: 'Autre adresse', v: s.adr2 }); }
     return s;
   }
   STATE = defState(STATE);
@@ -1645,7 +1651,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var p = BY[id]; if (!p) return;
     PROD_COUR = p;
     var dans = !!liste[id];
-    var partage = 'Regarde ce produit chez GOD DID EXPRESS : ' + p.t + ' (' + p.s + '). Commande sur WhatsApp : +243 983 129 294';
+    var partage = 'Regarde ce produit chez GOD DID EXPRESS : ' + p.t + ' (' + p.s + '). Commande sur WhatsApp : ' + TELTXT;
     ouvrir('<div class="sheet-tete"><div><div class="kicker">' + CATL[p.c] + '</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">' + p.t + '</h3></div>' +
       '<button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
       '<img class="big" src="' + ea(pic(p)) + '" alt="' + ea(p.t) + '">' +
@@ -1979,7 +1985,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   GH = makeGlobe($('g-home'), 'home'); GS = (window.makeHolo && makeHolo($('g-suivi'), { onProgress: function (p, km) { $('holo-pct').textContent = p; $('holo-km').textContent = km > 0 ? km.toLocaleString('fr-FR') + ' km restants (exemple de trajet)' : 'Arrivé à destination'; } })) || makeGlobe($('g-suivi'), 'suivi'); if (GS) GS.setStep(curCran);
 
   /* Pied */
-  $('num-copy').addEventListener('click', function () { copy('+243 983 129 294'); });
+  $('num-copy').addEventListener('click', function () { copy(TELTXT); });
 
   /* =====================================================================
      v2 : slogans, réseaux, avis, club VIP, hors-ligne, assistant, admin
@@ -2037,14 +2043,16 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var G = urlHttps(STATE.wag), C = urlHttps(STATE.wac);
     Array.prototype.forEach.call(document.querySelectorAll('.js-wag'), function (a) { a.hidden = !G; if (G) a.href = G; });
     Array.prototype.forEach.call(document.querySelectorAll('.js-wac'), function (a) { a.hidden = !C; if (C) a.href = C; });
-    var t2 = String(STATE.tel2 || '').trim(), a2 = String(STATE.adr2 || '').trim();
-    $('tel2-ligne').hidden = !t2;
-    if (t2) $('tel2-ligne').innerHTML = '<span class="kicker">Deuxième numéro</span><a class="mono" style="color:var(--papier)" href="tel:' + ea(t2.replace(/[^\d+]/g, '')) + '">' + h(t2) + '</a>';
-    var ml = String(STATE.mail || '').trim(), me = $('mail-ligne');
-    me.hidden = !ml; me.textContent = '';
-    if (ml) { var k = document.createElement('span'); k.className = 'kicker'; k.textContent = 'E-mail'; var l = document.createElement('a'); l.href = 'mailto:' + ml; l.textContent = ml; l.style.color = 'var(--papier)'; me.appendChild(k); me.appendChild(l); }
-    $('adr2-ligne').hidden = !a2;
-    if (a2) $('adr2-ligne').textContent = 'Autre adresse : ' + a2;
+    var NOMS = { tel: 'Numéro', wa: 'WhatsApp', mail: 'E-mail', adresse: 'Adresse' };
+    $('num').textContent = TELTXT;
+    $('contacts-pied').innerHTML = (STATE.contacts || []).map(function (c) {
+      var v = String(c.v || '').trim(); if (!v) return '';
+      var k = '<span class="kicker">' + h(c.label || NOMS[c.type] || 'Contact') + '</span>', d = v.replace(/[^\d+]/g, '');
+      if (c.type === 'mail') return '<div class="tel">' + k + '<a href="mailto:' + ea(v) + '" style="color:var(--papier)">' + h(v) + '</a></div>';
+      if (c.type === 'wa') return '<div class="tel">' + k + '<a class="mono" href="https://wa.me/' + ea(d.replace(/\D/g, '')) + '" target="_blank" rel="noopener" style="color:var(--papier)">' + h(v) + '</a></div>';
+      if (c.type === 'adresse') return '<div>' + k + ' ' + h(v) + '</div>';
+      return '<div class="tel">' + k + '<a class="mono" href="tel:' + ea(d) + '" style="color:var(--papier)">' + h(v) + '</a></div>';
+    }).join('');
   }
 
   /* Achats groupés vivants : le compte à rebours tourne seul, les chiffres viennent de l'admin */
@@ -2289,26 +2297,55 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   }, true);
 
   /* Suivi : recherche d'une commande publiée */
+  var photoSeq = 0, photoFile = null;
+  function dateLongue(s) { if (!/^\d{4}-\d{2}-\d{2}$/.test(s || '')) return ''; var d = new Date(s + 'T12:00:00'), J = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'], M = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre']; return J[d.getDay()] + ' ' + d.getDate() + ' ' + M[d.getMonth()]; }
+  function majPhoto(o) {
+    var box = $('s-photo-c'), n = ++photoSeq;
+    if (!o || !window.GDETicket || !GDETicket.position || o.cran < 0) { box.hidden = true; return; }
+    GDETicket.position({ produit: o.prod || 'Ton colis', ref: o.ref, nom: o.nom || '', cran: o.cran, mode: o.mode, arr: dateLongue(o.arr) }).then(function (cv) { return GDETicket.blob(cv); }).then(function (bl) {
+      if (n !== photoSeq) return;
+      try { photoFile = new File([bl], (o.ref || 'colis') + '-position.png', { type: 'image/png' }); } catch (e) { photoFile = null; }
+      var u = URL.createObjectURL(bl); $('s-photo').src = u; $('s-photo-save').href = u; $('s-photo-save').setAttribute('download', (o.ref || 'colis') + '-position.png'); box.hidden = false;
+    }).catch(function () { box.hidden = true; });
+  }
+  $('s-photo-share').addEventListener('click', function () {
+    if (photoFile && navigator.canShare && navigator.canShare({ files: [photoFile] })) navigator.share({ files: [photoFile], title: 'GOD DID EXPRESS' }).catch(function () {});
+    else { $('s-photo-save').click(); toast('Photo enregistrée : envoie-la depuis ta galerie'); }
+  });
+  function afficherCmd(v, o, tag) {
+    curOrd = o; var mode = o.mode === 'bateau' ? 'bateau' : 'avion';
+    $('s-tag').textContent = tag; rendreSuivi(o.cran);
+    if (typeof GS !== 'undefined' && GS && GS.setMode) { GS.setMode(mode); Array.prototype.forEach.call(document.querySelectorAll('[data-hm]'), function (b) { b.classList.toggle('on', b.getAttribute('data-hm') === mode); }); }
+    majPhoto({ ref: v, nom: o.nom, prod: o.prod, cran: o.cran, mode: mode, arr: o.arr });
+  }
   function chercherCmd(raw) {
     var v = String(raw || '').trim().toUpperCase();
     if (!v) { toast('Entrez une référence'); return; }
     $('s-ref').textContent = v;
-    var o = STATE.cmd[v];
-    if (o) {
-      curOrd = o;
-      $('s-tag').textContent = 'En direct';
-      rendreSuivi(o.cran);
-      $('s-note').textContent = 'Commande de ' + o.nom + (o.prod ? ', ' + o.prod : '') + '. Touchez une photo pour la voir en grand.';
-      try { localStorage.setItem('gde-ref', v); } catch (e) {}
-    } else if (v === EXEMPLE) {
-      curOrd = null; $('s-tag').textContent = 'Exemple'; rendreSuivi(4);
-      $('s-note').textContent = 'Ceci est une commande d\'exemple. Pour l\'état d\'une vraie commande, entrez votre référence.';
-    } else {
-      curOrd = null; $('s-tag').textContent = 'Non reliée'; rendreSuivi(-1);
-      $('s-note').textContent = 'Cette référence n\'est pas encore reliée au suivi en ligne. Demandez son état sur WhatsApp, on vous répond avec la dernière preuve.';
-    }
     $('s-wa').href = wa('Bonjour GOD DID EXPRESS, je voudrais l\'état de ma commande, référence : ' + v);
     $('s-notif').href = wa('Bonjour GOD DID EXPRESS, prévenez-moi sur WhatsApp à chaque étape de ma commande ' + v + '.');
+    var o = STATE.cmd[v];
+    function fin(o2) {
+      if (o2) {
+        afficherCmd(v, o2, 'En direct');
+        $('s-note').textContent = 'Commande de ' + o2.nom + (o2.prod ? ', ' + o2.prod : '') + '. Touchez une photo pour la voir en grand.';
+        try { localStorage.setItem('gde-ref', v); } catch (e) {}
+      } else if (v === EXEMPLE) {
+        curOrd = null; $('s-tag').textContent = 'Exemple'; rendreSuivi(4);
+        $('s-note').textContent = 'Ceci est une commande d\'exemple. Pour l\'état d\'une vraie commande, entrez votre référence.';
+        majPhoto({ ref: v, nom: '', prod: 'Commande d\'exemple', cran: 4, mode: 'avion', arr: '' });
+      } else {
+        curOrd = null; $('s-tag').textContent = 'Non reliée'; rendreSuivi(-1); majPhoto(null);
+        $('s-note').textContent = 'Cette référence n\'est pas encore reliée au suivi en ligne. Demandez son état sur WhatsApp, on vous répond avec la dernière preuve.';
+      }
+    }
+    if (o || v === EXEMPLE) { fin(o); return; }
+    $('s-tag').textContent = 'Recherche…';
+    fetch('/api/cmd/' + encodeURIComponent(v)).then(function (r) {
+      if (r.status === 429) { toast('Trop d\'essais, réessayez dans quelques minutes'); fin(null); return null; }
+      if (!r.ok) { fin(null); return null; }
+      return r.json().then(function (j) { if (String($('s-ref').textContent) !== v) return; fin({ nom: j.nom, prod: j.prod, cran: j.cran, mode: j.mode, arr: j.arr, pr: [] }); });
+    }).catch(function () { fin(null); });
   }
   $('form-suivi').addEventListener('submit', function (e) { e.preventDefault(); chercherCmd($('s-code').value); });
   $('s-etapes').addEventListener('click', function (e) {
@@ -2318,7 +2355,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   $('s-notif').href = wa('Bonjour GOD DID EXPRESS, prévenez-moi sur WhatsApp à chaque étape de ma commande.');
   try {
     var dr = localStorage.getItem('gde-ref');
-    if (dr && STATE.cmd[dr]) { $('s-code').value = dr; chercherCmd(dr); }
+    if (dr) { $('s-code').value = dr; chercherCmd(dr); }
   } catch (e) {}
 
   /* ---------------------------- Assistant ---------------------------- */
@@ -2332,7 +2369,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     { k: ['parrain', 'filleul', 'ami', 'invite'], r: 'Dans l\'onglet Membre, tu tapes ton prénom et tu reçois ton code de parrainage. Pour chaque ami qui commande avec ton code, tu gagnes 5 % de réduction sur ta prochaine commande.', g: [['parrainer', 'Mon code']] },
     { k: ['fidelite', 'diamant', 'membre', 'vip', 'niveau', 'bronze', 'argent'], r: 'La carte fidélité te donne 2 $ à chaque achat. Le Club VIP a quatre niveaux : Bronze, Argent, Or et Diamant, avec de meilleurs prix et la priorité sur les arrivages.', g: [['parrainer', 'Voir mon niveau']] },
     { k: ['live', 'direct', 'video'], r: 'Le live shopping te montre le produit réel avant d\'acheter. Tu poses tes questions et tu commandes pendant le live avec l\'acompte de 50 %.', g: [['live', 'Voir le programme']] },
-    { k: ['contact', 'whatsapp', 'numero', 'adresse', 'ou etes', 'localisation', 'lemba', 'telephone'], r: 'WhatsApp : +243 983 129 294. Nous sommes à Super Lemba, Kinshasa, repère : Bar ROYAL, en face de GRAND SHOP AIRTEL.', w: true },
+    { k: ['contact', 'whatsapp', 'numero', 'adresse', 'ou etes', 'localisation', 'lemba', 'telephone'], r: 'WhatsApp : ' + TELTXT + '. Nous sommes à Super Lemba, Kinshasa, repère : Bar ROYAL, en face de GRAND SHOP AIRTEL.', w: true },
     { k: ['entreprise', 'pme', 'restaurant', 'hotel', 'ecole', 'clinique', 'chantier', 'bureau'], r: 'On approvisionne les entreprises : restaurants, hôtels, écoles, cliniques, boutiques, chantiers. Tu touches ton secteur et ton besoin, et tu reçois une offre sur WhatsApp.', g: [['catalogue', 'Demander une offre']] },
     { k: ['bonjour', 'salut', 'bonsoir', 'hello', 'coucou'], r: 'Bonjour ! Dis-moi ce que tu cherches, ou demande-moi comment fonctionne l\'application.' },
     { k: ['merci'], r: 'Avec plaisir ! Je reste là si tu as une autre question.' },
@@ -2356,7 +2393,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       if (SM === undefined) SM = (window.claude && claude.use) ? await claude.use('sample') : null;
       if (!SM) return null;
       var cat = PRODUITS.slice(0, 80).map(function (p) { var m = prixMin(p); return p.t + (m !== null ? ' (dès ' + m + ' $)' : ''); }).join('; ');
-      var ins = 'Tu es l\'assistant de GOD DID EXPRESS, plateforme d\'importation et de sourcing basée à Kinshasa (RDC). Tutoie le client, réponds en français, en 3 phrases maximum, ton chaleureux et clair. Faits sûrs : acompte de 50 % puis solde à la livraison ; paiement Airtel Money, Orange Money, M-Pesa, Africell Money ou espèces ; devis détaillé avant tout paiement ; preuve en photo à chaque étape du suivi ; prix de gros par paliers (1, 5, 10 pièces) ; WhatsApp +243 983 129 294 ; Super Lemba, Kinshasa. N\'invente jamais un prix, un délai ou une promesse : si tu ne sais pas, invite à écrire sur WhatsApp. Produits au catalogue : ' + cat + '.\n\nQuestion du client : ' + q;
+      var ins = 'Tu es l\'assistant de GOD DID EXPRESS, plateforme d\'importation et de sourcing basée à Kinshasa (RDC). Tutoie le client, réponds en français, en 3 phrases maximum, ton chaleureux et clair. Faits sûrs : acompte de 50 % puis solde à la livraison ; paiement Airtel Money, Orange Money, M-Pesa, Africell Money ou espèces ; devis détaillé avant tout paiement ; preuve en photo à chaque étape du suivi ; prix de gros par paliers (1, 5, 10 pièces) ; WhatsApp ' + TELTXT + ' ; Super Lemba, Kinshasa. N\'invente jamais un prix, un délai ou une promesse : si tu ne sais pas, invite à écrire sur WhatsApp. Produits au catalogue : ' + cat + '.\n\nQuestion du client : ' + q;
       var r = await SM(ins, { modelTier: 'quick' });
       return r && r.text ? String(r.text).trim().slice(0, 700) : null;
     } catch (e) { return null; }
@@ -2575,7 +2612,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var s = '<form class="carte" data-f="cmd" autocomplete="off"><h3>Nouvelle commande suivie</h3>' +
       '<div class="duo"><div class="champ"><label for="a-ref">Référence</label><input id="a-ref" required placeholder="GDE-2610-0001" style="text-transform:uppercase"></div><div class="champ"><label for="a-nom">Prénom du client</label><input id="a-nom" required></div></div>' +
       '<div class="champ"><label for="a-prod">Produit</label><input id="a-prod" placeholder="Ex. Laptops HP x5"></div>' +
-      '<div class="duo"><div class="champ"><label for="a-mt">Montant total ($, reste sur cet appareil)</label><input id="a-mt" type="number" min="0" step="0.01" inputmode="decimal"></div><div class="champ"><label for="a-club">Code membre du client</label><input id="a-club" placeholder="Ex. EXAUCE-4K2" style="text-transform:uppercase"></div></div>' +
+      '<div class="duo"><div class="champ"><label for="a-mt">Montant total ($, reste sur cet appareil)</label><input id="a-mt" type="number" min="0" step="0.01" inputmode="decimal"></div><div class="champ"><label for="a-club">Code membre du client</label><input id="a-club" placeholder="Ex. MARIE-4K2" style="text-transform:uppercase"></div></div>' +
       '<div class="champ"><label for="a-tel">WhatsApp du client (reste sur cet appareil)</label><input id="a-tel" type="tel" inputmode="tel" placeholder="+243 …"></div>' +
       '<div class="rangee"><button class="btn ghost" type="button" data-a="genref">Générer une référence</button><button class="btn" type="submit">Enregistrer</button></div></form>';
     s += '<div class="compte">' + refs.length + ' commande' + (refs.length > 1 ? 's' : '') + ' suivie' + (refs.length > 1 ? 's' : '') + '</div>';

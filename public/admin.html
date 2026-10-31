@@ -89,6 +89,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       <button class="btn ghost" role="tab" data-t="grp" aria-selected="false">Achats groupés</button>
       <button class="btn ghost" role="tab" data-t="avis" aria-selected="false">Avis</button>
       <button class="btn ghost" role="tab" data-t="prix" aria-selected="false">Calcul des prix</button>
+      <button class="btn ghost" role="tab" data-t="cmd" aria-selected="false">Commandes</button>
       <button class="btn ghost" role="tab" data-t="fac" aria-selected="false">Factures</button>
       <button class="btn ghost" role="tab" data-t="fid" aria-selected="false">Fidélité</button>
       <button class="btn ghost" role="tab" data-t="reg" aria-selected="false">Réglages</button>
@@ -170,6 +171,25 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       <div id="c-liste" class="grille"></div>
     </section>
 
+    <section id="t-cmd" class="grille cache" style="gap:12px">
+      <p class="note">Suivi de tes colis. Le client tape sa référence sur le site (Plus, puis Suivi) et voit où est son colis. Les numéros de téléphone restent privés. Pour chaque colis, « Photo de position » crée une image avec les kilomètres parcourus et restants, à envoyer au client.</p>
+      <details class="carte" id="cm-ajout" open>
+        <summary>+ Nouvelle commande</summary>
+        <div class="grille" style="margin-top:10px">
+          <div class="grille g2"><div><label for="cm-nom">Prénom du client</label><input id="cm-nom" maxlength="40"></div><div><label for="cm-tel">Téléphone du client</label><input id="cm-tel" inputmode="tel" placeholder="0810000000"></div></div>
+          <div><label for="cm-prod">Produit</label><input id="cm-prod" maxlength="100" placeholder="Ex. Sac tactique 40L"></div>
+          <div class="grille g3"><div><label for="cm-mode">Transport</label><select id="cm-mode"><option value="avion">Avion</option><option value="bateau">Bateau</option></select></div><div><label for="cm-cran">Étape</label><select id="cm-cran"></select></div><div><label for="cm-arr">Arrivée estimée</label><input id="cm-arr" type="date"></div></div>
+          <button class="btn" id="cm-ok" type="button">Ajouter la commande</button>
+        </div>
+      </details>
+      <div><label for="cm-q">Chercher</label><input id="cm-q" type="search" placeholder="Prénom, produit ou référence"></div>
+      <div id="cm-liste" class="grille"></div>
+      <div id="cm-sortie" class="carte cache">
+        <img id="cm-img" alt="Position du colis" style="width:100%;border-radius:6px;background:#05080f">
+        <div class="rang"><button class="btn" id="cm-share" type="button">Envoyer l'image sur WhatsApp</button><a class="btn ghost" id="cm-save" download="position.png" style="text-decoration:none;display:inline-flex;align-items:center">Enregistrer l'image</a><a class="btn ghost" id="cm-chat" target="_blank" rel="noopener" style="text-decoration:none;display:none;align-items:center">Ouvrir la discussion du client</a></div>
+      </div>
+    </section>
+
     <section id="t-fac" class="grille cache" style="gap:12px">
       <p class="note">Crée un devis, une facture ou un reçu d'acompte. Il sort en image, comme un ticket, prêt à envoyer sur WhatsApp. Tout reste sur ce téléphone : rien n'est publié sur le site.</p>
       <div class="carte">
@@ -210,11 +230,11 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
 
     <section id="t-reg" class="grille cache" style="gap:12px">
       <div class="carte">
-        <h3>Contact</h3>
-        <p class="note">Ces deux champs s'affichent en bas de chaque page dès qu'ils sont remplis.</p>
-        <div><label for="r-mail">Adresse e-mail</label><input id="r-mail" type="email" inputmode="email" autocomplete="off" placeholder="contact@…"></div>
-        <div><label for="r-tel2">Deuxième numéro</label><input id="r-tel2" inputmode="tel" placeholder="+243 …"></div>
-        <div><label for="r-adr2">Deuxième adresse</label><input id="r-adr2" placeholder="Rue, commune, repère"></div>
+        <h3>Contacts</h3>
+        <p class="note">Ajoute autant de numéros, adresses et e-mails que tu veux. Ils s'affichent en bas de chaque page.</p>
+        <div><label for="r-wanum">Numéro WhatsApp principal (celui des commandes)</label><input id="r-wanum" inputmode="tel" placeholder="243983129294"></div>
+        <div id="r-contacts" class="grille"></div>
+        <div class="rang"><button class="btn ghost mini" data-ca="tel" type="button">+ Numéro</button><button class="btn ghost mini" data-ca="wa" type="button">+ WhatsApp</button><button class="btn ghost mini" data-ca="mail" type="button">+ E-mail</button><button class="btn ghost mini" data-ca="adresse" type="button">+ Adresse</button></div>
       </div>
       <div class="carte">
         <h3>Infos pour les clients</h3>
@@ -267,6 +287,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   </div></div>
 </div>
 
+<script src="holo.js"></script>
 <script src="ticket.js"></script>
 <script>
 (function () {
@@ -295,7 +316,9 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     s.rev = s.rev || 0; s.prod = s.prod || {}; s.extra = s.extra || []; s.slog = s.slog || {};
     s.soc = Object.assign({ tiktok: '', instagram: '', facebook: '' }, s.soc || {});
     s.promo = s.promo || []; s.avis = s.avis || []; s.vip = (s.vip && s.vip.length === 3) ? s.vip : [3, 6, 10]; s.lien = s.lien || '';
-    s.voy = s.voy || []; s.info = s.info || {}; s.mail = s.mail || ''; s.wag = s.wag || WAG0; s.wac = s.wac || WAC0; s.tel2 = s.tel2 || ''; s.adr2 = s.adr2 || ''; s.phr = s.phr || [];
+    s.voy = s.voy || []; s.info = s.info || {}; s.mail = s.mail || ''; s.wag = s.wag || WAG0; s.wac = s.wac || WAC0; s.tel2 = s.tel2 || ''; s.adr2 = s.adr2 || ''; s.wanum = s.wanum || '';
+    s.contacts = s.contacts || [];
+    if (!s.contacts.length) { if (s.tel2) s.contacts.push({ type: 'tel', label: 'Deuxième numéro', v: s.tel2 }); if (s.mail) s.contacts.push({ type: 'mail', label: 'E-mail', v: s.mail }); if (s.adr2) s.contacts.push({ type: 'adresse', label: 'Autre adresse', v: s.adr2 }); s.tel2 = ''; s.mail = ''; s.adr2 = ''; } s.phr = s.phr || [];
     s.grp = (s.grp || []).slice(0, 10);
     while (s.grp.length < 10) s.grp.push({ id: 'g' + (s.grp.length + 1), on: false, nom: '', pid: '', durj: 3, fin: 0, n: 0, max: 0, p: [[1, 0], [5, 0], [10, 0]] });
     s.grp.forEach(function (g) { while (g.p.length < 3) g.p.push([[1, 5, 10][g.p.length], 0]); });
@@ -323,12 +346,13 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
 
   function demarrer() {
     if (STATE) { $('ecran').classList.add('cache'); $('app').classList.remove('cache'); return Promise.resolve(); }
-    return Promise.all([api('/api/state'), fetch('/products.json').then(function (r) { return r.json(); }), api('/api/couts'), api('/api/cartes')]).then(function (rs) {
+    return Promise.all([api('/api/state'), fetch('/products.json').then(function (r) { return r.json(); }), api('/api/couts'), api('/api/cartes'), api('/api/cmds')]).then(function (rs) {
       STATE = defState(rs[0].j); PRODS = rs[1];
       if (rs[2].ok) COUTS = { reglages: Object.assign(COUTS.reglages, rs[2].j.reglages || {}), produits: rs[2].j.produits || {} };
       if (rs[3].ok) CARTES = rs[3].j.cartes || [];
+      if (rs[4].ok) CMDS = rs[4].j.cmds || [];
       $('ecran').classList.add('cache'); $('app').classList.remove('cache');
-      remplirSelects(); rendreProduits(); rendreGroupes(); rendreVoyages(); rendreAvisAdmin(); rendreReglagesPrix(); rendrePrix(); rendreCartes(); rendreReglages(); marquer(false);
+      remplirSelects(); rendreProduits(); rendreGroupes(); rendreVoyages(); rendreAvisAdmin(); rendreReglagesPrix(); rendrePrix(); rendreCartes(); rendreCmds(); rendreReglages(); marquer(false);
     });
   }
 
@@ -362,7 +386,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   Array.prototype.forEach.call(document.querySelectorAll('.onglets button'), function (b) {
     b.addEventListener('click', function () {
       Array.prototype.forEach.call(document.querySelectorAll('.onglets button'), function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
-      ['prod', 'voy', 'grp', 'avis', 'prix', 'fac', 'fid', 'reg'].forEach(function (t) { $('t-' + t).classList.toggle('cache', t !== b.getAttribute('data-t')); });
+      ['prod', 'voy', 'grp', 'avis', 'prix', 'cmd', 'fac', 'fid', 'reg'].forEach(function (t) { $('t-' + t).classList.toggle('cache', t !== b.getAttribute('data-t')); });
       window.scrollTo(0, 0);
     });
   });
@@ -371,20 +395,20 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   function remplirSelects() {
     var opts = Object.keys(CATL).map(function (k) { return '<option value="' + k + '">' + esc(CATL[k]) + '</option>'; }).join('');
     $('n-c').innerHTML = opts;
-    $('qc').innerHTML = '<option value="">Toutes</option><option value="__off">Retirés du site</option>' + opts;
+    $('qc').innerHTML = '<option value="">Toutes</option><option value="__off">Retirés du site</option><option value="__gone">Supprimés (anciens articles)</option>' + opts;
   }
   function tous() {
     var base = PRODS.map(function (p) {
       var o = STATE.prod[p.id] || {};
-      return { id: p.id, t: p.t, s: p.s, c: p.c, px: o.px || [null, null, null], photo: o.photo || ('img/' + p.id + '.jpg'), custom: !!o.photo, desc: o.desc || '', cache: !!o.cache, extra: false };
+      return { id: p.id, t: p.t, s: p.s, c: p.c, px: o.px || [null, null, null], photo: o.photo || ('img/' + p.id + '.jpg'), custom: !!o.photo, desc: o.desc || '', cache: !!o.cache, gone: !!o.gone, extra: false };
     });
-    var ex = STATE.extra.map(function (e) { return { id: e.id, t: e.t, s: e.s, c: e.c, px: e.px || [null, null, null], photo: e.photo || '', custom: !!e.photo, desc: e.desc || '', cache: !!e.cache, extra: true }; });
+    var ex = STATE.extra.map(function (e) { return { id: e.id, t: e.t, s: e.s, c: e.c, px: e.px || [null, null, null], photo: e.photo || '', custom: !!e.photo, desc: e.desc || '', cache: !!e.cache, gone: false, extra: true }; });
     return ex.concat(base);
   }
   function rendreProduits() {
     var q = $('q').value.trim().toLowerCase(), qc = $('qc').value;
-    var L = tous().filter(function (p) { return (!q || (p.t + ' ' + p.s).toLowerCase().indexOf(q) >= 0) && (!qc || (qc === '__off' ? p.cache : p.c === qc)); });
-    var sans = tous().filter(function (p) { return !p.cache && !(p.px || []).some(function (v) { return v > 0; }); }).length;
+    var L = tous().filter(function (p) { return (!q || (p.t + ' ' + p.s).toLowerCase().indexOf(q) >= 0) && (qc === '__gone' ? p.gone : (!p.gone && (!qc || (qc === '__off' ? p.cache : p.c === qc)))); });
+    var sans = tous().filter(function (p) { return !p.cache && !p.gone && !(p.px || []).some(function (v) { return v > 0; }); }).length;
     $('prod-info').textContent = L.length + ' produit' + (L.length > 1 ? 's' : '') + ' affiché' + (L.length > 1 ? 's' : '') + ', ' + sans + ' sans prix';
     $('liste').innerHTML = L.map(function (p) {
       var v = function (i) { return p.px[i] > 0 ? p.px[i] : ''; };
@@ -397,8 +421,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         '<details><summary class="note">Description pour les clients</summary><textarea data-k="desc" maxlength="600" style="min-height:70px" placeholder="Une ou deux phrases sur le produit">' + esc(p.desc) + '</textarea></details>' +
         '<div class="rang"><button class="btn ghost mini" data-a="photo" type="button">Changer la photo</button>' +
         (p.custom ? '<button class="btn ghost mini" data-a="photo-off" type="button">Enlever la photo</button>' : '') +
-        '<button class="btn ghost mini" data-a="cache" type="button">' + (p.cache ? 'Remettre en ligne' : (p.extra ? 'Masquer' : 'Retirer du site')) + '</button>' +
-        (p.extra ? '<button class="btn danger mini" data-a="suppr" type="button">Supprimer</button>' : '') +
+        (p.gone ? '<button class="btn ghost mini" data-a="restaure" type="button">Restaurer</button>' : '<button class="btn ghost mini" data-a="cache" type="button">' + (p.cache ? 'Remettre en ligne' : (p.extra ? 'Masquer' : 'Retirer du site')) + '</button><button class="btn danger mini" data-a="suppr" type="button">Supprimer</button>') +
         '<input type="file" accept="image/*" class="cache" data-k="file"></div></div></div>';
     }).join('') || '<p class="note">Aucun produit trouvé.</p>';
   }
@@ -451,7 +474,11 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     if (a === 'photo') { row.querySelector('input[data-k="file"]').click(); }
     else if (a === 'photo-off') { var o2 = refProd(id); delete o2.photo; marquer(true); rendreProduits(); }
     else if (a === 'cache') { var o = refProd(id); o.cache = !o.cache; if (!o.cache) delete o.cache; marquer(true); rendreProduits(); }
-    else if (a === 'suppr') { if (confirm('Supprimer ce produit pour de bon ?')) { STATE.extra = STATE.extra.filter(function (x) { return x.id !== id; }); marquer(true); rendreProduits(); } }
+    else if (a === 'suppr') {
+      if (STATE.extra.some(function (x) { return x.id === id; })) { if (confirm('Supprimer ce produit pour de bon ?')) { STATE.extra = STATE.extra.filter(function (x) { return x.id !== id; }); marquer(true); rendreProduits(); } }
+      else if (confirm('Supprimer cet ancien article du site ? Tu pourras le restaurer dans « Supprimés ».')) { var og = refProd(id); og.cache = true; og.gone = true; marquer(true); rendreProduits(); }
+    }
+    else if (a === 'restaure') { var or = refProd(id); delete or.gone; delete or.cache; marquer(true); rendreProduits(); }
   });
   $('liste').addEventListener('change', function (e) {
     var t = e.target; if (t.getAttribute('data-k') !== 'file' || !t.files[0]) return;
@@ -750,9 +777,78 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     var c = CARTES[Number(e.target.closest('[data-ci]').getAttribute('data-ci'))]; c.achats = Math.max(0, Math.min(999, parseInt(e.target.value, 10) || 0)); c.maj = Date.now(); carDirty = true; marquer(true);
   });
 
+
+  /* ---------- Commandes et suivi (privé, sauf référence/étape) ---------- */
+  var CMDS = [], cmDirty = false, CMF = null;
+  var ETAPES = ['Demande reçue', 'Devis envoyé', 'Acompte reçu', 'Acheté chez le fournisseur', 'En transit', 'Arrivé à Kinshasa', 'Livré'];
+  var JOURS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+  function dateFr(s) { if (!/^\d{4}-\d{2}-\d{2}$/.test(s || '')) return ''; var d = new Date(s + 'T12:00:00'); return JOURS[d.getDay()].replace(/^./, function (x) { return x.toUpperCase(); }) + ' ' + d.getDate() + ' ' + MOIS[d.getMonth()].toLowerCase(); }
+  function cranNom(n) { return n >= 7 ? 'Livré' : ETAPES[Math.max(0, n)]; }
+  $('cm-cran').innerHTML = [0, 1, 2, 3, 4, 5, 6, 7].map(function (n) { return '<option value="' + n + '">' + (n + 1 > 7 ? '7. Livré' : (n + 1) + '. ' + ETAPES[n]) + '</option>'; }).join('');
+  function refCmd() {
+    var A = '23456789ABCDEFGHJKMNPQRSTUVWXYZ', b = new Uint8Array(4), o = ''; crypto.getRandomValues(b); for (var i = 0; i < 4; i++) o += A[b[i] % A.length];
+    var d = new Date(); return 'GDE-' + String(d.getFullYear()).slice(2) + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + o;
+  }
+  function rendreCmds() {
+    var q = $('cm-q').value.trim().toLowerCase();
+    $('cm-liste').innerHTML = CMDS.filter(function (c) { return !q || (c.nom + ' ' + c.prod + ' ' + c.ref).toLowerCase().indexOf(q) >= 0; }).map(function (c) {
+      var i = CMDS.indexOf(c), opts = ETAPES.concat(['Livré']).slice(0, 7).map(function (e, n) { return '<option value="' + n + '"' + (n === Math.min(6, c.cran) ? ' selected' : '') + '>' + (n + 1) + '. ' + esc(e) + '</option>'; }).join('');
+      return '<div class="carte" data-cm="' + i + '"><div class="rang" style="justify-content:space-between"><strong>' + esc(c.prod || 'Colis') + '</strong><span class="pastille">' + esc(c.ref) + '</span></div>' +
+        '<div class="note">' + esc(c.nom) + (c.tel ? ', ' + esc(c.tel) : '') + ' · par ' + (c.mode === 'bateau' ? 'bateau' : 'avion') + (c.arr ? ' · arrivée ' + esc(dateFr(c.arr)) : '') + '</div>' +
+        '<div class="grille g2"><div><label>Étape</label><select data-cf="cran">' + opts + '</select></div><div><label>Arrivée estimée</label><input type="date" data-cf="arr" value="' + esc(c.arr) + '"></div></div>' +
+        '<div class="rang"><button class="btn mini" data-ca="suiv" type="button">Étape suivante</button><button class="btn ghost mini" data-ca="photo" type="button">Photo de position</button><button class="btn danger mini" data-ca="suppr" type="button">Supprimer</button></div></div>';
+    }).join('') || '<p class="note">Aucune commande pour le moment.</p>';
+  }
+  function cmTouch(c) { c.maj = new Date().toISOString().slice(0, 10); cmDirty = true; marquer(true); }
+  $('cm-q').addEventListener('input', rendreCmds);
+  $('cm-ok').addEventListener('click', function () {
+    var nom = $('cm-nom').value.trim(), prod = $('cm-prod').value.trim(); if (!nom || !prod) { alert('Écris le prénom du client et le produit.'); return; }
+    var ref = refCmd(); while (CMDS.some(function (c) { return c.ref === ref; })) ref = refCmd();
+    var c = { ref: ref, nom: nom, tel: $('cm-tel').value.trim(), prod: prod, cran: Number($('cm-cran').value), mode: $('cm-mode').value, arr: $('cm-arr').value, maj: '' };
+    cmTouch(c); CMDS.unshift(c); ['cm-nom', 'cm-tel', 'cm-prod', 'cm-arr'].forEach(function (id) { $(id).value = ''; }); rendreCmds(); infoEtat('Commande créée : ' + ref + '. Pense à enregistrer.', 'ok');
+  });
+  $('cm-liste').addEventListener('change', function (e) {
+    var f = e.target.getAttribute('data-cf'); if (!f) return; var c = CMDS[Number(e.target.closest('[data-cm]').getAttribute('data-cm'))];
+    if (f === 'cran') c.cran = Number(e.target.value); else if (f === 'arr') c.arr = e.target.value; cmTouch(c); rendreCmds();
+  });
+  $('cm-liste').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-ca]'); if (!b) return; var c = CMDS[Number(b.closest('[data-cm]').getAttribute('data-cm'))], a = b.getAttribute('data-ca');
+    if (a === 'suiv') { c.cran = Math.min(7, c.cran + 1); cmTouch(c); rendreCmds(); }
+    else if (a === 'suppr') { if (!confirm('Supprimer la commande de ' + c.nom + ' ?')) return; CMDS.splice(CMDS.indexOf(c), 1); cmDirty = true; marquer(true); rendreCmds(); }
+    else if (a === 'photo') {
+      b.disabled = true;
+      GDETicket.position({ produit: c.prod, ref: c.ref, nom: c.nom, cran: c.cran, mode: c.mode, arr: dateFr(c.arr) }).then(function (cv) { return GDETicket.blob(cv); }).then(function (bl) {
+        try { CMF = new File([bl], c.ref + '-position.png', { type: 'image/png' }); } catch (er) { CMF = null; }
+        var url = URL.createObjectURL(bl); $('cm-img').src = url; $('cm-save').href = url; $('cm-save').setAttribute('download', c.ref + '-position.png');
+        var t = facTel(c.tel), ch = $('cm-chat'); if (t) { ch.href = 'https://wa.me/' + t; ch.style.display = 'inline-flex'; } else ch.style.display = 'none';
+        $('cm-sortie').classList.remove('cache'); $('cm-sortie').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }).catch(function () { alert('La photo n\'a pas pu être créée.'); }).then(function () { b.disabled = false; });
+    }
+  });
+  $('cm-share').addEventListener('click', function () {
+    if (CMF && navigator.canShare && navigator.canShare({ files: [CMF] })) navigator.share({ files: [CMF], title: 'GOD DID EXPRESS' }).catch(function () {});
+    else { $('cm-save').click(); alert('Image enregistrée. Envoie-la dans WhatsApp depuis ta galerie.'); }
+  });
+
+  /* ---------- Contacts illimités ---------- */
+  var CT = { tel: 'Numéro', wa: 'WhatsApp', mail: 'E-mail', adresse: 'Adresse' };
+  function rendreContacts() {
+    $('r-contacts').innerHTML = STATE.contacts.map(function (c, i) {
+      return '<div class="grille g2" data-ct="' + i + '" style="align-items:end"><div><label>' + CT[c.type] + ' : nom (facultatif)</label><input data-cf="label" maxlength="40" value="' + esc(c.label) + '" placeholder="Ex. Bureau, Gérant"></div>' +
+        '<div><label>' + CT[c.type] + '</label><input data-cf="v" maxlength="200" value="' + esc(c.v) + '" ' + (c.type === 'mail' ? 'type="email" inputmode="email"' : c.type === 'adresse' ? '' : 'inputmode="tel"') + '></div>' +
+        '<div class="rang"><button class="btn danger mini" data-cdel="' + i + '" type="button">Retirer</button></div></div>';
+    }).join('') || '<p class="note">Aucun contact en plus. Ajoute-en avec les boutons ci-dessous.</p>';
+  }
+  $('r-contacts').addEventListener('input', function (e) { var f = e.target.getAttribute('data-cf'); if (!f) return; STATE.contacts[Number(e.target.closest('[data-ct]').getAttribute('data-ct'))][f] = e.target.value; marquer(true); });
+  $('r-contacts').addEventListener('click', function (e) { var d = e.target.getAttribute('data-cdel'); if (d == null) return; STATE.contacts.splice(Number(d), 1); marquer(true); rendreContacts(); });
+  document.querySelector('#t-reg [data-ca="tel"]').parentNode.addEventListener('click', function (e) {
+    var t = e.target.getAttribute('data-ca'); if (!t) return; if (STATE.contacts.length >= 30) { alert('30 contacts au maximum.'); return; }
+    STATE.contacts.push({ type: t, label: '', v: '' }); marquer(true); rendreContacts();
+  });
+
   /* ---------- Réglages ---------- */
   function rendreReglages() {
-    $('r-mail').value = STATE.mail; ['avion', 'bateau', 'zones', 'introuvable'].forEach(function (k) { $('r-i-' + k).value = STATE.info[k] || ''; }); $('r-tel2').value = STATE.tel2; $('r-adr2').value = STATE.adr2;
+    $('r-wanum').value = STATE.wanum; rendreContacts(); ['avion', 'bateau', 'zones', 'introuvable'].forEach(function (k) { $('r-i-' + k).value = STATE.info[k] || ''; });
     $('r-wag').value = STATE.wag; $('r-wac').value = STATE.wac;
     ['tiktok', 'instagram', 'facebook'].forEach(function (k) { $('r-' + k).value = STATE.soc[k] || ''; });
     $('r-lien').value = STATE.lien; $('r-phr').value = (STATE.phr || []).join('\n');
@@ -767,7 +863,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     }).join('') || '<p class="note">Aucun code promo.</p>';
   }
   [['r-i-avion', function (v) { STATE.info.avion = v; }], ['r-i-bateau', function (v) { STATE.info.bateau = v; }], ['r-i-zones', function (v) { STATE.info.zones = v; }], ['r-i-introuvable', function (v) { STATE.info.introuvable = v; }],
-   ['r-mail', function (v) { STATE.mail = v.trim(); }], ['r-tel2', function (v) { STATE.tel2 = v; }], ['r-adr2', function (v) { STATE.adr2 = v; }], ['r-wag', function (v) { STATE.wag = v.trim(); }], ['r-wac', function (v) { STATE.wac = v.trim(); }],
+   ['r-wanum', function (v) { STATE.wanum = v.replace(/\D/g, ''); }], ['r-wag', function (v) { STATE.wag = v.trim(); }], ['r-wac', function (v) { STATE.wac = v.trim(); }],
    ['r-tiktok', function (v) { STATE.soc.tiktok = v.trim(); }], ['r-instagram', function (v) { STATE.soc.instagram = v.trim(); }], ['r-facebook', function (v) { STATE.soc.facebook = v.trim(); }],
    ['r-lien', function (v) { STATE.lien = v.trim(); }], ['r-phr', function (v) { STATE.phr = v.split('\n').map(function (x) { return x.trim(); }).filter(Boolean); }]
   ].forEach(function (c) { $(c[0]).addEventListener('input', function () { c[1](this.value); marquer(true); }); });
@@ -813,8 +909,14 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         if (!r.ok) throw new Error('Les cartes ne sont pas enregistrées');
         CARTES = r.j.cartes; carDirty = false;
       }
+      if (cmDirty) {
+        r = await api('/api/cmds', { method: 'PUT', headers: H, body: JSON.stringify({ cmds: CMDS }) });
+        if (r.status === 401) return expire();
+        if (!r.ok) throw new Error('Les commandes ne sont pas enregistrées');
+        CMDS = r.j.cmds; cmDirty = false;
+      }
       marquer(false); infoEtat('Publié sur le site ✓', 'ok');
-      rendreProduits(); rendreGroupes(); rendreVoyages(); rendreAvisAdmin(); rendrePrix(); rendreCartes();
+      rendreProduits(); rendreGroupes(); rendreVoyages(); rendreAvisAdmin(); rendrePrix(); rendreCartes(); rendreCmds(); rendreContacts();
     } catch (er) { $('b-save').disabled = false; infoEtat(er.message || 'Pas de connexion', 'mal'); }
   });
 

@@ -40,10 +40,12 @@ var SEA=[],SEAL=[0];(function(){for(var i=0;i<SEAV.length-1;i++){var n=Math.max(
 var SEAKM=SEAL[SEAL.length-1];
 function seaPt(u){var L=u*SEAKM,i=1;while(i<SEA.length-1&&SEAL[i]<L)i++;var f=(L-SEAL[i-1])/Math.max(1,SEAL[i]-SEAL[i-1]);return[lerp(SEA[i-1][0],SEA[i][0],f),lerp(SEA[i-1][1],SEA[i][1],f)]}
 var PR=[0,0,0,.03,.45,.97,1,1];
+window.HOLO_KM={avion:gcd(ORIG.Chine,KIN),bateau:SEAKM};window.HOLO_PR=PR;
+window.holoPhoto=function(o){var c=document.createElement('canvas');var h=makeHolo(c,{stat:true,w:o.w,h:o.h,cran:o.cran,mode:o.mode||'avion'});return h?h.canvas:c};
 window.makeHolo=function(cv,opts){
  opts=opts||{};var ctx=cv.getContext('2d');if(!ctx)return null;
  var W=300,H=380,dpr=1,cam={lon:100,lat:20,R:150},tgt={lon:60,lat:12,R:150},step=4,mode='avion',pg=0,pgT=0,t0=performance.now(),run=false,vis=false,drag=null,hold=0,last=0,reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches,lastPct=-1;
- function size(){var r=cv.getBoundingClientRect();W=Math.max(200,r.width);H=Math.max(240,r.height);dpr=Math.min(2,window.devicePixelRatio||1);cv.width=W*dpr;cv.height=H*dpr}
+ function size(){if(opts.w){W=opts.w;H=opts.h;dpr=1;cv.width=W;cv.height=H;return}var r=cv.getBoundingClientRect();W=Math.max(200,r.width);H=Math.max(240,r.height);dpr=Math.min(2,window.devicePixelRatio||1);cv.width=W*dpr;cv.height=H*dpr}
  function P(lon,lat,h){var l0=cam.lon*RAD,p0=cam.lat*RAD,p=lat*RAD,d=lon*RAD-l0,e=1+(h||0);var x=Math.cos(p)*Math.sin(d),y=Math.cos(p0)*Math.sin(p)-Math.sin(p0)*Math.cos(p)*Math.cos(d),z=Math.sin(p0)*Math.sin(p)+Math.cos(p0)*Math.cos(p)*Math.cos(d);return{x:W/2+cam.R*x*e,y:H*.41-cam.R*y*e,z:z}}
  function pos(u){if(mode==='bateau')return seaPt(u);return gcpt(ORIG.Chine,KIN,u)}
  function hgt(u){return mode==='bateau'?.004:.26*Math.sin(Math.PI*u)}
@@ -96,13 +98,14 @@ window.makeHolo=function(cv,opts){
  function loop(now){if(!run)return;draw(now);if(reduce&&Math.abs(pgT-pg)<.0006){run=false;return}requestAnimationFrame(loop)}
  function kick(){if(vis&&!run){run=true;last=performance.now();requestAnimationFrame(loop)}else if(!vis){size();draw(performance.now())}}
  function start(){if(vis&&!document.hidden&&!run){run=true;last=performance.now();requestAnimationFrame(loop)}}
- if('IntersectionObserver' in window)new IntersectionObserver(function(es){vis=es[0].isIntersecting;if(vis){size();aim();start()}else run=false},{threshold:.05}).observe(cv);else{vis=true;size();aim();start()}
- document.addEventListener('visibilitychange',function(){if(document.hidden)run=false;else start()});
- if(window.ResizeObserver)new ResizeObserver(function(){size();aim()}).observe(cv);
+ if(opts.stat){}else if('IntersectionObserver' in window)new IntersectionObserver(function(es){vis=es[0].isIntersecting;if(vis){size();aim();start()}else run=false},{threshold:.05}).observe(cv);else{vis=true;size();aim();start()}
+ if(!opts.stat)document.addEventListener('visibilitychange',function(){if(document.hidden)run=false;else start()});
+ if(window.ResizeObserver&&!opts.stat)new ResizeObserver(function(){size();aim()}).observe(cv);
  cv.addEventListener('pointerdown',function(e){drag={x:e.clientX,y:e.clientY};try{cv.setPointerCapture(e.pointerId)}catch(x){}});
  cv.addEventListener('pointermove',function(e){if(!drag)return;var dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag={x:e.clientX,y:e.clientY};cam.lon-=dx*.4;cam.lat=cl(cam.lat+dy*.3,-70,70);hold=4});
  function up(){drag=null;hold=4}cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
  size();aim();cam.lon=tgt.lon+80;cam.lat=tgt.lat;cam.R=tgt.R*.7;
+ if(opts.stat){reduce=true;hold=99;setStep(opts.cran,opts.mode);cam.lon=tgt.lon;cam.lat=tgt.lat;cam.R=tgt.R;pg=pgT;draw(performance.now()+6000);return{canvas:cv}}
  return{setStep:setStep,setMode:function(m){setStep(step,m)}};
 };
 })();

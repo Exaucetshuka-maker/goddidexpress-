@@ -76,7 +76,7 @@
     // note
     if (o.note) { set(ctx, 400, 38, FB, MUT); var ns = wrap(ctx, o.note, W - PAD * 2); if (draw) ns.forEach(function (l, k) { ctx.fillText(l, PAD, y + k * 52); }); y += ns.length * 52 + 16; }
     // pied
-    set(ctx, 700, 34, FB, INK); var pied = o.pied || 'GOD DID EXPRESS · WhatsApp +243 983 129 294 · Super Lemba, Kinshasa';
+    set(ctx, 700, 34, FB, INK); var pied = o.pied || ('GOD DID EXPRESS · WhatsApp ' + (window.GDETicket && GDETicket.tel || '+243 983 129 294') + ' · Super Lemba, Kinshasa');
     var ps = wrap(ctx, pied, W - PAD * 2); if (draw) ps.forEach(function (l, k) { ctx.fillText(l, PAD, y + k * 46); }); y += ps.length * 46;
     // tampon
     if (draw && o.stamp) {
@@ -101,5 +101,40 @@
     });
   }
   function blob(c) { return new Promise(function (res) { c.toBlob(function (b) { res(b); }, 'image/png'); }); }
-  window.GDETicket = { draw: draw, blob: blob, usd: usd, W: W };
+  /* Photo « position du colis » : globe, produit, kilomètres parcourus et restants */
+  var ETP = ['Demande reçue', 'Devis envoyé', 'Acompte reçu', 'Acheté chez le fournisseur', 'En transit', 'Arrivé à Kinshasa', 'Livré'];
+  function kmf(n) { return Math.round(n).toLocaleString('fr-FR').replace(/[  ]/g, ' '); }
+  function position(o) {
+    return fonts().then(function () {
+      var Wp = 1080, Hp = 1590, c = document.createElement('canvas'); c.width = Wp; c.height = Hp; var ctx = c.getContext('2d');
+      var cran = Math.max(0, Math.min(7, Math.round(o.cran || 0))), mode = o.mode === 'bateau' ? 'bateau' : 'avion';
+      var tot = (window.HOLO_KM && HOLO_KM[mode]) || 11000, pr = (window.HOLO_PR && HOLO_PR[cran]) || 0, fait = tot * pr, reste = tot - fait, livre = cran >= 6;
+      ctx.fillStyle = '#05080f'; ctx.fillRect(0, 0, Wp, Hp);
+      if (window.holoPhoto) { try { ctx.drawImage(holoPhoto({ w: 1080, h: 860, cran: cran, mode: mode }), 0, 0); } catch (e) {} }
+      var g = ctx.createLinearGradient(0, 640, 0, 880); g.addColorStop(0, 'rgba(5,8,15,0)'); g.addColorStop(1, '#05080f'); ctx.fillStyle = g; ctx.fillRect(0, 640, Wp, 240);
+      var P2 = 56; ctx.textBaseline = 'alphabetic';
+      function tx(s, x, y, size, col, w, al, f, ls) { ctx.font = w + ' ' + size + 'px ' + (f || FB); ctx.fillStyle = col; ctx.textAlign = al || 'left'; try { ctx.letterSpacing = (ls || 0) + 'px'; } catch (e) {} ctx.fillText(s, x, y); try { ctx.letterSpacing = '0px'; } catch (e) {} }
+      tx('GOD DID EXPRESS', P2, 84, 30, '#fff', 700, 'left', FB, 5);
+      ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 2; rr(ctx, Wp - P2 - 330, 48, 330, 50, 6); ctx.stroke(); tx('POSITION DU COLIS', Wp - P2 - 165, 82, 22, 'rgba(255,255,255,.9)', 700, 'center', FB, 4);
+      tx((o.ref ? 'COLIS ' + o.ref : 'COLIS') + (o.nom ? ' · ' + String(o.nom).toUpperCase() : ''), P2, 910, 28, '#FF7A1A', 700, 'left', FB, 4);
+      var nom = String(o.produit || 'Ton colis').toUpperCase(), size = 100; ctx.font = '800 ' + size + 'px ' + FD;
+      while (ctx.measureText(nom).width > Wp - P2 * 2 && size > 64) { size -= 4; ctx.font = '800 ' + size + 'px ' + FD; }
+      var ls = wrap(ctx, nom, Wp - P2 * 2).slice(0, 2); ls.forEach(function (l, i) { tx(l, P2, 1000 + i * (size * .92), size, '#fff', 800, 'left', FD, 1); });
+      var yy = 1000 + (ls.length - 1) * size * .92 + 52;
+      tx('Chine  →  Kinshasa  ·  par ' + mode, P2, yy, 34, 'rgba(255,255,255,.72)', 500, 'left', FB, 0);
+      yy += 96; var cols = [['PARCOURUS', kmf(Math.round(fait / 10) * 10), 'km'], ['RESTANTS', livre ? '0' : kmf(Math.round(reste / 10) * 10), 'km'], ['PROGRESSION', String(Math.round(pr * 100)), '%']], cw = (Wp - P2 * 2) / 3;
+      cols.forEach(function (k, i) { var x = P2 + i * cw; tx(k[0], x, yy, 22, 'rgba(255,255,255,.55)', 700, 'left', FB, 4); tx(k[1], x, yy + 82, 86, i === 1 ? '#FF7A1A' : '#fff', 800, 'left', FD, 0); ctx.font = '800 86px ' + FD; var w = ctx.measureText(k[1]).width; tx(k[2], x + w + 10, yy + 82, 34, 'rgba(255,255,255,.7)', 600, 'left', FB, 0); });
+      var by = yy + 138, bw = Wp - P2 * 2; ctx.fillStyle = 'rgba(255,255,255,.14)'; rr(ctx, P2, by, bw, 14, 7); ctx.fill();
+      var fg = ctx.createLinearGradient(P2, 0, P2 + bw, 0); fg.addColorStop(0, '#FF7A1A'); fg.addColorStop(1, livre ? '#3CDC82' : '#FFC15A'); ctx.fillStyle = fg; ctx.shadowColor = '#FF7A1A'; ctx.shadowBlur = 24; rr(ctx, P2, by, Math.max(14, bw * pr), 14, 7); ctx.fill(); ctx.shadowBlur = 0;
+      ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 18; ctx.beginPath(); ctx.arc(P2 + Math.max(7, bw * pr), by + 7, 15, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+      tx('CHINE', P2, by + 58, 22, 'rgba(255,255,255,.6)', 700, 'left', FB, 4); tx('KINSHASA', Wp - P2, by + 58, 22, 'rgba(255,255,255,.6)', 700, 'right', FB, 4);
+      var st = livre ? 'LIVRÉ' : (ETP[Math.min(6, cran)] || '').toUpperCase(), sy = by + 120; ctx.font = '800 44px ' + FD; var sw = ctx.measureText(st).width + 70;
+      ctx.fillStyle = livre ? '#3CDC82' : '#FF7A1A'; rr(ctx, P2, sy - 50, sw, 76, 8); ctx.fill(); tx(st, P2 + 35, sy + 4, 44, '#0E0D0C', 800, 'left', FD, 2);
+      tx('Étape ' + Math.min(7, cran + 1) + ' sur 7', P2 + sw + 28, sy + 2, 30, 'rgba(255,255,255,.7)', 500, 'left', FB, 0);
+      if (o.arr && !livre) tx('Arrivée estimée à Kinshasa : ' + o.arr, P2, sy + 64, 30, '#fff', 600, 'left', FB, 0);
+      tx('GOD DID EXPRESS · WhatsApp ' + (window.GDETicket && GDETicket.tel || '+243 983 129 294'), Wp / 2, Hp - 30, 24, 'rgba(255,255,255,.45)', 500, 'center', FB, 1);
+      return c;
+    });
+  }
+  window.GDETicket = { draw: draw, position: position, blob: blob, usd: usd, W: W, tel: '' };
 })();

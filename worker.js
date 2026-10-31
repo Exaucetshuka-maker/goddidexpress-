@@ -81,6 +81,7 @@ function nettoyer(s) {
     const r = {};
     if (Array.isArray(p.px)) r.px = [0, 1, 2].map((i) => (p.px[i] === null || p.px[i] === '' || p.px[i] === undefined ? null : nombre(p.px[i], null)));
     if (p.cache) r.cache = true;
+    if (p.gone) r.gone = true;
     if (p.desc) r.desc = txt(p.desc, 600);
     if (p.photo && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(p.photo)) r.photo = p.photo;
     o.prod[id] = r;
@@ -110,6 +111,10 @@ function nettoyer(s) {
   o.wac = /^https:\/\//i.test(s.wac || '') ? txt(s.wac, 300) : '';
   const inf = s.info && typeof s.info === 'object' ? s.info : {};
   o.info = { avion: txt(inf.avion, 120), bateau: txt(inf.bateau, 120), zones: txt(inf.zones, 300), introuvable: txt(inf.introuvable, 300) };
+  o.contacts = (Array.isArray(s.contacts) ? s.contacts : []).slice(0, 30).map((c) => ({
+    type: ['tel', 'wa', 'mail', 'adresse'].includes(c && c.type) ? c.type : 'tel', label: txt(c && c.label, 40), v: txt(c && c.v, 200),
+  })).filter((c) => c.v);
+  o.wanum = /^\d{8,15}$/.test(String(s.wanum || '').replace(/\D/g, '')) ? String(s.wanum).replace(/\D/g, '') : '';
   o.tel2 = txt(s.tel2, 40);
   o.adr2 = txt(s.adr2, 200);
   o.phr = (Array.isArray(s.phr) ? s.phr : []).slice(0, 20).map((x) => txt(x, 80)).filter(Boolean);
@@ -241,6 +246,18 @@ export default {
       return json({ nom: c.nom, achats: c.achats });
     }
 
+    /* Position d'un colis par sa référence (public, limité) : seulement prénom, produit, étape */
+    const mm = /^\/api\/cmd\/([A-Za-z0-9-]{4,30})$/.exec(p);
+    if (mm && request.method === 'GET') {
+      const ip = request.headers.get('cf-connecting-ip') || 'x', k = 'look:' + ip;
+      const n = Number((await env.GDE.get(k)) || 0);
+      if (n >= 40) return json({ erreur: 'Trop d\'essais' }, 429);
+      await env.GDE.put(k, String(n + 1), { expirationTtl: 600 });
+      const c = (await lireListe(env, 'cmds')).find((x) => x.ref === mm[1].toUpperCase());
+      if (!c) return json({ erreur: 'Référence introuvable' }, 404);
+      return json({ ref: c.ref, nom: c.nom, prod: c.prod, cran: c.cran, mode: c.mode, arr: c.arr, maj: c.maj });
+    }
+
     /* Tout ce qui suit demande d'être connecté */
     if (!(await verifierToken(env, request))) return json({ erreur: 'Connexion requise' }, 401);
 
@@ -274,6 +291,18 @@ export default {
       })).filter((c) => /^[A-Z0-9-]{4,30}$/.test(c.code) && !vues.has(c.code) && vues.add(c.code));
       await env.GDE.put('cartes', JSON.stringify(propre));
       return json({ cartes: propre });
+    }
+
+    if (p === '/api/cmds' && request.method === 'GET') return json({ cmds: await lireListe(env, 'cmds') });
+    if (p === '/api/cmds' && request.method === 'PUT') {
+      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const vues = new Set(), dt = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? String(v) : '');
+      const propre = (Array.isArray(b.cmds) ? b.cmds : []).slice(0, 400).map((c) => ({
+        ref: String(c.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), nom: txt(c.nom, 40), tel: txt(c.tel, 30), prod: txt(c.prod, 100),
+        cran: Math.max(0, Math.min(7, Math.round(nombre(c.cran)))), mode: c.mode === 'bateau' ? 'bateau' : 'avion', arr: dt(c.arr), maj: dt(c.maj) || new Date().toISOString().slice(0, 10),
+      })).filter((c) => /^[A-Z0-9-]{4,30}$/.test(c.ref) && !vues.has(c.ref) && vues.add(c.ref));
+      await env.GDE.put('cmds', JSON.stringify(propre));
+      return json({ cmds: propre });
     }
 
     if (p === '/api/couts' && request.method === 'GET') {
