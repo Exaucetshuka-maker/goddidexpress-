@@ -169,5 +169,33 @@
       return c;
     });
   }
-  window.GDETicket = { draw: draw, position: position, carte: carte, blob: blob, usd: usd, W: W, tel: '' };
+  /* Affiche promo : une image pour présenter un produit à un client */
+  function chargerImg(src) { return new Promise(function (res) { if (!src) return res(null); var im = new Image(); im.onload = function () { res(im); }; im.onerror = function () { res(null); }; im.src = src; }); }
+  function affiche(o) {
+    return Promise.all([fonts(), chargerImg(o.photo)]).then(function (rs) {
+      var im = rs[1], Wa = 1080, Ha = 1500, c = document.createElement('canvas'); c.width = Wa; c.height = Ha; var ctx = c.getContext('2d');
+      ctx.fillStyle = '#0E0D0C'; ctx.fillRect(0, 0, Wa, Ha); var P2 = 56; ctx.textBaseline = 'alphabetic';
+      function tx(s, x, y, size, col, w, al, f, ls) { ctx.font = w + ' ' + size + 'px ' + (f || FB); ctx.fillStyle = col; ctx.textAlign = al || 'left'; try { ctx.letterSpacing = (ls || 0) + 'px'; } catch (e) {} ctx.fillText(s, x, y); try { ctx.letterSpacing = '0px'; } catch (e) {} }
+      var ph = 760;
+      if (im) { var k = Math.max(Wa / im.width, ph / im.height), w = im.width * k, h = im.height * k; ctx.save(); ctx.beginPath(); ctx.rect(0, 0, Wa, ph); ctx.clip(); ctx.drawImage(im, (Wa - w) / 2, (ph - h) / 2, w, h); ctx.restore(); }
+      else { var g0 = ctx.createLinearGradient(0, 0, Wa, ph); g0.addColorStop(0, '#2A1A0E'); g0.addColorStop(1, '#0E0D0C'); ctx.fillStyle = g0; ctx.fillRect(0, 0, Wa, ph); }
+      var g = ctx.createLinearGradient(0, 0, 0, 170); g.addColorStop(0, 'rgba(14,13,12,.85)'); g.addColorStop(1, 'rgba(14,13,12,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, Wa, 170);
+      var g2 = ctx.createLinearGradient(0, ph - 260, 0, ph); g2.addColorStop(0, 'rgba(14,13,12,0)'); g2.addColorStop(1, '#0E0D0C'); ctx.fillStyle = g2; ctx.fillRect(0, ph - 260, Wa, 260);
+      tx('GOD DID EXPRESS', P2, 84, 34, '#fff', 800, 'left', FD, 5);
+      if (o.badge) { ctx.fillStyle = '#FF7A1A'; rr(ctx, Wa - P2 - 250, 40, 250, 64, 8); ctx.fill(); tx(o.badge, Wa - P2 - 125, 85, 36, '#0E0D0C', 800, 'center', FD, 2); }
+      var y = ph + 30; tx(String(o.kicker || 'OFFRE').toUpperCase(), P2, y, 26, '#FF7A1A', 700, 'left', FB, 5);
+      var nom = String(o.titre || 'Produit').toUpperCase(), size = 96; ctx.font = '800 ' + size + 'px ' + FD; while (ctx.measureText(nom).width > Wa - P2 * 2 && size > 56) { size -= 4; ctx.font = '800 ' + size + 'px ' + FD; }
+      var ls = wrap(ctx, nom, Wa - P2 * 2).slice(0, 2); ls.forEach(function (l, i) { tx(l, P2, y + 80 + i * size * .92, size, '#fff', 800, 'left', FD, 1); }); y += 80 + (ls.length - 1) * size * .92;
+      if (o.sous) { y += 50; ctx.font = '500 32px ' + FB; wrap(ctx, o.sous, Wa - P2 * 2).slice(0, 2).forEach(function (l, i) { tx(l, P2, y + i * 42, 32, 'rgba(255,255,255,.72)', 500, 'left', FB, 0); }); y += (Math.min(2, wrap(ctx, o.sous, Wa - P2 * 2).length) - 1) * 42; }
+      var tg = o.tags || []; if (tg.length) { y += 52; var x = P2; tg.forEach(function (t) { ctx.font = '700 26px ' + FB; var w = ctx.measureText(t).width + 40, vert = /Déjà là/.test(t); ctx.strokeStyle = vert ? '#3CDC82' : 'rgba(255,255,255,.5)'; ctx.lineWidth = 2; rr(ctx, x, y - 32, w, 48, 6); ctx.stroke(); tx(t, x + 20, y + 2, 26, vert ? '#3CDC82' : '#fff', 700, 'left', FB, 0); x += w + 12; }); }
+      var px = (o.prix || []); y += 40;
+      if (px.length) { var cw = (Wa - P2 * 2) / Math.max(1, px.length); px.forEach(function (p, i) { var xx = P2 + i * cw; tx(p[0].toUpperCase(), xx, y + 20, 22, 'rgba(255,255,255,.55)', 700, 'left', FB, 4); tx(p[1], xx, y + 100, 80, i === 0 ? '#FF7A1A' : '#fff', 800, 'left', FD, 0); }); y += 120; }
+      if (o.code) { y += 44; ctx.fillStyle = 'rgba(255,122,26,.15)'; rr(ctx, P2, y - 34, Wa - P2 * 2, 70, 8); ctx.fill(); tx('CODE PROMO  ' + o.code, P2 + 28, y + 12, 32, '#FF7A1A', 800, 'left', FD, 3); if (o.remise) tx(o.remise, Wa - P2 - 28, y + 12, 32, '#fff', 800, 'right', FD, 1); }
+      ctx.fillStyle = '#FF7A1A'; rr(ctx, P2, Ha - 150, Wa - P2 * 2, 92, 10); ctx.fill();
+      tx('Commande sur WhatsApp : ' + (window.GDETicket && GDETicket.tel || '+243 983 129 294'), Wa / 2, Ha - 90, 40, '#0E0D0C', 800, 'center', FD, 1);
+      tx('Chine · Dubaï · Istanbul · livré à Kinshasa', Wa / 2, Ha - 26, 22, 'rgba(255,255,255,.5)', 500, 'center', FB, 1);
+      return c;
+    });
+  }
+  window.GDETicket = { draw: draw, position: position, carte: carte, affiche: affiche, blob: blob, usd: usd, W: W, tel: '' };
 })();

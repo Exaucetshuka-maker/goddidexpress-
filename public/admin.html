@@ -112,6 +112,11 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
           <button class="btn" id="n-ok" type="button">Ajouter ce produit</button>
         </div>
       </details>
+      <div id="af-sortie" class="carte cache">
+        <div class="kicker">Affiche promo</div>
+        <img id="af-img" alt="Affiche promo" style="width:100%;border-radius:6px;background:#0E0D0C">
+        <div class="rang"><button class="btn" id="af-share" type="button">Envoyer l'image sur WhatsApp</button><a class="btn ghost" id="af-save" download="affiche.png" style="text-decoration:none;display:inline-flex;align-items:center">Enregistrer l'image</a><button class="btn ghost" id="af-close" type="button">Fermer</button></div>
+      </div>
       <div class="grille g2">
         <div><label for="q">Chercher</label><input id="q" type="search" placeholder="Nom du produit"></div>
         <div><label for="qc">Catégorie</label><select id="qc"></select></div>
@@ -437,6 +442,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         '<details><summary class="note">Description pour les clients</summary><textarea data-k="desc" maxlength="600" style="min-height:70px" placeholder="Une ou deux phrases sur le produit">' + esc(p.desc) + '</textarea></details>' +
         '<div class="rang"><button class="btn ghost mini" data-a="photo" type="button">Changer la photo</button>' +
         (p.custom ? '<button class="btn ghost mini" data-a="photo-off" type="button">Enlever la photo</button>' : '') +
+        '<button class="btn mini" data-a="affiche" type="button">Affiche promo</button>' +
         (p.gone ? '<button class="btn ghost mini" data-a="restaure" type="button">Restaurer</button>' : '<button class="btn ghost mini" data-a="cache" type="button">' + (p.cache ? 'Remettre en ligne' : (p.extra ? 'Masquer' : 'Retirer du site')) + '</button><button class="btn danger mini" data-a="suppr" type="button">Supprimer</button>') +
         '<input type="file" accept="image/*" class="cache" data-k="file"></div></div></div>';
     }).join('') || '<p class="note">Aucun produit trouvé.</p>';
@@ -483,6 +489,26 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       return '/api/img/' + id + '?v=' + Date.now();
     });
   }
+  var AFF = null;
+  function affichePromo(id, b) {
+    var p = tous().filter(function (x) { return x.id === id; })[0]; if (!p) return;
+    var pr = [['1 pièce', p.px[0]], ['Dès 5', p.px[1]], ['Dès 10', p.px[2]]].filter(function (x) { return x[1] > 0; }).map(function (x) { return [x[0], x[1] + ' $']; });
+    var dt = p.det || {}, tags = [];
+    if (dt.e) tags.push(dt.e === 'neuf' ? 'Neuf' : 'Occasion'); if (dt.v) tags.push(dt.v === 'carton' ? 'En carton' : dt.v === 'detail' ? 'Au détail' : 'Carton ou détail'); if (dt.d) tags.push(dt.d === 'stock' ? 'Déjà là' : 'Sur commande'); if (dt.ct) tags.push(dt.ct);
+    var promo = (STATE.promo || []).filter(function (x) { return x.actif !== false && x.code; })[0], code = '', rem = '';
+    if (promo && confirm('Ajouter le code promo ' + promo.code + ' (' + promo.pct + ' %) sur l\'affiche ?')) { code = promo.code; rem = '-' + promo.pct + ' %'; }
+    var photo = p.photo && p.photo.charAt(0) !== '/' && p.photo.indexOf('http') !== 0 ? '/' + p.photo : p.photo;
+    b.disabled = true;
+    GDETicket.affiche({ titre: p.t, sous: p.desc || p.s, kicker: CATL[p.c] || 'Offre', photo: photo, prix: pr, tags: tags, code: code, remise: rem, badge: rem }).then(function (cv) { return GDETicket.blob(cv); }).then(function (bl) {
+      try { AFF = new File([bl], 'affiche-' + id + '.png', { type: 'image/png' }); } catch (e) { AFF = null; }
+      var u = URL.createObjectURL(bl); $('af-img').src = u; $('af-save').href = u; $('af-sortie').classList.remove('cache'); $('af-sortie').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }).catch(function () { alert('L\'affiche n\'a pas pu être créée.'); }).then(function () { b.disabled = false; });
+  }
+  $('af-share').addEventListener('click', function () {
+    if (AFF && navigator.canShare && navigator.canShare({ files: [AFF] })) navigator.share({ files: [AFF], title: 'GOD DID EXPRESS' }).catch(function () {});
+    else { $('af-save').click(); alert('Image enregistrée. Envoie-la dans WhatsApp depuis ta galerie.'); }
+  });
+  $('af-close').addEventListener('click', function () { $('af-sortie').classList.add('cache'); });
   function infoEtat(t, cls) { $('etat').textContent = t; $('etat').className = 'msg ' + (cls || ''); }
 
   $('liste').addEventListener('click', function (e) {
@@ -495,6 +521,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       if (STATE.extra.some(function (x) { return x.id === id; })) { if (confirm('Supprimer ce produit pour de bon ?')) { STATE.extra = STATE.extra.filter(function (x) { return x.id !== id; }); marquer(true); rendreProduits(); } }
       else if (confirm('Supprimer cet ancien article du site ? Tu pourras le restaurer dans « Supprimés ».')) { var og = refProd(id); og.cache = true; og.gone = true; marquer(true); rendreProduits(); }
     }
+    else if (a === 'affiche') { affichePromo(id, b); }
     else if (a === 'restaure') { var or = refProd(id); delete or.gone; delete or.cache; marquer(true); rendreProduits(); }
   });
   $('liste').addEventListener('change', function (e) {
