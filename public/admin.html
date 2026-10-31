@@ -107,6 +107,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
             <div><label for="n-p5">Dès 5 pièces</label><input id="n-p5" inputmode="decimal"></div>
             <div><label for="n-p10">Dès 10 pièces</label><input id="n-p10" inputmode="decimal"></div>
           </div>
+          <div id="n-det"></div>
           <div><label for="n-f">Photo</label><input id="n-f" type="file" accept="image/*"></div>
           <button class="btn" id="n-ok" type="button">Ajouter ce produit</button>
         </div>
@@ -178,6 +179,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         <div class="grille" style="margin-top:10px">
           <div class="grille g2"><div><label for="cm-nom">Prénom du client</label><input id="cm-nom" maxlength="40"></div><div><label for="cm-tel">Téléphone du client</label><input id="cm-tel" inputmode="tel" placeholder="0810000000"></div></div>
           <div><label for="cm-prod">Produit</label><input id="cm-prod" maxlength="100" placeholder="Ex. Sac tactique 40L"></div>
+          <div class="grille g2"><div><label for="cm-orig">Départ</label><select id="cm-orig"><option>Chine</option><option>Dubaï</option><option>Istanbul</option></select></div><div></div></div>
           <div class="grille g3"><div><label for="cm-mode">Transport</label><select id="cm-mode"><option value="avion">Avion</option><option value="bateau">Bateau</option></select></div><div><label for="cm-cran">Étape</label><select id="cm-cran"></select></div><div><label for="cm-arr">Arrivée estimée</label><input id="cm-arr" type="date"></div></div>
           <button class="btn" id="cm-ok" type="button">Ajouter la commande</button>
         </div>
@@ -399,16 +401,24 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   /* ---------- Produits ---------- */
   function remplirSelects() {
     var opts = Object.keys(CATL).map(function (k) { return '<option value="' + k + '">' + esc(CATL[k]) + '</option>'; }).join('');
-    $('n-c').innerHTML = opts;
+    $('n-c').innerHTML = opts; $('n-det').innerHTML = detForm(null, 'nd-');
     $('qc').innerHTML = '<option value="">Toutes</option><option value="__off">Retirés du site</option><option value="__gone">Supprimés (anciens articles)</option>' + opts;
   }
   function tous() {
     var base = PRODS.map(function (p) {
       var o = STATE.prod[p.id] || {};
-      return { id: p.id, t: p.t, s: p.s, c: p.c, px: o.px || [null, null, null], photo: o.photo || ('img/' + p.id + '.jpg'), custom: !!o.photo, desc: o.desc || '', cache: !!o.cache, gone: !!o.gone, extra: false };
+      return { id: p.id, t: p.t, s: p.s, c: p.c, px: o.px || [null, null, null], photo: o.photo || ('img/' + p.id + '.jpg'), custom: !!o.photo, desc: o.desc || '', cache: !!o.cache, gone: !!o.gone, det: o.det || null, extra: false };
     });
-    var ex = STATE.extra.map(function (e) { return { id: e.id, t: e.t, s: e.s, c: e.c, px: e.px || [null, null, null], photo: e.photo || '', custom: !!e.photo, desc: e.desc || '', cache: !!e.cache, gone: false, extra: true }; });
+    var ex = STATE.extra.map(function (e) { return { id: e.id, t: e.t, s: e.s, c: e.c, px: e.px || [null, null, null], photo: e.photo || '', custom: !!e.photo, desc: e.desc || '', cache: !!e.cache, gone: false, det: e.det || null, extra: true }; });
     return ex.concat(base);
+  }
+  function opt(v, cur, t) { return '<option value="' + v + '"' + (cur === v ? ' selected' : '') + '>' + t + '</option>'; }
+  function detForm(dt, pre) {
+    dt = dt || {}; pre = pre || 'det-';
+    return '<div class="grille g2" style="margin-top:8px"><div><label>État</label><select data-k="' + pre + 'e">' + opt('', dt.e || '', 'Non précisé') + opt('neuf', dt.e, 'Neuf') + opt('occasion', dt.e, 'Occasion') + '</select></div>' +
+      '<div><label>Vente</label><select data-k="' + pre + 'v">' + opt('', dt.v || '', 'Non précisé') + opt('detail', dt.v, 'Au détail') + opt('carton', dt.v, 'En carton') + opt('les-deux', dt.v, 'Carton ou détail') + '</select></div>' +
+      '<div><label>Disponibilité</label><select data-k="' + pre + 'd">' + opt('', dt.d || '', 'Non précisé') + opt('stock', dt.d, 'Déjà là (en stock)') + opt('commande', dt.d, 'Sur commande') + '</select></div>' +
+      '<div><label>Précision carton</label><input data-k="' + pre + 'ct" maxlength="60" value="' + esc(dt.ct || '') + '" placeholder="Ex. 24 pièces par carton"></div></div>';
   }
   function rendreProduits() {
     var q = $('q').value.trim().toLowerCase(), qc = $('qc').value;
@@ -423,6 +433,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         '<div class="grille g3"><div><label>1 pièce $</label><input data-k="px" data-i="0" inputmode="decimal" value="' + esc(v(0)) + '"></div>' +
         '<div><label>Dès 5</label><input data-k="px" data-i="1" inputmode="decimal" value="' + esc(v(1)) + '"></div>' +
         '<div><label>Dès 10</label><input data-k="px" data-i="2" inputmode="decimal" value="' + esc(v(2)) + '"></div></div>' +
+        '<details><summary class="note">Détail : neuf ou occasion, carton, sur commande</summary>' + detForm(p.det) + '</details>' +
         '<details><summary class="note">Description pour les clients</summary><textarea data-k="desc" maxlength="600" style="min-height:70px" placeholder="Une ou deux phrases sur le produit">' + esc(p.desc) + '</textarea></details>' +
         '<div class="rang"><button class="btn ghost mini" data-a="photo" type="button">Changer la photo</button>' +
         (p.custom ? '<button class="btn ghost mini" data-a="photo-off" type="button">Enlever la photo</button>' : '') +
@@ -441,8 +452,9 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   }
 
   $('liste').addEventListener('input', function (e) {
-    var t = e.target, row = t.closest('[data-id]'), k = t.getAttribute('data-k'); if (!row || (k !== 'px' && k !== 'desc')) return;
+    var t = e.target, row = t.closest('[data-id]'), k = t.getAttribute('data-k'); if (!row || (k !== 'px' && k !== 'desc' && String(k).indexOf('det-') !== 0)) return;
     var o = refProd(row.getAttribute('data-id'));
+    if (String(k).indexOf('det-') === 0) { o.det = o.det || {}; var dk = k.slice(4); if (t.value) o.det[dk] = t.value; else delete o.det[dk]; if (!Object.keys(o.det).length) delete o.det; marquer(true); return; }
     if (k === 'desc') { o.desc = t.value; marquer(true); return; }
     o.px = o.px || [null, null, null]; o.px[Number(t.getAttribute('data-i'))] = nb(t.value);
     marquer(true);
@@ -498,9 +510,10 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     var t = $('n-t').value.trim(); if (!t) { alert('Écris le nom du produit.'); return; }
     var id = 'x' + Date.now().toString(36), f = $('n-f').files[0];
     var p = { id: id, t: t, s: $('n-s').value.trim(), c: $('n-c').value, px: [nb($('n-p1').value), nb($('n-p5').value), nb($('n-p10').value)] };
+    var dn = {}; [['e', 'nd-e'], ['v', 'nd-v'], ['d', 'nd-d'], ['ct', 'nd-ct']].forEach(function (x) { var v = document.querySelector('#n-det [data-k="' + x[1] + '"]').value.trim(); if (v) dn[x[0]] = v; }); if (Object.keys(dn).length) p.det = dn;
     function fin() {
       STATE.extra.unshift(p); marquer(true);
-      ['n-t', 'n-s', 'n-p1', 'n-p5', 'n-p10', 'n-f'].forEach(function (k) { $(k).value = ''; });
+      ['n-t', 'n-s', 'n-p1', 'n-p5', 'n-p10', 'n-f'].forEach(function (k) { $(k).value = ''; }); $('n-det').innerHTML = detForm(null, 'nd-');
       $('ajout').open = false; rendreProduits(); infoEtat('Produit ajouté. Pense à enregistrer.', 'ok');
     }
     if (f) { infoEtat('Envoi de la photo…'); envoyerPhoto(id, f).then(function (u) { p.photo = u; fin(); }).catch(function (er) { infoEtat(er.message, 'mal'); }); }
@@ -817,7 +830,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     $('cm-liste').innerHTML = CMDS.filter(function (c) { return !q || (c.nom + ' ' + c.prod + ' ' + c.ref).toLowerCase().indexOf(q) >= 0; }).map(function (c) {
       var i = CMDS.indexOf(c), opts = ETAPES.concat(['Livré']).slice(0, 7).map(function (e, n) { return '<option value="' + n + '"' + (n === Math.min(6, c.cran) ? ' selected' : '') + '>' + (n + 1) + '. ' + esc(e) + '</option>'; }).join('');
       return '<div class="carte" data-cm="' + i + '"><div class="rang" style="justify-content:space-between"><strong>' + esc(c.prod || 'Colis') + '</strong><span class="pastille">' + esc(c.ref) + '</span></div>' +
-        '<div class="note">' + esc(c.nom) + (c.tel ? ', ' + esc(c.tel) : '') + ' · par ' + (c.mode === 'bateau' ? 'bateau' : 'avion') + (c.arr ? ' · arrivée ' + esc(dateFr(c.arr)) : '') + '</div>' +
+        '<div class="note">' + esc(c.nom) + (c.tel ? ', ' + esc(c.tel) : '') + ' · ' + esc(c.orig || 'Chine') + ' → Kinshasa, par ' + (c.mode === 'bateau' ? 'bateau' : 'avion') + (c.arr ? ' · arrivée ' + esc(dateFr(c.arr)) : '') + '</div>' +
         '<div class="grille g2"><div><label>Étape</label><select data-cf="cran">' + opts + '</select></div><div><label>Arrivée estimée</label><input type="date" data-cf="arr" value="' + esc(c.arr) + '"></div></div>' +
         '<div class="rang"><button class="btn mini" data-ca="suiv" type="button">Étape suivante</button><button class="btn ghost mini" data-ca="photo" type="button">Photo de position</button><button class="btn danger mini" data-ca="suppr" type="button">Supprimer</button></div></div>';
     }).join('') || '<p class="note">Aucune commande pour le moment.</p>';
@@ -827,7 +840,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   $('cm-ok').addEventListener('click', function () {
     var nom = $('cm-nom').value.trim(), prod = $('cm-prod').value.trim(); if (!nom || !prod) { alert('Écris le prénom du client et le produit.'); return; }
     var ref = refCmd(); while (CMDS.some(function (c) { return c.ref === ref; })) ref = refCmd();
-    var c = { ref: ref, nom: nom, tel: $('cm-tel').value.trim(), prod: prod, cran: Number($('cm-cran').value), mode: $('cm-mode').value, arr: $('cm-arr').value, maj: '' };
+    var c = { ref: ref, nom: nom, tel: $('cm-tel').value.trim(), prod: prod, cran: Number($('cm-cran').value), mode: $('cm-mode').value, orig: $('cm-orig').value, arr: $('cm-arr').value, maj: '' };
     cmTouch(c); CMDS.unshift(c); ['cm-nom', 'cm-tel', 'cm-prod', 'cm-arr'].forEach(function (id) { $(id).value = ''; }); rendreCmds(); infoEtat('Commande créée : ' + ref + '. Pense à enregistrer.', 'ok');
   });
   $('cm-liste').addEventListener('change', function (e) {
@@ -840,7 +853,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     else if (a === 'suppr') { if (!confirm('Supprimer la commande de ' + c.nom + ' ?')) return; CMDS.splice(CMDS.indexOf(c), 1); cmDirty = true; marquer(true); rendreCmds(); }
     else if (a === 'photo') {
       b.disabled = true;
-      GDETicket.position({ produit: c.prod, ref: c.ref, nom: c.nom, cran: c.cran, mode: c.mode, arr: dateFr(c.arr) }).then(function (cv) { return GDETicket.blob(cv); }).then(function (bl) {
+      GDETicket.position({ produit: c.prod, ref: c.ref, nom: c.nom, cran: c.cran, mode: c.mode, orig: c.orig || 'Chine', arr: dateFr(c.arr) }).then(function (cv) { return GDETicket.blob(cv); }).then(function (bl) {
         try { CMF = new File([bl], c.ref + '-position.png', { type: 'image/png' }); } catch (er) { CMF = null; }
         var url = URL.createObjectURL(bl); $('cm-img').src = url; $('cm-save').href = url; $('cm-save').setAttribute('download', c.ref + '-position.png');
         var t = facTel(c.tel), ch = $('cm-chat'); if (t) { ch.href = 'https://wa.me/' + t; ch.style.display = 'inline-flex'; } else ch.style.display = 'none';

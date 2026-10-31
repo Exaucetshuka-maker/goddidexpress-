@@ -69,6 +69,16 @@ function txt(v, max = MAXTXT) { return String(v == null ? '' : v).slice(0, max);
 function nombre(v, def = 0) { const n = Number(v); return isFinite(n) ? n : def; }
 
 /* Nettoie les données reçues : seules ces rubriques publiques sont gardées */
+function nettoyerDet(d) {
+  if (!d || typeof d !== 'object') return null;
+  const r = {};
+  if (['neuf', 'occasion'].includes(d.e)) r.e = d.e;
+  if (['carton', 'detail', 'les-deux'].includes(d.v)) r.v = d.v;
+  if (['stock', 'commande'].includes(d.d)) r.d = d.d;
+  const ct = txt(d.ct, 60); if (ct) r.ct = ct;
+  return Object.keys(r).length ? r : null;
+}
+
 function nettoyer(s) {
   s = s && typeof s === 'object' ? s : {};
   const o = {};
@@ -83,6 +93,7 @@ function nettoyer(s) {
     if (p.cache) r.cache = true;
     if (p.gone) r.gone = true;
     if (p.desc) r.desc = txt(p.desc, 600);
+    { const dd = nettoyerDet(p.det); if (dd) r.det = dd; }
     if (p.photo && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(p.photo)) r.photo = p.photo;
     o.prod[id] = r;
   });
@@ -95,6 +106,7 @@ function nettoyer(s) {
     if (e.photo && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(e.photo)) r.photo = e.photo;
     if (e.cache) r.cache = true;
     if (e.desc) r.desc = txt(e.desc, 600);
+    { const dd = nettoyerDet(e.det); if (dd) r.det = dd; }
     return r;
   });
   o.slog = {};
@@ -256,7 +268,7 @@ export default {
       await env.GDE.put(k, String(n + 1), { expirationTtl: 600 });
       const c = (await lireListe(env, 'cmds')).find((x) => x.ref === mm[1].toUpperCase());
       if (!c) return json({ erreur: 'Référence introuvable' }, 404);
-      return json({ ref: c.ref, nom: c.nom, prod: c.prod, cran: c.cran, mode: c.mode, arr: c.arr, maj: c.maj });
+      return json({ ref: c.ref, nom: c.nom, prod: c.prod, cran: c.cran, mode: c.mode, orig: c.orig || 'Chine', arr: c.arr, maj: c.maj });
     }
 
     /* Tout ce qui suit demande d'être connecté */
@@ -300,7 +312,7 @@ export default {
       const vues = new Set(), dt = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? String(v) : '');
       const propre = (Array.isArray(b.cmds) ? b.cmds : []).slice(0, 400).map((c) => ({
         ref: String(c.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), nom: txt(c.nom, 40), tel: txt(c.tel, 30), prod: txt(c.prod, 100),
-        cran: Math.max(0, Math.min(7, Math.round(nombre(c.cran)))), mode: c.mode === 'bateau' ? 'bateau' : 'avion', arr: dt(c.arr), maj: dt(c.maj) || new Date().toISOString().slice(0, 10),
+        cran: Math.max(0, Math.min(7, Math.round(nombre(c.cran)))), mode: c.mode === 'bateau' ? 'bateau' : 'avion', orig: ['Chine', 'Dubaï', 'Istanbul'].includes(c.orig) ? c.orig : 'Chine', arr: dt(c.arr), maj: dt(c.maj) || new Date().toISOString().slice(0, 10),
       })).filter((c) => /^[A-Z0-9-]{4,30}$/.test(c.ref) && !vues.has(c.ref) && vues.add(c.ref));
       await env.GDE.put('cmds', JSON.stringify(propre));
       return json({ cmds: propre });

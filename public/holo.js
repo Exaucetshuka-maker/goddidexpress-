@@ -40,15 +40,17 @@ var SEA=[],SEAL=[0];(function(){for(var i=0;i<SEAV.length-1;i++){var n=Math.max(
 var SEAKM=SEAL[SEAL.length-1];
 function seaPt(u){var L=u*SEAKM,i=1;while(i<SEA.length-1&&SEAL[i]<L)i++;var f=(L-SEAL[i-1])/Math.max(1,SEAL[i]-SEAL[i-1]);return[lerp(SEA[i-1][0],SEA[i][0],f),lerp(SEA[i-1][1],SEA[i][1],f)]}
 var PR=[0,0,0,.03,.45,.97,1,1];
-window.HOLO_KM={avion:gcd(ORIG.Chine,KIN),bateau:SEAKM};window.HOLO_PR=PR;
-window.holoPhoto=function(o){var c=document.createElement('canvas');var h=makeHolo(c,{stat:true,w:o.w,h:o.h,cran:o.cran,mode:o.mode||'avion'});return h?h.canvas:c};
+function kmTot(o,m){o=ORIG[o]?o:'Chine';return (o==='Chine'&&m==='bateau')?SEAKM:gcd(ORIG[o],KIN)}
+window.holoKm=kmTot;window.HOLO_KM={avion:gcd(ORIG.Chine,KIN),bateau:SEAKM};window.HOLO_PR=PR;
+window.holoPhoto=function(o){var c=document.createElement('canvas');var h=makeHolo(c,{stat:true,w:o.w,h:o.h,cran:o.cran,mode:o.mode||'avion',orig:o.orig});return h?h.canvas:c};
 window.makeHolo=function(cv,opts){
  opts=opts||{};var ctx=cv.getContext('2d');if(!ctx)return null;
- var W=300,H=380,dpr=1,cam={lon:100,lat:20,R:150},tgt={lon:60,lat:12,R:150},step=4,mode='avion',pg=0,pgT=0,t0=performance.now(),run=false,vis=false,drag=null,hold=0,last=0,reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches,lastPct=-1;
+ var W=300,H=380,dpr=1,cam={lon:100,lat:20,R:150},tgt={lon:60,lat:12,R:150},step=4,mode='avion',orig=ORIG[opts.orig]?opts.orig:'Chine',pg=0,pgT=0,t0=performance.now(),run=false,vis=false,drag=null,hold=0,last=0,reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches,lastPct=-1;
  function size(){if(opts.w){W=opts.w;H=opts.h;dpr=1;cv.width=W;cv.height=H;return}var r=cv.getBoundingClientRect();W=Math.max(200,r.width);H=Math.max(240,r.height);dpr=Math.min(2,window.devicePixelRatio||1);cv.width=W*dpr;cv.height=H*dpr}
  function P(lon,lat,h){var l0=cam.lon*RAD,p0=cam.lat*RAD,p=lat*RAD,d=lon*RAD-l0,e=1+(h||0);var x=Math.cos(p)*Math.sin(d),y=Math.cos(p0)*Math.sin(p)-Math.sin(p0)*Math.cos(p)*Math.cos(d),z=Math.sin(p0)*Math.sin(p)+Math.cos(p0)*Math.cos(p)*Math.cos(d);return{x:W/2+cam.R*x*e,y:H*.41-cam.R*y*e,z:z}}
- function pos(u){if(mode==='bateau')return seaPt(u);return gcpt(ORIG.Chine,KIN,u)}
- function hgt(u){return mode==='bateau'?.004:.26*Math.sin(Math.PI*u)}
+ function sea(){return mode==='bateau'&&orig==='Chine'}
+ function pos(u){if(sea())return seaPt(u);return gcpt(ORIG[orig],KIN,u)}
+ function hgt(u){return sea()?.004:.26*Math.sin(Math.PI*u)}
  function aim(){var u=Math.max(pgT,.02),p=pos(u),c=gcpt(p,KIN,.4);tgt.lon=c[0];tgt.lat=cl(c[1]*.8+8,-20,40);tgt.R=Math.min(W*.36,H*.34)}
  function setStep(s,m){var nm=m||mode;if(nm!==mode){mode=nm;pg=0}step=s;pgT=s<0?0:PR[cl(s,0,7)];if(!run||reduce){pg=pgT}aim();hold=0;kick()}
  function txt(s,x,y,size,col,w,al,ls){ctx.font=(w||600)+' '+size+'px "Big Shoulders Display","Bricolage Grotesque",system-ui,sans-serif';ctx.fillStyle=col;ctx.textAlign=al||'left';try{ctx.letterSpacing=(ls||0)+'px'}catch(e){}ctx.fillText(s,x,y);try{ctx.letterSpacing='0px'}catch(e){}}
@@ -76,7 +78,7 @@ window.makeHolo=function(cv,opts){
   if(step>=0&&pg>.003)trace(pg,mode==='bateau'?'rgb('+C+')':'rgb(255,150,50)',2.4,12);
   // nœuds
   function node(lonlat,label,a,col,big){var q=P(lonlat[0],lonlat[1],0);if(q.z<.05)return;var ph=(t*.9)%1;ctx.strokeStyle='rgba('+col+','+(.7*(1-ph)*a)+')';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(q.x,q.y,5+ph*(big?22:14),0,7);ctx.stroke();ctx.shadowColor='rgb('+col+')';ctx.shadowBlur=14;ctx.fillStyle='rgba(255,255,255,'+a+')';ctx.beginPath();ctx.arc(q.x,q.y,big?5.5:3.6,0,7);ctx.fill();ctx.shadowBlur=0;ctx.globalCompositeOperation='source-over';var left=q.x>W*.55;txt(label,q.x+(left?-11:11),q.y-9,big?15:12,'rgba(255,255,255,'+a+')',700,left?'right':'left',1.2);ctx.globalCompositeOperation='lighter'}
-  node(ORIG['Dubaï'],'DUBAÏ',.55,'255,193,90');node(ORIG.Istanbul,'ISTANBUL',.55,'255,138,74');node(ORIG.Chine,'CHINE',1,O,true);node(KIN,'KINSHASA',1,O,true);
+  node(ORIG['Dubaï'],'DUBAÏ',orig==='Dubaï'?1:.8,orig==='Dubaï'?O:'255,193,90',orig==='Dubaï');node(ORIG.Istanbul,'ISTANBUL',orig==='Istanbul'?1:.8,orig==='Istanbul'?O:'255,138,74',orig==='Istanbul');node(ORIG.Chine,'CHINE',orig==='Chine'?1:.8,orig==='Chine'?O:'255,170,90',orig==='Chine');node(KIN,'KINSHASA',1,O,true);
   // colis
   if(step>=0){var p=pos(pg),q=P(p[0],p[1],hgt(pg));
    for(var k2=1;k2<22;k2++){var u2=Math.max(0,pg-k2*.007),pp=pos(u2),qq=P(pp[0],pp[1],hgt(u2));if(qq.z>0){ctx.fillStyle=(mode==='bateau'?'rgba('+C+',':'rgba(255,220,160,')+(.65*(1-k2/22))+')';ctx.beginPath();ctx.arc(qq.x,qq.y,3*(1-k2/44),0,7);ctx.fill()}}
@@ -92,7 +94,7 @@ window.makeHolo=function(cv,opts){
   // balayage + coins
   var sy=((t*90)%(H+60))-30;var sc=ctx.createLinearGradient(0,sy-30,0,sy+2);sc.addColorStop(0,'rgba('+C+',0)');sc.addColorStop(1,'rgba('+C+',.09)');ctx.fillStyle=sc;ctx.fillRect(0,sy-30,W,32);
   ctx.strokeStyle='rgba('+O+',.9)';ctx.lineWidth=2;[[10,10,1,1],[W-10,10,-1,1],[10,H-10,1,-1],[W-10,H-10,-1,-1]].forEach(function(c){ctx.beginPath();ctx.moveTo(c[0],c[1]+c[3]*20);ctx.lineTo(c[0],c[1]);ctx.lineTo(c[0]+c[2]*20,c[1]);ctx.stroke()});
-  var km=Math.round((1-pg)*(mode==='bateau'?SEAKM:gcd(ORIG.Chine,KIN))/10)*10,pct=Math.round(pg*100);
+  var km=Math.round((1-pg)*kmTot(orig,mode)/10)*10,pct=Math.round(pg*100);
   if(opts.onProgress&&pct+'|'+km!==lastPct){lastPct=pct+'|'+km;opts.onProgress(pct,km,mode)}
  }
  function loop(now){if(!run)return;draw(now);if(reduce&&Math.abs(pgT-pg)<.0006){run=false;return}requestAnimationFrame(loop)}
@@ -106,6 +108,6 @@ window.makeHolo=function(cv,opts){
  function up(){drag=null;hold=4}cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
  size();aim();cam.lon=tgt.lon+80;cam.lat=tgt.lat;cam.R=tgt.R*.7;
  if(opts.stat){reduce=true;hold=99;setStep(opts.cran,opts.mode);cam.lon=tgt.lon;cam.lat=tgt.lat;cam.R=tgt.R;pg=pgT;draw(performance.now()+6000);return{canvas:cv}}
- return{setStep:setStep,setMode:function(m){setStep(step,m)}};
+ return{setStep:setStep,setMode:function(m){setStep(step,m)},setOrig:function(o){if(!ORIG[o]||o===orig)return;orig=o;pg=0;setStep(step,mode)}};
 };
 })();

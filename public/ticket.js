@@ -108,9 +108,9 @@
     return fonts().then(function () {
       var Wp = 1080, Hp = 1590, c = document.createElement('canvas'); c.width = Wp; c.height = Hp; var ctx = c.getContext('2d');
       var cran = Math.max(0, Math.min(7, Math.round(o.cran || 0))), mode = o.mode === 'bateau' ? 'bateau' : 'avion';
-      var tot = (window.HOLO_KM && HOLO_KM[mode]) || 11000, pr = (window.HOLO_PR && HOLO_PR[cran]) || 0, fait = tot * pr, reste = tot - fait, livre = cran >= 6;
+      var orig = o.orig || 'Chine', tot = (window.holoKm && holoKm(orig, mode)) || (window.HOLO_KM && HOLO_KM[mode]) || 11000, pr = (window.HOLO_PR && HOLO_PR[cran]) || 0, fait = tot * pr, reste = tot - fait, livre = cran >= 6;
       ctx.fillStyle = '#05080f'; ctx.fillRect(0, 0, Wp, Hp);
-      if (window.holoPhoto) { try { ctx.drawImage(holoPhoto({ w: 1080, h: 860, cran: cran, mode: mode }), 0, 0); } catch (e) {} }
+      if (window.holoPhoto) { try { ctx.drawImage(holoPhoto({ w: 1080, h: 860, cran: cran, mode: mode, orig: orig }), 0, 0); } catch (e) {} }
       var g = ctx.createLinearGradient(0, 640, 0, 880); g.addColorStop(0, 'rgba(5,8,15,0)'); g.addColorStop(1, '#05080f'); ctx.fillStyle = g; ctx.fillRect(0, 640, Wp, 240);
       var P2 = 56; ctx.textBaseline = 'alphabetic';
       function tx(s, x, y, size, col, w, al, f, ls) { ctx.font = w + ' ' + size + 'px ' + (f || FB); ctx.fillStyle = col; ctx.textAlign = al || 'left'; try { ctx.letterSpacing = (ls || 0) + 'px'; } catch (e) {} ctx.fillText(s, x, y); try { ctx.letterSpacing = '0px'; } catch (e) {} }
@@ -121,13 +121,13 @@
       while (ctx.measureText(nom).width > Wp - P2 * 2 && size > 64) { size -= 4; ctx.font = '800 ' + size + 'px ' + FD; }
       var ls = wrap(ctx, nom, Wp - P2 * 2).slice(0, 2); ls.forEach(function (l, i) { tx(l, P2, 1000 + i * (size * .92), size, '#fff', 800, 'left', FD, 1); });
       var yy = 1000 + (ls.length - 1) * size * .92 + 52;
-      tx('Chine  →  Kinshasa  ·  par ' + mode, P2, yy, 34, 'rgba(255,255,255,.72)', 500, 'left', FB, 0);
+      tx(orig + '  →  Kinshasa  ·  par ' + mode, P2, yy, 34, 'rgba(255,255,255,.72)', 500, 'left', FB, 0);
       yy += 96; var cols = [['PARCOURUS', kmf(Math.round(fait / 10) * 10), 'km'], ['RESTANTS', livre ? '0' : kmf(Math.round(reste / 10) * 10), 'km'], ['PROGRESSION', String(Math.round(pr * 100)), '%']], cw = (Wp - P2 * 2) / 3;
       cols.forEach(function (k, i) { var x = P2 + i * cw; tx(k[0], x, yy, 22, 'rgba(255,255,255,.55)', 700, 'left', FB, 4); tx(k[1], x, yy + 82, 86, i === 1 ? '#FF7A1A' : '#fff', 800, 'left', FD, 0); ctx.font = '800 86px ' + FD; var w = ctx.measureText(k[1]).width; tx(k[2], x + w + 10, yy + 82, 34, 'rgba(255,255,255,.7)', 600, 'left', FB, 0); });
       var by = yy + 138, bw = Wp - P2 * 2; ctx.fillStyle = 'rgba(255,255,255,.14)'; rr(ctx, P2, by, bw, 14, 7); ctx.fill();
       var fg = ctx.createLinearGradient(P2, 0, P2 + bw, 0); fg.addColorStop(0, '#FF7A1A'); fg.addColorStop(1, livre ? '#3CDC82' : '#FFC15A'); ctx.fillStyle = fg; ctx.shadowColor = '#FF7A1A'; ctx.shadowBlur = 24; rr(ctx, P2, by, Math.max(14, bw * pr), 14, 7); ctx.fill(); ctx.shadowBlur = 0;
       ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 18; ctx.beginPath(); ctx.arc(P2 + Math.max(7, bw * pr), by + 7, 15, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
-      tx('CHINE', P2, by + 58, 22, 'rgba(255,255,255,.6)', 700, 'left', FB, 4); tx('KINSHASA', Wp - P2, by + 58, 22, 'rgba(255,255,255,.6)', 700, 'right', FB, 4);
+      tx(orig.toUpperCase(), P2, by + 58, 22, 'rgba(255,255,255,.6)', 700, 'left', FB, 4); tx('KINSHASA', Wp - P2, by + 58, 22, 'rgba(255,255,255,.6)', 700, 'right', FB, 4);
       var st = livre ? 'LIVRÉ' : (ETP[Math.min(6, cran)] || '').toUpperCase(), sy = by + 120; ctx.font = '800 44px ' + FD; var sw = ctx.measureText(st).width + 70;
       ctx.fillStyle = livre ? '#3CDC82' : '#FF7A1A'; rr(ctx, P2, sy - 50, sw, 76, 8); ctx.fill(); tx(st, P2 + 35, sy + 4, 44, '#0E0D0C', 800, 'left', FD, 2);
       tx('Étape ' + Math.min(7, cran + 1) + ' sur 7', P2 + sw + 28, sy + 2, 30, 'rgba(255,255,255,.7)', 500, 'left', FB, 0);

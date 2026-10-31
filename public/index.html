@@ -522,7 +522,10 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 .voyage.go li::before { background: var(--orange); border-color: var(--orange); color: var(--sur-orange); transition-delay: calc(var(--i) * .45s); }
 @media (prefers-reduced-motion: reduce) { .voyage li::before { transition: none; transition-delay: 0s; } }
 .flag, .drap { font-family: "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Emoji", sans-serif; }
-.marches { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.dets { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 2px; }
+.dt { font-size: 11.5px; font-weight: 700; letter-spacing: .02em; padding: 3px 8px; border: 1px solid var(--ligne); border-radius: 3px; color: var(--papier); }
+.dt.ok { border-color: #3CDC82; color: #3CDC82; }
+.marches { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .marche { display: grid; justify-items: center; gap: 6px; padding: 12px 2px; background: var(--carbone); border: 1px solid var(--ligne); border-radius: 3px; color: var(--papier); font: inherit; cursor: pointer; min-height: 44px; }
 .marche .flag { font-size: 30px; line-height: 1; }
 .marche span:last-child { font-size: 12.5px; font-weight: 600; }
@@ -874,7 +877,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <button class="btn" type="submit">Voir</button>
     </form>
     <div class="holo">
-      <canvas class="globe" id="g-suivi" role="img" aria-label="Globe holographique : position de ton colis entre la Chine et Kinshasa"></canvas>
+      <canvas class="globe" id="g-suivi" role="img" aria-label="Globe holographique : position de ton colis entre son pays de départ et Kinshasa"></canvas>
       <div class="holo-top"><span>GOD DID EXPRESS · SUIVI</span><span class="pastille" id="holo-tag">Exemple</span></div>
       <div class="holo-mode" role="group" aria-label="Mode de transport"><button type="button" class="on" data-hm="avion">Avion</button><button type="button" data-hm="bateau">Bateau</button></div>
       <div class="holo-bas">
@@ -1146,7 +1149,20 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var s = Math.sin(G_OM), a = Math.sin((1 - t) * G_OM) / s, b = Math.sin(t * G_OM) / s, k = 1 + .2 * Math.sin(Math.PI * t);
     return [(a * G_A[0] + b * G_B[0]) * k, (a * G_A[1] + b * G_B[1]) * k, (a * G_A[2] + b * G_B[2]) * k];
   }
-  var G_LIST = [], G_RUN = false;
+  var G_LIST = [], G_RUN = false, G_NAME = 'CHINE', G_I = 0;
+  var G_ORIGS = [['CHINE', 23.1, 113.3], ['DUBAÏ', 25.3, 55.3], ['ISTANBUL', 41.0, 28.98]];
+  function centreRoute() { var m = arcPt(.5), l = Math.hypot(m[0], m[1], m[2]); return { lon: Math.atan2(m[0], m[2]), lat: Math.asin(m[1] / l) * .8 }; }
+  setInterval(function () {
+    if (!G_LIST.length || document.hidden) return;
+    G_I = (G_I + 1) % G_ORIGS.length; var o = G_ORIGS[G_I];
+    G_NAME = o[0]; G_A = v3(o[1], o[2]); G_OM = Math.acos(Math.max(-1, Math.min(1, G_A[0] * G_B[0] + G_A[1] * G_B[1] + G_A[2] * G_B[2])));
+    var c = centreRoute(), n = 0, st = G_LIST.map(function (g) { return [g, g.lon, g.lat]; });
+    var tw = setInterval(function () {
+      n++; var k = Math.min(1, n / 24), e = k * k * (3 - 2 * k);
+      st.forEach(function (s) { if (s[0].drag) return; var d = c.lon - s[1]; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; s[0].lon = s[1] + d * e; s[0].lat = s[2] + (c.lat - s[2]) * e; });
+      if (k >= 1) clearInterval(tw);
+    }, 33);
+  }, 7000);
   function makeGlobe(cv, mode) {
     if (!cv || !cv.getContext) return null;
     var ctx = cv.getContext('2d'); if (!ctx) return null;
@@ -1252,7 +1268,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       }
       /* étiquettes des deux villes */
       ctx.font = '600 10px "IBM Plex Mono", ui-monospace, monospace'; ctx.textBaseline = 'middle';
-      [[G_A, 'CHINE', 12], [G_B, 'KINSHASA', -12]].forEach(function (c) {
+      [[G_A, G_NAME, 12], [G_B, 'KINSHASA', -12]].forEach(function (c) {
         var r = rot(c[0]); if (r[2] <= .05) return;
         var x = cx + r[0] * R, y = cy - r[1] * R;
         ctx.beginPath(); ctx.arc(x, y, 4.6, 0, 7); ctx.fillStyle = '#FF6A13'; ctx.fill();
@@ -1517,10 +1533,19 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       if (o.px) p.px = o.px;
       if (o.photo) p.photo = o.photo;
       if (o.desc) p.desc = o.desc;
+      if (o.det) p.det = o.det;
       out.push(p);
     });
     STATE.extra.forEach(function (e) { if (!e.cache) out.push(Object.assign({ l: 0 }, e)); });
     return out;
+  }
+  function detTags(p) {
+    var d = p.det; if (!d) return '';
+    var t = [];
+    if (d.e) t.push(d.e === 'neuf' ? 'Neuf' : 'Occasion');
+    if (d.v) t.push(d.v === 'carton' ? 'En carton' : d.v === 'detail' ? 'Au détail' : 'Carton ou détail');
+    if (d.d) t.push(d.d === 'stock' ? 'Déjà là' : 'Sur commande');
+    return '<div class="dets">' + t.map(function (x) { return '<span class="dt' + (x === 'Déjà là' ? ' ok' : '') + '">' + x + '</span>'; }).join('') + (d.ct ? '<span class="dt">' + h(d.ct) + '</span>' : '') + '</div>';
   }
   function pxList(p) { return p.px || [null, null, null]; }
   function okPx(v) { return v !== null && v !== undefined && v !== '' && !isNaN(Number(v)) && Number(v) > 0; }
@@ -1612,8 +1637,8 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var dans = !!liste[p.id];
     return '<article class="prod"><button class="ph" type="button" data-open="' + p.id + '" aria-label="Agrandir : ' + p.t + '">' +
       '<img src="' + ea(pic(p)) + '" alt="' + ea(p.t) + '" loading="lazy" width="960" height="600">' +
-      '<span class="tag">Sourcing Chine</span>' + (p.l ? '<span class="tag live">Au live</span>' : '') + '</button>' +
-      '<div class="corps"><h3>' + p.t + '</h3><p class="sub">' + p.s + '</p>' + prixLigne(p) + '</div>' +
+      '<span class="tag">Chine · Dubaï · Istanbul</span>' + (p.l ? '<span class="tag live">Au live</span>' : '') + '</button>' +
+      '<div class="corps"><h3>' + p.t + '</h3><p class="sub">' + p.s + '</p>' + detTags(p) + prixLigne(p) + '</div>' +
       '<div class="act"><a class="btn mini" href="' + wa(msgProduit(p)) + '" target="_blank" rel="noopener">Commander</a>' +
       '<button class="btn ghost mini" type="button" data-add="' + p.id + '" aria-pressed="' + dans + '">' + (dans ? 'Dans ma liste' : '+ Ma liste') + '</button></div></article>';
   }
@@ -1661,7 +1686,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     ouvrir('<div class="sheet-tete"><div><div class="kicker">' + CATL[p.c] + '</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">' + p.t + '</h3></div>' +
       '<button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
       '<img class="big" src="' + ea(pic(p)) + '" alt="' + ea(p.t) + '">' +
-      fichePrix(p) +
+      detTags(p) + fichePrix(p) +
       '<div class="rangee"><a class="btn" data-cmd-wa href="' + wa(msgProduit(p)) + '" target="_blank" rel="noopener">Commander sur WhatsApp</a>' +
       '<button class="btn ghost" type="button" data-add="' + p.id + '" data-sheet="1" aria-pressed="' + dans + '">' + (dans ? 'Dans ma liste' : 'Ajouter à ma liste') + '</button>' +
       '<a class="btn ghost" href="https://wa.me/?text=' + encodeURIComponent(partage) + '" target="_blank" rel="noopener">Partager à un ami</a>' +
@@ -2141,7 +2166,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   setInterval(tickGroupes, 1000);
 
   /* Globe : phrases qui apparaissent seules */
-  var PHR0 = ['La Chine à ta porte', 'Tu rêves, on trouve', 'De Guangzhou à Kinshasa, en direct', 'Ce que personne ne t\'apporte, on l\'apporte', 'Chaque colis, preuve en photo', 'Tu choisis. On trouve. On te livre.'];
+  var PHR0 = ['Chine, Dubaï, Istanbul : à ta porte', 'Tu rêves, on trouve', 'De Chine, de Dubaï ou d\'Istanbul, jusqu\'à Kinshasa', 'Ce que personne ne t\'apporte, on l\'apporte', 'Chaque colis, preuve en photo', 'Tu choisis. On trouve. On te livre.'];
   var phrI = 0, phrT = null;
   function rendrePhrases() {
     var el = $('phr'); if (!el) return;
@@ -2155,11 +2180,9 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 
   /* Marchés : cinq drapeaux, une fiche par pays */
   var MARCHES = [
-    { f: '🇨🇩', n: 'RDC', t: 'Des produits trouvés et livrés en RDC.', m: 'Bonjour GOD DID EXPRESS, je cherche un produit disponible en RDC. Voici ce que je veux : ' },
-    { f: '🇨🇳', n: 'Chine', t: 'Électronique, vêtements, maison, emballages et tout ce qui se fabrique en gros.', cat: true, m: 'Bonjour GOD DID EXPRESS, je veux faire venir un produit de Chine. Voici ce que je veux : ' },
+    { f: '🇨🇳', n: 'Chine', t: 'Électronique, vêtements, maison, emballages et tout ce qui se fabrique en gros.', m: 'Bonjour GOD DID EXPRESS, je veux faire venir un produit de Chine. Voici ce que je veux : ' },
     { f: '🇦🇪', n: 'Dubaï', t: 'Téléphones, électronique, parfums et produits haut de gamme.', m: 'Bonjour GOD DID EXPRESS, je veux faire venir un produit de Dubaï. Voici ce que je veux : ' },
-    { f: '🇹🇷', n: 'Turquie', t: 'Vêtements, tissus, chaussures et meubles.', m: 'Bonjour GOD DID EXPRESS, je veux faire venir un produit de Turquie. Voici ce que je veux : ' },
-    { f: '🌍', n: 'Monde', t: 'Un autre pays ? Dis-nous le produit, on cherche le fournisseur.', m: 'Bonjour GOD DID EXPRESS, je cherche un produit dans un autre pays. Voici ce que je veux : ' }
+    { f: '🇹🇷', n: 'Istanbul', t: 'Vêtements, tissus, chaussures et meubles.', m: 'Bonjour GOD DID EXPRESS, je veux faire venir un produit d\'Istanbul. Voici ce que je veux : ' }
   ];
   function rendreMarches() {
     $('marches').innerHTML = MARCHES.map(function (x, i) {
@@ -2170,8 +2193,8 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var b = e.target.closest('[data-marche]'); if (!b) return;
     var x = MARCHES[Number(b.getAttribute('data-marche'))];
     ouvrir('<div class="sheet-tete"><div><h3 id="sheet-titre" style="font-size:22px"><span class="flag" aria-hidden="true">' + x.f + '</span> ' + x.n + '</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
-      '<p>' + x.t + '</p><div class="rangee">' + (x.cat ? '<button class="btn" type="button" data-go="catalogue">Voir le catalogue</button>' : '') +
-      '<a class="btn' + (x.cat ? ' ghost' : '') + '" href="' + ea(wa(x.m)) + '" target="_blank" rel="noopener">Demander sur WhatsApp</a></div>');
+      '<p>' + x.t + '</p><div class="rangee">' + '<button class="btn" type="button" data-go="catalogue">Voir le catalogue</button>' +
+      '<a class="btn ghost" href="' + ea(wa(x.m)) + '" target="_blank" rel="noopener">Demander sur WhatsApp</a></div>');
   });
 
   /* Méthode : voyage du colis et infos remplies par l'admin */
@@ -2331,7 +2354,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   function majPhoto(o) {
     var box = $('s-photo-c'), n = ++photoSeq;
     if (!o || !window.GDETicket || !GDETicket.position || o.cran < 0) { box.hidden = true; return; }
-    GDETicket.position({ produit: o.prod || 'Ton colis', ref: o.ref, nom: o.nom || '', cran: o.cran, mode: o.mode, arr: dateLongue(o.arr) }).then(function (cv) { return GDETicket.blob(cv); }).then(function (bl) {
+    GDETicket.position({ produit: o.prod || 'Ton colis', ref: o.ref, nom: o.nom || '', cran: o.cran, mode: o.mode, orig: o.orig || 'Chine', arr: dateLongue(o.arr) }).then(function (cv) { return GDETicket.blob(cv); }).then(function (bl) {
       if (n !== photoSeq) return;
       try { photoFile = new File([bl], (o.ref || 'colis') + '-position.png', { type: 'image/png' }); } catch (e) { photoFile = null; }
       var u = URL.createObjectURL(bl); $('s-photo').src = u; $('s-photo-save').href = u; $('s-photo-save').setAttribute('download', (o.ref || 'colis') + '-position.png'); box.hidden = false;
@@ -2345,7 +2368,8 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     curOrd = o; var mode = o.mode === 'bateau' ? 'bateau' : 'avion';
     $('s-tag').textContent = tag; rendreSuivi(o.cran);
     if (typeof GS !== 'undefined' && GS && GS.setMode) { GS.setMode(mode); Array.prototype.forEach.call(document.querySelectorAll('[data-hm]'), function (b) { b.classList.toggle('on', b.getAttribute('data-hm') === mode); }); }
-    majPhoto({ ref: v, nom: o.nom, prod: o.prod, cran: o.cran, mode: mode, arr: o.arr });
+    if (typeof GS !== 'undefined' && GS && GS.setOrig) GS.setOrig(o.orig || 'Chine');
+    majPhoto({ ref: v, nom: o.nom, prod: o.prod, cran: o.cran, mode: mode, orig: o.orig || 'Chine', arr: o.arr });
   }
   function chercherCmd(raw) {
     var v = String(raw || '').trim().toUpperCase();
@@ -2373,7 +2397,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     fetch('/api/cmd/' + encodeURIComponent(v)).then(function (r) {
       if (r.status === 429) { toast('Trop d\'essais, réessayez dans quelques minutes'); fin(null); return null; }
       if (!r.ok) { fin(null); return null; }
-      return r.json().then(function (j) { if (String($('s-ref').textContent) !== v) return; fin({ nom: j.nom, prod: j.prod, cran: j.cran, mode: j.mode, arr: j.arr, pr: [] }); });
+      return r.json().then(function (j) { if (String($('s-ref').textContent) !== v) return; fin({ nom: j.nom, prod: j.prod, cran: j.cran, mode: j.mode, orig: j.orig, arr: j.arr, pr: [] }); });
     }).catch(function () { fin(null); });
   }
   $('form-suivi').addEventListener('submit', function (e) { e.preventDefault(); chercherCmd($('s-code').value); });
