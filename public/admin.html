@@ -237,6 +237,11 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         <div class="rang"><button class="btn ghost mini" data-ca="tel" type="button">+ Numéro</button><button class="btn ghost mini" data-ca="wa" type="button">+ WhatsApp</button><button class="btn ghost mini" data-ca="mail" type="button">+ E-mail</button><button class="btn ghost mini" data-ca="adresse" type="button">+ Adresse</button></div>
       </div>
       <div class="carte">
+        <h3>Avantages de la carte membre</h3>
+        <p class="note">Une ligne par avantage (8 au maximum). Ils s'affichent sur la carte en image. Laisse vide pour garder les avantages par défaut.</p>
+        <textarea id="r-avant" maxlength="900" style="min-height:120px" placeholder="2 $ offerts à chaque achat"></textarea>
+      </div>
+      <div class="carte">
         <h3>Infos pour les clients</h3>
         <p class="note">Affichées dans « Comment on travaille ». Un champ vide n'affiche rien.</p>
         <div><label for="r-i-avion">Délai par avion</label><input id="r-i-avion" maxlength="120"></div>
@@ -316,7 +321,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     s.rev = s.rev || 0; s.prod = s.prod || {}; s.extra = s.extra || []; s.slog = s.slog || {};
     s.soc = Object.assign({ tiktok: '', instagram: '', facebook: '' }, s.soc || {});
     s.promo = s.promo || []; s.avis = s.avis || []; s.vip = (s.vip && s.vip.length === 3) ? s.vip : [3, 6, 10]; s.lien = s.lien || '';
-    s.voy = s.voy || []; s.info = s.info || {}; s.mail = s.mail || ''; s.wag = s.wag || WAG0; s.wac = s.wac || WAC0; s.tel2 = s.tel2 || ''; s.adr2 = s.adr2 || ''; s.wanum = s.wanum || '';
+    s.voy = s.voy || []; s.info = s.info || {}; s.mail = s.mail || ''; s.wag = s.wag || WAG0; s.wac = s.wac || WAC0; s.tel2 = s.tel2 || ''; s.adr2 = s.adr2 || ''; s.wanum = s.wanum || ''; s.avant = s.avant || [];
     s.contacts = s.contacts || [];
     if (!s.contacts.length) { if (s.tel2) s.contacts.push({ type: 'tel', label: 'Deuxième numéro', v: s.tel2 }); if (s.mail) s.contacts.push({ type: 'mail', label: 'E-mail', v: s.mail }); if (s.adr2) s.contacts.push({ type: 'adresse', label: 'Autre adresse', v: s.adr2 }); s.tel2 = ''; s.mail = ''; s.adr2 = ''; } s.phr = s.phr || [];
     s.grp = (s.grp || []).slice(0, 10);
@@ -755,8 +760,25 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       var i = CARTES.indexOf(c), msg = 'Bonjour ' + c.nom + ', voici ta carte fidélité GOD DID EXPRESS : ' + c.code + '. Tape ce numéro sur le site, dans Plus puis Membre, pour voir tes achats. ' + location.origin;
       return '<div class="carte" data-ci="' + i + '"><div class="rang" style="justify-content:space-between"><strong>' + esc(c.nom) + '</strong><span class="pastille">' + esc(c.code) + '</span></div>' +
         '<div><label>Achats</label><div class="compteur"><button class="btn ghost" data-fa="moins" type="button" aria-label="Moins un">−</button><input data-fn="1" inputmode="numeric" value="' + esc(c.achats) + '"><button class="btn" data-fa="plus" type="button" aria-label="Plus un">+</button></div></div>' +
-        '<div class="rang"><a class="btn ghost mini" style="text-decoration:none;display:inline-flex;align-items:center" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(msg) + '">Envoyer la carte sur WhatsApp</a><button class="btn danger mini" data-fa="suppr" type="button">Supprimer</button></div></div>';
+        '<div class="rang"><button class="btn mini" data-fa="img" type="button">Carte en image</button><a class="btn ghost mini" style="text-decoration:none;display:inline-flex;align-items:center" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(msg) + '">Message texte</a><button class="btn danger mini" data-fa="suppr" type="button">Supprimer</button></div></div>';
     }).join('') || '<p class="note">Aucune carte.</p>';
+  }
+  function prochainVoy() {
+    var auj = new Date().toISOString().slice(0, 10), p = (STATE.voy || []).filter(function (v) { return v.on !== false && v.orig && v.dep && v.dep > auj && v.etat !== 'arrive'; }).sort(function (x, y) { return x.dep.localeCompare(y.dep); })[0];
+    return p ? p.orig + ' · départ ' + dateFr(p.dep) : '';
+  }
+  var CMG = null;
+  function carteImage(c, b) {
+    var th = STATE.vip, n = c.achats, lv = n >= th[2] ? 3 : n >= th[1] ? 2 : n >= th[0] ? 1 : n >= 1 ? 0 : -1, nm = ['Bronze', 'Argent', 'Or', 'Diamant'];
+    var base = String(c.nom).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 6), hh = 0; for (var i = 0; i < base.length; i++) hh = (hh * 31 + base.charCodeAt(i)) % 46656;
+    var code = base ? base + '-' + ('000' + hh.toString(36).toUpperCase()).slice(-3) : '';
+    var av = (STATE.avant && STATE.avant.length) ? STATE.avant : ['2 $ offerts à chaque achat', 'À 10 achats : un produit de 20 $ sans frais de douane', 'Prix de gros dès 5 pièces', 'Priorité sur les nouveaux arrivages'];
+    b.disabled = true;
+    GDETicket.carte({ nom: c.nom, numero: c.code, code: code, achats: n, niveau: lv >= 0 ? nm[lv] : '', avantages: av, voyage: prochainVoy() }).then(function (cv) { return GDETicket.blob(cv); }).then(function (bl) {
+      try { CMG = new File([bl], c.code + '.png', { type: 'image/png' }); } catch (e) { CMG = null; }
+      var u = URL.createObjectURL(bl); $('cm-img').src = u; $('cm-save').href = u; $('cm-save').setAttribute('download', c.code + '.png'); $('cm-chat').style.display = 'none';
+      CMF = CMG; $('cm-sortie').classList.remove('cache'); document.querySelector('[data-t="cmd"]').click(); $('cm-sortie').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }).catch(function () { alert('La carte n\'a pas pu être créée.'); }).then(function () { b.disabled = false; });
   }
   $('f-q').addEventListener('input', rendreCartes);
   $('f-ok').addEventListener('click', function () {
@@ -767,6 +789,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   $('f-liste').addEventListener('click', function (e) {
     var b = e.target.closest('[data-fa]'); if (!b) return;
     var c = CARTES[Number(b.closest('[data-ci]').getAttribute('data-ci'))], a = b.getAttribute('data-fa');
+    if (a === 'img') { carteImage(c, b); return; }
     if (a === 'plus') c.achats = Math.min(999, c.achats + 1);
     else if (a === 'moins') c.achats = Math.max(0, c.achats - 1);
     else if (a === 'suppr') { if (!confirm('Supprimer la carte de ' + c.nom + ' ?')) return; CARTES.splice(CARTES.indexOf(c), 1); }
@@ -848,7 +871,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
 
   /* ---------- Réglages ---------- */
   function rendreReglages() {
-    $('r-wanum').value = STATE.wanum; rendreContacts(); ['avion', 'bateau', 'zones', 'introuvable'].forEach(function (k) { $('r-i-' + k).value = STATE.info[k] || ''; });
+    $('r-wanum').value = STATE.wanum; $('r-avant').value = (STATE.avant || []).join('\n'); rendreContacts(); ['avion', 'bateau', 'zones', 'introuvable'].forEach(function (k) { $('r-i-' + k).value = STATE.info[k] || ''; });
     $('r-wag').value = STATE.wag; $('r-wac').value = STATE.wac;
     ['tiktok', 'instagram', 'facebook'].forEach(function (k) { $('r-' + k).value = STATE.soc[k] || ''; });
     $('r-lien').value = STATE.lien; $('r-phr').value = (STATE.phr || []).join('\n');
@@ -863,7 +886,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     }).join('') || '<p class="note">Aucun code promo.</p>';
   }
   [['r-i-avion', function (v) { STATE.info.avion = v; }], ['r-i-bateau', function (v) { STATE.info.bateau = v; }], ['r-i-zones', function (v) { STATE.info.zones = v; }], ['r-i-introuvable', function (v) { STATE.info.introuvable = v; }],
-   ['r-wanum', function (v) { STATE.wanum = v.replace(/\D/g, ''); }], ['r-wag', function (v) { STATE.wag = v.trim(); }], ['r-wac', function (v) { STATE.wac = v.trim(); }],
+   ['r-avant', function (v) { STATE.avant = v.split('\n').map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 8); }], ['r-wanum', function (v) { STATE.wanum = v.replace(/\D/g, ''); }], ['r-wag', function (v) { STATE.wag = v.trim(); }], ['r-wac', function (v) { STATE.wac = v.trim(); }],
    ['r-tiktok', function (v) { STATE.soc.tiktok = v.trim(); }], ['r-instagram', function (v) { STATE.soc.instagram = v.trim(); }], ['r-facebook', function (v) { STATE.soc.facebook = v.trim(); }],
    ['r-lien', function (v) { STATE.lien = v.trim(); }], ['r-phr', function (v) { STATE.phr = v.split('\n').map(function (x) { return x.trim(); }).filter(Boolean); }]
   ].forEach(function (c) { $(c[0]).addEventListener('input', function () { c[1](this.value); marquer(true); }); });

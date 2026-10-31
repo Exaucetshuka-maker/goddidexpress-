@@ -907,6 +907,12 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <p>Votre carte, vos avantages, votre code à partager. Chaque client peut devenir un messager de la marque, chaque province peut avoir son point relais.</p>
     </header>
     <div class="passe" id="passe"><div class="l1"><b>GOD DID EXPRESS</b><span class="nom">Membre</span></div><div><div class="nom" id="p-nom-aff">Votre prénom</div><div class="code" id="p-code">Tapez votre prénom ci-dessous</div></div></div>
+    <div class="carte" id="mc-c">
+      <div class="kicker">Ma carte en image</div>
+      <p class="note">Tape ton prénom plus bas (code de parrainage), puis crée ta carte avec ton code promo, tes avantages et le prochain voyage. Tu peux l'envoyer sur WhatsApp.</p>
+      <div class="rangee"><button class="btn" id="mc-go" type="button">Créer ma carte en image</button></div>
+      <div id="mc-out" hidden><img id="mc-img" alt="Ma carte membre GOD DID EXPRESS" style="width:100%;border-radius:10px;margin-top:10px"><div class="rangee" style="margin-top:10px"><button class="btn" id="mc-share" type="button">Envoyer ma carte</button><a class="btn ghost" id="mc-save" download="carte-membre.png" style="text-decoration:none">Enregistrer</a></div></div>
+    </div>
     <div class="carte">
       <div class="l1f"><h3>Carte fidélité</h3><span class="pastille" id="fid-pastille">Exemple</span></div>
       <div class="champ"><label for="fid-code">Ton numéro de carte</label><input id="fid-code" autocomplete="off" style="text-transform:uppercase" placeholder="Ex. GDE-K7M2-9QXP"></div>
@@ -1493,7 +1499,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     s.rev = s.rev || 0; s.prod = s.prod || {}; s.extra = s.extra || []; s.slog = s.slog || {};
     s.soc = s.soc || { tiktok: '', instagram: '', facebook: '' }; s.promo = s.promo || []; s.avis = s.avis || [];
     s.cmd = s.cmd || {}; s.vip = (s.vip && s.vip.length === 3) ? s.vip : [3, 6, 10]; s.lien = s.lien || '';
-    s.info = s.info || {}; s.mail = s.mail || ''; s.wag = s.wag || WAG0; s.wac = s.wac || WAC0; s.tel2 = s.tel2 || ''; s.adr2 = s.adr2 || ''; s.phr = s.phr || []; s.grp = s.grp || []; s.voy = s.voy || []; s.wanum = s.wanum || ''; s.contacts = s.contacts || [];
+    s.info = s.info || {}; s.mail = s.mail || ''; s.wag = s.wag || WAG0; s.wac = s.wac || WAC0; s.tel2 = s.tel2 || ''; s.adr2 = s.adr2 || ''; s.phr = s.phr || []; s.grp = s.grp || []; s.voy = s.voy || []; s.wanum = s.wanum || ''; s.avant = s.avant || []; s.contacts = s.contacts || [];
     if (!s.contacts.length) { if (s.tel2) s.contacts.push({ type: 'tel', label: 'Deuxième numéro', v: s.tel2 }); if (s.mail) s.contacts.push({ type: 'mail', label: 'E-mail', v: s.mail }); if (s.adr2) s.contacts.push({ type: 'adresse', label: 'Autre adresse', v: s.adr2 }); }
     return s;
   }
@@ -1886,7 +1892,30 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   }
   diamants(4);
   $('fid-wa').href = wa('Bonjour GOD DID EXPRESS, je veux ma carte fidélité.');
-  var fidT = null;
+  var fidT = null, FID = null, mcFile = null;
+  function avantagesCarte(code) {
+    if (STATE.avant && STATE.avant.length) return STATE.avant;
+    var l = ['2 $ offerts à chaque achat', 'À 10 achats : un produit de 20 $ sans frais de douane', 'Prix de gros dès 5 pièces', 'Priorité sur les nouveaux arrivages'];
+    if (code) l.splice(2, 0, 'Code ' + code + ' : 5 % de réduction sur ta prochaine commande pour chaque ami qui commande');
+    return l;
+  }
+  function prochainVoyageTexte() {
+    var p = voyListe().filter(function (v) { return voyEtat(v) === 'ouvert' && v.dep; })[0];
+    return p ? p.orig + ' · départ ' + fdate(p.dep) + ' · commande avant ' + veille(p.dep) : '';
+  }
+  $('mc-go').addEventListener('click', function () {
+    var nom = $('p-nom').value.trim() || (FID && FID.nom) || ''; if (!nom) { toast('Tape d\'abord ton prénom dans « Votre code de parrainage »'); return; }
+    var n = FID ? FID.achats : 0, th = STATE.vip, lv = n >= th[2] ? 3 : n >= th[1] ? 2 : n >= th[0] ? 1 : n >= 1 ? 0 : -1, b = this; b.disabled = true;
+    GDETicket.carte({ nom: nom, numero: FID ? FID.numero : '', code: codeActuel || codeParrain(nom), achats: n, niveau: lv >= 0 ? NIV[lv] : '', avantages: avantagesCarte(codeActuel || codeParrain(nom)), voyage: prochainVoyageTexte() })
+      .then(function (cv) { return GDETicket.blob(cv); }).then(function (bl) {
+        try { mcFile = new File([bl], 'carte-membre.png', { type: 'image/png' }); } catch (e) { mcFile = null; }
+        var u = URL.createObjectURL(bl); $('mc-img').src = u; $('mc-save').href = u; $('mc-out').hidden = false;
+      }).catch(function () { toast('La carte n\'a pas pu être créée'); }).then(function () { b.disabled = false; });
+  });
+  $('mc-share').addEventListener('click', function () {
+    if (mcFile && navigator.canShare && navigator.canShare({ files: [mcFile] })) navigator.share({ files: [mcFile], title: 'GOD DID EXPRESS' }).catch(function () {});
+    else { $('mc-save').click(); toast('Carte enregistrée : envoie-la depuis ta galerie'); }
+  });
   $('fid-code').addEventListener('input', function () {
     clearTimeout(fidT);
     var c = this.value.trim().toUpperCase().replace(/\s+/g, '');
@@ -1894,7 +1923,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     fidT = setTimeout(function () {
       fetch('/api/carte/' + encodeURIComponent(c)).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, s: r.status, j: j }; }); }).then(function (r) {
         if (!r.ok) { $('fid-pastille').textContent = 'Exemple'; $('fid-res').textContent = r.s === 429 ? 'Trop d\'essais. Réessaie dans quelques minutes.' : 'Carte introuvable. Vérifie le numéro.'; diamants(4); return; }
-        var n = r.j.achats || 0, th = STATE.vip, lv = n >= th[2] ? 3 : n >= th[1] ? 2 : n >= th[0] ? 1 : n >= 1 ? 0 : -1;
+        FID = { numero: c, nom: r.j.nom || '', achats: r.j.achats || 0 }; var n = r.j.achats || 0, th = STATE.vip, lv = n >= th[2] ? 3 : n >= th[1] ? 2 : n >= th[0] ? 1 : n >= 1 ? 0 : -1;
         $('fid-pastille').textContent = 'Ta carte'; diamants(Math.min(10, n));
         $('fid-res').textContent = 'Bonjour ' + (r.j.nom || '') + '. ' + n + ' achat' + (n > 1 ? 's' : '') + ', ' + usd(n * 2) + ' reçus' + (lv >= 0 ? ', niveau ' + NIV[lv] : '') + '. ' +
           (n >= 10 ? 'Tu as droit à ton produit de 20 $. Écris-nous sur WhatsApp.' : 'Encore ' + (10 - n) + ' achat' + (10 - n > 1 ? 's' : '') + ' pour ton produit de 20 $.');

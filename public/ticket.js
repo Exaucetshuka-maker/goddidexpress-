@@ -136,5 +136,38 @@
       return c;
     });
   }
-  window.GDETicket = { draw: draw, position: position, blob: blob, usd: usd, W: W, tel: '' };
+  /* Carte membre en image : prénom, numéro, code promo, avantages, prochain voyage */
+  function carte(o) {
+    return fonts().then(function () {
+      var Wc = 1080, Hc = 1420, c = document.createElement('canvas'); c.width = Wc; c.height = Hc; var ctx = c.getContext('2d');
+      var g = ctx.createLinearGradient(0, 0, Wc, Hc); g.addColorStop(0, '#F6B07A'); g.addColorStop(.5, '#EE7E36'); g.addColorStop(1, '#D9601F'); ctx.fillStyle = g; ctx.fillRect(0, 0, Wc, Hc);
+      var sh = ctx.createRadialGradient(Wc * .8, 120, 20, Wc * .8, 120, 700); sh.addColorStop(0, 'rgba(255,240,220,.55)'); sh.addColorStop(1, 'rgba(255,240,220,0)'); ctx.fillStyle = sh; ctx.fillRect(0, 0, Wc, Hc);
+      var P2 = 72, ink = '#140C06'; ctx.textBaseline = 'alphabetic';
+      function tx(s, x, y, size, col, w, al, f, ls) { ctx.font = w + ' ' + size + 'px ' + (f || FB); ctx.fillStyle = col; ctx.textAlign = al || 'left'; try { ctx.letterSpacing = (ls || 0) + 'px'; } catch (e) {} ctx.fillText(s, x, y); try { ctx.letterSpacing = '0px'; } catch (e) {} }
+      tx('GOD DID EXPRESS', P2, 120, 52, ink, 800, 'left', FD, 4); tx(o.niveau ? 'MEMBRE ' + String(o.niveau).toUpperCase() : 'MEMBRE', Wc - P2, 116, 28, 'rgba(20,12,6,.75)', 700, 'right', FB, 4);
+      tx('PRÉNOM', P2, 250, 24, 'rgba(20,12,6,.65)', 700, 'left', FB, 4);
+      var nom = String(o.nom || 'Client').toUpperCase(), size = 150; ctx.font = '800 ' + size + 'px ' + FD; while (ctx.measureText(nom).width > Wc - P2 * 2 && size > 60) { size -= 6; ctx.font = '800 ' + size + 'px ' + FD; }
+      tx(nom, P2, 250 + size * .95, size, ink, 800, 'left', FD, 2);
+      var y = 250 + size * .95 + 70;
+      var cols = [['CARTE N°', o.numero || '—'], ['CODE PROMO', o.code || '—']];
+      cols.forEach(function (k, i) { var x = P2 + i * ((Wc - P2 * 2) / 2); tx(k[0], x, y, 22, 'rgba(20,12,6,.65)', 700, 'left', FB, 4); tx(k[1], x, y + 58, 50, ink, 800, 'left', FD, 3); });
+      y += 110; ctx.fillStyle = ink; rr(ctx, P2, y, Wc - P2 * 2, 150, 18); ctx.fill();
+      tx('ACHATS', P2 + 36, y + 50, 22, 'rgba(255,255,255,.6)', 700, 'left', FB, 4); tx(String(o.achats || 0) + ' / 10', P2 + 36, y + 118, 70, '#fff', 800, 'left', FD, 0);
+      tx('À 10 ACHATS : UN PRODUIT DE 20 $ OFFERT', Wc - P2 - 36, y + 90, 26, '#FFB070', 700, 'right', FB, 1);
+      var bx = P2 + 36, bw = Wc - P2 * 2 - 72; ctx.fillStyle = 'rgba(255,255,255,.18)'; rr(ctx, bx, y + 128, bw, 8, 4); ctx.fill(); ctx.fillStyle = '#FF7A1A'; rr(ctx, bx, y + 128, Math.max(8, bw * Math.min(1, (o.achats || 0) / 10)), 8, 4); ctx.fill();
+      y += 215; tx('TES AVANTAGES', P2, y, 24, 'rgba(20,12,6,.7)', 800, 'left', FB, 5); y += 18;
+      (o.avantages || []).slice(0, 6).forEach(function (a) {
+        var ls = wrap(ctx, a, Wc - P2 * 2 - 56); ctx.font = '600 33px ' + FB; ls = wrap(ctx, a, Wc - P2 * 2 - 56).slice(0, 2);
+        ctx.fillStyle = ink; ctx.beginPath(); ctx.arc(P2 + 10, y + 36, 8, 0, 7); ctx.fill();
+        ls.forEach(function (l, i) { tx(l, P2 + 40, y + 46 + i * 40, 33, ink, 600, 'left', FB, 0); }); y += 22 + ls.length * 40 + 12;
+      });
+      if (o.voyage) {
+        var vy = Hc - 210; ctx.fillStyle = 'rgba(20,12,6,.9)'; rr(ctx, P2, vy, Wc - P2 * 2, 120, 18); ctx.fill();
+        tx('PROCHAIN VOYAGE', P2 + 36, vy + 46, 22, '#FFB070', 700, 'left', FB, 4); tx(o.voyage, P2 + 36, vy + 92, 40, '#fff', 800, 'left', FD, 1);
+      }
+      tx('GOD DID EXPRESS · WhatsApp ' + (window.GDETicket && GDETicket.tel || '+243 983 129 294'), Wc / 2, Hc - 40, 24, 'rgba(20,12,6,.7)', 600, 'center', FB, 1);
+      return c;
+    });
+  }
+  window.GDETicket = { draw: draw, position: position, carte: carte, blob: blob, usd: usd, W: W, tel: '' };
 })();
