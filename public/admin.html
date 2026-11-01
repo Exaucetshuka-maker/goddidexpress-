@@ -740,9 +740,10 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   function fnum(v) { v = parseFloat(String(v).replace(',', '.')); return isFinite(v) && v >= 0 ? v : 0; }
   function facLigne(l) {
     l = l || {};
-    return '<div class="grille" data-fl style="grid-template-columns:minmax(0,1fr) 62px 86px 40px;align-items:end"><div><label>Article</label><input data-ff="t" maxlength="80" value="' + esc(l.t || '') + '"></div><div><label>Qté</label><input data-ff="q" inputmode="numeric" value="' + esc(l.q || 1) + '"></div><div><label>Prix ($)</label><input data-ff="p" inputmode="decimal" value="' + esc(l.p || '') + '"></div><button class="btn danger mini" data-fx type="button" aria-label="Retirer">×</button></div>';
+    return '<div data-fl data-img="' + esc(l.img || '') + '" style="display:grid;gap:6px;padding-bottom:8px;border-bottom:1px solid var(--ligne)"><div class="grille" style="grid-template-columns:minmax(0,1fr) 62px 86px 40px;align-items:end"><div><label>Article</label><input data-ff="t" maxlength="80" value="' + esc(l.t || '') + '"></div><div><label>Qté</label><input data-ff="q" inputmode="numeric" value="' + esc(l.q || 1) + '"></div><div><label>Prix ($)</label><input data-ff="p" inputmode="decimal" value="' + esc(l.p || '') + '"></div><button class="btn danger mini" data-fx type="button" aria-label="Retirer">×</button></div>' +
+      '<div class="rang" style="align-items:center"><img data-fth alt="" src="' + esc(l.img || '') + '" style="width:44px;height:44px;object-fit:cover;border-radius:6px;' + (l.img ? '' : 'display:none') + '"><button class="btn ghost mini" data-fph type="button">' + (l.img ? 'Changer la photo' : 'Ajouter une photo') + '</button><button class="btn ghost mini" data-fphx type="button" style="' + (l.img ? '' : 'display:none') + '">Sans photo</button><input type="file" accept="image/*" data-ffile class="cache"></div></div>';
   }
-  function facLignes() { return Array.prototype.map.call(document.querySelectorAll('#fa-lignes [data-fl]'), function (r) { return { t: r.querySelector('[data-ff=t]').value.trim(), q: Math.max(1, Math.round(fnum(r.querySelector('[data-ff=q]').value) || 1)), p: fnum(r.querySelector('[data-ff=p]').value) }; }).filter(function (l) { return l.t; }); }
+  function facLignes() { return Array.prototype.map.call(document.querySelectorAll('#fa-lignes [data-fl]'), function (r) { return { t: r.querySelector('[data-ff=t]').value.trim(), q: Math.max(1, Math.round(fnum(r.querySelector('[data-ff=q]').value) || 1)), p: fnum(r.querySelector('[data-ff=p]').value), img: r.getAttribute('data-img') || '' }; }).filter(function (l) { return l.t; }); }
   function facRef() { var d = new Date(); return 'GDE-' + String(d.getFullYear()).slice(2) + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(Math.floor(1000 + Math.random() * 9000)); }
   var MOISF = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
   function facSpec(f) {
@@ -764,6 +765,26 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     $('fa-hist').innerHTML = l.map(function (f, i) { return '<div class="rang" style="justify-content:space-between"><span><b>' + esc(f.ref) + '</b> · ' + TY[f.type] + ' · ' + esc(f.nom || '—') + ' · ' + esc(GDETicket.usd(f.total || 0)) + '</span><span class="rang"><button class="btn ghost mini" data-fh="open" data-i="' + i + '" type="button">Rouvrir</button><button class="btn danger mini" data-fh="del" data-i="' + i + '" type="button">Suppr.</button></span></div>'; }).join('') || '<p class="note">Aucun document pour le moment.</p>';
   }
   function facTel(t) { var x = String(t || '').replace(/\D/g, ''); if (!x) return ''; if (x.indexOf('243') === 0) return x; if (x.charAt(0) === '0') return '243' + x.slice(1); return x; }
+  function petitePhoto(file) {
+    return new Promise(function (res, rej) {
+      var url = URL.createObjectURL(file), im = new Image();
+      im.onload = function () { var s = 240, c = document.createElement('canvas'); c.width = s; c.height = s; var x = c.getContext('2d'), k = Math.max(s / im.width, s / im.height); x.fillStyle = '#fff'; x.fillRect(0, 0, s, s); x.drawImage(im, (s - im.width * k) / 2, (s - im.height * k) / 2, im.width * k, im.height * k); URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', 0.72)); };
+      im.onerror = function () { URL.revokeObjectURL(url); rej(); }; im.src = url;
+    });
+  }
+  function setLignePhoto(row, src) {
+    row.setAttribute('data-img', src || ''); var th = row.querySelector('[data-fth]'); th.src = src || ''; th.style.display = src ? '' : 'none';
+    row.querySelector('[data-fph]').textContent = src ? 'Changer la photo' : 'Ajouter une photo'; row.querySelector('[data-fphx]').style.display = src ? '' : 'none';
+  }
+  $('fa-lignes').addEventListener('click', function (e) {
+    var row = e.target.closest('[data-fl]'); if (!row) return;
+    if (e.target.closest('[data-fph]')) row.querySelector('[data-ffile]').click();
+    else if (e.target.closest('[data-fphx]')) setLignePhoto(row, '');
+  });
+  $('fa-lignes').addEventListener('change', function (e) {
+    if (!e.target.matches('[data-ffile]') || !e.target.files[0]) return; var row = e.target.closest('[data-fl]');
+    petitePhoto(e.target.files[0]).then(function (u) { setLignePhoto(row, u); }).catch(function () { alert('Photo illisible.'); }); e.target.value = '';
+  });
   function facPick() {
     var q = $('fa-pq').value.trim().toLowerCase();
     $('fa-pl').innerHTML = tous().filter(function (p) { return !p.cache && !p.gone && (!q || (p.t + ' ' + p.s).toLowerCase().indexOf(q) >= 0); }).slice(0, 60).map(function (p) {
@@ -774,12 +795,12 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   $('fa-pq').addEventListener('input', facPick); $('fa-pick').addEventListener('toggle', facPick);
   $('fa-pl').addEventListener('click', function (e) {
     var b = e.target.closest('[data-pk]'); if (!b) return; var p = tous().filter(function (x) { return x.id === b.getAttribute('data-pk'); })[0]; if (!p) return;
-    var rows = document.querySelectorAll('#fa-lignes [data-fl]'), last = rows[rows.length - 1], l = { t: p.t, q: 1, p: p.px[0] > 0 ? p.px[0] : '' };
+    var rows = document.querySelectorAll('#fa-lignes [data-fl]'), last = rows[rows.length - 1], l = { t: p.t, q: 1, p: p.px[0] > 0 ? p.px[0] : '', img: p.photo ? (p.photo.charAt(0) === '/' || p.photo.indexOf('http') === 0 ? p.photo : '/' + p.photo) : '' };
     if (last && !last.querySelector('[data-ff=t]').value.trim()) last.outerHTML = facLigne(l); else $('fa-lignes').insertAdjacentHTML('beforeend', facLigne(l));
     b.style.borderColor = 'var(--orange)';
   });
   $('fa-add').addEventListener('click', function () { $('fa-lignes').insertAdjacentHTML('beforeend', facLigne()); });
-  $('fa-lignes').addEventListener('click', function (e) { var x = e.target.closest('[data-fx]'); if (!x) return; if (document.querySelectorAll('#fa-lignes [data-fl]').length > 1) x.closest('[data-fl]').remove(); else x.closest('[data-fl]').querySelectorAll('input').forEach(function (i) { i.value = ''; }); });
+  $('fa-lignes').addEventListener('click', function (e) { var x = e.target.closest('[data-fx]'); if (!x) return; if (document.querySelectorAll('#fa-lignes [data-fl]').length > 1) x.closest('[data-fl]').remove(); else { var rw = x.closest('[data-fl]'); rw.querySelectorAll('input').forEach(function (i) { i.value = ''; }); setLignePhoto(rw, ''); } });
   $('fa-new').addEventListener('click', function () { facRemplir({ type: $('fa-type').value, mode: $('fa-mode').value, pct: 50 }); $('fa-sortie').classList.add('cache'); });
   $('fa-go').addEventListener('click', function () {
     var f = facForm(); if (!f.nom) { alert('Écris le nom du client.'); return; } if (!f.lignes.length) { alert('Ajoute au moins un article avec son prix.'); return; }

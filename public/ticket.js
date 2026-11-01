@@ -44,13 +44,13 @@
     });
     // tableau d'articles
     if (o.lignes && o.lignes.length) {
-      y += 6;
+      y += 6; if (o.stamp && y < stampB + 20) y = stampB + 20;
       if (draw) { set(ctx, 400, 34, FB, MUT); ctx.fillText('Article', PAD, y); ctx.textAlign = 'right'; ctx.fillText('Qté', W - PAD - 420, y); ctx.fillText('Prix', W - PAD - 220, y); ctx.fillText('Total', W - PAD, y); ctx.textAlign = 'left'; ctx.strokeStyle = LINE; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(PAD, y + 18); ctx.lineTo(W - PAD, y + 18); ctx.stroke(); }
       y += 70;
       o.lignes.forEach(function (l) {
-        set(ctx, 500, 44, FB, INK); var ls = wrap(ctx, l.t, W - PAD * 2 - 520);
-        if (draw) { set(ctx, 500, 44, FB, INK); ls.forEach(function (t, k) { ctx.fillText(t, PAD, y + k * 54); }); ctx.textAlign = 'right'; ctx.fillText(String(l.q), W - PAD - 420, y); ctx.fillText(usd(l.p), W - PAD - 220, y); set(ctx, 700, 44, FB, INK); ctx.fillText(usd(l.q * l.p), W - PAD, y); ctx.textAlign = 'left'; }
-        y += ls.length * 54 + 22;
+        var ind = l._im ? 130 : 0; set(ctx, 500, 44, FB, INK); var ls = wrap(ctx, l.t, W - PAD * 2 - 520 - ind);
+        if (draw) { set(ctx, 500, 44, FB, INK); if (l._im) { var s0 = Math.max(l._im.width, l._im.height) ? 104 / Math.min(l._im.width, l._im.height) : 1, iw = l._im.width * s0, ih = l._im.height * s0; ctx.save(); rr(ctx, PAD, y - 38, 104, 104, 10); ctx.clip(); ctx.drawImage(l._im, PAD + (104 - iw) / 2, y - 38 + (104 - ih) / 2, iw, ih); ctx.restore(); } ls.forEach(function (t, k) { ctx.fillText(t, PAD + ind, y + k * 54); }); ctx.textAlign = 'right'; ctx.fillText(String(l.q), W - PAD - 420, y); ctx.fillText(usd(l.p), W - PAD - 220, y); set(ctx, 700, 44, FB, INK); ctx.fillText(usd(l.q * l.p), W - PAD, y); ctx.textAlign = 'left'; }
+        y += Math.max(ls.length * 54 + 22, l._im ? 130 : 0);
       });
       if (draw) { ctx.strokeStyle = LINE; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(PAD, y - 8); ctx.lineTo(W - PAD, y - 8); ctx.stroke(); }
       y += 30;
@@ -91,7 +91,7 @@
   }
   function rr(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
   function draw(o) {
-    return fonts().then(function () {
+    return Promise.all([fonts()].concat((o.lignes || []).map(function (l) { return chargerImg(l.img).then(function (im) { l._im = im; }); }))).then(function () {
       var m = document.createElement('canvas'); m.width = W; m.height = 10;
       var H = Math.max(900, build(m.getContext('2d'), o, false));
       var c = document.createElement('canvas'); c.width = W; c.height = H;
