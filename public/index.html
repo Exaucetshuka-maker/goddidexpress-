@@ -525,7 +525,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 .dets { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 2px; }
 .dt { font-size: 11.5px; font-weight: 700; letter-spacing: .02em; padding: 3px 8px; border: 1px solid var(--ligne); border-radius: 3px; color: var(--papier); }
 .dt.ok { border-color: #3CDC82; color: #3CDC82; }
-.marches { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.marches { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
 .marche { display: grid; justify-items: center; gap: 6px; padding: 12px 2px; background: var(--carbone); border: 1px solid var(--ligne); border-radius: 3px; color: var(--papier); font: inherit; cursor: pointer; min-height: 44px; }
 .marche .flag { font-size: 30px; line-height: 1; }
 .marche span:last-child { font-size: 12.5px; font-weight: 600; }
@@ -552,7 +552,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   <header class="top">
     <div class="marque">
       <b>God Did <span>Express</span></b>
-      <div class="base">Kinshasa, RDC <span style="font-family:'Apple Color Emoji','Noto Color Emoji','Segoe UI Emoji',sans-serif" aria-hidden="true">🇨🇩</span><br>et le monde <span style="font-family:'Apple Color Emoji','Noto Color Emoji','Segoe UI Emoji',sans-serif" aria-hidden="true">🌍</span></div>
+      <div class="base">Kinshasa, RDC<br>et le monde</div>
     </div>
     <div class="ruban" aria-hidden="true"><div class="ruban-in" id="ruban-in"></div></div>
   </header>
@@ -2215,9 +2215,11 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 
   /* Marchés : cinq drapeaux, une fiche par pays */
   var MARCHES = [
+    { f: '🇨🇩', n: 'RDC', t: 'Des produits trouvés et livrés en RDC.', m: 'Bonjour GOD DID EXPRESS, je cherche un produit disponible en RDC. Voici ce que je veux : ' },
     { f: '🇨🇳', n: 'Chine', t: 'Électronique, vêtements, maison, emballages et tout ce qui se fabrique en gros.', m: 'Bonjour GOD DID EXPRESS, je veux faire venir un produit de Chine. Voici ce que je veux : ' },
     { f: '🇦🇪', n: 'Dubaï', t: 'Téléphones, électronique, parfums et produits haut de gamme.', m: 'Bonjour GOD DID EXPRESS, je veux faire venir un produit de Dubaï. Voici ce que je veux : ' },
-    { f: '🇹🇷', n: 'Istanbul', t: 'Vêtements, tissus, chaussures et meubles.', m: 'Bonjour GOD DID EXPRESS, je veux faire venir un produit d\'Istanbul. Voici ce que je veux : ' }
+    { f: '🇹🇷', n: 'Istanbul', t: 'Vêtements, tissus, chaussures et meubles.', m: 'Bonjour GOD DID EXPRESS, je veux faire venir un produit d\'Istanbul. Voici ce que je veux : ' },
+    { f: '🌍', n: 'Monde', t: 'Un autre pays ? Dis-nous le produit, on cherche le fournisseur.', m: 'Bonjour GOD DID EXPRESS, je cherche un produit dans un autre pays. Voici ce que je veux : ' }
   ];
   function rendreMarches() {
     $('marches').innerHTML = MARCHES.map(function (x, i) {
