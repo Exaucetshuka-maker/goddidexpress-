@@ -806,7 +806,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   <section class="view" id="v-voyages" hidden>
     <header>
       <h2>Nos voyages</h2>
-      <p>Chine, Dubaï, Istanbul : une date de départ, une date limite pour commander, une arrivée estimée.</p>
+      <p>Vers la RDC ou depuis la RDC : une date de départ, une date limite pour commander, une arrivée estimée, des places qui se remplissent pour de vrai.</p>
     </header>
     <div class="wrap" style="gap:14px">
       <div id="voy-liste" style="display:grid;gap:14px"></div>
@@ -1470,8 +1470,10 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     ['Livré', 'Vidéo de remise']
   ];
   var EXEMPLE = 'GDE-2610-0042';
+  var ETAPES_EXP = [['Demande reçue', 'Message WhatsApp'], ['Devis envoyé', 'Transport et douane, avant tout paiement'], ['Acompte reçu', 'Capture du paiement'], ['Colis reçu chez nous', 'Photo du colis reçu'], ['En transit', 'Photo du colis expédié'], ['Arrivé à Kinshasa', 'Photo à l\'arrivée'], ['Livré', 'Vidéo de remise']];
+  function etapesCour() { return (curOrd && curOrd.typ === 'expedition') ? ETAPES_EXP : ETAPES; }
   function rendreSuivi(cran) {
-    curCran = cran;
+    curCran = cran; var ETAPES = etapesCour();
     var fait = Math.max(0, Math.min(7, cran));
     $('s-jauge').innerHTML = jaugeSVG(fait);
     var cur = cran >= 7 ? 'Livré' : cran < 0 ? 'Référence non reliée' : ETAPES[cran][0];
@@ -1568,18 +1570,26 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       if (o.photo) p.photo = o.photo;
       if (o.desc) p.desc = o.desc;
       if (o.det) p.det = o.det;
+      if (o.arr) p.arr = o.arr;
       out.push(p);
     });
     STATE.extra.forEach(function (e) { if (!e.cache) out.push(Object.assign({ l: 0 }, e)); });
     return out;
   }
+  function arrTag(p) {
+    if (!p.arr || !/^\d{4}-\d{2}-\d{2}$/.test(p.arr)) return '';
+    var pr = p.arr.split('-'), t0 = new Date(+pr[0], +pr[1] - 1, +pr[2]).getTime(), t1 = new Date(); t1 = new Date(t1.getFullYear(), t1.getMonth(), t1.getDate()).getTime();
+    var j = Math.round((t0 - t1) / 86400000); if (j < 0) return '';
+    return '<span class="dt ok" data-arr="' + p.arr + '">Arrive ' + (j === 0 ? 'aujourd\'hui' : j === 1 ? 'demain' : 'dans ' + j + ' jours') + ' · ' + fdate(p.arr) + '</span>';
+  }
   function detTags(p) {
-    var d = p.det; if (!d) return '';
+    var d = p.det, ar = arrTag(p); if (!d && !ar) return '';
+    d = d || {};
     var t = [];
     if (d.e) t.push(d.e === 'neuf' ? 'Neuf' : 'Occasion');
     if (d.v) t.push(d.v === 'carton' ? 'En carton' : d.v === 'detail' ? 'Au détail' : 'Carton ou détail');
     if (d.d) t.push(d.d === 'stock' ? 'Déjà là' : 'Sur commande');
-    return '<div class="dets">' + t.map(function (x) { return '<span class="dt' + (x === 'Déjà là' ? ' ok' : '') + '">' + x + '</span>'; }).join('') + (d.ct ? '<span class="dt">' + h(d.ct) + '</span>' : '') + '</div>';
+    return '<div class="dets">' + t.map(function (x) { return '<span class="dt' + (x === 'Déjà là' ? ' ok' : '') + '">' + x + '</span>'; }).join('') + (d.ct ? '<span class="dt">' + h(d.ct) + '</span>' : '') + ar + '</div>';
   }
   function pxList(p) { return p.px || [null, null, null]; }
   function okPx(v) { return v !== null && v !== undefined && v !== '' && !isNaN(Number(v)) && Number(v) > 0; }
@@ -2151,6 +2161,41 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     function z(n) { return (n < 10 ? '0' : '') + n; }
     return (j ? j + ' j ' : '') + z(hh) + ' h ' + z(m) + ' min ' + z(ss) + ' s';
   }
+  /* Inscriptions réelles (compteurs vrais, venus du serveur) */
+  var JN = { g: {}, v: {} }, MESJ = {};
+  try { MESJ = JSON.parse(localStorage.getItem('gde-joins') || '{}') || {}; } catch (e) { MESJ = {}; }
+  function nJ(k, id) { return (JN[k] && JN[k][id]) ? JN[k][id].n : 0; }
+  function ilYa(t) { var s = Math.max(0, Math.round((Date.now() - t) / 1000)); if (s < 60) return 'à l\'instant'; var m = Math.round(s / 60); if (m < 60) return 'il y a ' + m + ' min'; var hh = Math.round(m / 60); if (hh < 24) return 'il y a ' + hh + ' h'; return 'il y a ' + Math.round(hh / 24) + ' j'; }
+  function derniers(k, id) { var c = JN[k] && JN[k][id]; return c && c.last.length ? '<p class="note" style="margin:0">' + c.last.map(function (x) { return '<b style="color:var(--papier)">' + h(x.nom) + '</b> ' + ilYa(x.t); }).join(' · ') + '</p>' : ''; }
+  function chargerJoins() {
+    if (document.hidden) return;
+    fetch('/api/joins', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (!j) return; JN = { g: j.g || {}, v: j.v || {} }; rendreGroupes(); rendreVoyages(); }).catch(function () {});
+  }
+  setInterval(chargerJoins, 20000);
+  function ouvrirJoin(k, id) {
+    var nm = ''; try { nm = localStorage.getItem('gde-prenom') || ''; } catch (e) {}
+    var cible = k === 'g' ? (STATE.grp || []).filter(function (g) { return g.id === id; })[0] : (STATE.voy || []).filter(function (v) { return v.id === id; })[0];
+    var titre = cible ? (k === 'g' ? cible.nom : (cible.sens === 'depuis' ? 'Kinshasa → ' + cible.orig : cible.orig + ' → Kinshasa')) : '';
+    ouvrir('<div class="sheet-tete"><div><div class="kicker">' + (k === 'g' ? 'Achat groupé' : 'Voyage') + '</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">' + h(titre) + '</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
+      '<div class="champ"><label for="jn-nom">Ton prénom</label><input id="jn-nom" maxlength="30" autocomplete="given-name" value="' + ea(nm) + '"></div>' +
+      '<p class="note" id="jn-msg" role="alert"></p><div class="rangee"><button class="btn" id="jn-ok" type="button">' + (k === 'g' ? 'Je rejoins' : 'Je réserve ma place') + '</button></div>' +
+      '<p class="note">Seul ton prénom est visible. Ton inscription compte pour de vrai.</p>');
+    $('jn-ok').addEventListener('click', function () {
+      var nom = $('jn-nom').value.trim(), msg = $('jn-msg'), b = this; msg.textContent = '';
+      if (nom.length < 2) { msg.textContent = 'Écris ton prénom.'; return; }
+      b.disabled = true;
+      fetch('/api/join', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ k: k, id: id, nom: nom }) }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }).then(function (r) {
+        if (r.ok || (r.j && /déjà inscrit/.test(r.j.erreur || ''))) {
+          MESJ[k + ':' + id] = 1; try { localStorage.setItem('gde-joins', JSON.stringify(MESJ)); localStorage.setItem('gde-prenom', nom); } catch (e) {}
+          var m = k === 'g' ? 'Bonjour GOD DID EXPRESS, c\'est ' + nom + '. Je viens de rejoindre le groupe d\'achat : ' + (cible ? cible.nom : '') + '.' : 'Bonjour GOD DID EXPRESS, c\'est ' + nom + '. Je viens de réserver ma place pour le voyage ' + (cible ? (cible.sens === 'depuis' ? 'Kinshasa → ' + cible.orig : cible.orig + ' → Kinshasa') : '') + '.';
+          $('sheet').querySelector('.rangee').innerHTML = '<a class="btn" target="_blank" rel="noopener" href="' + ea(wa(m)) + '">Confirmer sur WhatsApp</a>';
+          msg.textContent = r.ok ? 'C\'est fait, ' + nom + ' ! Tu es inscrit.' : 'Tu étais déjà inscrit.'; msg.style.color = 'var(--orange)';
+          chargerJoins();
+        } else { msg.textContent = (r.j && r.j.erreur) || 'Impossible pour le moment.'; b.disabled = false; }
+      }).catch(function () { msg.textContent = 'Pas de connexion. Réessaie.'; b.disabled = false; });
+    });
+  }
+  document.addEventListener('click', function (e) { var b = e.target.closest('[data-join]'); if (!b) return; e.preventDefault(); var p = b.getAttribute('data-join').split(':'); ouvrirJoin(p[0], p[1]); });
   function groupesActifs() {
     var now = Date.now();
     return (STATE.grp || []).filter(function (g) { return g && g.on && g.nom && g.fin > now; }).sort(function (a, b) { return a.fin - b.fin; });
@@ -2164,12 +2209,12 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     box.innerHTML = L.map(function (g) {
       var p = (g.p || []).filter(function (x) { return x[1] > 0; }).sort(function (x, y) { return x[0] - y[0]; });
       if (!p.length) p = [[1, 0]];
-      var actif = -1; p.forEach(function (x, i) { if (g.n >= x[0]) actif = i; });
+      var gn = (g.n || 0) + nJ('g', g.id); var actif = -1; p.forEach(function (x, i) { if (gn >= x[0]) actif = i; });
       var cur = p[Math.max(actif, 0)], suiv = p[actif + 1];
-      var pct = suiv ? Math.min(100, Math.round(g.n / suiv[0] * 100)) : 100;
-      var txt = suiv ? (suiv[0] - g.n) + ' personne' + (suiv[0] - g.n > 1 ? 's' : '') + ' de plus pour passer à ' + usd(suiv[1]) : 'Dernier palier atteint';
+      var pct = suiv ? Math.min(100, Math.round(gn / suiv[0] * 100)) : 100;
+      var txt = suiv ? (suiv[0] - gn) + ' personne' + (suiv[0] - gn > 1 ? 's' : '') + ' de plus pour passer à ' + usd(suiv[1]) : 'Dernier palier atteint';
       var pal = p.map(function (x, i) { return '<div class="palier' + (i === actif ? ' on' : '') + '"><span>' + x[0] + '+ pers.</span><b>' + usd(x[1]) + '</b></div>'; }).join('');
-      var restePl = g.max > 0 ? g.max - g.n : null, plein = restePl !== null && restePl <= 0;
+      var restePl = g.max > 0 ? g.max - gn : null, plein = restePl !== null && restePl <= 0;
       var places = restePl === null ? '' : plein ? '<span class="places urgent">Complet</span>' : '<span class="places' + (restePl <= 3 ? ' urgent' : '') + '">Il reste ' + restePl + ' place' + (restePl > 1 ? 's' : '') + '</span>';
       var prod = g.pid && BY[g.pid] ? BY[g.pid] : null;
       var lien = location.origin + '/#groupes';
@@ -2177,10 +2222,10 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       var part = 'Achat groupé chez GOD DID EXPRESS : ' + g.nom + (cur[1] > 0 ? ', ' + usd(cur[1]) + ' la pièce' : '') + '. Plus on est nombreux, moins c\'est cher. Rejoins-nous : ' + lien;
       return '<article class="carte groupe"><div class="gtete"' + (prod ? '' : ' style="grid-template-columns:1fr"') + '>' + (prod ? '<img class="gimg" src="' + ea(pic(prod)) + '" alt="" loading="lazy">' : '') +
         '<div><h3>' + h(g.nom) + '</h3><div class="gcpt"><span class="cpt" data-fin="' + g.fin + '">' + cpt(g.fin - Date.now()) + '</span>' + places + '</div></div></div>' +
-        (cur[1] > 0 ? '<div class="prix">' + usd(cur[1]) + '<small>par pièce, ' + g.n + ' inscrit' + (g.n > 1 ? 's' : '') + '</small></div>' : '<div class="prix"><small>' + g.n + ' inscrit' + (g.n > 1 ? 's' : '') + ', prix annoncé sur WhatsApp</small></div>') +
+        (cur[1] > 0 ? '<div class="prix">' + usd(cur[1]) + '<small>par pièce, ' + gn + ' inscrit' + (gn > 1 ? 's' : '') + '</small></div>' : '<div class="prix"><small>' + gn + ' inscrit' + (gn > 1 ? 's' : '') + ', prix annoncé sur WhatsApp</small></div>') + derniers('g', g.id) +
         '<div class="barre" role="img" aria-label="Progression vers le palier suivant : ' + pct + ' %"><i style="width:' + pct + '%"></i></div>' +
         '<p class="note">' + txt + '</p><div class="paliers">' + pal + '</div>' +
-        '<div class="g-act">' + (plein ? '' : '<a class="btn" href="' + ea(wa(msg)) + '" target="_blank" rel="noopener">Rejoindre ce groupe</a>') +
+        '<div class="g-act">' + (plein ? '' : MESJ['g:' + g.id] ? '<button class="btn" type="button" disabled>Tu es inscrit ✓</button>' : '<button class="btn" type="button" data-join="g:' + ea(g.id) + '">Je rejoins</button>') + (plein ? '' : '<a class="btn ghost" href="' + ea(wa(msg)) + '" target="_blank" rel="noopener">Poser une question sur WhatsApp</a>') +
         '<a class="btn ghost" href="https://wa.me/?text=' + encodeURIComponent(part) + '" target="_blank" rel="noopener">Partager ce groupe sur WhatsApp</a></div></article>';
     }).join('');
     majBandeau();
@@ -2246,15 +2291,18 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   function voyListe() { return (STATE.voy || []).filter(function (v) { return v.on !== false && v.orig; }).sort(function (a, b) { return (a.dep || '9').localeCompare(b.dep || '9'); }); }
   function cptTexte(dep) { var ms = dmin(dep) - Date.now(); if (ms <= 0) return 'terminé'; var s = Math.floor(ms / 1000), j = Math.floor(s / 86400), hh = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), ss = s % 60; return (j ? j + ' j ' : '') + hh + ' h ' + (m < 10 ? '0' : '') + m + ' min ' + (ss < 10 ? '0' : '') + ss + ' s'; }
   function carteVoy(v) {
-    var e = voyEtat(v), l = [];
+    var e = voyEtat(v), l = [], dep = v.sens === 'depuis', dest = dep ? v.orig : 'Kinshasa', titre = dep ? 'Kinshasa → ' + v.orig : v.orig + ' → Kinshasa';
     if (v.dep) l.push('<div><small>Départ</small><b>' + h(fdate(v.dep)) + '</b></div><div><small>Dernier jour pour commander</small><b>' + h(veille(v.dep)) + '</b></div>');
-    if (v.arr) l.push('<div><small>Arrivée estimée à Kinshasa</small><b>' + h(fdate(v.arr)) + '</b></div>');
+    if (v.arr) l.push('<div><small>Arrivée estimée à ' + h(dest) + '</small><b>' + h(fdate(v.arr)) + '</b></div>');
+    var n = nJ('v', v.id), plein = v.max > 0 && n >= v.max;
+    var ins = '<div class="note" style="display:flex;justify-content:space-between;gap:8px"><span>' + (n ? n + ' personne' + (n > 1 ? 's' : '') + ' inscrite' + (n > 1 ? 's' : '') : 'Sois parmi les premiers à réserver') + '</span>' + (v.max > 0 ? '<b style="color:' + (plein || v.max - n <= 3 ? 'var(--orange)' : 'var(--papier)') + '">' + (plein ? 'Complet' : 'Il reste ' + (v.max - n) + ' place' + (v.max - n > 1 ? 's' : '')) + '</b>' : '') + '</div>';
     var rem = v.rempl != null ? '<div><div class="note" style="display:flex;justify-content:space-between"><span>Voyage rempli</span><b style="color:var(--papier)">' + v.rempl + ' %</b></div><div class="barre"><i style="width:' + v.rempl + '%"></i></div></div>' : '';
-    var cpt = e === 'ouvert' && v.dep ? '<div><small class="note">Fin des commandes dans</small><div class="cpt" data-cpt="' + h(v.dep) + '">' + cptTexte(v.dep) + '</div></div>' : '';
-    var msg = 'Bonjour GOD DID EXPRESS, je veux commander pour le voyage ' + v.orig + (v.dep ? ' du ' + fdate(v.dep) : '') + '. Voici ce que je cherche : ';
-    return '<article class="carte voy"><div class="tete"><div class="nom">' + h(v.orig) + '</div><span class="st ' + e + '">' + ETL[e] + '</span></div>' +
-      (l.length ? '<div class="ligne">' + l.join('') + '</div>' : '') + cpt + rem + (v.note ? '<p class="note">' + h(v.note) + '</p>' : '') +
-      (e === 'ouvert' ? '<a class="btn" target="_blank" rel="noopener" href="' + wa(msg) + '">Commander pour ce voyage</a>' : '') + '</article>';
+    var c1 = e === 'ouvert' && v.dep ? '<div><small class="note">Fin des commandes dans</small><div class="cpt" data-cpt="' + h(v.dep) + '">' + cptTexte(v.dep) + '</div></div>' : '';
+    var c2 = (e === 'clos' || e === 'route') && v.arr && dmin(v.arr) > Date.now() ? '<div><small class="note">Colis en route : arrivée estimée dans</small><div class="cpt" data-cpt="' + h(v.arr) + '">' + cptTexte(v.arr) + '</div></div>' : '';
+    var msg = dep ? 'Bonjour GOD DID EXPRESS, je veux envoyer un colis de Kinshasa vers ' + v.orig + (v.dep ? ' (voyage du ' + fdate(v.dep) + ')' : '') + '. Voici ce que j\'envoie : ' : 'Bonjour GOD DID EXPRESS, je veux commander pour le voyage ' + v.orig + (v.dep ? ' du ' + fdate(v.dep) : '') + '. Voici ce que je cherche : ';
+    var act = e === 'ouvert' ? '<div class="rangee">' + (plein ? '' : MESJ['v:' + v.id] ? '<button class="btn" type="button" disabled>Place réservée ✓</button>' : '<button class="btn" type="button" data-join="v:' + ea(v.id) + '">Réserver ma place</button>') + '<a class="btn ghost" target="_blank" rel="noopener" href="' + wa(msg) + '">' + (dep ? 'Envoyer un colis' : 'Commander pour ce voyage') + '</a></div>' : '';
+    return '<article class="carte voy"><div class="tete"><div class="nom">' + h(titre) + '</div><span class="st ' + e + '">' + ETL[e] + '</span></div>' +
+      (l.length ? '<div class="ligne">' + l.join('') + '</div>' : '') + c1 + c2 + (e === 'ouvert' ? ins + derniers('v', v.id) : '') + rem + (v.note ? '<p class="note">' + h(v.note) + '</p>' : '') + act + '</article>';
   }
   function rendreVoyages() {
     var L = voyListe();
@@ -2391,7 +2439,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   function majPhoto(o) {
     var box = $('s-photo-c'), n = ++photoSeq;
     if (!o || !window.GDETicket || !GDETicket.position || o.cran < 0) { box.hidden = true; return; }
-    GDETicket.position({ produit: o.prod || 'Ton colis', ref: o.ref, nom: o.nom || '', cran: o.cran, mode: o.mode, orig: o.orig || 'Chine', arr: dateLongue(o.arr) }).then(function (cv) { return GDETicket.blob(cv); }).then(function (bl) {
+    GDETicket.position({ produit: o.prod || 'Ton colis', ref: o.ref, nom: o.nom || '', cran: o.cran, mode: o.mode, orig: o.orig || 'Chine', typ: o.typ, arr: dateLongue(o.arr) }).then(function (cv) { return GDETicket.blob(cv); }).then(function (bl) {
       if (n !== photoSeq) return;
       try { photoFile = new File([bl], (o.ref || 'colis') + '-position.png', { type: 'image/png' }); } catch (e) { photoFile = null; }
       var u = URL.createObjectURL(bl); $('s-photo').src = u; $('s-photo-save').href = u; $('s-photo-save').setAttribute('download', (o.ref || 'colis') + '-position.png'); box.hidden = false;
@@ -2406,7 +2454,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     $('s-tag').textContent = tag; rendreSuivi(o.cran);
     if (typeof GS !== 'undefined' && GS && GS.setMode) { GS.setMode(mode); Array.prototype.forEach.call(document.querySelectorAll('[data-hm]'), function (b) { b.classList.toggle('on', b.getAttribute('data-hm') === mode); }); }
     if (typeof GS !== 'undefined' && GS && GS.setOrig) GS.setOrig(o.orig || 'Chine');
-    majPhoto({ ref: v, nom: o.nom, prod: o.prod, cran: o.cran, mode: mode, orig: o.orig || 'Chine', arr: o.arr });
+    majPhoto({ ref: v, nom: o.nom, prod: o.prod, cran: o.cran, mode: mode, orig: o.orig || 'Chine', typ: o.typ, arr: o.arr });
   }
   function chercherCmd(raw) {
     var v = String(raw || '').trim().toUpperCase();
@@ -2418,7 +2466,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     function fin(o2) {
       if (o2) {
         afficherCmd(v, o2, 'En direct');
-        $('s-note').textContent = 'Commande de ' + o2.nom + (o2.prod ? ', ' + o2.prod : '') + '. Touchez une photo pour la voir en grand.';
+        $('s-note').textContent = (o2.typ === 'expedition' ? 'Expédition pour ' : 'Commande de ') + o2.nom + (o2.prod ? ', ' + o2.prod : '') + (o2.typ === 'expedition' && o2.ou ? '. Colis acheté chez : ' + o2.ou : '') + '. Touchez une photo pour la voir en grand.';
         try { localStorage.setItem('gde-ref', v); } catch (e) {}
       } else if (v === EXEMPLE) {
         curOrd = null; $('s-tag').textContent = 'Exemple'; rendreSuivi(4);
@@ -2434,7 +2482,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     fetch('/api/cmd/' + encodeURIComponent(v)).then(function (r) {
       if (r.status === 429) { toast('Trop d\'essais, réessayez dans quelques minutes'); fin(null); return null; }
       if (!r.ok) { fin(null); return null; }
-      return r.json().then(function (j) { if (String($('s-ref').textContent) !== v) return; fin({ nom: j.nom, prod: j.prod, cran: j.cran, mode: j.mode, orig: j.orig, arr: j.arr, pr: [] }); });
+      return r.json().then(function (j) { if (String($('s-ref').textContent) !== v) return; fin({ nom: j.nom, prod: j.prod, cran: j.cran, mode: j.mode, orig: j.orig, typ: j.typ, ou: j.ou, arr: j.arr, pr: [] }); });
     }).catch(function () { fin(null); });
   }
   $('form-suivi').addEventListener('submit', function (e) { e.preventDefault(); chercherCmd($('s-code').value); });
@@ -2859,7 +2907,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   })();
 
   /* Premier affichage */
-  rendreSlogan(); rendreReseaux(); rendreVip(); rendreAvis(); majPub(); rendreGroupes(); rendrePhrases(); rendreMarches(); rendreInfo(); rendreVoyages(); initVideos();
+  rendreSlogan(); rendreReseaux(); rendreVip(); rendreAvis(); majPub(); chargerJoins(); rendreGroupes(); rendrePhrases(); rendreMarches(); rendreInfo(); rendreVoyages(); initVideos();
 
   show(location.hash.slice(1), false);
 })();

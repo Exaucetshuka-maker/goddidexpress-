@@ -87,6 +87,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       <button class="btn ghost" role="tab" data-t="prod" aria-selected="true">Produits</button>
       <button class="btn ghost" role="tab" data-t="voy" aria-selected="false">Voyages</button>
       <button class="btn ghost" role="tab" data-t="grp" aria-selected="false">Achats groupés</button>
+      <button class="btn ghost" role="tab" data-t="ins" aria-selected="false">Inscrits</button>
       <button class="btn ghost" role="tab" data-t="avis" aria-selected="false">Avis</button>
       <button class="btn ghost" role="tab" data-t="prix" aria-selected="false">Calcul des prix</button>
       <button class="btn ghost" role="tab" data-t="cmd" aria-selected="false">Commandes</button>
@@ -128,6 +129,14 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     <section id="t-grp" class="grille cache" style="gap:12px">
       <p class="note">Jusqu'à 10 achats groupés en même temps. Le site affiche le compte à rebours tout seul. Les « inscrits » sont les vrais clients : monte le chiffre avec le bouton + à chaque nouvelle personne qui rejoint par WhatsApp.</p>
       <div id="groupes" class="grille"></div>
+    </section>
+
+    <section id="t-ins" class="grille cache" style="gap:12px">
+      <p class="note">Les clients qui touchent « Je rejoins » ou « Réserver ma place » sur le site apparaissent ici avec leur prénom. Tu peux retirer quelqu'un, ou ajouter un vrai client déjà inscrit chez toi, avec son accord. Rien n'est ajouté à ta place.</p>
+      <div class="carte"><h3>Ajouter un vrai inscrit</h3>
+        <div class="grille g2"><div><label for="in-cible">Groupe ou voyage</label><select id="in-cible"></select></div><div><label for="in-nom">Prénom</label><input id="in-nom" maxlength="30"></div></div>
+        <button class="btn" id="in-ok" type="button">Ajouter</button></div>
+      <div id="in-liste" class="grille"></div>
     </section>
 
     <section id="t-avis" class="grille cache" style="gap:12px">
@@ -184,6 +193,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         <div class="grille" style="margin-top:10px">
           <div class="grille g2"><div><label for="cm-nom">Prénom du client</label><input id="cm-nom" maxlength="40"></div><div><label for="cm-tel">Téléphone du client</label><input id="cm-tel" inputmode="tel" placeholder="0810000000"></div></div>
           <div><label for="cm-prod">Produit</label><input id="cm-prod" maxlength="100" placeholder="Ex. Sac tactique 40L"></div>
+          <div class="grille g2"><div><label for="cm-typ">Type</label><select id="cm-typ"><option value="achat">Achat : on trouve et on achète</option><option value="expedition">Expédition : le client a déjà acheté</option></select></div><div><label for="cm-ou">Où est le colis ? (si déjà acheté)</label><input id="cm-ou" maxlength="80" placeholder="Ville, vendeur…"></div></div>
           <div class="grille g2"><div><label for="cm-orig">Départ</label><select id="cm-orig"><option>Chine</option><option>Dubaï</option><option>Istanbul</option></select></div><div></div></div>
           <div class="grille g3"><div><label for="cm-mode">Transport</label><select id="cm-mode"><option value="avion">Avion</option><option value="bateau">Bateau</option></select></div><div><label for="cm-cran">Étape</label><select id="cm-cran"></select></div><div><label for="cm-arr">Arrivée estimée</label><input id="cm-arr" type="date"></div></div>
           <button class="btn" id="cm-ok" type="button">Ajouter la commande</button>
@@ -361,13 +371,14 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
 
   function demarrer() {
     if (STATE) { $('ecran').classList.add('cache'); $('app').classList.remove('cache'); return Promise.resolve(); }
-    return Promise.all([api('/api/state'), fetch('/products.json').then(function (r) { return r.json(); }), api('/api/couts'), api('/api/cartes'), api('/api/cmds')]).then(function (rs) {
+    return Promise.all([api('/api/state'), fetch('/products.json').then(function (r) { return r.json(); }), api('/api/couts'), api('/api/cartes'), api('/api/cmds'), api('/api/joins/all')]).then(function (rs) {
       STATE = defState(rs[0].j); PRODS = rs[1];
       if (rs[2].ok) COUTS = { reglages: Object.assign(COUTS.reglages, rs[2].j.reglages || {}), produits: rs[2].j.produits || {} };
       if (rs[3].ok) CARTES = rs[3].j.cartes || [];
       if (rs[4].ok) CMDS = rs[4].j.cmds || [];
+      if (rs[5].ok) JOINS = rs[5].j.joins || [];
       $('ecran').classList.add('cache'); $('app').classList.remove('cache');
-      remplirSelects(); rendreProduits(); rendreGroupes(); rendreVoyages(); rendreAvisAdmin(); rendreReglagesPrix(); rendrePrix(); rendreCartes(); rendreCmds(); rendreReglages(); marquer(false);
+      remplirSelects(); rendreProduits(); rendreGroupes(); rendreVoyages(); rendreAvisAdmin(); rendreReglagesPrix(); rendrePrix(); rendreCartes(); rendreCmds(); rendreInscrits(); rendreReglages(); marquer(false);
     });
   }
 
@@ -401,7 +412,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   Array.prototype.forEach.call(document.querySelectorAll('.onglets button'), function (b) {
     b.addEventListener('click', function () {
       Array.prototype.forEach.call(document.querySelectorAll('.onglets button'), function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
-      ['prod', 'voy', 'grp', 'avis', 'prix', 'cmd', 'fac', 'fid', 'reg'].forEach(function (t) { $('t-' + t).classList.toggle('cache', t !== b.getAttribute('data-t')); });
+      ['prod', 'voy', 'grp', 'ins', 'avis', 'prix', 'cmd', 'fac', 'fid', 'reg'].forEach(function (t) { $('t-' + t).classList.toggle('cache', t !== b.getAttribute('data-t')); });
       window.scrollTo(0, 0);
     });
   });
@@ -415,18 +426,19 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   function tous() {
     var base = PRODS.map(function (p) {
       var o = STATE.prod[p.id] || {};
-      return { id: p.id, t: p.t, s: p.s, c: p.c, px: o.px || [null, null, null], photo: o.photo || ('img/' + p.id + '.jpg'), custom: !!o.photo, desc: o.desc || '', cache: !!o.cache, gone: !!o.gone, det: o.det || null, extra: false };
+      return { id: p.id, t: p.t, s: p.s, c: p.c, px: o.px || [null, null, null], photo: o.photo || ('img/' + p.id + '.jpg'), custom: !!o.photo, desc: o.desc || '', cache: !!o.cache, gone: !!o.gone, det: o.det || null, arr: o.arr || '', extra: false };
     });
-    var ex = STATE.extra.map(function (e) { return { id: e.id, t: e.t, s: e.s, c: e.c, px: e.px || [null, null, null], photo: e.photo || '', custom: !!e.photo, desc: e.desc || '', cache: !!e.cache, gone: false, det: e.det || null, extra: true }; });
+    var ex = STATE.extra.map(function (e) { return { id: e.id, t: e.t, s: e.s, c: e.c, px: e.px || [null, null, null], photo: e.photo || '', custom: !!e.photo, desc: e.desc || '', cache: !!e.cache, gone: false, det: e.det || null, arr: e.arr || '', extra: true }; });
     return ex.concat(base);
   }
   function opt(v, cur, t) { return '<option value="' + v + '"' + (cur === v ? ' selected' : '') + '>' + t + '</option>'; }
-  function detForm(dt, pre) {
+  function detForm(dt, pre, arr) {
     dt = dt || {}; pre = pre || 'det-';
     return '<div class="grille g2" style="margin-top:8px"><div><label>État</label><select data-k="' + pre + 'e">' + opt('', dt.e || '', 'Non précisé') + opt('neuf', dt.e, 'Neuf') + opt('occasion', dt.e, 'Occasion') + '</select></div>' +
       '<div><label>Vente</label><select data-k="' + pre + 'v">' + opt('', dt.v || '', 'Non précisé') + opt('detail', dt.v, 'Au détail') + opt('carton', dt.v, 'En carton') + opt('les-deux', dt.v, 'Carton ou détail') + '</select></div>' +
       '<div><label>Disponibilité</label><select data-k="' + pre + 'd">' + opt('', dt.d || '', 'Non précisé') + opt('stock', dt.d, 'Déjà là (en stock)') + opt('commande', dt.d, 'Sur commande') + '</select></div>' +
-      '<div><label>Précision carton</label><input data-k="' + pre + 'ct" maxlength="60" value="' + esc(dt.ct || '') + '" placeholder="Ex. 24 pièces par carton"></div></div>';
+      '<div><label>Précision carton</label><input data-k="' + pre + 'ct" maxlength="60" value="' + esc(dt.ct || '') + '" placeholder="Ex. 24 pièces par carton"></div>' +
+      '<div><label>Date d\'arrivée prévue</label><input type="date" data-k="' + pre + 'arr" value="' + esc(arr || '') + '"></div></div>';
   }
   function rendreProduits() {
     var q = $('q').value.trim().toLowerCase(), qc = $('qc').value;
@@ -441,7 +453,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         '<div class="grille g3"><div><label>1 pièce $</label><input data-k="px" data-i="0" inputmode="decimal" value="' + esc(v(0)) + '"></div>' +
         '<div><label>Dès 5</label><input data-k="px" data-i="1" inputmode="decimal" value="' + esc(v(1)) + '"></div>' +
         '<div><label>Dès 10</label><input data-k="px" data-i="2" inputmode="decimal" value="' + esc(v(2)) + '"></div></div>' +
-        '<details><summary class="note">Détail : neuf ou occasion, carton, sur commande</summary>' + detForm(p.det) + '</details>' +
+        '<details><summary class="note">Détail : neuf ou occasion, carton, sur commande</summary>' + detForm(p.det, 'det-', p.arr) + '</details>' +
         '<details><summary class="note">Description pour les clients</summary><textarea data-k="desc" maxlength="600" style="min-height:70px" placeholder="Une ou deux phrases sur le produit">' + esc(p.desc) + '</textarea></details>' +
         '<div class="rang"><button class="btn ghost mini" data-a="photo" type="button">Changer la photo</button>' +
         (p.custom ? '<button class="btn ghost mini" data-a="photo-off" type="button">Enlever la photo</button>' : '') +
@@ -463,6 +475,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   $('liste').addEventListener('input', function (e) {
     var t = e.target, row = t.closest('[data-id]'), k = t.getAttribute('data-k'); if (!row || (k !== 'px' && k !== 'desc' && String(k).indexOf('det-') !== 0)) return;
     var o = refProd(row.getAttribute('data-id'));
+    if (k === 'det-arr') { if (t.value) o.arr = t.value; else delete o.arr; marquer(true); return; }
     if (String(k).indexOf('det-') === 0) { o.det = o.det || {}; var dk = k.slice(4); if (t.value) o.det[dk] = t.value; else delete o.det[dk]; if (!Object.keys(o.det).length) delete o.det; marquer(true); return; }
     if (k === 'desc') { o.desc = t.value; marquer(true); return; }
     o.px = o.px || [null, null, null]; o.px[Number(t.getAttribute('data-i'))] = nb(t.value);
@@ -540,7 +553,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     var t = $('n-t').value.trim(); if (!t) { alert('Écris le nom du produit.'); return; }
     var id = 'x' + Date.now().toString(36), f = $('n-f').files[0];
     var p = { id: id, t: t, s: $('n-s').value.trim(), c: $('n-c').value, px: [nb($('n-p1').value), nb($('n-p5').value), nb($('n-p10').value)] };
-    var dn = {}; [['e', 'nd-e'], ['v', 'nd-v'], ['d', 'nd-d'], ['ct', 'nd-ct']].forEach(function (x) { var v = document.querySelector('#n-det [data-k="' + x[1] + '"]').value.trim(); if (v) dn[x[0]] = v; }); if (Object.keys(dn).length) p.det = dn;
+    var dn = {}; [['e', 'nd-e'], ['v', 'nd-v'], ['d', 'nd-d'], ['ct', 'nd-ct']].forEach(function (x) { var v = document.querySelector('#n-det [data-k="' + x[1] + '"]').value.trim(); if (v) dn[x[0]] = v; }); if (Object.keys(dn).length) p.det = dn; var da = document.querySelector('#n-det [data-k="nd-arr"]').value; if (da) p.arr = da;
     function fin() {
       STATE.extra.unshift(p); marquer(true);
       ['n-t', 'n-s', 'n-p1', 'n-p5', 'n-p10', 'n-f'].forEach(function (k) { $(k).value = ''; }); $('n-det').innerHTML = detForm(null, 'nd-');
@@ -601,6 +614,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     else if (a === 'lancer') {
       if (g.fin > Date.now() && g.n > 0 && !confirm('Ce groupe est en cours avec ' + g.n + ' inscrit(s). Le relancer remet tout à zéro. Continuer ?')) return;
       g.fin = Date.now() + (g.durj || 3) * 864e5; g.n = 0; g.on = true;
+      api('/api/joins/all', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'clear', k: 'g', id: g.id }) }).then(function (r2) { if (r2.ok) { JOINS = r2.j.joins; rendreInscrits(); } });
     }
     marquer(true); rendreGroupes();
   });
@@ -637,9 +651,10 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     $('voyages').innerHTML = STATE.voy.map(function (v, i) {
       var orig = ['Chine', 'Dubaï', 'Istanbul'];
       var sel = orig.indexOf(v.orig) >= 0 ? v.orig : '__autre';
-      return '<details class="carte" ' + (v.dep ? '' : 'open') + ' data-vi="' + i + '"><summary><b>' + esc(v.orig || 'Nouveau voyage') + '</b>' + (v.dep ? ' · départ ' + esc(v.dep) : '') + (v.on === false ? ' · caché' : '') + '</summary>' +
+      return '<details class="carte" ' + (v.dep ? '' : 'open') + ' data-vi="' + i + '"><summary><b>' + esc(v.orig ? (v.sens === 'depuis' ? 'Kinshasa → ' + v.orig : v.orig + ' → Kinshasa') : 'Nouveau voyage') + '</b>' + (v.dep ? ' · départ ' + esc(v.dep) : '') + (v.on === false ? ' · caché' : '') + '</summary>' +
         '<div class="grille" style="margin-top:10px">' +
         '<div><label>Origine</label><select data-vf="osel"><option value="Chine"' + (sel === 'Chine' ? ' selected' : '') + '>Chine</option><option value="Dubaï"' + (sel === 'Dubaï' ? ' selected' : '') + '>Dubaï</option><option value="Istanbul"' + (sel === 'Istanbul' ? ' selected' : '') + '>Istanbul</option><option value="__autre"' + (sel === '__autre' ? ' selected' : '') + '>Autre</option></select></div>' +
+        '<div class="grille g2"><div><label>Sens du voyage</label><select data-vf="sens"><option value="vers"' + (v.sens !== 'depuis' ? ' selected' : '') + '>Vers la RDC (importation)</option><option value="depuis"' + (v.sens === 'depuis' ? ' selected' : '') + '>Depuis la RDC (exportation)</option></select></div><div><label>Places maximum</label><input data-vf="max" inputmode="numeric" placeholder="Illimité" value="' + esc(v.max || '') + '"></div></div>' +
         (sel === '__autre' ? '<div><label>Nom de l\'origine</label><input data-vf="orig" maxlength="40" value="' + esc(v.orig) + '"></div>' : '') +
         '<div class="grille g2"><div><label>Date de départ</label><input type="date" data-vf="dep" value="' + esc(v.dep) + '"></div><div><label>Arrivée estimée</label><input type="date" data-vf="arr" value="' + esc(v.arr) + '"></div></div>' +
         '<div class="grille g2"><div><label>État</label><select data-vf="etat"><option value="auto"' + (v.etat === 'auto' ? ' selected' : '') + '>Automatique (ouvert, puis fermé la veille)</option><option value="route"' + (v.etat === 'route' ? ' selected' : '') + '>En route</option><option value="arrive"' + (v.etat === 'arrive' ? ' selected' : '') + '>Arrivé</option></select></div>' +
@@ -651,13 +666,14 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   }
   $('v-add').addEventListener('click', function () {
     if (STATE.voy.length >= 24) { alert('24 voyages au maximum.'); return; }
-    STATE.voy.push({ id: 'v' + Date.now().toString(36), on: true, orig: 'Chine', dep: '', arr: '', etat: 'auto', rempl: null, note: '' }); marquer(true); rendreVoyages();
+    STATE.voy.push({ id: 'v' + Date.now().toString(36), on: true, sens: 'vers', max: 0, orig: 'Chine', dep: '', arr: '', etat: 'auto', rempl: null, note: '' }); marquer(true); rendreVoyages();
   });
   function voyChamp(e) {
     var t = e.target, f = t.getAttribute('data-vf'), row = t.closest('[data-vi]'); if (!f || !row) return;
     var v = STATE.voy[Number(row.getAttribute('data-vi'))];
     if (f === 'osel') { v.orig = t.value === '__autre' ? '' : t.value; marquer(true); rendreVoyages(); return; }
     if (f === 'on') v.on = t.checked;
+    else if (f === 'max') { v.max = Math.max(0, parseInt(t.value, 10) || 0); }
     else if (f === 'rempl') { var n = parseInt(t.value, 10); v.rempl = isFinite(n) ? Math.max(0, Math.min(100, n)) : null; }
     else v[f] = t.value;
     marquer(true);
@@ -880,6 +896,33 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   });
 
 
+
+  /* ---------- Inscrits (compteurs vrais) ---------- */
+  var JOINS = [];
+  function cibles() {
+    var l = []; (STATE.grp || []).forEach(function (g) { if (g.nom) l.push({ k: 'g', id: g.id, t: 'Groupe : ' + g.nom }); });
+    (STATE.voy || []).forEach(function (v) { if (v.orig) l.push({ k: 'v', id: v.id, t: 'Voyage : ' + (v.sens === 'depuis' ? 'Kinshasa → ' + v.orig : v.orig + ' → Kinshasa') + (v.dep ? ' (' + v.dep + ')' : '') }); });
+    return l;
+  }
+  function rendreInscrits() {
+    var C = cibles();
+    $('in-cible').innerHTML = C.map(function (c) { return '<option value="' + esc(c.k + ':' + c.id) + '">' + esc(c.t) + '</option>'; }).join('') || '<option value="">Aucun groupe ni voyage</option>';
+    $('in-liste').innerHTML = C.map(function (c) {
+      var L = JOINS.filter(function (j) { return j.k === c.k && j.id === c.id; }).sort(function (a, b) { return b.t - a.t; });
+      return '<div class="carte"><div class="rang" style="justify-content:space-between"><strong>' + esc(c.t) + '</strong><span class="pastille">' + L.length + ' inscrit' + (L.length > 1 ? 's' : '') + '</span></div>' +
+        (L.map(function (j) { return '<div class="rang" style="justify-content:space-between"><span>' + esc(j.nom) + ' <span class="note">· ' + new Date(j.t).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + (j.m ? ' · ajouté par toi' : '') + '</span></span><button class="btn danger mini" data-jd="' + esc(j.k + ':' + j.id + ':' + j.t) + '" data-jn="' + esc(j.nom) + '" type="button">Retirer</button></div>'; }).join('') || '<p class="note">Personne pour le moment.</p>') + '</div>';
+    }).join('');
+  }
+  function joinsApi(body) { return api('/api/joins/all', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { if (r.ok) { JOINS = r.j.joins; rendreInscrits(); } else alert((r.j && r.j.erreur) || 'Impossible.'); }); }
+  $('in-ok').addEventListener('click', function () {
+    var c = $('in-cible').value.split(':'), nom = $('in-nom').value.trim(); if (c.length < 2 || nom.length < 2) { alert('Choisis un groupe ou un voyage et écris le prénom.'); return; }
+    joinsApi({ action: 'add', k: c[0], id: c[1], nom: nom }).then(function () { $('in-nom').value = ''; });
+  });
+  $('in-liste').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-jd]'); if (!b) return; var p = b.getAttribute('data-jd').split(':');
+    if (confirm('Retirer ' + b.getAttribute('data-jn') + ' ?')) joinsApi({ action: 'del', k: p[0], id: p[1], t: Number(p[2]), nom: b.getAttribute('data-jn') });
+  });
+
   /* ---------- Commandes et suivi (privé, sauf référence/étape) ---------- */
   var CMDS = [], cmDirty = false, CMF = null;
   var ETAPES = ['Demande reçue', 'Devis envoyé', 'Acompte reçu', 'Acheté chez le fournisseur', 'En transit', 'Arrivé à Kinshasa', 'Livré'];
@@ -894,9 +937,9 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   function rendreCmds() {
     var q = $('cm-q').value.trim().toLowerCase();
     $('cm-liste').innerHTML = CMDS.filter(function (c) { return !q || (c.nom + ' ' + c.prod + ' ' + c.ref).toLowerCase().indexOf(q) >= 0; }).map(function (c) {
-      var i = CMDS.indexOf(c), opts = ETAPES.concat(['Livré']).slice(0, 7).map(function (e, n) { return '<option value="' + n + '"' + (n === Math.min(6, c.cran) ? ' selected' : '') + '>' + (n + 1) + '. ' + esc(e) + '</option>'; }).join('');
+      var i = CMDS.indexOf(c), opts = ETAPES.concat(['Livré']).slice(0, 7).map(function (e, n) { if (c.typ === 'expedition' && n === 3) e = 'Colis reçu chez nous'; return '<option value="' + n + '"' + (n === Math.min(6, c.cran) ? ' selected' : '') + '>' + (n + 1) + '. ' + esc(e) + '</option>'; }).join('');
       return '<div class="carte" data-cm="' + i + '"><div class="rang" style="justify-content:space-between"><strong>' + esc(c.prod || 'Colis') + '</strong><span class="pastille">' + esc(c.ref) + '</span></div>' +
-        '<div class="note">' + esc(c.nom) + (c.tel ? ', ' + esc(c.tel) : '') + ' · ' + esc(c.orig || 'Chine') + ' → Kinshasa, par ' + (c.mode === 'bateau' ? 'bateau' : 'avion') + (c.arr ? ' · arrivée ' + esc(dateFr(c.arr)) : '') + '</div>' +
+        '<div class="note">' + esc(c.nom) + (c.tel ? ', ' + esc(c.tel) : '') + (c.typ === 'expedition' ? ' · expédition seulement' + (c.ou ? ' (colis chez : ' + esc(c.ou) + ')' : '') : '') + ' · ' + esc(c.orig || 'Chine') + ' → Kinshasa, par ' + (c.mode === 'bateau' ? 'bateau' : 'avion') + (c.arr ? ' · arrivée ' + esc(dateFr(c.arr)) : '') + '</div>' +
         '<div class="grille g2"><div><label>Étape</label><select data-cf="cran">' + opts + '</select></div><div><label>Arrivée estimée</label><input type="date" data-cf="arr" value="' + esc(c.arr) + '"></div></div>' +
         '<div class="rang"><button class="btn mini" data-ca="suiv" type="button">Étape suivante</button><button class="btn ghost mini" data-ca="photo" type="button">Photo de position</button><button class="btn danger mini" data-ca="suppr" type="button">Supprimer</button></div></div>';
     }).join('') || '<p class="note">Aucune commande pour le moment.</p>';
@@ -906,8 +949,8 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   $('cm-ok').addEventListener('click', function () {
     var nom = $('cm-nom').value.trim(), prod = $('cm-prod').value.trim(); if (!nom || !prod) { alert('Écris le prénom du client et le produit.'); return; }
     var ref = refCmd(); while (CMDS.some(function (c) { return c.ref === ref; })) ref = refCmd();
-    var c = { ref: ref, nom: nom, tel: $('cm-tel').value.trim(), prod: prod, cran: Number($('cm-cran').value), mode: $('cm-mode').value, orig: $('cm-orig').value, arr: $('cm-arr').value, maj: '' };
-    cmTouch(c); CMDS.unshift(c); ['cm-nom', 'cm-tel', 'cm-prod', 'cm-arr'].forEach(function (id) { $(id).value = ''; }); rendreCmds(); infoEtat('Commande créée : ' + ref + '. Pense à enregistrer.', 'ok');
+    var c = { ref: ref, nom: nom, tel: $('cm-tel').value.trim(), prod: prod, cran: Number($('cm-cran').value), mode: $('cm-mode').value, orig: $('cm-orig').value, typ: $('cm-typ').value, ou: $('cm-ou').value.trim(), arr: $('cm-arr').value, maj: '' };
+    cmTouch(c); CMDS.unshift(c); ['cm-nom', 'cm-tel', 'cm-prod', 'cm-arr', 'cm-ou'].forEach(function (id) { $(id).value = ''; }); rendreCmds(); infoEtat('Commande créée : ' + ref + '. Pense à enregistrer.', 'ok');
   });
   $('cm-liste').addEventListener('change', function (e) {
     var f = e.target.getAttribute('data-cf'); if (!f) return; var c = CMDS[Number(e.target.closest('[data-cm]').getAttribute('data-cm'))];
@@ -919,7 +962,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     else if (a === 'suppr') { if (!confirm('Supprimer la commande de ' + c.nom + ' ?')) return; CMDS.splice(CMDS.indexOf(c), 1); cmDirty = true; marquer(true); rendreCmds(); }
     else if (a === 'photo') {
       b.disabled = true;
-      GDETicket.position({ produit: c.prod, ref: c.ref, nom: c.nom, cran: c.cran, mode: c.mode, orig: c.orig || 'Chine', arr: dateFr(c.arr) }).then(function (cv) { return GDETicket.blob(cv); }).then(function (bl) {
+      GDETicket.position({ produit: c.prod, ref: c.ref, nom: c.nom, cran: c.cran, mode: c.mode, orig: c.orig || 'Chine', typ: c.typ, arr: dateFr(c.arr) }).then(function (cv) { return GDETicket.blob(cv); }).then(function (bl) {
         try { CMF = new File([bl], c.ref + '-position.png', { type: 'image/png' }); } catch (er) { CMF = null; }
         var url = URL.createObjectURL(bl); $('cm-img').src = url; $('cm-save').href = url; $('cm-save').setAttribute('download', c.ref + '-position.png');
         var t = facTel(c.tel), ch = $('cm-chat'); if (t) { ch.href = 'https://wa.me/' + t; ch.style.display = 'inline-flex'; } else ch.style.display = 'none';
@@ -1018,7 +1061,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         CMDS = r.j.cmds; cmDirty = false;
       }
       marquer(false); infoEtat('Publié sur le site ✓', 'ok');
-      rendreProduits(); rendreGroupes(); rendreVoyages(); rendreAvisAdmin(); rendrePrix(); rendreCartes(); rendreCmds(); rendreContacts();
+      rendreProduits(); rendreGroupes(); rendreVoyages(); rendreAvisAdmin(); rendrePrix(); rendreCartes(); rendreCmds(); rendreContacts(); rendreInscrits();
     } catch (er) { $('b-save').disabled = false; infoEtat(er.message || 'Pas de connexion', 'mal'); }
   });
 

@@ -94,6 +94,7 @@ function nettoyer(s) {
     if (p.gone) r.gone = true;
     if (p.desc) r.desc = txt(p.desc, 600);
     { const dd = nettoyerDet(p.det); if (dd) r.det = dd; }
+    if (new RegExp('^\\d{4}-\\d{2}-\\d{2}$').test(String(p.arr || ''))) r.arr = String(p.arr);
     if (p.photo && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(p.photo)) r.photo = p.photo;
     o.prod[id] = r;
   });
@@ -107,6 +108,7 @@ function nettoyer(s) {
     if (e.cache) r.cache = true;
     if (e.desc) r.desc = txt(e.desc, 600);
     { const dd = nettoyerDet(e.det); if (dd) r.det = dd; }
+    if (new RegExp('^\\d{4}-\\d{2}-\\d{2}$').test(String(e.arr || ''))) r.arr = String(e.arr);
     return r;
   });
   o.slog = {};
@@ -146,6 +148,8 @@ function nettoyer(s) {
     id: txt(v.id || 'v' + (i + 1), 20),
     on: v.on !== false,
     orig: txt(v.orig, 40),
+    sens: v.sens === 'depuis' ? 'depuis' : 'vers',
+    max: Math.max(0, Math.min(9999, Math.round(nombre(v.max)))),
     dep: /^\d{4}-\d{2}-\d{2}$/.test(String(v.dep || '')) ? String(v.dep) : '',
     arr: /^\d{4}-\d{2}-\d{2}$/.test(String(v.arr || '')) ? String(v.arr) : '',
     etat: ['auto', 'route', 'arrive'].indexOf(v.etat) >= 0 ? v.etat : 'auto',
@@ -259,6 +263,36 @@ export default {
       return json({ nom: c.nom, achats: c.achats });
     }
 
+
+    /* Inscriptions réelles : achats groupés et voyages (public, prénom seulement) */
+    if (p === '/api/joins' && request.method === 'GET') {
+      const L = await lireListe(env, 'joins'), out = { g: {}, v: {} };
+      L.forEach((j) => { const b = out[j.k] || (out[j.k] = {}); const c = b[j.id] || (b[j.id] = { n: 0, last: [] }); c.n++; });
+      L.slice().sort((a, b) => b.t - a.t).forEach((j) => { const c = out[j.k][j.id]; if (c.last.length < 3) c.last.push({ nom: j.nom, t: j.t }); });
+      return json(out);
+    }
+    if (p === '/api/join' && request.method === 'POST') {
+      const ip = request.headers.get('cf-connecting-ip') || 'x', rk = 'jn:' + ip;
+      const nrl = Number((await env.GDE.get(rk)) || 0);
+      if (nrl >= 20) return json({ erreur: 'Trop d\'essais, réessaie dans quelques minutes' }, 429);
+      await env.GDE.put(rk, String(nrl + 1), { expirationTtl: 600 });
+      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const k = b.k === 'v' ? 'v' : b.k === 'g' ? 'g' : '', id = String(b.id || '');
+      const nom = String(b.nom || '').trim().replace(/\s+/g, ' ');
+      if (!k || !/^[A-Za-z0-9_-]{1,20}$/.test(id)) return json({ erreur: 'Demande invalide' }, 400);
+      if (!/^[\p{L}][\p{L} '’-]{1,29}$/u.test(nom)) return json({ erreur: 'Écris ton prénom (2 à 30 lettres)' }, 400);
+      const etat = await lireEtat(env), L = await lireListe(env, 'joins'), now = Date.now(), jour = new Date().toISOString().slice(0, 10);
+      const cible = k === 'g' ? (etat.grp || []).find((g) => g.id === id && g.on && g.nom && g.fin > now) : (etat.voy || []).find((v) => v.id === id && v.on !== false && v.orig && v.etat !== 'arrive' && v.etat !== 'route' && (!v.dep || v.dep > jour));
+      if (!cible) return json({ erreur: 'Ce groupe ou ce voyage est fermé' }, 409);
+      const deja = L.filter((j) => j.k === k && j.id === id);
+      const total = (k === 'g' ? Number(cible.n) || 0 : 0) + deja.length;
+      if (cible.max > 0 && total >= cible.max) return json({ erreur: 'Complet' }, 409);
+      if (deja.some((j) => j.ip === ip)) return json({ erreur: 'Tu es déjà inscrit', n: total }, 409);
+      L.push({ k, id, nom, t: now, ip });
+      await env.GDE.put('joins', JSON.stringify(L.slice(-3000)));
+      return json({ ok: true, n: total + 1 });
+    }
+
     /* Position d'un colis par sa référence (public, limité) : seulement prénom, produit, étape */
     const mm = /^\/api\/cmd\/([A-Za-z0-9-]{4,30})$/.exec(p);
     if (mm && request.method === 'GET') {
@@ -268,7 +302,7 @@ export default {
       await env.GDE.put(k, String(n + 1), { expirationTtl: 600 });
       const c = (await lireListe(env, 'cmds')).find((x) => x.ref === mm[1].toUpperCase());
       if (!c) return json({ erreur: 'Référence introuvable' }, 404);
-      return json({ ref: c.ref, nom: c.nom, prod: c.prod, cran: c.cran, mode: c.mode, orig: c.orig || 'Chine', arr: c.arr, maj: c.maj });
+      return json({ ref: c.ref, nom: c.nom, prod: c.prod, cran: c.cran, mode: c.mode, orig: c.orig || 'Chine', typ: c.typ || 'achat', ou: c.ou || '', arr: c.arr, maj: c.maj });
     }
 
     /* Tout ce qui suit demande d'être connecté */
@@ -306,13 +340,30 @@ export default {
       return json({ cartes: propre });
     }
 
+
+    if (p === '/api/joins/all' && request.method === 'GET') return json({ joins: (await lireListe(env, 'joins')).map((j) => ({ k: j.k, id: j.id, nom: j.nom, t: j.t, m: !!j.m })) });
+    if (p === '/api/joins/all' && request.method === 'POST') {
+      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let L = await lireListe(env, 'joins');
+      if (b.action === 'add') {
+        const k = b.k === 'v' ? 'v' : 'g', id = String(b.id || ''), nom = String(b.nom || '').trim().slice(0, 30);
+        if (!/^[A-Za-z0-9_-]{1,20}$/.test(id) || nom.length < 2) return json({ erreur: 'Prénom ou cible manquant' }, 400);
+        L.push({ k, id, nom, t: Date.now(), m: true, ip: 'admin' });
+      } else if (b.action === 'clear') {
+        L = L.filter((j) => !(j.k === b.k && j.id === b.id));
+      } else if (b.action === 'del') {
+        L = L.filter((j) => !(j.k === b.k && j.id === b.id && j.t === b.t && j.nom === b.nom));
+      } else return json({ erreur: 'Action inconnue' }, 400);
+      await env.GDE.put('joins', JSON.stringify(L.slice(-3000)));
+      return json({ joins: L.map((j) => ({ k: j.k, id: j.id, nom: j.nom, t: j.t, m: !!j.m })) });
+    }
     if (p === '/api/cmds' && request.method === 'GET') return json({ cmds: await lireListe(env, 'cmds') });
     if (p === '/api/cmds' && request.method === 'PUT') {
       let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const vues = new Set(), dt = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? String(v) : '');
       const propre = (Array.isArray(b.cmds) ? b.cmds : []).slice(0, 400).map((c) => ({
         ref: String(c.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), nom: txt(c.nom, 40), tel: txt(c.tel, 30), prod: txt(c.prod, 100),
-        cran: Math.max(0, Math.min(7, Math.round(nombre(c.cran)))), mode: c.mode === 'bateau' ? 'bateau' : 'avion', orig: ['Chine', 'Dubaï', 'Istanbul'].includes(c.orig) ? c.orig : 'Chine', arr: dt(c.arr), maj: dt(c.maj) || new Date().toISOString().slice(0, 10),
+        cran: Math.max(0, Math.min(7, Math.round(nombre(c.cran)))), mode: c.mode === 'bateau' ? 'bateau' : 'avion', orig: ['Chine', 'Dubaï', 'Istanbul'].includes(c.orig) ? c.orig : 'Chine', typ: c.typ === 'expedition' ? 'expedition' : 'achat', ou: txt(c.ou, 80), arr: dt(c.arr), maj: dt(c.maj) || new Date().toISOString().slice(0, 10),
       })).filter((c) => /^[A-Z0-9-]{4,30}$/.test(c.ref) && !vues.has(c.ref) && vues.add(c.ref));
       await env.GDE.put('cmds', JSON.stringify(propre));
       return json({ cmds: propre });

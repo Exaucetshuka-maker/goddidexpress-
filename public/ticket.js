@@ -103,6 +103,7 @@
   function blob(c) { return new Promise(function (res) { c.toBlob(function (b) { res(b); }, 'image/png'); }); }
   /* Photo « position du colis » : globe, produit, kilomètres parcourus et restants */
   var ETP = ['Demande reçue', 'Devis envoyé', 'Acompte reçu', 'Acheté chez le fournisseur', 'En transit', 'Arrivé à Kinshasa', 'Livré'];
+  var ETPX = ['Demande reçue', 'Devis envoyé', 'Acompte reçu', 'Colis reçu chez nous', 'En transit', 'Arrivé à Kinshasa', 'Livré'];
   function kmf(n) { return Math.round(n).toLocaleString('fr-FR').replace(/[  ]/g, ' '); }
   function position(o) {
     return fonts().then(function () {
@@ -128,7 +129,7 @@
       var fg = ctx.createLinearGradient(P2, 0, P2 + bw, 0); fg.addColorStop(0, '#FF7A1A'); fg.addColorStop(1, livre ? '#3CDC82' : '#FFC15A'); ctx.fillStyle = fg; ctx.shadowColor = '#FF7A1A'; ctx.shadowBlur = 24; rr(ctx, P2, by, Math.max(14, bw * pr), 14, 7); ctx.fill(); ctx.shadowBlur = 0;
       ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 18; ctx.beginPath(); ctx.arc(P2 + Math.max(7, bw * pr), by + 7, 15, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
       tx(orig.toUpperCase(), P2, by + 58, 22, 'rgba(255,255,255,.6)', 700, 'left', FB, 4); tx('KINSHASA', Wp - P2, by + 58, 22, 'rgba(255,255,255,.6)', 700, 'right', FB, 4);
-      var st = livre ? 'LIVRÉ' : (ETP[Math.min(6, cran)] || '').toUpperCase(), sy = by + 120; ctx.font = '800 44px ' + FD; var sw = ctx.measureText(st).width + 70;
+      var st = livre ? 'LIVRÉ' : ((o.typ === 'expedition' ? ETPX : ETP)[Math.min(6, cran)] || '').toUpperCase(), sy = by + 120; ctx.font = '800 44px ' + FD; var sw = ctx.measureText(st).width + 70;
       ctx.fillStyle = livre ? '#3CDC82' : '#FF7A1A'; rr(ctx, P2, sy - 50, sw, 76, 8); ctx.fill(); tx(st, P2 + 35, sy + 4, 44, '#0E0D0C', 800, 'left', FD, 2);
       tx('Étape ' + Math.min(7, cran + 1) + ' sur 7', P2 + sw + 28, sy + 2, 30, 'rgba(255,255,255,.7)', 500, 'left', FB, 0);
       if (o.arr && !livre) tx('Arrivée estimée à Kinshasa : ' + o.arr, P2, sy + 64, 30, '#fff', 600, 'left', FB, 0);
