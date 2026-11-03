@@ -230,5 +230,37 @@
       return c;
     });
   }
-  window.GDETicket = { voyage: voyage, draw: draw, position: position, carte: carte, affiche: affiche, blob: blob, usd: usd, W: W, tel: '' };
+  function iphone(o) {
+    return fonts().then(function () {
+      var Wv = 1080, P2 = 56, G = o.groupes || [], rh = 86, top = 430, bot = 520, Hv = Math.max(1350, top + G.length * rh + bot);
+      var c = document.createElement('canvas'); c.width = Wv; c.height = Hv; var ctx = c.getContext('2d'); ctx.textBaseline = 'alphabetic';
+      function tx(s, x, y, size, col, w, al, f, ls) { ctx.font = w + ' ' + size + 'px ' + (f || FB); ctx.fillStyle = col; ctx.textAlign = al || 'left'; try { ctx.letterSpacing = (ls || 0) + 'px'; } catch (e) {} ctx.fillText(s, x, y); try { ctx.letterSpacing = '0px'; } catch (e) {} }
+      ctx.fillStyle = '#0E0D0C'; ctx.fillRect(0, 0, Wv, Hv);
+      var g = ctx.createRadialGradient(Wv * .85, 0, 40, Wv * .85, 0, 900); g.addColorStop(0, 'rgba(255,122,26,.30)'); g.addColorStop(1, 'rgba(255,122,26,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, Wv, 900);
+      tx('GOD DID EXPRESS', P2, 92, 36, '#fff', 800, 'left', FD, 5);
+      if (o.date) { ctx.fillStyle = '#FF7A1A'; ctx.font = '800 34px ' + FD; var dw = ctx.measureText(o.date.toUpperCase()).width + 48; rr(ctx, Wv - P2 - dw, 52, dw, 58, 8); ctx.fill(); tx(o.date.toUpperCase(), Wv - P2 - dw / 2, 94, 34, '#0E0D0C', 800, 'center', FD, 2); }
+      tx('PRIX DU JOUR', P2, 200, 28, '#FF7A1A', 700, 'left', FB, 6);
+      tx('iPHONE', P2, 330, 150, '#fff', 800, 'left', FD, 2);
+      if (o.mention) { ctx.font = '800 34px ' + FD; var mw = ctx.measureText(String(o.mention).toUpperCase()).width + 44; ctx.strokeStyle = '#FF7A1A'; ctx.lineWidth = 3; rr(ctx, Wv - P2 - mw, 270, mw, 60, 8); ctx.stroke(); tx(String(o.mention).toUpperCase(), Wv - P2 - mw / 2, 312, 34, '#FF7A1A', 800, 'center', FD, 2); }
+      ctx.fillStyle = 'rgba(255,255,255,.2)'; ctx.fillRect(P2, 372, Wv - P2 * 2, 2);
+      G.forEach(function (r, i) {
+        var y = top + i * rh; if (i % 2 === 0) { ctx.fillStyle = 'rgba(255,255,255,.04)'; ctx.fillRect(P2 - 16, y - 40, Wv - P2 * 2 + 32, rh - 8); }
+        tx(r.m.toUpperCase(), P2, y + 18, 44, '#fff', 800, 'left', FD, 1);
+        var x = Wv - P2; r.v.slice().reverse().forEach(function (v) { var lab = v[0] ? v[0] : '', pr = v[1] > 0 ? Math.round(v[1]) + ' $' : 'Prix du jour'; ctx.font = '700 28px ' + FB; var w1 = ctx.measureText(pr).width, w2 = lab ? ctx.measureText(lab).width : 0, w = Math.max(168, w1 + w2 + (lab ? 46 : 36)); x -= w;
+          ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 2; rr(ctx, x, y - 34, w, 58, 8); ctx.stroke(); if (lab) { tx(lab, x + 16, y + 6, 24, 'rgba(255,255,255,.65)', 600, 'left', FB, 0); tx(pr, x + w - 16, y + 7, 30, '#FF7A1A', 800, 'right', FB, 0); } else tx(pr, x + w / 2, y + 7, 30, '#FF7A1A', 800, 'center', FB, 0); x -= 10; });
+      });
+      var by = top + G.length * rh + 20;
+      var M = window.GDEQR ? GDEQR.make('https://goddidexpress.com/#iphone') : null, qs = 190;
+      ctx.fillStyle = '#fff'; rr(ctx, Wv - P2 - qs, by, qs, qs, 14); ctx.fill();
+      if (M) { var n = M.length, cell = Math.floor((qs - 24) / n), ox = Wv - P2 - qs + (qs - cell * n) / 2, oy = by + (qs - cell * n) / 2; ctx.fillStyle = '#0E0D0C'; for (var yy = 0; yy < n; yy++) for (var xx = 0; xx < n; xx++) if (M[yy][xx]) ctx.fillRect(ox + xx * cell, oy + yy * cell, cell, cell); }
+      tx('goddidexpress.com', P2, by + 80, 64, '#fff', 800, 'left', FD, 2);
+      tx('Scanne ou clique pour commander.', P2, by + 124, 28, 'rgba(255,255,255,.7)', 500, 'left', FB, 0);
+      tx('Prix du jour, ils peuvent changer.', P2, by + 164, 24, 'rgba(255,255,255,.5)', 500, 'left', FB, 0);
+      ctx.fillStyle = '#FF7A1A'; rr(ctx, P2, Hv - 150, Wv - P2 * 2, 96, 10); ctx.fill();
+      tx('Commande sur WhatsApp : ' + (window.GDETicket && GDETicket.tel || '+243 983 129 294'), Wv / 2, Hv - 88, 42, '#0E0D0C', 800, 'center', FD, 1);
+      tx('Super Lemba, Kinshasa · Devis avant de payer · Preuve en photo', Wv / 2, Hv - 26, 22, 'rgba(255,255,255,.5)', 500, 'center', FB, 1);
+      return c;
+    });
+  }
+  window.GDETicket = { iphone: iphone, voyage: voyage, draw: draw, position: position, carte: carte, affiche: affiche, blob: blob, usd: usd, W: W, tel: '' };
 })();

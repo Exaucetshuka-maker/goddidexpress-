@@ -86,6 +86,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     <div class="onglets" role="tablist">
       <button class="btn ghost" role="tab" data-t="prod" aria-selected="true">Produits</button>
       <button class="btn ghost" role="tab" data-t="voy" aria-selected="false">Voyages</button>
+      <button class="btn ghost" role="tab" data-t="iph" aria-selected="false">iPhone</button>
       <button class="btn ghost" role="tab" data-t="grp" aria-selected="false">Achats groupés</button>
       <button class="btn ghost" role="tab" data-t="ins" aria-selected="false">Inscrits</button>
       <button class="btn ghost" role="tab" data-t="avis" aria-selected="false">Avis</button>
@@ -126,6 +127,23 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       <div id="liste" class="grille"></div>
     </section>
 
+    <section id="t-iph" class="grille cache" style="gap:12px">
+      <p class="note">Colle ici la liste de prix de ton fournisseur, chaque modèle sur une ligne avec son prix en dollars (ex. « 13 128GB 855AED/234$ »). Le site lit la liste, ajoute ta marge, et fabrique l'affiche et la page « iPhone ». Les prix du fournisseur restent privés : seuls tes prix de vente sont publiés.</p>
+      <div><label for="ip-brut">Liste du fournisseur</label><textarea id="ip-brut" rows="8" placeholder="📲*XR 64GB 435AED/119$&#10;📲*11 128GB 600AED/164$"></textarea></div>
+      <button class="btn" id="ip-lire" type="button">Lire la liste</button>
+      <div class="grille g2"><div><label for="ip-mode">Ma marge</label><select id="ip-mode"><option value="usd">En dollars ($) par téléphone</option><option value="pct">En pourcentage (%)</option></select></div><div><label for="ip-marge">Valeur de la marge</label><input id="ip-marge" inputmode="decimal" placeholder="Ex. 20"></div></div>
+      <div class="grille g2"><div><label for="ip-date">Date affichée</label><input id="ip-date" maxlength="40" placeholder="Ex. 3 novembre"></div><div><label for="ip-mention">Mention</label><input id="ip-mention" maxlength="60" value="Prix en carton"></div></div>
+      <label style="display:flex;gap:8px;align-items:center;margin:0;color:var(--papier)"><input type="checkbox" id="ip-on" style="width:22px;min-height:22px"> Afficher la page « iPhone » sur le site</label>
+      <div id="ip-liste" class="grille" style="gap:6px"></div>
+      <button class="btn" id="ip-aff" type="button">Créer l'affiche</button>
+      <div id="ip-sortie" class="carte cache" style="display:grid;gap:12px">
+        <img id="ip-img" alt="Affiche iPhone" style="width:100%;border-radius:6px;background:#0E0D0C">
+        <div class="rang"><button class="btn" id="ip-share" type="button">Envoyer l'image</button><a class="btn ghost" id="ip-save" download="prix-iphone.png" style="text-decoration:none;text-align:center">Enregistrer</a></div>
+        <label>Texte avec lien cliquable</label><textarea id="ip-t" rows="4"></textarea>
+        <div class="rang"><button class="btn" id="ip-wa" type="button">Envoyer le texte sur WhatsApp</button><button class="btn ghost" id="ip-cp" type="button">Copier le texte</button></div>
+      </div>
+      <p class="note">N'oublie pas d'appuyer sur « Publier » en haut pour que le site prenne la liste.</p>
+    </section>
     <section id="t-grp" class="grille cache" style="gap:12px">
       <p class="note">Jusqu'à 10 achats groupés en même temps. Le site affiche le compte à rebours tout seul. Les « inscrits » sont les vrais clients : monte le chiffre avec le bouton + à chaque nouvelle personne qui rejoint par WhatsApp.</p>
       <div id="groupes" class="grille"></div>
@@ -382,14 +400,15 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
 
   function demarrer() {
     if (STATE) { $('ecran').classList.add('cache'); $('app').classList.remove('cache'); return Promise.resolve(); }
-    return Promise.all([api('/api/state'), fetch('/products.json').then(function (r) { return r.json(); }), api('/api/couts'), api('/api/cartes'), api('/api/cmds'), api('/api/joins/all')]).then(function (rs) {
+    return Promise.all([api('/api/state'), fetch('/products.json').then(function (r) { return r.json(); }), api('/api/couts'), api('/api/cartes'), api('/api/cmds'), api('/api/joins/all'), api('/api/iph')]).then(function (rs) {
       STATE = defState(rs[0].j); PRODS = rs[1];
       if (rs[2].ok) COUTS = { reglages: Object.assign(COUTS.reglages, rs[2].j.reglages || {}), produits: rs[2].j.produits || {} };
       if (rs[3].ok) CARTES = rs[3].j.cartes || [];
       if (rs[4].ok) CMDS = rs[4].j.cmds || [];
       if (rs[5].ok) JOINS = rs[5].j.joins || [];
+      if (rs[6] && rs[6].ok) IPH = rs[6].j;
       $('ecran').classList.add('cache'); $('app').classList.remove('cache');
-      remplirSelects(); rendreProduits(); rendreGroupes(); rendreVoyages(); rendreAvisAdmin(); rendreReglagesPrix(); rendrePrix(); rendreCartes(); rendreCmds(); rendreInscrits(); rendreReglages(); marquer(false);
+      remplirSelects(); rendreProduits(); rendreGroupes(); rendreVoyages(); rendreAvisAdmin(); rendreReglagesPrix(); rendrePrix(); rendreCartes(); rendreCmds(); rendreInscrits(); rendreReglages(); rendreIph(); marquer(false);
     });
   }
 
@@ -423,7 +442,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   Array.prototype.forEach.call(document.querySelectorAll('.onglets button'), function (b) {
     b.addEventListener('click', function () {
       Array.prototype.forEach.call(document.querySelectorAll('.onglets button'), function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
-      ['prod', 'voy', 'grp', 'ins', 'avis', 'prix', 'cmd', 'fac', 'fid', 'reg'].forEach(function (t) { $('t-' + t).classList.toggle('cache', t !== b.getAttribute('data-t')); });
+      ['prod', 'voy', 'iph', 'grp', 'ins', 'avis', 'prix', 'cmd', 'fac', 'fid', 'reg'].forEach(function (t) { $('t-' + t).classList.toggle('cache', t !== b.getAttribute('data-t')); });
       window.scrollTo(0, 0);
     });
   });
@@ -696,6 +715,61 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     if (b.getAttribute('data-va') === 'affiche') { afficheVoyage(STATE.voy[i], b); return; }
     if (confirm('Supprimer ce voyage ?')) { STATE.voy.splice(i, 1); marquer(true); rendreVoyages(); }
   });
+
+  /* ---------- Liste iPhone ---------- */
+  var IPH = { brut: '', mode: 'usd', marge: '', items: [] }, iphDirty = false, IPF = null;
+  function iphParse(txt) {
+    var out = [];
+    String(txt || '').split(/\n/).forEach(function (ln) {
+      ln.split(/📲/).forEach(function (seg) {
+        seg = seg.trim(); if (!seg) return;
+        var pm = seg.match(/(\d+(?:[.,]\d+)?)\s*(?:AED)?\s*\/\s*(\d+(?:[.,]\d+)?)\s*\$/i), c = pm ? Number(pm[2].replace(',', '.')) : 0;
+        var head = (pm ? seg.slice(0, pm.index) : seg).replace(/[^A-Za-z0-9= ]/g, ' ').replace(/\s+/g, ' ').trim();
+        var m = head.match(/^(XR|XS|X|\d{1,2})\s*(pro\s*max|promax|pm|pro|plus|air|mini|simple|normal|max|e)?\s*=?\s*(\d{2,4})\s*(?:gb|go|g)?\b/i);
+        if (!m) return;
+        var nom = m[1].toUpperCase(), v = (m[2] || '').toLowerCase().replace(/\s+/g, ''), suf = { pm: ' Pro Max', promax: ' Pro Max', pro: ' Pro', plus: ' Plus', air: ' Air', mini: ' Mini', max: ' Max', e: 'e' }[v] || '';
+        var g = Number(m[3]); if ([32, 64, 128, 256, 512, 1024].indexOf(g) < 0) return;
+        out.push({ m: 'iPhone ' + nom + suf, g: g >= 1024 ? '1 To' : g + ' Go', c: c, p: 0 });
+      });
+    });
+    return out;
+  }
+  function iphPrix(c) { var mg = Number(IPH.marge) || 0, p = IPH.mode === 'pct' ? c * (1 + mg / 100) : c + mg; return c > 0 ? Math.ceil(p) : 0; }
+  function iphSync() {
+    STATE.iph = { on: $('ip-on').checked, date: $('ip-date').value.trim(), mention: $('ip-mention').value.trim(), items: IPH.items.map(function (t) { return { m: t.m, g: t.g, p: t.p }; }) };
+    iphDirty = true; marquer(true);
+  }
+  function rendreIph() {
+    var pi = STATE.iph || {}; $('ip-brut').value = IPH.brut || ''; $('ip-mode').value = IPH.mode || 'usd'; $('ip-marge').value = IPH.marge === 0 || IPH.marge ? IPH.marge : '';
+    $('ip-on').checked = !!pi.on; $('ip-date').value = pi.date || ''; $('ip-mention').value = pi.mention || $('ip-mention').value;
+    if (!IPH.items || !IPH.items.length) IPH.items = (pi.items || []).map(function (t) { return { m: t.m, g: t.g, c: 0, p: t.p }; });
+    $('ip-liste').innerHTML = IPH.items.map(function (t, i) { return '<div class="rang" style="align-items:center;gap:8px"><span style="flex:1">' + esc(t.m) + ' ' + esc(t.g) + '<small style="display:block;color:var(--muted,#999)">fournisseur ' + (t.c > 0 ? t.c + ' $' : 'sans prix') + '</small></span><input data-ip="' + i + '" inputmode="decimal" style="width:90px" value="' + (t.p || '') + '" placeholder="Prix du jour"><button class="btn danger mini" data-ipx="' + i + '" type="button">×</button></div>'; }).join('') || '<p class="note">Aucun modèle. Colle la liste puis appuie sur « Lire la liste ».</p>';
+  }
+  function iphRecalc() { IPH.items.forEach(function (t) { t.p = iphPrix(t.c); }); }
+  $('ip-lire').addEventListener('click', function () {
+    IPH.brut = $('ip-brut').value; var L = iphParse(IPH.brut); if (!L.length) { alert('Aucun modèle reconnu. Vérifie que chaque ligne a un prix comme 234$.'); return; }
+    IPH.items = L; IPH.mode = $('ip-mode').value; IPH.marge = $('ip-marge').value.trim(); iphRecalc(); if (!$('ip-date').value) $('ip-date').value = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+    iphSync(); rendreIph(); infoEtat(L.length + ' modèles lus. Pense à publier.', 'ok');
+  });
+  ['ip-mode', 'ip-marge'].forEach(function (id) { $(id).addEventListener('input', function () { IPH.mode = $('ip-mode').value; IPH.marge = $('ip-marge').value.trim(); iphRecalc(); iphSync(); rendreIph(); }); });
+  ['ip-on', 'ip-date', 'ip-mention'].forEach(function (id) { $(id).addEventListener('input', iphSync); $(id).addEventListener('change', iphSync); });
+  $('ip-brut').addEventListener('input', function () { IPH.brut = this.value; iphDirty = true; marquer(true); });
+  $('ip-liste').addEventListener('input', function (e) { var i = e.target.getAttribute('data-ip'); if (i == null) return; IPH.items[+i].p = Number(String(e.target.value).replace(',', '.')) || 0; iphSync(); });
+  $('ip-liste').addEventListener('click', function (e) { var b = e.target.closest('[data-ipx]'); if (!b) return; IPH.items.splice(+b.getAttribute('data-ipx'), 1); iphSync(); rendreIph(); });
+  function iphGroupes() { var G = [], idx = {}; IPH.items.forEach(function (t) { if (!(t.m in idx)) { idx[t.m] = G.length; G.push({ m: t.m.replace(/^iPhone /, 'iPhone '), v: [] }); } G[idx[t.m]].v.push([t.g, t.p]); }); return G; }
+  $('ip-aff').addEventListener('click', function () {
+    if (!IPH.items.length) { alert('Lis d\'abord la liste.'); return; }
+    var b = this; b.disabled = true;
+    GDETicket.iphone({ date: $('ip-date').value.trim(), mention: $('ip-mention').value.trim(), groupes: iphGroupes() }).then(GDETicket.blob).then(function (bl) {
+      IPF = null; try { IPF = new File([bl], 'prix-iphone.png', { type: 'image/png' }); } catch (e) {}
+      var u = URL.createObjectURL(bl); $('ip-img').src = u; $('ip-save').href = u;
+      $('ip-t').value = 'Prix iPhone du jour' + ($('ip-date').value ? ' (' + $('ip-date').value + ')' : '') + ' chez GOD DID EXPRESS.\nVoir la liste et commander : https://goddidexpress.com/#iphone\nWhatsApp : ' + (GDETicket.tel || '+243 983 129 294');
+      $('ip-sortie').classList.remove('cache'); $('ip-sortie').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }).catch(function () { alert('L\'affiche n\'a pas pu être créée.'); }).then(function () { b.disabled = false; });
+  });
+  $('ip-share').addEventListener('click', function () { if (IPF && navigator.canShare && navigator.canShare({ files: [IPF] })) navigator.share({ files: [IPF], title: 'GOD DID EXPRESS' }).catch(function () {}); else { $('ip-save').click(); alert('Image enregistrée. Envoie-la dans WhatsApp depuis ta galerie.'); } });
+  $('ip-wa').addEventListener('click', function () { window.open('https://wa.me/?text=' + encodeURIComponent($('ip-t').value), '_blank'); });
+  $('ip-cp').addEventListener('click', function () { var t = $('ip-t'); t.select(); try { navigator.clipboard.writeText(t.value); } catch (e) { document.execCommand('copy'); } alert('Texte copié.'); });
 
   /* ---------- Affiche du voyage ---------- */
   var VAF = {};
@@ -1085,6 +1159,12 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         if (r.status === 401) return expire();
         if (!r.ok) throw new Error('Les calculs de prix ne sont pas enregistrés');
         COUTS = { reglages: r.j.reglages, produits: r.j.produits }; couDirty = false;
+      }
+      if (iphDirty) {
+        r = await api('/api/iph', { method: 'PUT', headers: H, body: JSON.stringify(IPH) });
+        if (r.status === 401) return expire();
+        if (!r.ok) throw new Error('La liste iPhone n\'est pas enregistrée');
+        IPH = r.j; iphDirty = false;
       }
       if (carDirty) {
         r = await api('/api/cartes', { method: 'PUT', headers: H, body: JSON.stringify({ cartes: CARTES }) });

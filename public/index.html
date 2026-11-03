@@ -570,6 +570,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <div class="rangee">
         <button class="btn" type="button" data-go="catalogue">Voir le catalogue</button>
         <button class="btn ghost" type="button" data-go="voyages">Nos voyages</button>
+        <button class="btn ghost" type="button" data-go="iphone" id="home-iph" hidden>Prix iPhone du jour</button>
         <button class="btn ghost" type="button" data-go="commander">Commander sur mesure</button>
         <button class="btn ghost" type="button" data-assist>Poser une question</button>
         <button class="btn ghost" type="button" data-tour>Visite guidée parlée</button>
@@ -812,6 +813,17 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <div id="voy-liste" style="display:grid;gap:14px"></div>
       <p class="note">Les commandes ferment la veille du départ. Si tu rates un voyage, ta commande part avec le suivant.</p>
       <a class="btn ghost" id="voy-wa" href="#" target="_blank" rel="noopener">Demander les prochaines dates sur WhatsApp</a>
+    </div>
+  </section>
+
+  <section class="view" id="v-iphone" hidden>
+    <header>
+      <h2>Prix iPhone du jour</h2>
+      <p id="iph-sous">Les prix changent chaque jour. Touche un modèle pour commander sur WhatsApp.</p>
+    </header>
+    <div class="wrap" style="gap:12px">
+      <div id="iph-liste" style="display:grid;gap:10px"></div>
+      <a class="btn ghost" id="iph-part" href="#" target="_blank" rel="noopener">Partager la liste sur WhatsApp</a>
     </div>
   </section>
 
@@ -1303,7 +1315,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 
 
   /* Onglets */
-  var VUES = ['accueil', 'catalogue', 'commander', 'groupes', 'voyages', 'services', 'live', 'suivi', 'parrainer', 'methode', 'admin'];
+  var VUES = ['accueil', 'catalogue', 'commander', 'groupes', 'voyages', 'iphone', 'services', 'live', 'suivi', 'parrainer', 'methode', 'admin'];
   var SERVICES = [
     { id: 'venir', ico: '📥', t: 'Faire venir ma marchandise en RDC', d: 'Tu as déjà des marchandises à Dubaï, à Istanbul ou en Chine (téléphones, électronique, vêtements, chaussures…) ? On les amène jusqu\'à Kinshasa, avec le suivi et la preuve en photo à chaque étape.',
       etapes: ['Tu nous envoies la liste des marchandises, les photos, les quantités et l\'adresse où elles se trouvent.', 'On te donne un devis détaillé : transport, douane et marge, avant tout paiement.', 'Tu verses l\'acompte de 50 %. On récupère et on regroupe ta marchandise.', 'Elle part sur le prochain voyage. Tu suis chaque étape avec ta référence GDE.', 'Livraison à Kinshasa, tu règles le solde à la réception.'],
@@ -1328,6 +1340,21 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         '<a class="btn" style="margin-top:6px" href="' + ea(wa(s.m)) + '" target="_blank" rel="noopener">Démarrer sur WhatsApp</a></details>';
     }).join('');
   }
+  function iphOn() { return STATE.iph && STATE.iph.on && STATE.iph.items && STATE.iph.items.length; }
+  function rendreIphone() {
+    var b = $('home-iph'); if (b) b.hidden = !iphOn();
+    var I = STATE.iph || {}, box = $('iph-liste'); if (!box) return;
+    if (!iphOn()) { box.innerHTML = '<article class="carte"><h3>La liste arrive bientôt</h3><p class="note">Demande les prix du jour sur WhatsApp.</p></article>'; $('iph-part').href = wa('Bonjour GOD DID EXPRESS, quels sont les prix des iPhone du jour ?'); return; }
+    $('iph-sous').textContent = (I.date ? 'Prix du ' + I.date + '. ' : '') + (I.mention ? I.mention + '. ' : '') + 'Ils peuvent changer. Touche un modèle pour commander sur WhatsApp.';
+    var G = [], idx = {}; I.items.forEach(function (t) { if (!(t.m in idx)) { idx[t.m] = G.length; G.push({ m: t.m, v: [] }); } G[idx[t.m]].v.push(t); });
+    box.innerHTML = G.map(function (g) {
+      return '<article class="carte"><h3 style="margin-bottom:8px">' + h(g.m) + '</h3><div style="display:flex;flex-wrap:wrap;gap:8px">' + g.v.map(function (t) {
+        var msg = 'Bonjour GOD DID EXPRESS, je veux commander : ' + t.m + ' ' + t.g + (t.p > 0 ? ' (prix affiché ' + usd(t.p) + ')' : '') + '. Est-il disponible ?';
+        return '<a class="btn ghost" style="flex:1;min-width:140px;text-align:center;white-space:nowrap" target="_blank" rel="noopener" href="' + ea(wa(msg)) + '">' + h(t.g) + ' · <b>' + (t.p > 0 ? usd(t.p) : 'Prix du jour') + '</b></a>';
+      }).join('') + '</div></article>';
+    }).join('');
+    $('iph-part').href = 'https://wa.me/?text=' + encodeURIComponent('Prix iPhone du jour chez GOD DID EXPRESS : ' + location.origin + '/#iphone');
+  }
   var IS_ADMIN = false, GS = null, GH = null, curOrd = null;
   var PRINC = ['accueil', 'catalogue', 'commander', 'suivi'];
   var curCran = 4;
@@ -1337,6 +1364,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     PRINC.forEach(function (v) { $('t-' + v).setAttribute('aria-current', v === id ? 'page' : 'false'); });
     $('t-plus').setAttribute('aria-current', PRINC.indexOf(id) < 0 ? 'page' : 'false');
     if (id === 'suivi' && typeof rendreSuivi === 'function') rendreSuivi(curCran);
+    if (id === 'iphone') rendreIphone();
     if (id === 'services' && typeof rendreServices === 'function') rendreServices();
     if (id === 'methode' && typeof animerVoyage === 'function') animerVoyage();
     if (id === 'admin' && typeof rendreAdmin === 'function') rendreAdmin();
@@ -2006,6 +2034,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Plus</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Aller plus loin</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
       tuile('groupes', '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.6.2 4.5 2.3 4.5 5.1"/>', 'Achats groupés', 'Plus on est nombreux, moins c\'est cher') +
       tuile('voyages', '<path d="M3 17l18-6-6 9-3-4-5 1z"/><path d="M12 16v4"/>', 'Nos voyages', 'Départs, dates limites et arrivées') +
+      (STATE.iph && STATE.iph.on && STATE.iph.items.length ? tuile('iphone', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>', 'Prix iPhone du jour', 'Tous les modèles, commande en un clic') : '') +
       tuile('services', '<path d="M4 7h16v12H4z"/><path d="M9 7V4h6v3M4 12h16"/>', 'Fiches services', 'Faire venir, exporter, trouver un produit') +
       tuile('live', '<circle cx="12" cy="12" r="2.4"/><path d="M7.5 7.5a6.4 6.4 0 0 0 0 9M16.5 7.5a6.4 6.4 0 0 1 0 9M4.5 4.5a10.6 10.6 0 0 0 0 15M19.5 4.5a10.6 10.6 0 0 1 0 15"/>', 'Live shopping', 'Voir le produit réel avant d\'acheter') +
       tuile('parrainer', '<rect x="3" y="9" width="18" height="4" rx="1"/><path d="M12 9v12M5 13v7h14v-7M12 9c-3 0-4.5-1-4.5-2.6S9 4 10.2 4C11.6 4 12 6 12 9zm0 0c3 0 4.5-1 4.5-2.6S15 4 13.8 4C12.4 4 12 6 12 9z"/>', 'Membre, fidélité, parrainage', 'Votre carte, le Club VIP, devenir point relais') + tuile('methode', '<circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8.2 18H13a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h4.8"/>', 'Comment on travaille', 'Les cinq métiers et le voyage du colis') + (IS_ADMIN ? tuile('admin', '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>', 'Espace admin', 'Prix, produits, photos, commandes') : ''));
@@ -2919,7 +2948,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   })();
 
   /* Premier affichage */
-  rendreSlogan(); rendreReseaux(); rendreVip(); rendreAvis(); majPub(); chargerJoins(); rendreGroupes(); rendrePhrases(); rendreMarches(); rendreInfo(); rendreVoyages(); initVideos();
+  rendreSlogan(); rendreReseaux(); rendreVip(); rendreAvis(); majPub(); chargerJoins(); rendreGroupes(); rendreIphone(); rendrePhrases(); rendreMarches(); rendreInfo(); rendreVoyages(); initVideos();
 
   show(location.hash.slice(1), false);
 })();

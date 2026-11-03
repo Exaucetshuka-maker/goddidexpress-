@@ -156,6 +156,13 @@ function nettoyer(s) {
     rempl: v.rempl === '' || v.rempl == null ? null : Math.max(0, Math.min(100, Math.round(nombre(v.rempl)))),
     note: txt(v.note, 160),
   }));
+  const ip = s.iph && typeof s.iph === 'object' ? s.iph : {};
+  o.iph = {
+    on: ip.on === true,
+    date: txt(ip.date, 40),
+    mention: txt(ip.mention, 60),
+    items: (Array.isArray(ip.items) ? ip.items : []).slice(0, 200).map((t) => ({ m: txt(t && t.m, 40), g: txt(t && t.g, 20), p: Math.max(0, Math.min(99999, Math.round(nombre(t && t.p) * 100) / 100)) })).filter((t) => t.m),
+  };
   return o;
 }
 
@@ -367,6 +374,19 @@ export default {
       })).filter((c) => /^[A-Z0-9-]{4,30}$/.test(c.ref) && !vues.has(c.ref) && vues.add(c.ref));
       await env.GDE.put('cmds', JSON.stringify(propre));
       return json({ cmds: propre });
+    }
+
+    if (p === '/api/iph' && request.method === 'GET') {
+      const t = await env.GDE.get('iph'); let j = {}; try { j = t ? JSON.parse(t) : {}; } catch (e) {}
+      return json({ brut: j.brut || '', mode: j.mode === 'pct' ? 'pct' : 'usd', marge: j.marge || '', items: j.items || [] });
+    }
+    if (p === '/api/iph' && request.method === 'PUT') {
+      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const num = (v) => (v === '' || v == null || !isFinite(Number(v)) ? 0 : Math.max(0, Math.min(99999, Number(v))));
+      const out = { brut: String(b.brut || '').slice(0, 8000), mode: b.mode === 'pct' ? 'pct' : 'usd', marge: b.marge === '' || b.marge == null ? '' : num(b.marge),
+        items: (Array.isArray(b.items) ? b.items : []).slice(0, 200).map((t) => ({ m: String(t.m || '').slice(0, 40), g: String(t.g || '').slice(0, 20), c: num(t.c), p: num(t.p) })) };
+      await env.GDE.put('iph', JSON.stringify(out));
+      return json(out);
     }
 
     if (p === '/api/couts' && request.method === 'GET') {
