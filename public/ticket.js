@@ -198,5 +198,37 @@
       return c;
     });
   }
-  window.GDETicket = { draw: draw, position: position, carte: carte, affiche: affiche, blob: blob, usd: usd, W: W, tel: '' };
+  function voyage(o) {
+    return fonts().then(function () {
+      var Wv = 1080, sq = o.fmt === 'carre', Hv = sq ? 1080 : 1920, c = document.createElement('canvas'); c.width = Wv; c.height = Hv; var ctx = c.getContext('2d'), P2 = 64; ctx.textBaseline = 'alphabetic';
+      function tx(s, x, y, size, col, w, al, f, ls) { ctx.font = w + ' ' + size + 'px ' + (f || FB); ctx.fillStyle = col; ctx.textAlign = al || 'left'; try { ctx.letterSpacing = (ls || 0) + 'px'; } catch (e) {} ctx.fillText(s, x, y); try { ctx.letterSpacing = '0px'; } catch (e) {} }
+      ctx.fillStyle = '#0E0D0C'; ctx.fillRect(0, 0, Wv, Hv);
+      var g = ctx.createRadialGradient(Wv * .85, Hv * .08, 40, Wv * .85, Hv * .08, Hv * .75); g.addColorStop(0, 'rgba(255,122,26,.34)'); g.addColorStop(1, 'rgba(255,122,26,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, Wv, Hv);
+      ctx.strokeStyle = 'rgba(255,255,255,.05)'; ctx.lineWidth = 2; for (var k = 1; k < 6; k++) { ctx.beginPath(); ctx.arc(Wv * .85, Hv * .08, k * 190, 0, 7); ctx.stroke(); }
+      tx('GOD DID EXPRESS', P2, 92, 36, '#fff', 800, 'left', FD, 5);
+      ctx.fillStyle = '#FF7A1A'; rr(ctx, Wv - P2 - 230, 48, 230, 62, 8); ctx.fill(); tx('VOYAGE', Wv - P2 - 115, 92, 36, '#0E0D0C', 800, 'center', FD, 4);
+      var dep = o.sens === 'depuis', orig = String(o.orig || '').toUpperCase(), a = dep ? 'KINSHASA' : orig, b = dep ? orig : 'KINSHASA';
+      var y = sq ? 190 : 300; tx(dep ? 'ENVOIE TES COLIS' : 'COMMANDE POUR CE VOYAGE', P2, y, 28, '#FF7A1A', 700, 'left', FB, 6);
+      var fs = sq ? 108 : 150; ctx.font = '800 ' + fs + 'px ' + FD; while (Math.max(ctx.measureText(a).width, ctx.measureText('→ ' + b).width) > Wv - P2 * 2 && fs > 60) { fs -= 6; ctx.font = '800 ' + fs + 'px ' + FD; }
+      tx(a, P2, y + fs * .95, fs, '#fff', 800, 'left', FD, 1);
+      tx('→ ' + b, P2, y + fs * 1.9, fs, '#FF7A1A', 800, 'left', FD, 1); y += fs * 1.9 + (sq ? 50 : 70);
+      var rows = []; if (o.dep) rows.push([dep ? 'Départ de Kinshasa' : 'Départ', o.dep]); if (o.lim) rows.push([dep ? 'Dernier jour pour déposer ton colis' : 'Dernier jour pour commander', o.lim]); if (o.arr) rows.push(['Arrivée estimée', o.arr]);
+      if (o.places) rows.push(['Places', o.places]);
+      var qs = sq ? 290 : 380, rw = sq ? Wv - P2 * 2 - qs - 40 : Wv - P2 * 2, rh = sq ? 84 : 108;
+      rows.forEach(function (r, i) { var yy = y + i * rh; ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(P2, yy - 34, rw, 2); tx(r[0].toUpperCase(), P2, yy + 4, sq ? 20 : 24, 'rgba(255,255,255,.55)', 700, 'left', FB, 4); var f2 = sq ? 42 : 56, v = String(r[1]); ctx.font = '700 ' + f2 + 'px ' + FB; while (ctx.measureText(v).width > rw && f2 > 26) { f2 -= 2; ctx.font = '700 ' + f2 + 'px ' + FB; } tx(v, P2, yy + 4 + f2 + 6, f2, i === 1 ? '#FF7A1A' : '#fff', 700, 'left', FB, 0); });
+      var qy = sq ? y - 34 : y + rows.length * rh + 10, qx = sq ? Wv - P2 - qs : (Wv - qs) / 2;
+      var M = window.GDEQR && o.url ? GDEQR.make(o.url) : null;
+      ctx.fillStyle = '#fff'; rr(ctx, qx, qy, qs, qs, 18); ctx.fill();
+      if (M) { var n = M.length, cell = Math.floor((qs - 40) / n), off = qx + (qs - cell * n) / 2, offy = qy + (qs - cell * n) / 2; ctx.fillStyle = '#0E0D0C'; for (var yy2 = 0; yy2 < n; yy2++) for (var xx = 0; xx < n; xx++) if (M[yy2][xx]) ctx.fillRect(off + xx * cell, offy + yy2 * cell, cell, cell); }
+      tx('SCANNE POUR RÉSERVER', qx + qs / 2, qy + qs + (sq ? 30 : 44), sq ? 20 : 26, 'rgba(255,255,255,.7)', 700, 'center', FB, 3);
+      var by = Hv - (sq ? 230 : 330);
+      tx(o.urlTxt || 'goddidexpress.com', Wv / 2, by + (sq ? 20 : 50), sq ? 66 : 96, '#fff', 800, 'center', FD, 2);
+      tx('Tu cliques sur le lien, tu réserves ta place.', Wv / 2, by + (sq ? 62 : 110), sq ? 24 : 30, 'rgba(255,255,255,.65)', 500, 'center', FB, 0);
+      ctx.fillStyle = '#FF7A1A'; rr(ctx, P2, Hv - (sq ? 130 : 200), Wv - P2 * 2, sq ? 76 : 100, 10); ctx.fill();
+      tx('WhatsApp : ' + (window.GDETicket && GDETicket.tel || '+243 983 129 294'), Wv / 2, Hv - (sq ? 130 : 200) + (sq ? 52 : 68), sq ? 40 : 48, '#0E0D0C', 800, 'center', FD, 1);
+      tx('Super Lemba, Kinshasa · Devis avant de payer · Preuve en photo', Wv / 2, Hv - (sq ? 40 : 90), sq ? 20 : 24, 'rgba(255,255,255,.5)', 500, 'center', FB, 1);
+      return c;
+    });
+  }
+  window.GDETicket = { voyage: voyage, draw: draw, position: position, carte: carte, affiche: affiche, blob: blob, usd: usd, W: W, tel: '' };
 })();

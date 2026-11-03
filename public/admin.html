@@ -157,6 +157,16 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       <p class="note">Un voyage = un départ (Chine, Dubaï, Istanbul…). Les commandes ferment automatiquement la veille du départ. Les dates d'arrivée et le pourcentage de remplissage, c'est toi qui les écris : rien n'est inventé.</p>
       <button class="btn" id="v-add" type="button">+ Ajouter un voyage</button>
       <div id="voyages" class="grille" style="gap:12px"></div>
+      <div id="vaf" class="carte cache" style="display:grid;gap:12px">
+        <div class="kicker">Affiche du voyage</div>
+        <p class="note">Carrée pour Facebook et WhatsApp, verticale pour Instagram et TikTok. Les liens ne sont pas cliquables dans une image : envoie aussi le texte avec le lien, et le QR code mène au site.</p>
+        <label>Carrée</label><img id="vaf-c" alt="Affiche carrée" style="width:100%;border-radius:6px;background:#0E0D0C">
+        <div class="rang"><button class="btn" id="vaf-sc" type="button">Envoyer l'image</button><a class="btn ghost" id="vaf-dc" download="voyage-carre.png" style="text-decoration:none;text-align:center">Enregistrer</a></div>
+        <label>Verticale</label><img id="vaf-v" alt="Affiche verticale" style="width:100%;border-radius:6px;background:#0E0D0C">
+        <div class="rang"><button class="btn" id="vaf-sv" type="button">Envoyer l'image</button><a class="btn ghost" id="vaf-dv" download="voyage-vertical.png" style="text-decoration:none;text-align:center">Enregistrer</a></div>
+        <label>Texte avec lien cliquable</label><textarea id="vaf-t" rows="5"></textarea>
+        <div class="rang"><button class="btn" id="vaf-wa" type="button">Envoyer le texte sur WhatsApp</button><button class="btn ghost" id="vaf-cp" type="button">Copier le texte</button></div>
+      </div>
     </section>
 
     <section id="t-prix" class="grille cache" style="gap:12px">
@@ -313,6 +323,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
 </div>
 
 <script src="holo.js"></script>
+<script src="qr.js"></script>
 <script src="ticket.js"></script>
 <script>
 (function () {
@@ -660,7 +671,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         '<div class="grille g2"><div><label>État</label><select data-vf="etat"><option value="auto"' + (v.etat === 'auto' ? ' selected' : '') + '>Automatique (ouvert, puis fermé la veille)</option><option value="route"' + (v.etat === 'route' ? ' selected' : '') + '>En route</option><option value="arrive"' + (v.etat === 'arrive' ? ' selected' : '') + '>Arrivé</option></select></div>' +
         '<div><label>Voyage rempli (%)</label><input data-vf="rempl" inputmode="numeric" placeholder="Vide = pas affiché" value="' + esc(v.rempl == null ? '' : v.rempl) + '"></div></div>' +
         '<div><label>Note (facultatif)</label><input data-vf="note" maxlength="160" value="' + esc(v.note) + '" placeholder="Ex. Vêtements et électronique"></div>' +
-        '<div class="rang"><label style="display:flex;gap:8px;align-items:center;margin:0;color:var(--papier)"><input type="checkbox" style="width:22px;min-height:22px" data-vf="on"' + (v.on !== false ? ' checked' : '') + '> Visible sur le site</label><button class="btn danger mini" data-va="suppr" type="button">Supprimer</button></div>' +
+        '<div class="rang"><label style="display:flex;gap:8px;align-items:center;margin:0;color:var(--papier)"><input type="checkbox" style="width:22px;min-height:22px" data-vf="on"' + (v.on !== false ? ' checked' : '') + '> Visible sur le site</label><button class="btn mini" data-va="affiche" type="button">Affiche du voyage</button><button class="btn danger mini" data-va="suppr" type="button">Supprimer</button></div>' +
         '</div></details>';
     }).join('') || '<p class="note">Aucun voyage. Appuie sur « Ajouter un voyage ».</p>';
   }
@@ -682,8 +693,35 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   $('voyages').addEventListener('click', function (e) {
     var b = e.target.closest('[data-va]'); if (!b) return;
     var i = Number(b.closest('[data-vi]').getAttribute('data-vi'));
+    if (b.getAttribute('data-va') === 'affiche') { afficheVoyage(STATE.voy[i], b); return; }
     if (confirm('Supprimer ce voyage ?')) { STATE.voy.splice(i, 1); marquer(true); rendreVoyages(); }
   });
+
+  /* ---------- Affiche du voyage ---------- */
+  var VAF = {};
+  function fdl(d) { if (!d) return ''; var q = d.split('-'), x = new Date(+q[0], +q[1] - 1, +q[2]), t = x.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }); return t.charAt(0).toUpperCase() + t.slice(1); }
+  function veilleA(d) { var q = d.split('-'); var x = new Date(+q[0], +q[1] - 1, +q[2] - 1); var t = x.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }); return t.charAt(0).toUpperCase() + t.slice(1); }
+  function afficheVoyage(v, b) {
+    if (!v || !v.orig) { alert('Choisis d\'abord l\'origine du voyage.'); return; }
+    var dep = v.sens === 'depuis', n = Number(v.max) || 0;
+    var o = { sens: v.sens, orig: v.orig, dep: fdl(v.dep), lim: v.dep ? veilleA(v.dep) : '', arr: fdl(v.arr), places: n > 0 ? n + ' places seulement' : '', url: 'https://goddidexpress.com/#voyages', urlTxt: 'goddidexpress.com' };
+    b.disabled = true;
+    Promise.all([GDETicket.voyage(Object.assign({ fmt: 'carre' }, o)), GDETicket.voyage(Object.assign({ fmt: 'vertical' }, o))]).then(function (cs) { return Promise.all(cs.map(GDETicket.blob)); }).then(function (bl) {
+      VAF.c = null; VAF.v = null; try { VAF.c = new File([bl[0]], 'voyage-carre.png', { type: 'image/png' }); VAF.v = new File([bl[1]], 'voyage-vertical.png', { type: 'image/png' }); } catch (e) {}
+      var u1 = URL.createObjectURL(bl[0]), u2 = URL.createObjectURL(bl[1]);
+      $('vaf-c').src = u1; $('vaf-dc').href = u1; $('vaf-v').src = u2; $('vaf-dv').href = u2;
+      var t = (dep ? 'Voyage Kinshasa → ' + v.orig : 'Voyage ' + v.orig + ' → Kinshasa') + ' avec GOD DID EXPRESS.\n';
+      if (v.dep) t += (dep ? 'Départ : ' : 'Départ : ') + o.dep + '\nDernier jour pour ' + (dep ? 'déposer ton colis' : 'commander') + ' : ' + o.lim + '\n';
+      if (v.arr) t += 'Arrivée estimée : ' + o.arr + '\n';
+      if (n > 0) t += n + ' places seulement.\n';
+      t += 'Réserve ta place ici : https://goddidexpress.com/#voyages\nWhatsApp : ' + (GDETicket.tel || '+243 983 129 294');
+      $('vaf-t').value = t; $('vaf').classList.remove('cache'); $('vaf').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }).catch(function () { alert('L\'affiche n\'a pas pu être créée.'); }).then(function () { b.disabled = false; });
+  }
+  function envoyerVaf(k) { var f = VAF[k]; if (f && navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'GOD DID EXPRESS' }).catch(function () {}); else { $(k === 'c' ? 'vaf-dc' : 'vaf-dv').click(); alert('Image enregistrée. Envoie-la dans WhatsApp depuis ta galerie.'); } }
+  $('vaf-sc').addEventListener('click', function () { envoyerVaf('c'); }); $('vaf-sv').addEventListener('click', function () { envoyerVaf('v'); });
+  $('vaf-wa').addEventListener('click', function () { window.open('https://wa.me/?text=' + encodeURIComponent($('vaf-t').value), '_blank'); });
+  $('vaf-cp').addEventListener('click', function () { var t = $('vaf-t'); t.select(); try { navigator.clipboard.writeText(t.value); } catch (e) { document.execCommand('copy'); } alert('Texte copié.'); });
 
   /* ---------- Calcul des prix (données privées, jamais publiées) ---------- */
   var COUTS = { reglages: { devise: 'USD', taux: '', kgAvion: '', kgBateau: '', douane: '', m1: '', m5: '', m10: '', arrondi: '0.5' }, produits: {} }, couDirty = false;

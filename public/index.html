@@ -557,7 +557,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     <div class="ruban" aria-hidden="true"><div class="ruban-in" id="ruban-in"></div></div>
   </header>
 
-  <div class="bandeau" id="bandeau" hidden><div class="bd-t"><span class="kicker">Achat groupé en cours</span><b id="bd-nom"></b><span class="cpt" id="bd-cpt"></span></div><button class="btn mini" type="button" data-go="groupes">Rejoindre</button></div>
+  <div class="bandeau" id="bandeau" hidden><div class="bd-t"><span class="kicker" id="bd-k">Achat groupé en cours</span><b id="bd-nom"></b><span class="cpt" id="bd-cpt"></span></div><button class="btn mini" id="bd-btn" type="button" data-go="groupes">Rejoindre</button></div>
 
   <!-- ACCUEIL 2050 -->
   <section class="view" id="v-accueil">
@@ -2230,12 +2230,23 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     }).join('');
     majBandeau();
   }
-  function majBandeau() {
-    var L = groupesActifs(), b = $('bandeau');
-    if (!L.length) { b.hidden = true; return; }
-    var g = L[0]; b.hidden = false; $('bd-nom').textContent = g.nom;
-    $('bd-cpt').setAttribute('data-fin', g.fin); $('bd-cpt').textContent = cpt(g.fin - Date.now());
+  var BDI = 0;
+  function bandeauItems() {
+    var it = [], p = voyListe().filter(function (v) { return voyEtat(v) === 'ouvert' && v.dep && dmin(v.dep) > Date.now(); })[0];
+    if (p) { var dep = p.sens === 'depuis'; it.push({ k: 'Prochain voyage', nom: (dep ? 'Kinshasa → ' + p.orig : p.orig + ' → Kinshasa') + ' · ' + (dep ? 'fin des envois dans' : 'fin des commandes dans'), cpt: p.dep, go: 'voyages', btn: 'Réserver' }); }
+    var g = groupesActifs()[0];
+    if (g) it.push({ k: 'Achat groupé en cours', nom: g.nom, fin: g.fin, go: 'groupes', btn: 'Rejoindre' });
+    return it;
   }
+  function majBandeau() {
+    var it = bandeauItems(), b = $('bandeau');
+    if (!it.length) { b.hidden = true; return; }
+    var x = it[BDI % it.length], c = $('bd-cpt'); b.hidden = false;
+    $('bd-k').textContent = x.k; $('bd-nom').textContent = x.nom; $('bd-btn').textContent = x.btn; $('bd-btn').setAttribute('data-go', x.go);
+    c.removeAttribute('data-fin'); c.removeAttribute('data-cpt');
+    if (x.cpt) { c.setAttribute('data-cpt', x.cpt); c.textContent = cptTexte(x.cpt); } else { c.setAttribute('data-fin', x.fin); c.textContent = cpt(x.fin - Date.now()); }
+  }
+  setInterval(function () { BDI++; majBandeau(); }, 6000);
   function tickGroupes() {
     var now = Date.now(), fini = false;
     Array.prototype.forEach.call(document.querySelectorAll('.cpt[data-fin]'), function (el) {
@@ -2309,6 +2320,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     $('voy-liste').innerHTML = L.length ? L.map(carteVoy).join('') : '<div class="carte"><h3>Les prochains départs arrivent</h3><p class="note">Les dates des voyages Chine, Dubaï et Istanbul seront affichées ici. Demande-les sur WhatsApp.</p></div>';
     $('voy-wa').href = wa('Bonjour GOD DID EXPRESS, quelles sont les prochaines dates de voyage ?');
     var p = L.filter(function (v) { return voyEtat(v) === 'ouvert' && v.dep; })[0];
+    majBandeau();
     $('prochain').innerHTML = p ? carteVoy(p) : '<div class="nv"><div><b>Chine</b><small>Dates bientôt</small></div><div><b>Dubaï</b><small>Dates bientôt</small></div><div><b>Istanbul</b><small>Dates bientôt</small></div></div>';
   }
   setInterval(function () { Array.prototype.forEach.call(document.querySelectorAll('[data-cpt]'), function (n) { n.textContent = cptTexte(n.getAttribute('data-cpt')); }); }, 1000);
