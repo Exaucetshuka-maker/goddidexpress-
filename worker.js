@@ -156,6 +156,14 @@ function nettoyer(s) {
     rempl: v.rempl === '' || v.rempl == null ? null : Math.max(0, Math.min(100, Math.round(nombre(v.rempl)))),
     note: txt(v.note, 160),
   }));
+  const dd = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? String(v) : '');
+  o.camp = (Array.isArray(s.camp) ? s.camp : []).slice(0, 12).map((c, i) => ({
+    id: txt(c.id || 'c' + (i + 1), 20), on: c.on !== false, nom: txt(c.nom, 60), slogan: txt(c.slogan, 120),
+    theme: ['noel', 'ecole', 'fete', 'autre'].includes(c.theme) ? c.theme : 'autre',
+    deb: dd(c.deb), fin: dd(c.fin), evt: dd(c.evt),
+    pids: (Array.isArray(c.pids) ? c.pids : []).slice(0, 40).map((x) => txt(x, 40)).filter(Boolean),
+    lots: (Array.isArray(c.lots) ? c.lots : []).slice(0, 8).map((l) => ({ nom: txt(l && l.nom, 60), desc: txt(l && l.desc, 140), prix: Math.max(0, Math.min(99999, nombre(l && l.prix))) })).filter((l) => l.nom),
+  })).filter((c) => c.nom);
   const ip = s.iph && typeof s.iph === 'object' ? s.iph : {};
   o.iph = {
     on: ip.on === true,
@@ -181,6 +189,24 @@ async function lireEtat(env) {
 
 function echapper(s) { return s.replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029'); }
 
+
+function attr(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+async function metaPartage(url, etat, env, request) {
+  const s = url.searchParams.get('s'), pid = url.searchParams.get('p'), org = url.origin;
+  let titre = 'GOD DID EXPRESS', desc = 'Tu choisis. On trouve. On te livre. Chine, Dubaï, Istanbul vers Kinshasa.', img = org + '/icon.png';
+  if (s === 'iphone') { titre = 'Prix iPhone du jour · GOD DID EXPRESS'; desc = 'Tous les modèles, commande en un clic sur WhatsApp.'; }
+  else if (s === 'voyages') { titre = 'Nos voyages · GOD DID EXPRESS'; const v = (etat.voy || []).filter((x) => x.on !== false && x.orig && x.dep && x.dep >= new Date().toISOString().slice(0, 10))[0]; desc = v ? (v.sens === 'depuis' ? 'Kinshasa → ' + v.orig : v.orig + ' → Kinshasa') + ' · départ le ' + v.dep + '. Réserve ta place.' : 'Dates de départ, dernier jour pour commander, arrivées estimées.'; }
+  else if (s === 'groupes') { titre = 'Achats groupés · GOD DID EXPRESS'; desc = 'Plus on est nombreux, moins c\'est cher.'; }
+  else if (s === 'paniers') { const c = (etat.camp || []).filter((x) => x.on !== false)[0]; titre = (c ? c.nom : 'Paniers de saison') + ' · GOD DID EXPRESS'; desc = c && c.slogan ? c.slogan : 'Les paniers du moment, commande sur WhatsApp.'; }
+  else if (pid && /^[A-Za-z0-9_-]{1,40}$/.test(pid)) {
+    let p = (etat.extra || []).find((e) => e.id === pid) || null, ov = (etat.prod || {})[pid] || {};
+    if (!p) { try { const r = await env.ASSETS.fetch(new Request(org + '/products.json')); const L = await r.json(); p = (Array.isArray(L) ? L : L.produits || []).find((e) => e.id === pid) || null; } catch (e) {} }
+    if (p) { const px = (ov.px || p.px || [])[0]; titre = p.t + ' · GOD DID EXPRESS'; desc = (px > 0 ? px + ' $ · ' : '') + 'Commande sur WhatsApp, livré à Kinshasa.'; const ph = ov.photo || p.photo || ('img/' + pid + '.jpg'); img = org + (ph.startsWith('/') ? '' : '/') + ph; if (/^https?:/.test(ph)) img = ph; }
+  } else return null;
+  const tags = '<meta property="og:site_name" content="GOD DID EXPRESS"><meta property="og:type" content="website"><meta property="og:title" content="' + attr(titre) + '"><meta property="og:description" content="' + attr(desc) + '"><meta property="og:image" content="' + attr(img) + '"><meta property="og:url" content="' + attr(org + url.pathname + url.search) + '"><meta name="twitter:card" content="summary"><meta name="description" content="' + attr(desc) + '">';
+  return { titre, tags };
+}
+
 async function servirPageAvecEtat(request, env) {
   const rep = await env.ASSETS.fetch(request);
   const ct = rep.headers.get('content-type') || '';
@@ -188,6 +214,7 @@ async function servirPageAvecEtat(request, env) {
   const etat = await lireEtat(env);
   let html = await rep.text();
   html = html.replace(/(<script type="application\/json" id="gde-state">)[\s\S]*?(<\/script>)/, (m, a, b) => a + echapper(JSON.stringify(etat)) + b);
+  try { const m = await metaPartage(new URL(request.url), etat, env, request); if (m) html = html.replace(/<title>[\s\S]*?<\/title>/, '<title>' + attr(m.titre) + '</title>' + m.tags); } catch (e) {}
   const h = new Headers(rep.headers);
   h.set('cache-control', 'no-store');
   h.delete('content-length');
@@ -370,7 +397,7 @@ export default {
       const vues = new Set(), dt = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? String(v) : '');
       const propre = (Array.isArray(b.cmds) ? b.cmds : []).slice(0, 400).map((c) => ({
         ref: String(c.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), nom: txt(c.nom, 40), tel: txt(c.tel, 30), prod: txt(c.prod, 100),
-        cran: Math.max(0, Math.min(7, Math.round(nombre(c.cran)))), mode: c.mode === 'bateau' ? 'bateau' : 'avion', orig: ['Chine', 'Dubaï', 'Istanbul'].includes(c.orig) ? c.orig : 'Chine', typ: c.typ === 'expedition' ? 'expedition' : 'achat', ou: txt(c.ou, 80), arr: dt(c.arr), maj: dt(c.maj) || new Date().toISOString().slice(0, 10),
+        cran: Math.max(0, Math.min(7, Math.round(nombre(c.cran)))), mode: c.mode === 'bateau' ? 'bateau' : 'avion', orig: ['Chine', 'Dubaï', 'Istanbul'].includes(c.orig) ? c.orig : 'Chine', typ: c.typ === 'expedition' ? 'expedition' : 'achat', ou: txt(c.ou, 80), total: Math.max(0, Math.min(1e6, nombre(c.total))), paye: Math.max(0, Math.min(1e6, nombre(c.paye))), arr: dt(c.arr), maj: dt(c.maj) || new Date().toISOString().slice(0, 10),
       })).filter((c) => /^[A-Z0-9-]{4,30}$/.test(c.ref) && !vues.has(c.ref) && vues.add(c.ref));
       await env.GDE.put('cmds', JSON.stringify(propre));
       return json({ cmds: propre });

@@ -571,6 +571,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         <button class="btn" type="button" data-go="catalogue">Voir le catalogue</button>
         <button class="btn ghost" type="button" data-go="voyages">Nos voyages</button>
         <button class="btn ghost" type="button" data-go="iphone" id="home-iph" hidden>Prix iPhone du jour</button>
+        <button class="btn ghost" type="button" data-go="paniers" id="home-pan" hidden>Panier de saison</button>
         <button class="btn ghost" type="button" data-go="commander">Commander sur mesure</button>
         <button class="btn ghost" type="button" data-assist>Poser une question</button>
         <button class="btn ghost" type="button" data-tour>Visite guidée parlée</button>
@@ -813,6 +814,16 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <div id="voy-liste" style="display:grid;gap:14px"></div>
       <p class="note">Les commandes ferment la veille du départ. Si tu rates un voyage, ta commande part avec le suivant.</p>
       <a class="btn ghost" id="voy-wa" href="#" target="_blank" rel="noopener">Demander les prochaines dates sur WhatsApp</a>
+    </div>
+  </section>
+
+  <section class="view" id="v-paniers" hidden>
+    <header>
+      <h2>Paniers de saison</h2>
+      <p>Les produits du moment, avec une date de fin. Touche un produit ou un lot pour commander sur WhatsApp.</p>
+    </header>
+    <div class="wrap" style="gap:14px">
+      <div id="pan-liste" style="display:grid;gap:14px"></div>
     </div>
   </section>
 
@@ -1315,7 +1326,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 
 
   /* Onglets */
-  var VUES = ['accueil', 'catalogue', 'commander', 'groupes', 'voyages', 'iphone', 'services', 'live', 'suivi', 'parrainer', 'methode', 'admin'];
+  var VUES = ['accueil', 'catalogue', 'commander', 'groupes', 'voyages', 'iphone', 'paniers', 'services', 'live', 'suivi', 'parrainer', 'methode', 'admin'];
   var SERVICES = [
     { id: 'venir', ico: '📥', t: 'Faire venir ma marchandise en RDC', d: 'Tu as déjà des marchandises à Dubaï, à Istanbul ou en Chine (téléphones, électronique, vêtements, chaussures…) ? On les amène jusqu\'à Kinshasa, avec le suivi et la preuve en photo à chaque étape.',
       etapes: ['Tu nous envoies la liste des marchandises, les photos, les quantités et l\'adresse où elles se trouvent.', 'On te donne un devis détaillé : transport, douane et marge, avant tout paiement.', 'Tu verses l\'acompte de 50 %. On récupère et on regroupe ta marchandise.', 'Elle part sur le prochain voyage. Tu suis chaque étape avec ta référence GDE.', 'Livraison à Kinshasa, tu règles le solde à la réception.'],
@@ -1338,6 +1349,25 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         '<div class="kicker" style="margin-top:12px">Ce qu\'il nous faut</div><ul style="margin:6px 0 0;padding-left:20px;display:grid;gap:4px">' + s.besoin.map(function (e) { return '<li>' + h(e) + '</li>'; }).join('') + '</ul>' +
         '<p class="note" style="margin-top:10px">Aucun prix n\'est promis à l\'avance : tu reçois un devis détaillé avant de payer. Acompte de 50 %, solde à la livraison.</p>' +
         '<a class="btn" style="margin-top:6px" href="' + ea(wa(s.m)) + '" target="_blank" rel="noopener">Démarrer sur WhatsApp</a></details>';
+    }).join('');
+  }
+  var EMO = { noel: '🎄', ecole: '🎒', fete: '🎁', autre: '✨' };
+  function auj() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function jourApres(d) { var q = d.split('-'), x = new Date(+q[0], +q[1] - 1, +q[2] + 1); return x.getFullYear() + '-' + ('0' + (x.getMonth() + 1)).slice(-2) + '-' + ('0' + x.getDate()).slice(-2); }
+  function campActives() { var t = auj(); return (STATE.camp || []).filter(function (c) { return c && c.on !== false && c.nom && (!c.deb || c.deb <= t) && (!c.fin || c.fin >= t); }); }
+  function campLim(c) { if (!c.evt) return ''; var t = auj(), best = null; (STATE.voy || []).forEach(function (v) { if (v.on !== false && v.sens !== 'depuis' && v.dep && v.arr && v.dep > t && v.arr <= c.evt && (!best || v.dep > best.dep)) best = v; }); return best ? 'Dernier jour pour commander à temps : ' + veille(best.dep) : ''; }
+  function rendrePaniersSite() {
+    var b = $('home-pan'); if (b) b.hidden = !campActives().length;
+    var L = campActives(), box = $('pan-liste'); if (!box) return;
+    if (!L.length) { box.innerHTML = '<article class="carte"><h3>Le prochain panier arrive bientôt</h3><p class="note">Demande les offres du moment sur WhatsApp.</p><a class="btn" target="_blank" rel="noopener" href="' + ea(wa('Bonjour GOD DID EXPRESS, quelles sont les offres du moment ?')) + '">Demander sur WhatsApp</a></article>'; return; }
+    box.innerHTML = L.map(function (c) {
+      var lim = campLim(c), cp = c.fin ? '<div><small class="note">Fin du panier dans</small><div class="cpt" data-cpt="' + h(jourApres(c.fin)) + '">' + cptTexte(jourApres(c.fin)) + '</div></div>' : '';
+      var lots = (c.lots || []).map(function (l) { var msg = 'Bonjour GOD DID EXPRESS, je veux le lot « ' + l.nom + ' » du ' + c.nom + (l.prix > 0 ? ' (' + usd(l.prix) + ')' : '') + '.'; return '<div class="carte" style="padding:12px"><div style="display:flex;justify-content:space-between;gap:8px"><b>' + h(l.nom) + '</b><b style="color:var(--orange)">' + (l.prix > 0 ? usd(l.prix) : '') + '</b></div>' + (l.desc ? '<p class="note">' + h(l.desc) + '</p>' : '') + '<a class="btn" style="margin-top:6px" target="_blank" rel="noopener" href="' + ea(wa(msg)) + '">Commander ce lot</a></div>'; }).join('');
+      var prods = (c.pids || []).map(function (id) { var p = BY[id]; if (!p) return ''; var px = p.px && p.px[0] > 0 ? usd(p.px[0]) : 'Sur demande'; return '<a class="btn ghost" style="justify-content:space-between;text-align:left" target="_blank" rel="noopener" href="' + ea(wa('Bonjour GOD DID EXPRESS, je veux : ' + p.t + ' (panier ' + c.nom + ').')) + '"><span>' + h(p.t) + '</span><b>' + px + '</b></a>'; }).join('');
+      return '<article class="carte"><div class="kicker">' + (EMO[c.theme] || '') + ' Panier de saison</div><h3>' + h(c.nom) + '</h3>' + (c.slogan ? '<p class="note">' + h(c.slogan) + '</p>' : '') + cp + (lim ? '<p class="note" style="color:var(--orange)"><b>' + h(lim) + '</b></p>' : '') +
+        (lots ? '<div class="kicker" style="margin-top:10px">Lots à prix groupé</div><div style="display:grid;gap:8px">' + lots + '</div>' : '') +
+        (prods ? '<div class="kicker" style="margin-top:10px">Produits</div><div style="display:grid;gap:6px">' + prods + '</div>' : '') +
+        '<a class="btn ghost" style="margin-top:10px" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(c.nom + ' chez GOD DID EXPRESS : ' + location.origin + '/?s=paniers#paniers') + '">Partager ce panier</a></article>';
     }).join('');
   }
   function iphOn() { return STATE.iph && STATE.iph.on && STATE.iph.items && STATE.iph.items.length; }
@@ -1365,6 +1395,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     $('t-plus').setAttribute('aria-current', PRINC.indexOf(id) < 0 ? 'page' : 'false');
     if (id === 'suivi' && typeof rendreSuivi === 'function') rendreSuivi(curCran);
     if (id === 'iphone') rendreIphone();
+    if (id === 'paniers') rendrePaniersSite();
     if (id === 'services' && typeof rendreServices === 'function') rendreServices();
     if (id === 'methode' && typeof animerVoyage === 'function') animerVoyage();
     if (id === 'admin' && typeof rendreAdmin === 'function') rendreAdmin();
@@ -2034,6 +2065,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Plus</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Aller plus loin</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
       tuile('groupes', '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.6.2 4.5 2.3 4.5 5.1"/>', 'Achats groupés', 'Plus on est nombreux, moins c\'est cher') +
       tuile('voyages', '<path d="M3 17l18-6-6 9-3-4-5 1z"/><path d="M12 16v4"/>', 'Nos voyages', 'Départs, dates limites et arrivées') +
+      (campActives().length ? tuile('paniers', '<path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 0 1 6 0"/>', campActives()[0].nom, 'Produits et lots du moment') : '') +
       (STATE.iph && STATE.iph.on && STATE.iph.items.length ? tuile('iphone', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>', 'Prix iPhone du jour', 'Tous les modèles, commande en un clic') : '') +
       tuile('services', '<path d="M4 7h16v12H4z"/><path d="M9 7V4h6v3M4 12h16"/>', 'Fiches services', 'Faire venir, exporter, trouver un produit') +
       tuile('live', '<circle cx="12" cy="12" r="2.4"/><path d="M7.5 7.5a6.4 6.4 0 0 0 0 9M16.5 7.5a6.4 6.4 0 0 1 0 9M4.5 4.5a10.6 10.6 0 0 0 0 15M19.5 4.5a10.6 10.6 0 0 1 0 15"/>', 'Live shopping', 'Voir le produit réel avant d\'acheter') +
@@ -2263,6 +2295,8 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   function bandeauItems() {
     var it = [], p = voyListe().filter(function (v) { return voyEtat(v) === 'ouvert' && v.dep && dmin(v.dep) > Date.now(); })[0];
     if (p) { var dep = p.sens === 'depuis'; it.push({ k: 'Prochain voyage', nom: (dep ? 'Kinshasa → ' + p.orig : p.orig + ' → Kinshasa') + ' · ' + (dep ? 'fin des envois dans' : 'fin des commandes dans'), cpt: p.dep, go: 'voyages', btn: 'Réserver' }); }
+    var cA = campActives()[0];
+    if (cA) it.push({ k: (EMO[cA.theme] || '') + ' Panier de saison', nom: cA.nom + (cA.fin ? ' · fin dans' : ''), cpt: cA.fin ? jourApres(cA.fin) : '', go: 'paniers', btn: 'Voir' });
     var g = groupesActifs()[0];
     if (g) it.push({ k: 'Achat groupé en cours', nom: g.nom, fin: g.fin, go: 'groupes', btn: 'Rejoindre' });
     return it;
@@ -2273,7 +2307,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var x = it[BDI % it.length], c = $('bd-cpt'); b.hidden = false;
     $('bd-k').textContent = x.k; $('bd-nom').textContent = x.nom; $('bd-btn').textContent = x.btn; $('bd-btn').setAttribute('data-go', x.go);
     c.removeAttribute('data-fin'); c.removeAttribute('data-cpt');
-    if (x.cpt) { c.setAttribute('data-cpt', x.cpt); c.textContent = cptTexte(x.cpt); } else { c.setAttribute('data-fin', x.fin); c.textContent = cpt(x.fin - Date.now()); }
+    if ('cpt' in x) { if (x.cpt) { c.setAttribute('data-cpt', x.cpt); c.textContent = cptTexte(x.cpt); } else c.textContent = ''; } else { c.setAttribute('data-fin', x.fin); c.textContent = cpt(x.fin - Date.now()); }
   }
   setInterval(function () { BDI++; majBandeau(); }, 6000);
   function tickGroupes() {
@@ -2948,7 +2982,8 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   })();
 
   /* Premier affichage */
-  rendreSlogan(); rendreReseaux(); rendreVip(); rendreAvis(); majPub(); chargerJoins(); rendreGroupes(); rendreIphone(); rendrePhrases(); rendreMarches(); rendreInfo(); rendreVoyages(); initVideos();
+  try { var qp = new URLSearchParams(location.search).get('p'); if (qp) setTimeout(function () { if (BY[qp]) { show('catalogue', false); ouvrirProduit(qp); } }, 400); } catch (e) {}
+  rendreSlogan(); rendreReseaux(); rendreVip(); rendreAvis(); majPub(); chargerJoins(); rendreGroupes(); rendreIphone(); rendrePaniersSite(); rendrePhrases(); rendreMarches(); rendreInfo(); rendreVoyages(); initVideos();
 
   show(location.hash.slice(1), false);
 })();

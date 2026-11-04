@@ -262,5 +262,34 @@
       return c;
     });
   }
-  window.GDETicket = { iphone: iphone, voyage: voyage, draw: draw, position: position, carte: carte, affiche: affiche, blob: blob, usd: usd, W: W, tel: '' };
+  function panier(o) {
+    return fonts().then(function () {
+      var Wv = 1080, P2 = 56, L = (o.lots || []).slice(0, 6), I = (o.items || []).slice(0, 14), rh = 84;
+      var top = 520, lh = 118, Hv = Math.max(1350, top + (L.length ? 70 + L.length * lh : 0) + (I.length ? 70 + I.length * rh : 0) + 520);
+      var c = document.createElement('canvas'); c.width = Wv; c.height = Hv; var ctx = c.getContext('2d'); ctx.textBaseline = 'alphabetic';
+      function tx(s, x, y, size, col, w, al, f, ls) { ctx.font = w + ' ' + size + 'px ' + (f || FB); ctx.fillStyle = col; ctx.textAlign = al || 'left'; try { ctx.letterSpacing = (ls || 0) + 'px'; } catch (e) {} ctx.fillText(s, x, y); try { ctx.letterSpacing = '0px'; } catch (e) {} }
+      ctx.fillStyle = '#0E0D0C'; ctx.fillRect(0, 0, Wv, Hv);
+      var g = ctx.createRadialGradient(Wv * .85, 0, 40, Wv * .85, 0, 1000); g.addColorStop(0, 'rgba(255,122,26,.34)'); g.addColorStop(1, 'rgba(255,122,26,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, Wv, 1000);
+      tx('GOD DID EXPRESS', P2, 92, 36, '#fff', 800, 'left', FD, 5);
+      if (o.periode) { ctx.font = '800 32px ' + FD; var dw = ctx.measureText(o.periode.toUpperCase()).width + 48; ctx.fillStyle = '#FF7A1A'; rr(ctx, Wv - P2 - dw, 52, dw, 58, 8); ctx.fill(); tx(o.periode.toUpperCase(), Wv - P2 - dw / 2, 93, 32, '#0E0D0C', 800, 'center', FD, 2); }
+      tx('PANIER DE SAISON', P2, 200, 28, '#FF7A1A', 700, 'left', FB, 6);
+      var nom = String(o.titre || '').toUpperCase(), fs = 130; ctx.font = '800 ' + fs + 'px ' + FD; while (ctx.measureText(nom).width > Wv - P2 * 2 && fs > 56) { fs -= 6; ctx.font = '800 ' + fs + 'px ' + FD; }
+      var ls = wrap(ctx, nom, Wv - P2 * 2).slice(0, 2); ls.forEach(function (l, i) { tx(l, P2, 310 + i * fs * .92, fs, '#fff', 800, 'left', FD, 1); }); var y = 310 + (ls.length - 1) * fs * .92 + 60;
+      if (o.slogan) { ctx.font = '500 34px ' + FB; wrap(ctx, o.slogan, Wv - P2 * 2).slice(0, 2).forEach(function (l, i) { tx(l, P2, y + i * 44, 34, 'rgba(255,255,255,.8)', 500, 'left', FB, 0); }); y += 44 * Math.min(2, wrap(ctx, o.slogan, Wv - P2 * 2).length) + 10; }
+      if (o.lim) { ctx.strokeStyle = '#3CDC82'; ctx.lineWidth = 3; ctx.font = '700 28px ' + FB; var lw = ctx.measureText(o.lim).width + 44; rr(ctx, P2, y, lw, 58, 8); ctx.stroke(); tx(o.lim, P2 + 22, y + 39, 28, '#3CDC82', 700, 'left', FB, 0); y += 104; }
+      y = Math.max(y, top - 20) + 20;
+      if (L.length) { tx('LOTS', P2, y, 26, '#FF7A1A', 700, 'left', FB, 6); y += 24; L.forEach(function (l) { ctx.fillStyle = 'rgba(255,122,26,.14)'; rr(ctx, P2, y, Wv - P2 * 2, lh - 14, 12); ctx.fill(); tx(l.nom.toUpperCase(), P2 + 28, y + 50, 40, '#fff', 800, 'left', FD, 1); if (l.desc) tx(l.desc.slice(0, 60), P2 + 28, y + 86, 24, 'rgba(255,255,255,.7)', 500, 'left', FB, 0); if (l.prix > 0) tx(Math.round(l.prix * 100) / 100 + ' $', Wv - P2 - 28, y + 66, 60, '#FF7A1A', 800, 'right', FD, 0); y += lh; }); y += 20; }
+      if (I.length) { tx('PRODUITS', P2, y, 26, '#FF7A1A', 700, 'left', FB, 6); y += 40; I.forEach(function (it, i) { if (i % 2 === 0) { ctx.fillStyle = 'rgba(255,255,255,.04)'; ctx.fillRect(P2 - 16, y - 40, Wv - P2 * 2 + 32, rh - 8); } tx(String(it[0]).slice(0, 34).toUpperCase(), P2, y + 14, 38, '#fff', 800, 'left', FD, 1); tx(it[1] > 0 ? Math.round(it[1] * 100) / 100 + ' $' : 'Sur demande', Wv - P2, y + 14, 40, '#FF7A1A', 800, 'right', FD, 0); y += rh; }); }
+      var by = Hv - 470;
+      var M = window.GDEQR ? GDEQR.make('https://goddidexpress.com/#paniers') : null, qs = 190;
+      ctx.fillStyle = '#fff'; rr(ctx, Wv - P2 - qs, by, qs, qs, 14); ctx.fill();
+      if (M) { var n = M.length, cell = Math.floor((qs - 24) / n), ox = Wv - P2 - qs + (qs - cell * n) / 2, oy = by + (qs - cell * n) / 2; ctx.fillStyle = '#0E0D0C'; for (var yy = 0; yy < n; yy++) for (var xx = 0; xx < n; xx++) if (M[yy][xx]) ctx.fillRect(ox + xx * cell, oy + yy * cell, cell, cell); }
+      tx('goddidexpress.com', P2, by + 80, 64, '#fff', 800, 'left', FD, 2); tx('Scanne ou clique pour commander.', P2, by + 124, 28, 'rgba(255,255,255,.7)', 500, 'left', FB, 0);
+      ctx.fillStyle = '#FF7A1A'; rr(ctx, P2, Hv - 150, Wv - P2 * 2, 96, 10); ctx.fill();
+      tx('Commande sur WhatsApp : ' + (window.GDETicket && GDETicket.tel || '+243 983 129 294'), Wv / 2, Hv - 88, 42, '#0E0D0C', 800, 'center', FD, 1);
+      tx('Super Lemba, Kinshasa · Devis avant de payer · Preuve en photo', Wv / 2, Hv - 26, 22, 'rgba(255,255,255,.5)', 500, 'center', FB, 1);
+      return c;
+    });
+  }
+  window.GDETicket = { panier: panier, iphone: iphone, voyage: voyage, draw: draw, position: position, carte: carte, affiche: affiche, blob: blob, usd: usd, W: W, tel: '' };
 })();
