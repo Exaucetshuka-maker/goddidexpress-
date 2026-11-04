@@ -811,7 +811,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         '<div><label>Thème</label><select data-pf="theme">' + Object.keys(THEMES).map(function (k) { return '<option value="' + k + '"' + (c.theme === k ? ' selected' : '') + '>' + THEMES[k] + '</option>'; }).join('') + '</select></div>' +
         '<div class="grille g2"><div><label>Début</label><input type="date" data-pf="deb" value="' + esc(c.deb) + '"></div><div><label>Dernier jour affiché</label><input type="date" data-pf="fin" value="' + esc(c.fin) + '"></div></div>' +
         '<div><label>Date de la fête (pour le dernier jour de commande)</label><input type="date" data-pf="evt" value="' + esc(c.evt) + '"></div>' +
-        '<div class="note">' + esc(pnLim(c) || 'Dernier jour pour commander : s\'affiche quand un voyage Vers la RDC arrive avant la date de la fête.') + '</div>' +
+        '<div class="note" data-lim>' + esc(pnLim(c) || 'Dernier jour pour commander : s\'affiche quand un voyage Vers la RDC arrive avant la date de la fête.') + '</div>' +
         '<div><label>Produits du panier</label><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">' + (chips || '<span class="note">Aucun produit</span>') + '</div><div class="rang"><input data-pp list="pn-prods" placeholder="Tape un produit" style="flex:1"><button class="btn mini" type="button" data-pa="addp">Ajouter</button></div></div>' +
         '<div><label>Lots à prix groupé (facultatif)</label>' + lots + '<button class="btn ghost mini" type="button" data-pa="addl">+ Ajouter un lot</button></div>' +
         '<div class="rang"><label style="display:flex;gap:8px;align-items:center;margin:0;color:var(--papier)"><input type="checkbox" style="width:22px;min-height:22px" data-pf="on"' + (c.on !== false ? ' checked' : '') + '> Visible sur le site</label><button class="btn mini" data-pa="aff" type="button">Affiche</button><button class="btn danger mini" data-pa="suppr" type="button">Supprimer</button></div>' +
@@ -825,7 +825,9 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   function pnChamp(e) {
     var row = e.target.closest('[data-pi]'); if (!row) return; var c = STATE.camp[Number(row.getAttribute('data-pi'))];
     var f = e.target.getAttribute('data-pf'), l = e.target.getAttribute('data-pl');
-    if (f) { c[f] = f === 'on' ? e.target.checked : e.target.value; marquer(true); if (e.type === 'change') setTimeout(rendrePaniers, 0); }
+    if (f) { c[f] = f === 'on' ? e.target.checked : e.target.value; marquer(true);
+      var sm = row.querySelector('summary b'); if (sm) sm.textContent = c.nom || 'Nouveau panier';
+      var ln = row.querySelector('[data-lim]'); if (ln) ln.textContent = pnLim(c) || 'Dernier jour pour commander : s\'affiche quand un voyage Vers la RDC arrive avant la date de la fête.'; }
     else if (l) { var q = l.split(':'), lot = c.lots[+q[1]]; lot[q[0]] = q[0] === 'prix' ? (Number(String(e.target.value).replace(',', '.')) || 0) : e.target.value; marquer(true); }
   }
   $('paniers').addEventListener('input', pnChamp); $('paniers').addEventListener('change', pnChamp);
