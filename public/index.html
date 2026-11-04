@@ -1370,6 +1370,11 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         '<a class="btn ghost" style="margin-top:10px" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(c.nom + ' chez GOD DID EXPRESS : ' + location.origin + '/?s=paniers#paniers') + '">Partager ce panier</a></article>';
     }).join('');
   }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-iadd]'); if (b) { var k = b.getAttribute('data-iadd'); if (liste[k]) delete liste[k]; else liste[k] = 1; sauve(); majBarre(); b.textContent = liste[k] ? '✓' : '+'; b.setAttribute('aria-pressed', liste[k] ? 'true' : 'false'); return; }
+    var c = e.target.closest('[data-clic]'); if (c) clic(c.getAttribute('data-clic'));
+  });
+  function clic(id) { try { var bl = new Blob([JSON.stringify({ id: String(id).slice(0, 60) })], { type: 'application/json' }); if (!navigator.sendBeacon || !navigator.sendBeacon('/api/clic', bl)) fetch('/api/clic', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: String(id).slice(0, 60) }), keepalive: true }); } catch (er) {} }
   function iphOn() { return STATE.iph && STATE.iph.on && STATE.iph.items && STATE.iph.items.length; }
   function rendreIphone() {
     var b = $('home-iph'); if (b) b.hidden = !iphOn();
@@ -1380,7 +1385,8 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     box.innerHTML = G.map(function (g) {
       return '<article class="carte"><h3 style="margin-bottom:8px">' + h(g.m) + '</h3><div style="display:flex;flex-wrap:wrap;gap:8px">' + g.v.map(function (t) {
         var msg = 'Bonjour GOD DID EXPRESS, je veux commander : ' + t.m + ' ' + t.g + (t.p > 0 ? ' (prix affiché ' + usd(t.p) + ')' : '') + '. Est-il disponible ?';
-        return '<a class="btn ghost" style="flex:1;min-width:140px;text-align:center;white-space:nowrap" target="_blank" rel="noopener" href="' + ea(wa(msg)) + '">' + h(t.g) + ' · <b>' + (t.p > 0 ? usd(t.p) : 'Prix du jour') + '</b></a>';
+        var key = 'i:' + t.m + '|' + t.g;
+        return '<span style="display:flex;flex:1;min-width:170px;gap:4px"><a class="btn ghost" style="flex:1;text-align:center;white-space:nowrap" target="_blank" rel="noopener" data-clic="' + ea(key) + '" href="' + ea(wa(msg)) + '">' + h(t.g) + ' · <b>' + (t.p > 0 ? usd(t.p) : 'Prix du jour') + '</b></a><button class="btn ghost" type="button" data-iadd="' + ea(key) + '" aria-label="Ajouter à ma liste" aria-pressed="' + (liste[key] ? 'true' : 'false') + '" style="min-width:48px">' + (liste[key] ? '✓' : '+') + '</button></span>';
       }).join('') + '</div></article>';
     }).join('');
     $('iph-part').href = 'https://wa.me/?text=' + encodeURIComponent('Prix iPhone du jour chez GOD DID EXPRESS : ' + location.origin + '/#iphone');
@@ -1719,7 +1725,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var brut = JSON.parse(localStorage.getItem('gde-liste') || '{}');
     if (brut && typeof brut === 'object') Object.keys(brut).forEach(function (k) {
       var n = parseInt(brut[k], 10);
-      if (BY[k] && n > 0 && n < 100) liste[k] = n;
+      if ((BY[k] || k.indexOf('i:') === 0) && n > 0 && n < 100) liste[k] = n;
     });
   } catch (e) {}
   function sauve() { try { localStorage.setItem('gde-liste', JSON.stringify(liste)); } catch (e) {} }
@@ -1782,6 +1788,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     if (dernierFocus && dernierFocus.focus) { try { dernierFocus.focus(); } catch (e) {} }
   }
   function ouvrirProduit(id) {
+    clic(id);
     var p = BY[id]; if (!p) return;
     PROD_COUR = p;
     var dans = !!liste[id];
@@ -1796,9 +1803,16 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       '<button class="btn ghost" type="button" data-parle="' + p.id + '">Écouter la fiche</button></div>');
     majCalc();
   }
+  function itemListe(k) {
+    if (BY[k]) { var p = BY[k]; return { t: p.t, px: p.px && p.px[0] > 0 ? p.px[0] : 0, img: pic(p) }; }
+    if (k.indexOf('i:') === 0) { var q = k.slice(2).split('|'), it = ((STATE.iph && STATE.iph.items) || []).filter(function (x) { return x.m === q[0] && x.g === q[1]; })[0]; if (it) return { t: it.m + ' ' + it.g, px: it.p > 0 ? it.p : 0, img: 'icon.png' }; }
+    return null;
+  }
+  function totalListe() { var t = 0, inc = 0; Object.keys(liste).forEach(function (k) { var i = itemListe(k); if (i && i.px > 0) t += i.px * liste[k]; else inc++; }); return { t: Math.round(t * 100) / 100, inc: inc }; }
   function messageListe() {
     var l = ['Bonjour GOD DID EXPRESS, je voudrais un devis pour :'];
-    Object.keys(liste).forEach(function (k) { l.push('- ' + BY[k].t + ' x' + liste[k]); });
+    Object.keys(liste).forEach(function (k) { var i = itemListe(k); if (i) l.push('- ' + i.t + ' x' + liste[k] + (i.px > 0 ? ' (' + usd(i.px) + ')' : '')); });
+    var tt = totalListe(); if (tt.t > 0) l.push('Total estimé : ' + usd(tt.t) + (tt.inc ? ' (+ ' + tt.inc + ' article' + (tt.inc > 1 ? 's' : '') + ' sur devis)' : ''));
     l.push('Merci de me donner les prix et le délai de livraison.');
     return l.join('\n');
   }
@@ -1806,13 +1820,13 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var ids = Object.keys(liste);
     if (!ids.length) { fermer(); return; }
     var rows = ids.map(function (k) {
-      var p = BY[k];
-      return '<div class="lrow"><img src="' + ea(pic(p)) + '" alt=""><b>' + p.t + '</b>' +
+      var p = itemListe(k) || { t: k, img: 'icon.png', px: 0 };
+      return '<div class="lrow"><img src="' + ea(p.img) + '" alt=""><b>' + h(p.t) + (p.px > 0 ? '<small style="display:block;font-weight:400;color:var(--orange)">' + usd(p.px) + '</small>' : '') + '</b>' +
         '<span class="qty"><button type="button" data-moins="' + k + '" aria-label="Moins">−</button><span>' + liste[k] + '</span><button type="button" data-plus="' + k + '" aria-label="Plus">+</button></span></div>';
     }).join('');
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Devis</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Ma liste</h3></div>' +
       '<button class="btn ghost mini" type="button" data-close>Fermer</button></div>' + rows +
-      '<a class="btn" href="' + wa(messageListe()) + '" target="_blank" rel="noopener">Envoyer ma liste sur WhatsApp</a>' +
+      (totalListe().t > 0 ? '<div class="prix" style="text-align:center">Total estimé : <b>' + usd(totalListe().t) + '</b>' + (totalListe().inc ? '<small>+ ' + totalListe().inc + ' article(s) sur devis</small>' : '') + '</div>' : '') + '<a class="btn" href="' + wa(messageListe()) + '" target="_blank" rel="noopener">Envoyer ma commande sur WhatsApp</a>' +
       '<button class="btn ghost" type="button" data-vider>Vider la liste</button>' +
       '<p class="note">Vous recevez les prix avant tout paiement. Acompte de 50 % pour lancer l\'achat.</p>');
   }
@@ -2724,7 +2738,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   function brouillon() { try { localStorage.setItem('gde-draft', JSON.stringify({ rev: STATE.rev, s: STATE })); } catch (e) {} }
   function rafraichir() {
     PRODUITS = buildProduits(); BY = {}; PRODUITS.forEach(function (p) { BY[p.id] = p; });
-    Object.keys(liste).forEach(function (k) { if (!BY[k]) delete liste[k]; });
+    Object.keys(liste).forEach(function (k) { if (!itemListe(k)) delete liste[k]; });
     sauve(); rendreChips(); rendreGrille(); majBarre(); rendreOcc();
     $('st-prod').textContent = PRODUITS.length;
     $('tend-rail').innerHTML = PRODUITS.filter(function (p) { return p.l; }).map(function (p, i) { return mini(p, '0' + (i + 1)); }).join('');

@@ -305,6 +305,13 @@ export default {
       L.slice().sort((a, b) => b.t - a.t).forEach((j) => { const c = out[j.k][j.id]; if (c.last.length < 3) c.last.push({ nom: j.nom, t: j.t }); });
       return json(out);
     }
+    if (p === '/api/clic' && request.method === 'POST') {
+      let b; try { b = await request.json(); } catch (e) { return new Response(null, { status: 204 }); }
+      const id = String(b && b.id || '').slice(0, 60); if (!id || /[<>"]/.test(id) || !env.GDE) return new Response(null, { status: 204 });
+      const t = await env.GDE.get('clics'); let c = {}; try { c = t ? JSON.parse(t) : {}; } catch (e) {}
+      if (!(id in c) && Object.keys(c).length >= 600) return new Response(null, { status: 204 });
+      c[id] = (c[id] || 0) + 1; await env.GDE.put('clics', JSON.stringify(c)); return new Response(null, { status: 204 });
+    }
     if (p === '/api/join' && request.method === 'POST') {
       const ip = request.headers.get('cf-connecting-ip') || 'x', rk = 'jn:' + ip;
       const nrl = Number((await env.GDE.get(rk)) || 0);
@@ -391,6 +398,11 @@ export default {
       await env.GDE.put('joins', JSON.stringify(L.slice(-3000)));
       return json({ joins: L.map((j) => ({ k: j.k, id: j.id, nom: j.nom, t: j.t, m: !!j.m })) });
     }
+    if (p === '/api/clics' && request.method === 'GET') {
+      const t = await env.GDE.get('clics'); let c = {}; try { c = t ? JSON.parse(t) : {}; } catch (e) {}
+      return json({ clics: c });
+    }
+
     if (p === '/api/cmds' && request.method === 'GET') return json({ cmds: await lireListe(env, 'cmds') });
     if (p === '/api/cmds' && request.method === 'PUT') {
       let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }

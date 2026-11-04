@@ -418,13 +418,14 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
 
   function demarrer() {
     if (STATE) { $('ecran').classList.add('cache'); $('app').classList.remove('cache'); return Promise.resolve(); }
-    return Promise.all([api('/api/state'), fetch('/products.json').then(function (r) { return r.json(); }), api('/api/couts'), api('/api/cartes'), api('/api/cmds'), api('/api/joins/all'), api('/api/iph')]).then(function (rs) {
+    return Promise.all([api('/api/state'), fetch('/products.json').then(function (r) { return r.json(); }), api('/api/couts'), api('/api/cartes'), api('/api/cmds'), api('/api/joins/all'), api('/api/iph'), api('/api/clics')]).then(function (rs) {
       STATE = defState(rs[0].j); PRODS = rs[1];
       if (rs[2].ok) COUTS = { reglages: Object.assign(COUTS.reglages, rs[2].j.reglages || {}), produits: rs[2].j.produits || {} };
       if (rs[3].ok) CARTES = rs[3].j.cartes || [];
       if (rs[4].ok) CMDS = rs[4].j.cmds || [];
       if (rs[5].ok) JOINS = rs[5].j.joins || [];
       if (rs[6] && rs[6].ok) IPH = rs[6].j;
+      if (rs[7] && rs[7].ok) CLICS = rs[7].j.clics || {};
       $('ecran').classList.add('cache'); $('app').classList.remove('cache');
       remplirSelects(); rendreProduits(); rendreGroupes(); rendreVoyages(); rendreAvisAdmin(); rendreReglagesPrix(); rendrePrix(); rendreCartes(); rendreCmds(); rendreInscrits(); rendreReglages(); rendreIph(); rendrePaniers(); marquer(false);
     });
@@ -735,6 +736,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   });
 
   /* ---------- Liste iPhone ---------- */
+  var CLICS = {};
   var IPH = { brut: '', mode: 'usd', marge: '', items: [] }, iphDirty = false, IPF = null;
   function iphParse(txt) {
     var out = [];
@@ -857,10 +859,12 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     var parEt = {}; cm.forEach(function (c) { var k = c.cran; parEt[k] = (parEt[k] || 0) + 1; }); var cours = cm.filter(function (c) { return c.cran < 6; }).length;
     var voy = (STATE.voy || []).filter(function (v) { return v.on !== false && v.orig; }).map(function (v) { var n = (JOINS || []).filter(function (j) { return j.k === 'v' && j.id === v.id; }).length; return '<div class="rang" style="justify-content:space-between"><span>' + esc(v.sens === 'depuis' ? 'Kinshasa → ' + v.orig : v.orig + ' → Kinshasa') + (v.dep ? ' · ' + esc(v.dep) : '') + '</span><b>' + n + (v.max > 0 ? ' / ' + v.max : '') + ' inscrit' + (n > 1 ? 's' : '') + '</b></div>'; }).join('');
     var grp = (STATE.grp || []).filter(function (g) { return g.on && g.nom; }).map(function (g) { var n = (g.n || 0) + (JOINS || []).filter(function (j) { return j.k === 'g' && j.id === g.id; }).length; return '<div class="rang" style="justify-content:space-between"><span>' + esc(g.nom) + '</span><b>' + n + ' inscrit' + (n > 1 ? 's' : '') + '</b></div>'; }).join('');
+    var top = Object.keys(CLICS || {}).sort(function (a, b) { return CLICS[b] - CLICS[a]; }).slice(0, 8).map(function (k) { var nom = k, p = tous().filter(function (x) { return x.id === k; })[0]; if (p) nom = p.t; else if (k.indexOf('i:') === 0) nom = k.slice(2).replace('|', ' '); else if (k.indexOf('lot:') === 0) nom = 'Lot ' + k.split(':').slice(2).join(':'); return '<div class="rang" style="justify-content:space-between"><span>' + esc(nom) + '</span><b>' + CLICS[k] + ' fois</b></div>'; }).join('');
     function tuile(t, v) { return '<div class="carte" style="text-align:center"><div class="note">' + t + '</div><div style="font-size:30px;font-weight:800;color:var(--orange)">' + v + '</div></div>'; }
     $('tdb').innerHTML = '<div class="grille g2" style="gap:10px">' + tuile('Commandes en cours', cours) + tuile('À encaisser', Math.round(du * 100) / 100 + ' $') + tuile('Déjà encaissé', Math.round(paye * 100) / 100 + ' $') + tuile('Inscrits (voyages et groupes)', (JOINS || []).length) + '</div>' +
       '<div class="carte"><div class="kicker">Remplissage des voyages</div>' + (voy || '<p class="note">Aucun voyage.</p>') + '</div>' +
       '<div class="carte"><div class="kicker">Achats groupés</div>' + (grp || '<p class="note">Aucun achat groupé actif.</p>') + '</div>' +
+      '<div class="carte"><div class="kicker">Les plus touchés par les clients</div>' + (top || '<p class="note">Pas encore de données : elles s\'ajoutent à chaque fois qu\'un client ouvre un produit ou touche un prix.</p>') + '</div>' +
       '<p class="note">« À encaisser » vient des montants que tu saisis dans chaque commande (total et acompte reçu). Les commandes sans montant ne comptent pas.</p>';
   }
   document.querySelector('[data-t="tdb"]').addEventListener('click', rendreTdb);
