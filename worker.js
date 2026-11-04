@@ -156,6 +156,7 @@ function nettoyer(s) {
     rempl: v.rempl === '' || v.rempl == null ? null : Math.max(0, Math.min(100, Math.round(nombre(v.rempl)))),
     note: txt(v.note, 160),
   }));
+  o.pay = (Array.isArray(s.pay) ? s.pay : []).slice(0, 6).map((x) => ({ op: txt(x && x.op, 30), num: txt(x && x.num, 30), nom: txt(x && x.nom, 50) })).filter((x) => x.op && x.num);
   const dd = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? String(v) : '');
   o.camp = (Array.isArray(s.camp) ? s.camp : []).slice(0, 12).map((c, i) => ({
     id: txt(c.id || 'c' + (i + 1), 20), on: c.on !== false, nom: txt(c.nom, 60), slogan: txt(c.slogan, 120),
@@ -305,6 +306,31 @@ export default {
       L.slice().sort((a, b) => b.t - a.t).forEach((j) => { const c = out[j.k][j.id]; if (c.last.length < 3) c.last.push({ nom: j.nom, t: j.t }); });
       return json(out);
     }
+    if (p.startsWith('/api/devis/') && request.method === 'GET') {
+      const id = p.slice(11); if (!/^[A-Za-z0-9_-]{1,40}$/.test(id)) return json({ avion: null, bateau: null });
+      const t = await env.GDE.get('couts'); let j = {}; try { j = t ? JSON.parse(t) : {}; } catch (e) {}
+      const r = j.reglages || {}, c = (j.produits || {})[id], n = (v) => (v === '' || v == null || !isFinite(Number(v)) ? null : Number(v));
+      const calc = (mode) => {
+        if (!c) return null;
+        const cout = n(c.cout), poids = n(c.poids), kg = n(mode === 'bateau' ? r.kgBateau : r.kgAvion), m1 = n(r.m1), dou = n(r.douane) || 0, taux = r.devise === 'CNY' ? n(r.taux) : 1;
+        if (cout === null || poids === null || kg === null || m1 === null || taux === null) return null;
+        const rendu = (cout * taux + poids * kg) * (1 + dou / 100), st = parseFloat(r.arrondi) || 0.5, arr = (x) => Math.round(Math.round(x / st) * st * 100) / 100;
+        const pr = (m) => (n(m) === null ? null : arr(rendu * (1 + n(m) / 100)));
+        return [arr(rendu * (1 + m1 / 100)), pr(r.m5), pr(r.m10)];
+      };
+      return json({ avion: calc('avion'), bateau: calc('bateau') });
+    }
+    if (p === '/api/avis' && request.method === 'POST') {
+      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const ref = String(b.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), tx = txt(b.txt, 400), nom = txt(b.nom, 40);
+      if (tx.length < 8) return json({ erreur: 'Écris au moins une phrase.' }, 400);
+      const cmds = await lireListe(env, 'cmds'), c = cmds.find((x) => x.ref === ref);
+      if (!c) return json({ erreur: 'Référence inconnue.' }, 404);
+      if (c.cran < 6) return json({ erreur: 'Tu pourras donner ton avis quand ton colis sera livré.' }, 409);
+      const L = await lireListe(env, 'avisv'); if (L.some((x) => x.ref === ref)) return json({ erreur: 'Tu as déjà donné ton avis. Merci !' }, 409);
+      L.push({ ref, nom: nom || c.nom, txt: tx, t: Date.now() }); await env.GDE.put('avisv', JSON.stringify(L.slice(-200)));
+      return json({ ok: true });
+    }
     if (p === '/api/clic' && request.method === 'POST') {
       let b; try { b = await request.json(); } catch (e) { return new Response(null, { status: 204 }); }
       const id = String(b && b.id || '').slice(0, 60); if (!id || /[<>"]/.test(id) || !env.GDE) return new Response(null, { status: 204 });
@@ -403,6 +429,12 @@ export default {
       return json({ clics: c });
     }
 
+    if (p === '/api/avisv' && request.method === 'GET') return json({ avis: await lireListe(env, 'avisv') });
+    if (p === '/api/avisv' && request.method === 'PUT') {
+      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const L = (Array.isArray(b.avis) ? b.avis : []).slice(0, 200).map((a) => ({ ref: String(a.ref || '').slice(0, 30), nom: txt(a.nom, 40), txt: txt(a.txt, 400), t: nombre(a.t) }));
+      await env.GDE.put('avisv', JSON.stringify(L)); return json({ avis: L });
+    }
     if (p === '/api/cmds' && request.method === 'GET') return json({ cmds: await lireListe(env, 'cmds') });
     if (p === '/api/cmds' && request.method === 'PUT') {
       let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }

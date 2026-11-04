@@ -89,6 +89,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       <button class="btn ghost" role="tab" data-t="iph" aria-selected="false">iPhone</button>
       <button class="btn ghost" role="tab" data-t="pan" aria-selected="false">Paniers</button>
       <button class="btn ghost" role="tab" data-t="tdb" aria-selected="false">Tableau de bord</button>
+      <button class="btn ghost" role="tab" data-t="cli" aria-selected="false">Clients</button>
       <button class="btn ghost" role="tab" data-t="grp" aria-selected="false">Achats groupés</button>
       <button class="btn ghost" role="tab" data-t="ins" aria-selected="false">Inscrits</button>
       <button class="btn ghost" role="tab" data-t="avis" aria-selected="false">Avis</button>
@@ -158,6 +159,10 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       </div>
       <datalist id="pn-prods"></datalist>
     </section>
+    <section id="t-cli" class="grille cache" style="gap:12px">
+      <p class="note">Tes clients, construits avec tes commandes (même prénom et même téléphone). Le bouton « Relancer » prépare un message WhatsApp poli pour ceux qui ont encore un solde à payer.</p>
+      <div id="cli-liste" class="grille" style="gap:8px"></div>
+    </section>
     <section id="t-tdb" class="grille cache" style="gap:12px">
       <p class="note">Ce qui se passe dans ton commerce, calculé avec tes vraies données.</p>
       <div id="tdb" class="grille" style="gap:12px"></div>
@@ -177,6 +182,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
 
     <section id="t-avis" class="grille cache" style="gap:12px">
       <p class="note">Mets ici les vrais avis de tes clients, avec leur accord. Tant qu'il n'y en a aucun, le site montre trois cartes d'exemple. Dès que tu en ajoutes un, elles disparaissent.</p>
+      <div class="carte" id="avv" style="display:grid;gap:8px"><div class="kicker">Avis envoyés par tes clients (vérifiés avec leur référence)</div><div id="avv-liste" class="grille" style="gap:8px"></div></div>
       <details class="carte" id="av-ajout" open>
         <summary>+ Ajouter un avis</summary>
         <div class="grille" style="margin-top:10px">
@@ -295,6 +301,12 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     </section>
 
     <section id="t-reg" class="grille cache" style="gap:12px">
+      <div class="carte">
+        <h3>Paiement de l'acompte</h3>
+        <p class="note">Tes numéros Orange Money, M-Pesa, Airtel Money ou autre. Le client les voit et les copie en un clic quand il doit payer l'acompte de 50 %.</p>
+        <div id="pay-liste" class="grille" style="gap:8px"></div>
+        <button class="btn ghost mini" id="pay-add" type="button">+ Ajouter un numéro</button>
+      </div>
       <div class="carte">
         <h3>Contacts</h3>
         <p class="note">Ajoute autant de numéros, adresses et e-mails que tu veux. Ils s'affichent en bas de chaque page.</p>
@@ -418,7 +430,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
 
   function demarrer() {
     if (STATE) { $('ecran').classList.add('cache'); $('app').classList.remove('cache'); return Promise.resolve(); }
-    return Promise.all([api('/api/state'), fetch('/products.json').then(function (r) { return r.json(); }), api('/api/couts'), api('/api/cartes'), api('/api/cmds'), api('/api/joins/all'), api('/api/iph'), api('/api/clics')]).then(function (rs) {
+    return Promise.all([api('/api/state'), fetch('/products.json').then(function (r) { return r.json(); }), api('/api/couts'), api('/api/cartes'), api('/api/cmds'), api('/api/joins/all'), api('/api/iph'), api('/api/clics'), api('/api/avisv')]).then(function (rs) {
       STATE = defState(rs[0].j); PRODS = rs[1];
       if (rs[2].ok) COUTS = { reglages: Object.assign(COUTS.reglages, rs[2].j.reglages || {}), produits: rs[2].j.produits || {} };
       if (rs[3].ok) CARTES = rs[3].j.cartes || [];
@@ -426,8 +438,9 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       if (rs[5].ok) JOINS = rs[5].j.joins || [];
       if (rs[6] && rs[6].ok) IPH = rs[6].j;
       if (rs[7] && rs[7].ok) CLICS = rs[7].j.clics || {};
+      if (rs[8] && rs[8].ok) AVV = rs[8].j.avis || [];
       $('ecran').classList.add('cache'); $('app').classList.remove('cache');
-      remplirSelects(); rendreProduits(); rendreGroupes(); rendreVoyages(); rendreAvisAdmin(); rendreReglagesPrix(); rendrePrix(); rendreCartes(); rendreCmds(); rendreInscrits(); rendreReglages(); rendreIph(); rendrePaniers(); marquer(false);
+      remplirSelects(); rendreProduits(); rendreGroupes(); rendreVoyages(); rendreAvisAdmin(); rendreReglagesPrix(); rendrePrix(); rendreCartes(); rendreCmds(); rendreInscrits(); rendreReglages(); rendreIph(); rendrePaniers(); rendreAvv(); rendrePay(); rendreCli(); marquer(false);
     });
   }
 
@@ -461,7 +474,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   Array.prototype.forEach.call(document.querySelectorAll('.onglets button'), function (b) {
     b.addEventListener('click', function () {
       Array.prototype.forEach.call(document.querySelectorAll('.onglets button'), function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
-      ['prod', 'voy', 'iph', 'pan', 'tdb', 'grp', 'ins', 'avis', 'prix', 'cmd', 'fac', 'fid', 'reg'].forEach(function (t) { $('t-' + t).classList.toggle('cache', t !== b.getAttribute('data-t')); });
+      ['prod', 'voy', 'iph', 'pan', 'tdb', 'cli', 'grp', 'ins', 'avis', 'prix', 'cmd', 'fac', 'fid', 'reg'].forEach(function (t) { $('t-' + t).classList.toggle('cache', t !== b.getAttribute('data-t')); });
       window.scrollTo(0, 0);
     });
   });
@@ -871,6 +884,36 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   }
   document.querySelector('[data-t="tdb"]').addEventListener('click', rendreTdb);
 
+  /* ---------- Avis vérifiés, paiement, clients ---------- */
+  var AVV = [], avvDirty = false;
+  function rendreAvv() {
+    $('avv-liste').innerHTML = AVV.map(function (a, i) { return '<div class="carte" data-avv="' + i + '"><strong>' + esc(a.nom) + '</strong> <span class="pastille">' + esc(a.ref) + '</span><p style="margin:6px 0">' + esc(a.txt) + '</p><div class="rang"><button class="btn mini" data-avvp="' + i + '" type="button">Publier sur le site</button><button class="btn danger mini" data-avvx="' + i + '" type="button">Supprimer</button></div></div>'; }).join('') || '<p class="note">Aucun avis en attente. Quand ton colis est livré, « Prévenir le client » envoie le lien pour donner son avis.</p>';
+  }
+  $('avv-liste').addEventListener('click', function (e) {
+    var p = e.target.closest('[data-avvp]'), x = e.target.closest('[data-avvx]');
+    if (p) { var a = AVV[+p.getAttribute('data-avvp')]; if (STATE.avis.length >= 30) { alert('30 avis au maximum sur le site.'); return; } STATE.avis.push({ txt: a.txt, nom: a.nom }); AVV.splice(+p.getAttribute('data-avvp'), 1); avvDirty = true; marquer(true); rendreAvv(); rendreAvisAdmin(); }
+    else if (x) { if (!confirm('Supprimer cet avis ?')) return; AVV.splice(+x.getAttribute('data-avvx'), 1); avvDirty = true; marquer(true); rendreAvv(); }
+  });
+  function rendrePay() {
+    STATE.pay = STATE.pay || [];
+    $('pay-liste').innerHTML = STATE.pay.map(function (x, i) { return '<div class="grille g2" style="gap:6px" data-pay="' + i + '"><input data-pyf="op" maxlength="30" placeholder="Opérateur (Orange Money)" value="' + esc(x.op) + '"><input data-pyf="num" maxlength="30" inputmode="tel" placeholder="Numéro" value="' + esc(x.num) + '"><input data-pyf="nom" maxlength="50" placeholder="Nom du titulaire" value="' + esc(x.nom) + '"><button class="btn danger mini" data-pyx="' + i + '" type="button">Retirer</button></div>'; }).join('') || '<p class="note">Aucun numéro. Ajoutes-en un.</p>';
+  }
+  $('pay-add').addEventListener('click', function () { STATE.pay = STATE.pay || []; if (STATE.pay.length >= 6) return; STATE.pay.push({ op: 'Orange Money', num: '', nom: '' }); marquer(true); rendrePay(); });
+  $('pay-liste').addEventListener('input', function (e) { var f = e.target.getAttribute('data-pyf'); if (!f) return; STATE.pay[+e.target.closest('[data-pay]').getAttribute('data-pay')][f] = e.target.value; marquer(true); });
+  $('pay-liste').addEventListener('click', function (e) { var b = e.target.closest('[data-pyx]'); if (!b) return; STATE.pay.splice(+b.getAttribute('data-pyx'), 1); marquer(true); rendrePay(); });
+  function rendreCli() {
+    var G = {}; (CMDS || []).forEach(function (c) { var k = (facTel(c.tel) || '') + '|' + String(c.nom).toLowerCase(); var g = G[k] || (G[k] = { nom: c.nom, tel: c.tel, n: 0, tot: 0, paye: 0, prods: [], last: '' }); g.n++; g.tot += c.total || 0; g.paye += c.paye || 0; g.prods.push(c.prod); if ((c.maj || '') > g.last) g.last = c.maj || ''; });
+    var L = Object.keys(G).map(function (k) { return G[k]; }).sort(function (a, b) { return (b.last || '').localeCompare(a.last || ''); });
+    $('cli-liste').innerHTML = L.map(function (g, i) { var reste = Math.max(0, Math.round((g.tot - g.paye) * 100) / 100); return '<div class="carte" data-cl="' + i + '"><div class="rang" style="justify-content:space-between"><strong>' + esc(g.nom) + '</strong><span class="pastille">' + g.n + ' commande' + (g.n > 1 ? 's' : '') + '</span></div><div class="note">' + esc(g.tel || 'sans téléphone') + ' · ' + esc(g.prods.slice(0, 3).join(', ')) + '</div>' + (g.tot > 0 ? '<div class="note">Total ' + Math.round(g.tot * 100) / 100 + ' $ · payé ' + Math.round(g.paye * 100) / 100 + ' $ · <b>reste ' + reste + ' $</b></div>' : '') + '<div class="rang"><button class="btn mini" data-cla="msg" type="button">Écrire</button>' + (reste > 0 ? '<button class="btn ghost mini" data-cla="relance" type="button">Relancer le solde</button>' : '') + '</div></div>'; }).join('') || '<p class="note">Aucun client pour l\'instant. Ils apparaissent quand tu crées des commandes.</p>';
+    rendreCli.L = L;
+  }
+  $('cli-liste').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-cla]'); if (!b) return; var g = rendreCli.L[+b.closest('[data-cl]').getAttribute('data-cl')], a = b.getAttribute('data-cla'), reste = Math.max(0, Math.round((g.tot - g.paye) * 100) / 100);
+    var t = a === 'relance' ? 'Bonjour ' + g.nom + ', petit rappel de GOD DID EXPRESS : il reste ' + reste + ' $ à régler pour ta commande. Dis-moi quand tu peux le faire, merci !' : 'Bonjour ' + g.nom + ', ici GOD DID EXPRESS. ';
+    var tel = facTel(g.tel); window.open((tel ? 'https://wa.me/' + tel : 'https://wa.me/') + '?text=' + encodeURIComponent(t), '_blank');
+  });
+  document.querySelector('[data-t="cli"]').addEventListener('click', rendreCli);
+
   /* ---------- Affiche du voyage ---------- */
   var VAF = {};
   function fdl(d) { if (!d) return ''; var q = d.split('-'), x = new Date(+q[0], +q[1] - 1, +q[2]), t = x.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }); return t.charAt(0).toUpperCase() + t.slice(1); }
@@ -1174,7 +1217,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     if (a === 'suiv') { c.cran = Math.min(7, c.cran + 1); cmTouch(c); rendreCmds(); }
     else if (a === 'msg') {
       var et = ETAPES.concat(['Livré'])[Math.min(6, c.cran)]; if (c.typ === 'expedition' && c.cran === 3) et = 'Colis reçu chez nous';
-      var t = 'Bonjour ' + c.nom + ', mise à jour de ta commande « ' + (c.prod || 'colis') + ' » : ' + et + '.' + (c.arr ? ' Arrivée estimée : ' + dateFr(c.arr) + '.' : '') + (c.total > 0 && c.cran >= 5 && c.total - (c.paye || 0) > 0 ? ' Reste à payer : ' + Math.round((c.total - (c.paye || 0)) * 100) / 100 + ' $.' : '') + '\nSuis ton colis ici avec la référence ' + c.ref + ' : https://goddidexpress.com/#suivi';
+      var t = 'Bonjour ' + c.nom + ', mise à jour de ta commande « ' + (c.prod || 'colis') + ' » : ' + et + '.' + (c.arr ? ' Arrivée estimée : ' + dateFr(c.arr) + '.' : '') + (c.total > 0 && c.cran >= 5 && c.total - (c.paye || 0) > 0 ? ' Reste à payer : ' + Math.round((c.total - (c.paye || 0)) * 100) / 100 + ' $.' : '') + '\nSuis ton colis ici avec la référence ' + c.ref + ' : https://goddidexpress.com/#suivi' + (c.cran >= 6 ? '\nDonne ton avis ici, ça nous aide beaucoup : https://goddidexpress.com/?avis=' + c.ref : '');
       var tel = facTel(c.tel); window.open((tel ? 'https://wa.me/' + tel : 'https://wa.me/') + '?text=' + encodeURIComponent(t), '_blank');
     }
     else if (a === 'suppr') { if (!confirm('Supprimer la commande de ' + c.nom + ' ?')) return; CMDS.splice(CMDS.indexOf(c), 1); cmDirty = true; marquer(true); rendreCmds(); }
@@ -1271,6 +1314,12 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         if (r.status === 401) return expire();
         if (!r.ok) throw new Error('La liste iPhone n\'est pas enregistrée');
         IPH = r.j; iphDirty = false;
+      }
+      if (avvDirty) {
+        r = await api('/api/avisv', { method: 'PUT', headers: H, body: JSON.stringify({ avis: AVV }) });
+        if (r.status === 401) return expire();
+        if (!r.ok) throw new Error('Les avis ne sont pas enregistrés');
+        AVV = r.j.avis || []; avvDirty = false;
       }
       if (carDirty) {
         r = await api('/api/cartes', { method: 'PUT', headers: H, body: JSON.stringify({ cartes: CARTES }) });
