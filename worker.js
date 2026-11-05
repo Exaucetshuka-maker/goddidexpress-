@@ -194,7 +194,7 @@ function echapper(s) { return s.replace(/</g, '\\u003c').replace(/>/g, '\\u003e'
 function attr(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
 async function metaPartage(url, etat, env, request) {
   const s = url.searchParams.get('s'), pid = url.searchParams.get('p'), org = url.origin;
-  let titre = 'GOD DID EXPRESS', desc = 'Tu choisis. On trouve. On te livre. Chine, Dubaï, Istanbul vers Kinshasa.', img = org + '/icon.png';
+  let titre = 'GOD DID EXPRESS', desc = 'Tu choisis. On trouve. On te livre. Chine, Dubaï, Istanbul vers Kinshasa.', img = org + '/logo-og.png';
   if (s === 'iphone') { titre = 'Prix iPhone du jour · GOD DID EXPRESS'; desc = 'Tous les modèles, commande en un clic sur WhatsApp.'; }
   else if (s === 'voyages') { titre = 'Nos voyages · GOD DID EXPRESS'; const v = (etat.voy || []).filter((x) => x.on !== false && x.orig && x.dep && x.dep >= new Date().toISOString().slice(0, 10))[0]; desc = v ? (v.sens === 'depuis' ? 'Kinshasa → ' + v.orig : v.orig + ' → Kinshasa') + ' · départ le ' + v.dep + '. Réserve ta place.' : 'Dates de départ, dernier jour pour commander, arrivées estimées.'; }
   else if (s === 'groupes') { titre = 'Achats groupés · GOD DID EXPRESS'; desc = 'Plus on est nombreux, moins c\'est cher.'; }
