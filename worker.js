@@ -96,6 +96,7 @@ function nettoyer(s) {
     { const dd = nettoyerDet(p.det); if (dd) r.det = dd; }
     if (new RegExp('^\\d{4}-\\d{2}-\\d{2}$').test(String(p.arr || ''))) r.arr = String(p.arr);
     if (p.photo && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(p.photo)) r.photo = p.photo;
+    { const ph = phs(p.ph); if (ph.length) r.ph = ph; }
     o.prod[id] = r;
   });
   o.extra = (Array.isArray(s.extra) ? s.extra : []).slice(0, 300).map((e) => {
@@ -105,6 +106,7 @@ function nettoyer(s) {
       px: [0, 1, 2].map((i) => (e.px && e.px[i] !== '' && e.px[i] != null ? nombre(e.px[i], null) : null)),
     };
     if (e.photo && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(e.photo)) r.photo = e.photo;
+    { const ph = phs(e.ph); if (ph.length) r.ph = ph; }
     if (e.cache) r.cache = true;
     if (e.desc) r.desc = txt(e.desc, 600);
     { const dd = nettoyerDet(e.det); if (dd) r.det = dd; }
@@ -165,13 +167,15 @@ function nettoyer(s) {
     pids: (Array.isArray(c.pids) ? c.pids : []).slice(0, 40).map((x) => txt(x, 40)).filter(Boolean),
     lots: (Array.isArray(c.lots) ? c.lots : []).slice(0, 8).map((l) => ({ nom: txt(l && l.nom, 60), desc: txt(l && l.desc, 140), prix: Math.max(0, Math.min(99999, nombre(l && l.prix))) })).filter((l) => l.nom),
   })).filter((c) => c.nom);
-  const ip = s.iph && typeof s.iph === 'object' ? s.iph : {};
-  o.iph = {
-    on: ip.on === true,
-    date: txt(ip.date, 40),
-    mention: txt(ip.mention, 60),
-    items: (Array.isArray(ip.items) ? ip.items : []).slice(0, 200).map((t) => ({ m: txt(t && t.m, 40), g: txt(t && t.g, 20), p: Math.max(0, Math.min(99999, Math.round(nombre(t && t.p) * 100) / 100)) })).filter((t) => t.m),
-  };
+  const src = Array.isArray(s.listes) ? s.listes : s.iph && typeof s.iph === 'object' ? [Object.assign({ id: 'iphone', nom: 'iPhone' }, s.iph)] : [];
+  o.listes = src.slice(0, 5).map((l, i) => ({
+    id: /^[A-Za-z0-9_-]{1,20}$/.test(String(l && l.id)) ? l.id : 'l' + (i + 1),
+    nom: txt(l && l.nom, 40) || 'Liste ' + (i + 1),
+    on: !!(l && l.on === true),
+    date: txt(l && l.date, 40),
+    mention: txt(l && l.mention, 60),
+    items: (Array.isArray(l && l.items) ? l.items : []).slice(0, 200).map((t) => ({ m: txt(t && t.m, 60), g: txt(t && t.g, 20), p: Math.max(0, Math.min(99999, Math.round(nombre(t && t.p) * 100) / 100)) })).filter((t) => t.m),
+  }));
   return o;
 }
 
@@ -191,11 +195,12 @@ async function lireEtat(env) {
 function echapper(s) { return s.replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029'); }
 
 
+function phs(a) { return (Array.isArray(a) ? a : []).filter((x) => typeof x === 'string' && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(x)).slice(0, 5); }
 function attr(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
 async function metaPartage(url, etat, env, request) {
   const s = url.searchParams.get('s'), pid = url.searchParams.get('p'), org = url.origin;
   let titre = 'GOD DID EXPRESS', desc = 'Tu choisis. On trouve. On te livre. Chine, Dubaï, Istanbul vers Kinshasa.', img = org + '/logo-og.png';
-  if (s === 'iphone') { titre = 'Prix iPhone du jour · GOD DID EXPRESS'; desc = 'Tous les modèles, commande en un clic sur WhatsApp.'; }
+  if (s === 'iphone' || s === 'prix') { titre = 'Prix du jour · GOD DID EXPRESS'; desc = 'Les prix du jour, commande en un clic sur WhatsApp.'; }
   else if (s === 'voyages') { titre = 'Nos voyages · GOD DID EXPRESS'; const v = (etat.voy || []).filter((x) => x.on !== false && x.orig && x.dep && x.dep >= new Date().toISOString().slice(0, 10))[0]; desc = v ? (v.sens === 'depuis' ? 'Kinshasa → ' + v.orig : v.orig + ' → Kinshasa') + ' · départ le ' + v.dep + '. Réserve ta place.' : 'Dates de départ, dernier jour pour commander, arrivées estimées.'; }
   else if (s === 'groupes') { titre = 'Achats groupés · GOD DID EXPRESS'; desc = 'Plus on est nombreux, moins c\'est cher.'; }
   else if (s === 'paniers') { const c = (etat.camp || []).filter((x) => x.on !== false)[0]; titre = (c ? c.nom : 'Paniers de saison') + ' · GOD DID EXPRESS'; desc = c && c.slogan ? c.slogan : 'Les paniers du moment, commande sur WhatsApp.'; }
@@ -331,6 +336,22 @@ export default {
       L.push({ ref, nom: nom || c.nom, txt: tx, t: Date.now() }); await env.GDE.put('avisv', JSON.stringify(L.slice(-200)));
       return json({ ok: true });
     }
+    if (p === '/api/demande' && request.method === 'POST') {
+      const ip = request.headers.get('cf-connecting-ip') || 'x', rk = 'dm:' + ip, n0 = Number((await env.GDE.get(rk)) || 0);
+      if (n0 >= 5) return json({ erreur: 'Tu as déjà envoyé plusieurs demandes. Réessaie dans une heure ou écris sur WhatsApp.' }, 429);
+      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const nom = txt(b.nom, 60), tel = txt(b.tel, 30).replace(/[^0-9+ ]/g, ''), tx = txt(b.txt, 600), lien = txt(b.lien, 300);
+      if (lien && !/^https?:\/\/\S+$/i.test(lien)) return json({ erreur: 'Le lien doit commencer par http ou https.' }, 400);
+      if (!nom || tel.replace(/\D/g, '').length < 8) return json({ erreur: 'Écris ton prénom et ton numéro WhatsApp.' }, 400);
+      let photo = '', id = 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      const m = typeof b.photo === 'string' ? b.photo.match(/^data:image\/jpeg;base64,([A-Za-z0-9+/=]+)$/) : null;
+      if (b.photo && !m) return json({ erreur: 'Photo non acceptée.' }, 400);
+      if (!tx && !lien && !m) return json({ erreur: 'Envoie au moins une photo, un lien ou une description.' }, 400);
+      if (m) { if (m[1].length > 600000) return json({ erreur: 'Photo trop grande.' }, 413); const bin = Uint8Array.from(atob(m[1]), (c) => c.charCodeAt(0)); await env.GDE.put('img:' + id, bin, { expirationTtl: 90 * 86400 }); photo = '/api/img/' + id; }
+      await env.GDE.put(rk, String(n0 + 1), { expirationTtl: 3600 });
+      const L = await lireListe(env, 'demandes'); L.push({ id, nom, tel, txt: tx, lien, photo, t: Date.now(), vu: false });
+      await env.GDE.put('demandes', JSON.stringify(L.slice(-300))); return json({ ok: true });
+    }
     if (p === '/api/clic' && request.method === 'POST') {
       let b; try { b = await request.json(); } catch (e) { return new Response(null, { status: 204 }); }
       const id = String(b && b.id || '').slice(0, 60); if (!id || /[<>"]/.test(id) || !env.GDE) return new Response(null, { status: 204 });
@@ -449,17 +470,29 @@ export default {
 
     if (p === '/api/iph' && request.method === 'GET') {
       const t = await env.GDE.get('iph'); let j = {}; try { j = t ? JSON.parse(t) : {}; } catch (e) {}
-      return json({ brut: j.brut || '', mode: j.mode === 'pct' ? 'pct' : 'usd', marge: j.marge || '', items: j.items || [] });
+      if (!j.listes) j = { listes: j.items || j.brut ? { iphone: j } : {} };
+      return json({ listes: j.listes });
     }
     if (p === '/api/iph' && request.method === 'PUT') {
       let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const num = (v) => (v === '' || v == null || !isFinite(Number(v)) ? 0 : Math.max(0, Math.min(99999, Number(v))));
-      const out = { brut: String(b.brut || '').slice(0, 8000), mode: b.mode === 'pct' ? 'pct' : 'usd', marge: b.marge === '' || b.marge == null ? '' : num(b.marge),
-        items: (Array.isArray(b.items) ? b.items : []).slice(0, 200).map((t) => ({ m: String(t.m || '').slice(0, 40), g: String(t.g || '').slice(0, 20), c: num(t.c), p: num(t.p) })) };
+      const out = { listes: {} };
+      Object.keys(b.listes || {}).slice(0, 6).forEach((id) => {
+        if (!/^[A-Za-z0-9_-]{1,20}$/.test(id)) return; const l = b.listes[id] || {};
+        out.listes[id] = { brut: String(l.brut || '').slice(0, 8000), mode: l.mode === 'pct' ? 'pct' : 'usd', marge: l.marge === '' || l.marge == null ? '' : num(l.marge),
+          items: (Array.isArray(l.items) ? l.items : []).slice(0, 200).map((t) => ({ m: String(t.m || '').slice(0, 60), g: String(t.g || '').slice(0, 20), c: num(t.c), p: num(t.p) })) };
+      });
       await env.GDE.put('iph', JSON.stringify(out));
       return json(out);
     }
-
+    if (p === '/api/demandes' && request.method === 'GET') return json({ demandes: await lireListe(env, 'demandes') });
+    if (p === '/api/demandes' && request.method === 'PUT') {
+      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const old = await lireListe(env, 'demandes'), L = (Array.isArray(b.demandes) ? b.demandes : []).slice(0, 300).map((d) => ({ id: String(d.id || '').slice(0, 30), nom: txt(d.nom, 60), tel: txt(d.tel, 30), txt: txt(d.txt, 600), lien: txt(d.lien, 300), photo: /^\/api\/img\/d[A-Za-z0-9_-]{1,38}$/.test(d.photo || '') ? d.photo : '', t: nombre(d.t), vu: d.vu === true }));
+      const gardes = new Set(L.map((d) => d.id));
+      for (const d of old) if (!gardes.has(d.id) && d.photo) await env.GDE.delete('img:' + d.photo.slice(9));
+      await env.GDE.put('demandes', JSON.stringify(L)); return json({ demandes: L });
+    }
     if (p === '/api/couts' && request.method === 'GET') {
       const t = await env.GDE.get('couts'); let j = {}; try { j = t ? JSON.parse(t) : {}; } catch (e) {}
       return json({ reglages: j.reglages || {}, produits: j.produits || {} });
