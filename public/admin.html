@@ -925,7 +925,15 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       '<div class="carte"><div class="kicker">Remplissage des voyages</div>' + (voy || '<p class="note">Aucun voyage.</p>') + '</div>' +
       '<div class="carte"><div class="kicker">Achats groupés</div>' + (grp || '<p class="note">Aucun achat groupé actif.</p>') + '</div>' +
       '<div class="carte"><div class="kicker">Les plus touchés par les clients</div>' + (top || '<p class="note">Pas encore de données : elles s\'ajoutent à chaque fois qu\'un client ouvre un produit ou touche un prix.</p>') + '</div>' +
-      '<p class="note">« À encaisser » vient des montants que tu saisis dans chaque commande (total et acompte reçu). Les commandes sans montant ne comptent pas.</p>';
+      '<div class="carte"><div class="kicker">Produits les plus voulus (votes des clients)</div><div id="tdb-votes"><p class="note">Chargement…</p></div></div>' +
+      '<p class="note">« À encaisser » vient des montants que tu saisis dans chaque commande (total et acompte reçu). Les commandes sans montant ne comptent pas.</p>'; chargerVotes();
+  }
+  function chargerVotes() {
+    fetch('/api/votes', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
+      var b = $('tdb-votes'); if (!b) return;
+      var L = Object.keys(v).sort(function (x, y) { return v[y] - v[x]; }).slice(0, 8).map(function (k) { var p = tous().filter(function (x) { return x.id === k; })[0]; return '<div class="rang" style="justify-content:space-between"><span>' + esc(p ? p.t : k) + '</span><span><b>' + v[k] + '</b> vote' + (v[k] > 1 ? 's' : '') + (v[k] >= 5 ? ' · idée d\'achat groupé' : '') + '</span></div>'; }).join('');
+      b.innerHTML = L || '<p class="note">Pas encore de vote. Le bouton « Je veux ce produit » est dans la fiche de chaque produit.</p>';
+    }).catch(function () {});
   }
   document.querySelector('[data-t="tdb"]').addEventListener('click', rendreTdb);
 
@@ -965,6 +973,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     var nv = DEM.filter(function (d) { return !d.vu; }).length, tb = document.querySelector('[data-t="dem"]'); if (tb) tb.textContent = 'Demandes' + (nv ? ' (' + nv + ')' : '');
     $('dem-liste').innerHTML = DEM.slice().reverse().map(function (d) { var i = DEM.indexOf(d); return '<div class="carte" data-dm="' + i + '">' + (d.photo ? '<a href="' + esc(d.photo) + '" target="_blank" rel="noopener"><img src="' + esc(d.photo) + '" alt="" style="width:100%;max-height:260px;object-fit:cover;border-radius:6px"></a>' : '') +
       '<div class="rang" style="justify-content:space-between;margin-top:6px"><strong>' + esc(d.nom) + '</strong><span class="note">' + new Date(d.t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) + (d.vu ? '' : ' · nouveau') + '</span></div>' +
+      (d.act ? '<p style="margin:6px 0"><span class="pastille">Commerçant : ' + esc(d.act) + (d.freq ? ' · ' + esc(d.freq) : '') + '</span></p>' : '') +
       (d.pre ? '<p style="margin:6px 0"><span class="pastille">Réservation : ' + esc(d.voy || 'prochain arrivage') + ' · acompte 50 %</span></p>' : '') +
       ((d.qte || d.bud || d.mar) ? '<p class="note" style="margin:6px 0">' + [d.qte ? 'Quantité : ' + esc(d.qte) : '', d.bud ? 'Budget : ' + esc(d.bud) + ' $' : '', d.mar ? 'Marché : ' + esc(d.mar) : ''].filter(Boolean).join(' · ') + '</p>' : '') +
       (d.txt ? '<p style="margin:6px 0">' + esc(d.txt) + '</p>' : '') + (d.lien ? '<p style="margin:6px 0;word-break:break-all"><a href="' + esc(d.lien) + '" target="_blank" rel="noopener noreferrer">' + esc(d.lien) + '</a></p>' : '') +
@@ -972,7 +981,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   }
   $('dem-liste').addEventListener('click', function (e) {
     var b = e.target.closest('[data-dma]'); if (!b) return; var i = +b.closest('[data-dm]').getAttribute('data-dm'), d = DEM[i], a = b.getAttribute('data-dma');
-    if (a === 'rep') { var t = 'Bonjour ' + d.nom + ', ici GOD DID EXPRESS. Nous avons bien reçu ta demande' + (d.txt ? ' (« ' + d.txt.slice(0, 60) + ' »)' : '') + '. Nous cherchons le produit et revenons vers toi avec le devis avant tout paiement.' + (d.pre ? ' Pour ta réservation (' + (d.voy || 'prochain arrivage') + '), l\'acompte est de 50 % ; le reste se paie avant la livraison.' : '');; var tel = facTel(d.tel); window.open((tel ? 'https://wa.me/' + tel : 'https://wa.me/') + '?text=' + encodeURIComponent(t), '_blank'); if (!d.vu) { d.vu = true; demDirty = true; marquer(true); rendreDem(); } }
+    if (a === 'rep') { var t = 'Bonjour ' + d.nom + ', ici GOD DID EXPRESS. Nous avons bien reçu ta demande' + (d.txt ? ' (« ' + d.txt.slice(0, 60) + ' »)' : '') + '. Nous cherchons le produit et revenons vers toi avec le devis avant tout paiement.' + (d.act ? ' Nous te préparons une proposition avec nos tarifs professionnels.' : '') + (d.pre ? ' Pour ta réservation (' + (d.voy || 'prochain arrivage') + '), l\'acompte est de 50 % ; le reste se paie avant la livraison.' : '');; var tel = facTel(d.tel); window.open((tel ? 'https://wa.me/' + tel : 'https://wa.me/') + '?text=' + encodeURIComponent(t), '_blank'); if (!d.vu) { d.vu = true; demDirty = true; marquer(true); rendreDem(); } }
     else if (a === 'vu') { d.vu = !d.vu; demDirty = true; marquer(true); rendreDem(); }
     else if (a === 'x') { if (!confirm('Supprimer cette demande et sa photo ?')) return; DEM.splice(i, 1); demDirty = true; marquer(true); rendreDem(); }
   });

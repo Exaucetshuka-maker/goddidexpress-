@@ -868,6 +868,23 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     </div>
   </section>
 
+  <section class="view" id="v-pro" hidden>
+    <header>
+      <div class="kicker">Commerçants et entreprises</div>
+      <h2>Tu achètes pour revendre ?</h2>
+      <p>Boutiques, hôtels, restaurants, entreprises, revendeurs : demande un devis de gros, un devis groupé sur plusieurs articles ou une commande qui revient chaque mois. Tu reçois une proposition d'approvisionnement avec nos tarifs professionnels.</p>
+    </header>
+    <div class="carte" style="display:grid;gap:10px">
+      <div class="duo"><div class="champ"><label for="pr-nom">Ton prénom</label><input id="pr-nom" maxlength="60" autocomplete="given-name"></div><div class="champ"><label for="pr-tel">Ton numéro WhatsApp</label><input id="pr-tel" inputmode="tel" maxlength="30" autocomplete="tel" placeholder="+243…"></div></div>
+      <div class="champ"><label for="pr-act">Ton activité</label><select id="pr-act"><option>Boutique</option><option>Hôtel</option><option>Restaurant</option><option>Entreprise</option><option>Revendeur</option><option>Autre</option></select></div>
+      <div class="champ"><label for="pr-txt">Les produits et quantités que tu veux</label><textarea id="pr-txt" rows="4" maxlength="500" placeholder="Ex. 50 chargeurs rapides, 20 montres connectées…"></textarea></div>
+      <label class="rang" style="gap:8px;align-items:center"><input type="checkbox" id="pr-liste" style="width:auto"> <span id="pr-liste-t">Ajouter les articles de ma liste</span></label>
+      <div class="champ"><label for="pr-freq">Fréquence</label><select id="pr-freq"><option>Une fois</option><option>Chaque mois</option><option>Chaque semaine</option></select></div>
+      <button class="btn" id="pr-ok" type="button">Demander mon devis professionnel</button>
+      <p class="note" id="pr-msg" aria-live="polite" style="margin:0"></p>
+    </div>
+  </section>
+
   <section class="view" id="v-services" hidden>
     <header>
       <div class="kicker">Nos services</div>
@@ -1359,7 +1376,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 
 
   /* Onglets */
-  var VUES = ['accueil', 'catalogue', 'commander', 'groupes', 'voyages', 'iphone', 'paniers', 'services', 'live', 'suivi', 'parrainer', 'methode', 'admin'];
+  var VUES = ['accueil', 'catalogue', 'commander', 'groupes', 'voyages', 'iphone', 'paniers', 'services', 'live', 'suivi', 'parrainer', 'methode', 'pro', 'admin'];
   var SERVICES = [
     { id: 'venir', ico: '📥', t: 'Faire venir ma marchandise en RDC', d: 'Tu as déjà des marchandises à Dubaï, à Istanbul ou en Chine (téléphones, électronique, vêtements, chaussures…) ? On les amène jusqu\'à Kinshasa, avec le suivi et la preuve en photo à chaque étape.',
       etapes: ['Tu nous envoies la liste des marchandises, les photos, les quantités et l\'adresse où elles se trouvent.', 'On te donne un devis détaillé : transport, douane et marge, avant tout paiement.', 'Tu verses l\'acompte de 50 %. On récupère et on regroupe ta marchandise.', 'Elle part sur le prochain voyage. Tu suis chaque étape avec ta référence GDE.', 'Livraison à Kinshasa, tu règles le solde à la réception.'],
@@ -1826,6 +1843,18 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     $('veil').hidden = true; $('sheet').innerHTML = '';
     if (dernierFocus && dernierFocus.focus) { try { dernierFocus.focus(); } catch (e) {} }
   }
+  var votes = {}, mesVotes = {};
+  try { mesVotes = JSON.parse(localStorage.getItem('gde-votes') || '{}') || {}; } catch (e) {}
+  fetch('/api/votes').then(function (r) { return r.ok ? r.json() : {}; }).then(function (v) { votes = v || {}; }).catch(function () {});
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-vote]'); if (!b) return; var id = b.getAttribute('data-vote');
+    if (mesVotes[id]) { b.textContent = 'Merci, ton vote est compté'; return; }
+    b.disabled = true;
+    fetch('/api/vote', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: id }) }).then(function (r) { return r.json(); }).then(function (j) {
+      if (j && j.ok) { votes[id] = j.n; mesVotes[id] = 1; try { localStorage.setItem('gde-votes', JSON.stringify(mesVotes)); } catch (x) {} b.disabled = false; b.textContent = 'Merci ! ' + j.n + ' personne' + (j.n > 1 ? 's veulent' : ' veut') + ' ce produit'; }
+      else { b.textContent = (j && j.erreur) || 'Impossible pour le moment'; b.disabled = false; }
+    }).catch(function () { b.textContent = 'Pas de connexion'; b.disabled = false; });
+  });
   function ouvrirProduit(id) {
     clic(id);
     var p = BY[id]; if (!p) return;
@@ -1839,6 +1868,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       '<div class="rangee"><a class="btn" data-cmd-wa href="' + wa(msgProduit(p)) + '" target="_blank" rel="noopener">Commander sur WhatsApp</a>' +
       '<button class="btn ghost" type="button" data-add="' + p.id + '" data-sheet="1" aria-pressed="' + dans + '">' + (dans ? 'Dans ma liste' : 'Ajouter à ma liste') + '</button>' +
       '<a class="btn ghost" href="https://wa.me/?text=' + encodeURIComponent(partage) + '" target="_blank" rel="noopener">Partager à un ami</a>' +
+      '<button class="btn ghost" type="button" data-vote="' + p.id + '">' + (votes[p.id] ? 'Je le veux aussi (' + votes[p.id] + ')' : 'Je veux ce produit') + '</button>' +
       '<button class="btn ghost" type="button" data-parle="' + p.id + '">Écouter la fiche</button></div>');
     majCalc(); chargerDevis(p);
   }
@@ -2124,6 +2154,22 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     $('occ-rail').innerHTML = PRODUITS.filter(function (p) { return set.indexOf(p.c) >= 0; }).slice(0, 10).map(function (p) { return mini(p); }).join('');
   }
   rendreOcc();
+  (function () {
+    var b = $('pr-ok'); if (!b) return;
+    function nb() { return Object.keys(liste).filter(function (k) { return itemListe(k); }).length; }
+    b.addEventListener('click', function () {
+      var m = $('pr-msg'), txt = $('pr-txt').value.trim();
+      if ($('pr-liste').checked) { var l = Object.keys(liste).map(function (k) { var i = itemListe(k); return i ? '- ' + i.t + ' x' + liste[k] : ''; }).filter(Boolean); if (l.length) txt = (txt ? txt + '\n' : '') + 'Ma liste :\n' + l.join('\n'); }
+      if (!txt) { m.textContent = 'Écris les produits que tu veux, ou ajoute ta liste.'; return; }
+      b.disabled = true; m.textContent = 'Envoi…';
+      fetch('/api/demande', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nom: $('pr-nom').value, tel: $('pr-tel').value, txt: txt.slice(0, 600), act: $('pr-act').value, freq: $('pr-freq').value }) })
+        .then(function (r) { return r.json().then(function (j) { return [r.ok, j]; }); }).then(function (x) {
+          if (x[0]) { m.textContent = 'Merci ! On te répond sur WhatsApp avec une proposition professionnelle.'; $('pr-txt').value = ''; b.textContent = 'Demande envoyée ✓'; setTimeout(function () { b.textContent = 'Envoyer une autre demande'; b.disabled = false; }, 2500); }
+          else { m.textContent = x[1].erreur || 'Impossible pour le moment.'; b.disabled = false; }
+        }).catch(function () { m.textContent = 'Pas de connexion. Réessaie.'; b.disabled = false; });
+    });
+    var obs = new MutationObserver(function () { var n = nb(); $('pr-liste-t').textContent = n ? 'Ajouter les ' + n + ' article' + (n > 1 ? 's' : '') + ' de ma liste' : 'Ajouter les articles de ma liste (ta liste est vide)'; }); obs.observe($('v-pro'), { attributes: true });
+  })();
   function majQuand() {
     var t = auj(), M = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'], o = '<option value="">Dès que possible</option><option value="arrivage">Réserver pour le prochain arrivage (acompte 50 %)</option>';
     voyListe().filter(function (v) { return v.sens !== 'depuis' && v.dep && v.dep > t; }).forEach(function (v) { var d = v.dep.split('-'); var lab = v.orig + ' → Kinshasa, départ ' + Number(d[2]) + ' ' + M[Number(d[1]) - 1]; o += '<option value="' + lab.replace(/"/g, '') + '">Réserver : ' + lab + ' (acompte 50 %)</option>'; });
@@ -2261,6 +2307,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       tuile('groupes', '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.6.2 4.5 2.3 4.5 5.1"/>', 'Achats groupés', 'Plus on est nombreux, moins c\'est cher') +
       tuile('voyages', '<path d="M3 17l18-6-6 9-3-4-5 1z"/><path d="M12 16v4"/>', 'Nos voyages', 'Départs, dates limites et arrivées') +
       (STATE.pay && STATE.pay.length ? tuile('pay', '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h3"/>', 'Payer l\'acompte', 'Orange Money, M-Pesa, Airtel') : '') +
+      tuile('pro', '<path d="M4 9h16v10H4z"/><path d="M9 9V6h6v3"/>', 'Espace commerçants', 'Devis de gros, commandes régulières') +
       tuile('share', '<circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="18" cy="18" r="2.4"/><path d="M8.1 10.9l7.8-3.8M8.1 13.1l7.8 3.8"/>', 'Partager le site', 'WhatsApp, Facebook, TikTok, Instagram...') +
       tuile('install', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M12 7v7m-3-3 3 3 3-3"/>', 'Installer l\'application', 'L\'icône sur ton téléphone') +
       (campActives().length ? tuile('paniers', '<path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 0 1 6 0"/>', campActives()[0].nom, 'Produits et lots du moment') : '') +
