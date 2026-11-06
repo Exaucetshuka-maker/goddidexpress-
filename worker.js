@@ -167,6 +167,7 @@ function nettoyer(s) {
     pids: (Array.isArray(c.pids) ? c.pids : []).slice(0, 40).map((x) => txt(x, 40)).filter(Boolean),
     lots: (Array.isArray(c.lots) ? c.lots : []).slice(0, 8).map((l) => ({ nom: txt(l && l.nom, 60), desc: txt(l && l.desc, 140), prix: Math.max(0, Math.min(99999, nombre(l && l.prix))) })).filter((l) => l.nom),
   })).filter((c) => c.nom);
+  o.tend = (Array.isArray(s.tend) ? s.tend : []).slice(0, 24).map((x) => ({ pid: txt(x && x.pid, 40), tag: ['Chine', 'Dubaï', 'Turquie', 'RDC', 'Nouveau'].includes(x && x.tag) ? x.tag : 'Nouveau' })).filter((x) => x.pid);
   const src = Array.isArray(s.listes) ? s.listes : s.iph && typeof s.iph === 'object' ? [Object.assign({ id: 'iphone', nom: 'iPhone' }, s.iph)] : [];
   o.listes = src.slice(0, 5).map((l, i) => ({
     id: /^[A-Za-z0-9_-]{1,20}$/.test(String(l && l.id)) ? l.id : 'l' + (i + 1),
@@ -302,7 +303,7 @@ export default {
       const cartes = await lireListe(env, 'cartes');
       const c = cartes.find((x) => x.code === mc[1].toUpperCase());
       if (!c) return json({ erreur: 'Carte introuvable' }, 404);
-      return json({ nom: c.nom, achats: c.achats });
+      return json({ nom: c.nom, achats: c.achats, parr: c.parr || 0, util: c.util || 0 });
     }
 
 
@@ -342,7 +343,7 @@ export default {
       const ip = request.headers.get('cf-connecting-ip') || 'x', rk = 'dm:' + ip, n0 = Number((await env.GDE.get(rk)) || 0);
       if (n0 >= 5) return json({ erreur: 'Tu as déjà envoyé plusieurs demandes. Réessaie dans une heure ou écris sur WhatsApp.' }, 429);
       let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
-      const nom = txt(b.nom, 60), tel = txt(b.tel, 30).replace(/[^0-9+ ]/g, ''), tx = txt(b.txt, 600), lien = txt(b.lien, 300);
+      const nom = txt(b.nom, 60), tel = txt(b.tel, 30).replace(/[^0-9+ ]/g, ''), tx = txt(b.txt, 600), lien = txt(b.lien, 300), qte = txt(b.qte, 20), bud = txt(b.bud, 20), mar = ['Chine', 'Dubaï', 'Turquie', 'Tous les marchés'].includes(b.mar) ? b.mar : '', pre = b.pre === true;
       if (lien && !/^https?:\/\/\S+$/i.test(lien)) return json({ erreur: 'Le lien doit commencer par http ou https.' }, 400);
       if (!nom || tel.replace(/\D/g, '').length < 8) return json({ erreur: 'Écris ton prénom et ton numéro WhatsApp.' }, 400);
       let photo = '', id = 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -351,7 +352,7 @@ export default {
       if (!tx && !lien && !m) return json({ erreur: 'Envoie au moins une photo, un lien ou une description.' }, 400);
       if (m) { if (m[1].length > 600000) return json({ erreur: 'Photo trop grande.' }, 413); const bin = Uint8Array.from(atob(m[1]), (c) => c.charCodeAt(0)); await env.GDE.put('img:' + id, bin, { expirationTtl: 90 * 86400 }); photo = '/api/img/' + id; }
       await env.GDE.put(rk, String(n0 + 1), { expirationTtl: 3600 });
-      const L = await lireListe(env, 'demandes'); L.push({ id, nom, tel, txt: tx, lien, photo, t: Date.now(), vu: false });
+      const L = await lireListe(env, 'demandes'); L.push({ id, nom, tel, txt: tx, lien, photo, qte, bud, mar, pre, t: Date.now(), vu: false });
       await env.GDE.put('demandes', JSON.stringify(L.slice(-300))); return json({ ok: true });
     }
     if (p === '/api/clic' && request.method === 'POST') {
@@ -433,6 +434,7 @@ export default {
       const vues = new Set();
       const propre = (Array.isArray(b.cartes) ? b.cartes : []).slice(0, 3000).map((c) => ({
         code: String(c.code || '').toUpperCase(), nom: txt(c.nom, 40), achats: Math.max(0, Math.min(999, Math.round(nombre(c.achats)))), maj: nombre(c.maj, Date.now()),
+        parrain: String(c.parrain || '').toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 30), parr: Math.max(0, Math.min(999, Math.round(nombre(c.parr)))), util: Math.max(0, Math.min(99999, Math.round(nombre(c.util)))), bonus: c.bonus === true,
       })).filter((c) => /^[A-Z0-9-]{4,30}$/.test(c.code) && !vues.has(c.code) && vues.add(c.code));
       await env.GDE.put('cartes', JSON.stringify(propre));
       return json({ cartes: propre });
@@ -502,7 +504,7 @@ export default {
     if (p === '/api/demandes' && request.method === 'GET') return json({ demandes: await lireListe(env, 'demandes') });
     if (p === '/api/demandes' && request.method === 'PUT') {
       let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
-      const old = await lireListe(env, 'demandes'), L = (Array.isArray(b.demandes) ? b.demandes : []).slice(0, 300).map((d) => ({ id: String(d.id || '').slice(0, 30), nom: txt(d.nom, 60), tel: txt(d.tel, 30), txt: txt(d.txt, 600), lien: txt(d.lien, 300), photo: /^\/api\/img\/d[A-Za-z0-9_-]{1,38}$/.test(d.photo || '') ? d.photo : '', t: nombre(d.t), vu: d.vu === true }));
+      const old = await lireListe(env, 'demandes'), L = (Array.isArray(b.demandes) ? b.demandes : []).slice(0, 300).map((d) => ({ id: String(d.id || '').slice(0, 30), nom: txt(d.nom, 60), tel: txt(d.tel, 30), txt: txt(d.txt, 600), lien: txt(d.lien, 300), qte: txt(d.qte, 20), bud: txt(d.bud, 20), mar: ['Chine', 'Dubaï', 'Turquie', 'Tous les marchés'].includes(d.mar) ? d.mar : '', pre: d.pre === true, photo: /^\/api\/img\/d[A-Za-z0-9_-]{1,38}$/.test(d.photo || '') ? d.photo : '', t: nombre(d.t), vu: d.vu === true }));
       const gardes = new Set(L.map((d) => d.id));
       for (const d of old) if (!gardes.has(d.id) && d.photo) await env.GDE.delete('img:' + d.photo.slice(9));
       await env.GDE.put('demandes', JSON.stringify(L)); return json({ demandes: L });

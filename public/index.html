@@ -650,6 +650,11 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       </div>
     </section>
 
+    <section class="bloc rv" id="tendance" hidden>
+      <header><div class="kicker">GOD DID TRENDING</div><h2>Les produits qui font parler d'eux</h2></header>
+      <div class="rail" id="tendance-rail"></div>
+    </section>
+
     <section class="bloc rv">
       <header><div class="kicker">Sélection de la semaine</div><h2>Au programme du live</h2></header>
       <div class="rail" id="tend-rail"></div>
@@ -747,11 +752,13 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <p>Décrivez le produit. Vous recevez un devis détaillé : prix fournisseur, transport, douane et notre marge. Vous versez 50 % pour lancer l'achat, le reste à la livraison.</p>
     </header>
     <div class="carte" id="dem-box" style="margin:0 0 14px;display:grid;gap:10px">
-      <div class="kicker">Tu as une photo ou un lien ?</div>
+      <div class="kicker">GOD DID WANTED</div><h3 style="margin:0">Tu cherches un produit ? Nous le trouvons.</h3>
       <p class="note" style="margin:0">Envoie-nous la photo du produit que tu veux, ou le lien d'un site. On le retrouve et on te donne un devis avant tout paiement.</p>
       <div class="duo"><div class="champ"><label for="dm-nom">Ton prénom</label><input id="dm-nom" maxlength="60" autocomplete="given-name"></div><div class="champ"><label for="dm-tel">Ton numéro WhatsApp</label><input id="dm-tel" inputmode="tel" maxlength="30" autocomplete="tel" placeholder="+243…"></div></div>
       <div class="champ"><label for="dm-photo">Photo du produit</label><input id="dm-photo" type="file" accept="image/*"><img id="dm-prev" alt="" hidden style="width:100%;max-height:220px;object-fit:cover;border-radius:6px;margin-top:6px"></div>
       <div class="champ"><label for="dm-lien">Lien du produit (facultatif)</label><input id="dm-lien" inputmode="url" maxlength="300" placeholder="https://…"></div>
+      <div class="duo"><div class="champ"><label for="dm-qte">Quantité</label><input id="dm-qte" inputmode="numeric" maxlength="12" placeholder="Ex. 20"></div><div class="champ"><label for="dm-bud">Budget indicatif ($)</label><input id="dm-bud" inputmode="decimal" maxlength="12" placeholder="Ex. 500"></div></div>
+      <div class="champ"><label for="dm-mar">Où chercher ?</label><select id="dm-mar"><option>Tous les marchés</option><option>Chine</option><option>Dubaï</option><option>Turquie</option></select></div>
       <div class="champ"><label for="dm-txt">Ce que tu veux (taille, couleur, quantité…)</label><textarea id="dm-txt" rows="3" maxlength="600"></textarea></div>
       <button class="btn" id="dm-ok" type="button">Envoyer ma demande</button>
       <p class="note" id="dm-msg" aria-live="polite" style="margin:0"></p>
@@ -971,6 +978,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <div class="champ"><label for="fid-code">Ton numéro de carte</label><input id="fid-code" autocomplete="off" style="text-transform:uppercase" placeholder="Ex. GDE-K7M2-9QXP"></div>
       <p class="note" id="fid-res" aria-live="polite">Entre ton numéro pour voir tes achats. Sans carte, demande-la sur WhatsApp.</p>
       <div class="fid" id="fid-grid"></div>
+      <div class="carte" id="fid-pts" hidden style="gap:6px"><div class="kicker">GOD DID REWARDS</div><h3 id="fp-t"></h3><p class="note" id="fp-n"></p><a class="btn" id="fp-inv" href="#" target="_blank" rel="noopener">Inviter un ami</a></div>
       <div id="fid-wallet" hidden style="display:grid;gap:8px"><img id="fw-img" alt="Ma carte fidélité GOD DID EXPRESS" style="width:100%;border-radius:14px"><div class="rang"><a class="btn mini" id="fw-save" download="carte-fidelite-gde.png">Enregistrer dans mes photos</a><button class="btn ghost mini" type="button" id="fw-inst">Mettre sur l'écran d'accueil</button></div><p class="note">Ouvre ce site à tout moment : ta carte et tes achats sont toujours à jour.</p></div>
       <div class="niveaux"><span>Bronze</span><span>Argent</span><span>Or</span><span>Diamant</span></div>
       <p class="note">2 $ reçus à chaque achat. Après 10 achats (20 $ cumulés) : un produit de 20 $ sans frais de douane et livraison gratuite. Offre limitée à 2 mois. Votre seule limite, c'est votre imagination.</p>
@@ -1924,7 +1932,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     f.addEventListener('change', function () { DM_PH = ''; $('dm-prev').hidden = true; if (!f.files[0]) return; reduireDm(f.files[0]).then(function (u) { DM_PH = u; $('dm-prev').src = u; $('dm-prev').hidden = false; }).catch(function () { $('dm-msg').textContent = 'Cette photo ne peut pas être lue. Essaie une autre.'; }); });
     $('dm-ok').addEventListener('click', function () {
       var b = $('dm-ok'), m = $('dm-msg'); b.disabled = true; m.textContent = 'Envoi…';
-      fetch('/api/demande', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nom: $('dm-nom').value, tel: $('dm-tel').value, lien: $('dm-lien').value.trim(), txt: $('dm-txt').value, photo: DM_PH }) })
+      fetch('/api/demande', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nom: $('dm-nom').value, tel: $('dm-tel').value, lien: $('dm-lien').value.trim(), txt: $('dm-txt').value, qte: $('dm-qte').value, bud: $('dm-bud').value, mar: $('dm-mar').value, photo: DM_PH }) })
         .then(function (r) { return r.json().then(function (j) { return [r.ok, j]; }); })
         .then(function (x) {
           if (x[0]) { m.textContent = 'Merci ! On cherche ton produit et on te répond sur WhatsApp avec le devis.'; ['dm-lien', 'dm-txt', 'dm-photo'].forEach(function (id) { $(id).value = ''; }); DM_PH = ''; $('dm-prev').hidden = true; b.textContent = 'Demande envoyée ✓'; setTimeout(function () { b.textContent = 'Envoyer une autre demande'; b.disabled = false; }, 2500); }
@@ -2111,6 +2119,17 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     $('occ-rail').innerHTML = PRODUITS.filter(function (p) { return set.indexOf(p.c) >= 0; }).slice(0, 10).map(function (p) { return mini(p); }).join('');
   }
   rendreOcc();
+  function rendreTendance() {
+    var T = (STATE.tend || []).map(function (x) { return { p: PRODUITS.filter(function (q) { return q.id === x.pid; })[0], tag: x.tag }; }).filter(function (x) { return x.p; });
+    var L = { Chine: 'Tendance en Chine', 'Dubaï': 'Tendance à Dubaï', Turquie: 'Tendance en Turquie', RDC: 'Demandé en RDC', Nouveau: 'Nouveauté' };
+    $('tendance').hidden = !T.length;
+    $('tendance-rail').innerHTML = T.map(function (x) {
+      return '<div class="mc" style="display:grid;gap:6px;align-content:start;min-width:178px"><button type="button" class="mc" data-open="' + x.p.id + '" style="all:unset;cursor:pointer;display:grid;gap:6px"><span class="im"><img src="' + img(x.p) + '" alt="" loading="lazy" width="156" height="98"></span><span class="pastille" style="justify-self:start">' + (L[x.tag] || '') + '</span><b>' + x.p.t + '</b></button>' +
+        '<a class="btn mini" href="' + wa('Bonjour GOD DID EXPRESS, quel est le prix de : ' + x.p.t + ' ? Pouvez-vous aussi me donner le délai de livraison ?') + '" target="_blank" rel="noopener">Demander le prix</a>' +
+        '<a class="btn ghost mini" href="' + wa('Bonjour GOD DID EXPRESS, je veux précommander : ' + x.p.t + '. Quelles sont les conditions (acompte, délai) ?') + '" target="_blank" rel="noopener">Précommander</a></div>';
+    }).join('');
+  }
+  rendreTendance();
 
   /* Salle d'attente du live */
   function prochainLive() {
@@ -2187,16 +2206,21 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     if (mcFile && navigator.canShare && navigator.canShare({ files: [mcFile] })) navigator.share({ files: [mcFile], title: 'GOD DID EXPRESS' }).catch(function () {});
     else { $('mc-save').click(); toast('Carte enregistrée : envoie-la depuis ta galerie'); }
   });
+  function majPoints(code, pt, parr) {
+    $('fid-pts').hidden = false; $('fp-t').textContent = pt + ' point' + (pt > 1 ? 's' : '') + ' (1 point = 1 $ de réduction)';
+    $('fp-n').textContent = 'Chaque achat : 2 points. Quand un ami que tu as parrainé fait son premier achat : 5 points pour toi. ' + (parr ? parr + ' ami' + (parr > 1 ? 's' : '') + ' déjà parrainé' + (parr > 1 ? 's' : '') + '.' : '');
+    $('fp-inv').href = wa('Salut ! Je commande chez GOD DID EXPRESS (produits de Chine, Dubaï, Turquie). Va sur ' + location.origin + ' et dis qu\'on t\'a recommandé avec le code ' + code + ' lors de ta première commande.');
+  }
   window.GDELOGO = new Image(); GDELOGO.src = 'logo-web.png';
-  function dessinerCarte(code, nom, n) {
-    var W = 900, H = 560, cv = document.createElement('canvas'); cv.width = W; cv.height = H; var x = cv.getContext('2d');
+  function dessinerCarte(code, nom, n, pt) {
+    var W = 900, H = 580, cv = document.createElement('canvas'); cv.width = W; cv.height = H; var x = cv.getContext('2d');
     var g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#ff8a1f'); g.addColorStop(1, '#e8650a'); x.fillStyle = g;
     x.beginPath(); if (x.roundRect) x.roundRect(0, 0, W, H, 40); else x.rect(0, 0, W, H); x.fill();
     var lg = window.GDELOGO; if (lg && lg.complete && lg.naturalWidth) { x.fillStyle = '#fff'; x.beginPath(); if (x.roundRect) x.roundRect(34, 30, 330, 100, 18); else x.rect(34, 30, 330, 100); x.fill(); x.drawImage(lg, 48, 42, 302, 76); x.fillStyle = '#111'; } else { x.fillStyle = '#111'; x.font = '800 40px system-ui,Arial'; x.fillText('GOD DID EXPRESS', 48, 78); }
     x.font = '600 26px system-ui,Arial'; x.fillStyle = 'rgba(0,0,0,.65)'; x.fillText('Carte fidélité', 48, 168);
     x.fillStyle = '#111'; x.font = '700 24px system-ui,Arial'; x.fillText('ACHATS', W - 230, 70); x.font = '800 56px system-ui,Arial'; x.fillText(Math.min(n, 99) + ' / 10', W - 230, 128);
     for (var i = 0; i < 10; i++) { var cx = 90 + (i % 5) * 92, cy = 215 + Math.floor(i / 5) * 92; x.beginPath(); x.arc(cx, cy, 36, 0, 7); x.fillStyle = i < n ? '#111' : 'rgba(255,255,255,.35)'; x.fill(); if (i < n) { x.strokeStyle = '#ff8a1f'; x.lineWidth = 7; x.lineCap = 'round'; x.beginPath(); x.moveTo(cx - 14, cy + 1); x.lineTo(cx - 4, cy + 12); x.lineTo(cx + 15, cy - 11); x.stroke(); } }
-    x.fillStyle = '#111'; x.font = '600 22px system-ui,Arial'; x.fillText('MEMBRE', 48, 440); x.font = '800 40px system-ui,Arial'; x.fillText(String(nom || '').slice(0, 18), 48, 486); x.font = '700 28px ui-monospace,monospace'; x.fillText(code, 48, 528);
+    x.fillStyle = '#111'; x.font = '600 22px system-ui,Arial'; x.fillText('MEMBRE', 48, 440); x.font = '800 40px system-ui,Arial'; x.fillText(String(nom || '').slice(0, 18), 48, 486); x.font = '700 24px system-ui,Arial'; x.fillText((pt || 0) + ' points', 48, 560 - 8); x.font = '700 28px ui-monospace,monospace'; x.fillText(code, 48, 528);
     var M = window.GDEQR ? GDEQR.make((function (u) { return u.length <= 42 ? u : u.slice(8); })('https://' + location.host + '/?c=' + code)) : null;
     if (M) { var q = 220, px = Math.floor(q / M.length), qs = px * M.length, ox = W - qs - 78, oy = 260; x.fillStyle = '#fff'; x.fillRect(ox - 18, oy - 18, qs + 36, qs + 36); x.fillStyle = '#000'; for (var r = 0; r < M.length; r++) for (var k = 0; k < M.length; k++) if (M[r][k]) x.fillRect(ox + k * px, oy + r * px, px, px); }
     var u = cv.toDataURL('image/png'); $('fw-img').src = u; $('fw-save').href = u; $('fid-wallet').hidden = false;
@@ -2210,9 +2234,9 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     fidT = setTimeout(function () {
       fetch('/api/carte/' + encodeURIComponent(c)).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, s: r.status, j: j }; }); }).then(function (r) {
         if (!r.ok) { $('fid-pastille').textContent = 'Exemple'; $('fid-res').textContent = r.s === 429 ? 'Trop d\'essais. Réessaie dans quelques minutes.' : 'Carte introuvable. Vérifie le numéro.'; diamants(4); return; }
-        FID = { numero: c, nom: r.j.nom || '', achats: r.j.achats || 0 }; var n = r.j.achats || 0, th = STATE.vip, lv = n >= th[2] ? 3 : n >= th[1] ? 2 : n >= th[0] ? 1 : n >= 1 ? 0 : -1;
+        FID = { numero: c, nom: r.j.nom || '', achats: r.j.achats || 0 }; var n = r.j.achats || 0, PT = Math.max(0, n * 2 + (r.j.parr || 0) * 5 - (r.j.util || 0)); FID.pts = PT; majPoints(c, PT, r.j.parr || 0); var n0 = n, th = STATE.vip, lv = n >= th[2] ? 3 : n >= th[1] ? 2 : n >= th[0] ? 1 : n >= 1 ? 0 : -1;
         $('fid-pastille').textContent = 'Ta carte'; diamants(Math.min(10, n));
-        try { localStorage.setItem('gde-carte', c); } catch (e) {} dessinerCarte(c, r.j.nom || '', n);
+        try { localStorage.setItem('gde-carte', c); } catch (e) {} dessinerCarte(c, r.j.nom || '', n, PT);
         $('fid-res').textContent = 'Bonjour ' + (r.j.nom || '') + '. ' + n + ' achat' + (n > 1 ? 's' : '') + ', ' + usd(n * 2) + ' reçus' + (lv >= 0 ? ', niveau ' + NIV[lv] : '') + '. ' +
           (n >= 10 ? 'Tu as droit à ton produit de 20 $. Écris-nous sur WhatsApp.' : 'Encore ' + (10 - n) + ' achat' + (10 - n > 1 ? 's' : '') + ' pour ton produit de 20 $.');
       }).catch(function () { $('fid-res').textContent = 'Pas de connexion. Réessaie.'; });
