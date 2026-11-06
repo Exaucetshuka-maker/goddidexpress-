@@ -359,6 +359,14 @@ export default {
       if (!(id in c) && Object.keys(c).length >= 600) return new Response(null, { status: 204 });
       c[id] = (c[id] || 0) + 1; await env.GDE.put('clics', JSON.stringify(c)); return new Response(null, { status: 204 });
     }
+    if (p === '/api/vue' && request.method === 'POST') {
+      let b; try { b = await request.json(); } catch (e) { return new Response(null, { status: 204 }); }
+      if (!env.GDE) return new Response(null, { status: 204 });
+      const jour = new Date().toISOString().slice(0, 10), t = await env.GDE.get('vues'); let v = {}; try { v = t ? JSON.parse(t) : {}; } catch (e) {}
+      const d = v[jour] || (v[jour] = { v: 0, u: 0 }); d.v++; if (b && b.n === true) d.u++;
+      Object.keys(v).sort().slice(0, Math.max(0, Object.keys(v).length - 60)).forEach((k) => delete v[k]);
+      await env.GDE.put('vues', JSON.stringify(v)); return new Response(null, { status: 204 });
+    }
     if (p === '/api/join' && request.method === 'POST') {
       const ip = request.headers.get('cf-connecting-ip') || 'x', rk = 'jn:' + ip;
       const nrl = Number((await env.GDE.get(rk)) || 0);
@@ -444,6 +452,10 @@ export default {
       } else return json({ erreur: 'Action inconnue' }, 400);
       await env.GDE.put('joins', JSON.stringify(L.slice(-3000)));
       return json({ joins: L.map((j) => ({ k: j.k, id: j.id, nom: j.nom, t: j.t, m: !!j.m })) });
+    }
+    if (p === '/api/vues' && request.method === 'GET') {
+      const t = await env.GDE.get('vues'); let v = {}; try { v = t ? JSON.parse(t) : {}; } catch (e) {}
+      return json({ vues: v });
     }
     if (p === '/api/clics' && request.method === 'GET') {
       const t = await env.GDE.get('clics'); let c = {}; try { c = t ? JSON.parse(t) : {}; } catch (e) {}

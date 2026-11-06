@@ -971,6 +971,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <div class="champ"><label for="fid-code">Ton numéro de carte</label><input id="fid-code" autocomplete="off" style="text-transform:uppercase" placeholder="Ex. GDE-K7M2-9QXP"></div>
       <p class="note" id="fid-res" aria-live="polite">Entre ton numéro pour voir tes achats. Sans carte, demande-la sur WhatsApp.</p>
       <div class="fid" id="fid-grid"></div>
+      <div id="fid-wallet" hidden style="display:grid;gap:8px"><img id="fw-img" alt="Ma carte fidélité GOD DID EXPRESS" style="width:100%;border-radius:14px"><div class="rang"><a class="btn mini" id="fw-save" download="carte-fidelite-gde.png">Enregistrer dans mes photos</a><button class="btn ghost mini" type="button" id="fw-inst">Mettre sur l'écran d'accueil</button></div><p class="note">Ouvre ce site à tout moment : ta carte et tes achats sont toujours à jour.</p></div>
       <div class="niveaux"><span>Bronze</span><span>Argent</span><span>Or</span><span>Diamant</span></div>
       <p class="note">2 $ reçus à chaque achat. Après 10 achats (20 $ cumulés) : un produit de 20 $ sans frais de douane et livraison gratuite. Offre limitée à 2 mois. Votre seule limite, c'est votre imagination.</p>
       <a class="btn" id="fid-wa" href="#" target="_blank" rel="noopener">Activer ma carte sur WhatsApp</a>
@@ -1065,6 +1066,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 <div class="boot" id="boot" hidden><div><div class="boot-logo">God Did <span>Express</span></div><div class="boot-ligne"><i></i></div><div class="boot-txt">Kinshasa vers le monde</div></div></div>
 
 <script src="holo.js"></script>
+<script src="qr.js"></script>
 <script src="ticket.js"></script>
 <script>
 (function () {
@@ -1852,6 +1854,44 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Application</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Installer GOD DID EXPRESS</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div><ol style="margin:6px 0 0;padding-left:20px;display:grid;gap:8px">' + (ios ? '<li>Touche le bouton Partager de Safari (le carré avec une flèche).</li><li>Choisis « Sur l\'écran d\'accueil ».</li><li>Touche « Ajouter ».</li>' : '<li>Ouvre le menu du navigateur (les trois points).</li><li>Choisis « Installer l\'application » ou « Ajouter à l\'écran d\'accueil ».</li>') + '</ol><p class="note">L\'icône GOD DID EXPRESS apparaît ensuite sur ton téléphone, comme une application.</p>');
   });
+
+  /* ---- Visiteurs réels, installation automatique, partage universel ---- */
+  try {
+    var jv = new Date().toISOString().slice(0, 10), nv = false;
+    try { nv = localStorage.getItem('gde-vu') !== jv; if (nv) localStorage.setItem('gde-vu', jv); } catch (e) { nv = false; }
+    if (!sessionStorage.getItem('gde-sv') && navigator.sendBeacon) { sessionStorage.setItem('gde-sv', '1'); navigator.sendBeacon('/api/vue', new Blob([JSON.stringify({ n: nv })], { type: 'application/json' })); }
+  } catch (e) {}
+  function lienPartage(txt) { var m = String(txt || '').match(/https?:\/\/[^\s]+/); return m ? m[0] : location.origin; }
+  function partager(titre, txt) {
+    var url = lienPartage(txt), t = encodeURIComponent(txt), u = encodeURIComponent(url), nt = encodeURIComponent(String(txt).replace(url, '').trim());
+    var R = [['WhatsApp', 'https://wa.me/?text=' + t], ['Facebook', 'https://www.facebook.com/sharer/sharer.php?u=' + u + '&quote=' + nt], ['Messenger', 'fb-messenger://share/?link=' + u], ['Telegram', 'https://t.me/share/url?url=' + u + '&text=' + nt], ['X (Twitter)', 'https://twitter.com/intent/tweet?text=' + nt + '&url=' + u], ['LinkedIn', 'https://www.linkedin.com/sharing/share-offsite/?url=' + u], ['SMS', 'sms:?&body=' + t], ['E-mail', 'mailto:?subject=' + encodeURIComponent(titre || 'GOD DID EXPRESS') + '&body=' + t]];
+    ouvrir('<div class="sheet-tete"><div><div class="kicker">Partager</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">' + h(titre || 'GOD DID EXPRESS') + '</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
+      (navigator.share ? '<button class="btn" type="button" id="pt-nat">Toutes mes applications (TikTok, Instagram, Snapchat...)</button>' : '') +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' + R.map(function (r) { return '<a class="btn ghost" target="_blank" rel="noopener" href="' + ea(r[1]) + '">' + r[0] + '</a>'; }).join('') + '</div>' +
+      '<button class="btn ghost" type="button" id="pt-cp">Copier le lien</button><p class="note" id="pt-msg" aria-live="polite"></p>');
+    var n = $('pt-nat'); if (n) n.addEventListener('click', function () { navigator.share({ title: titre || 'GOD DID EXPRESS', text: String(txt).replace(url, '').trim(), url: url }).catch(function () {}); });
+    $('pt-cp').addEventListener('click', function () { try { navigator.clipboard.writeText(txt); $('pt-msg').textContent = 'Lien copié. Colle-le où tu veux (TikTok, Instagram, statut...).'; } catch (e) { $('pt-msg').textContent = 'Copie impossible ici.'; } });
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href^="https://wa.me/?text="]'); if (a) { e.preventDefault(); var tx = ''; try { tx = decodeURIComponent(a.getAttribute('href').slice('https://wa.me/?text='.length)); } catch (er) { return; } partager('GOD DID EXPRESS', tx); return; }
+    if (e.target.closest('[data-share]')) partager('GOD DID EXPRESS', 'GOD DID EXPRESS : on cherche, on importe, on te livre à Kinshasa.\n' + location.origin + '/');
+  });
+  (function () {
+    var std = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone; if (std) return;
+    var ios = /iphone|ipad|ipod/i.test(navigator.userAgent), K = 'gde-inst';
+    function barre() {
+      try { if (Number(localStorage.getItem(K)) > Date.now()) return; } catch (e) {}
+      if (document.getElementById('bar-inst')) return;
+      var d = document.createElement('div'); d.id = 'bar-inst'; d.style.cssText = 'position:fixed;left:10px;right:10px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:60;background:#fff;color:#111;border-radius:12px;padding:12px;display:flex;gap:10px;align-items:center;box-shadow:0 8px 30px rgba(0,0,0,.45)';
+      d.innerHTML = '<img src="/icon-192.png" alt="" width="40" height="40" style="border-radius:10px"><div style="flex:1;font-size:14px;line-height:1.25"><b>Installer GOD DID EXPRESS</b><br>L\'icône sur ton téléphone, en un clic.</div><button type="button" class="btn mini" id="bi-ok">Installer</button><button type="button" class="btn ghost mini" id="bi-no" aria-label="Plus tard" style="color:#111;border-color:#bbb">×</button>';
+      document.body.appendChild(d);
+      function ferme(j) { d.remove(); try { localStorage.setItem(K, String(Date.now() + j * 864e5)); } catch (e) {} }
+      document.getElementById('bi-no').addEventListener('click', function () { ferme(7); });
+      document.getElementById('bi-ok').addEventListener('click', function () { ferme(30); var t = document.querySelector('[data-install]'); if (INST) { INST.prompt(); INST = null; } else { var b = document.createElement('button'); b.setAttribute('data-install', ''); b.hidden = true; document.body.appendChild(b); b.click(); b.remove(); } });
+    }
+    window.addEventListener('appinstalled', function () { var d = document.getElementById('bar-inst'); if (d) d.remove(); try { localStorage.setItem(K, String(Date.now() + 3650 * 864e5)); } catch (e) {} });
+    setTimeout(barre, ios ? 9000 : 6000);
+  })();
   function ouvrirAvis(ref) {
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Ton avis</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Donne ton avis</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
       '<p class="note">Commande ' + h(ref) + '. Ton avis vérifié aide les prochains clients.</p><div><label for="av-nom">Prénom</label><input id="av-nom" maxlength="40" autocomplete="given-name"></div><div><label for="av-txt">Ton avis</label><textarea id="av-txt" rows="4" maxlength="400" placeholder="Comment s\'est passée ta commande ?"></textarea></div><button class="btn" id="av-ok" type="button">Envoyer mon avis</button><p class="note" id="av-msg" aria-live="polite"></p>');
@@ -2147,6 +2187,21 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     if (mcFile && navigator.canShare && navigator.canShare({ files: [mcFile] })) navigator.share({ files: [mcFile], title: 'GOD DID EXPRESS' }).catch(function () {});
     else { $('mc-save').click(); toast('Carte enregistrée : envoie-la depuis ta galerie'); }
   });
+  function dessinerCarte(code, nom, n) {
+    var W = 900, H = 560, cv = document.createElement('canvas'); cv.width = W; cv.height = H; var x = cv.getContext('2d');
+    var g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#ff8a1f'); g.addColorStop(1, '#e8650a'); x.fillStyle = g;
+    x.beginPath(); if (x.roundRect) x.roundRect(0, 0, W, H, 40); else x.rect(0, 0, W, H); x.fill();
+    x.fillStyle = '#111'; x.font = '800 40px system-ui,Arial'; x.fillText('GOD DID EXPRESS', 48, 78);
+    x.font = '600 26px system-ui,Arial'; x.fillStyle = 'rgba(0,0,0,.65)'; x.fillText('Carte fidélité', 48, 114);
+    x.fillStyle = '#111'; x.font = '700 24px system-ui,Arial'; x.fillText('ACHATS', W - 230, 70); x.font = '800 56px system-ui,Arial'; x.fillText(Math.min(n, 99) + ' / 10', W - 230, 128);
+    for (var i = 0; i < 10; i++) { var cx = 90 + (i % 5) * 92, cy = 215 + Math.floor(i / 5) * 92; x.beginPath(); x.arc(cx, cy, 36, 0, 7); x.fillStyle = i < n ? '#111' : 'rgba(255,255,255,.35)'; x.fill(); if (i < n) { x.strokeStyle = '#ff8a1f'; x.lineWidth = 7; x.lineCap = 'round'; x.beginPath(); x.moveTo(cx - 14, cy + 1); x.lineTo(cx - 4, cy + 12); x.lineTo(cx + 15, cy - 11); x.stroke(); } }
+    x.fillStyle = '#111'; x.font = '600 22px system-ui,Arial'; x.fillText('MEMBRE', 48, 440); x.font = '800 40px system-ui,Arial'; x.fillText(String(nom || '').slice(0, 18), 48, 486); x.font = '700 28px ui-monospace,monospace'; x.fillText(code, 48, 528);
+    var M = window.GDEQR ? GDEQR.make((function (u) { return u.length <= 42 ? u : u.slice(8); })('https://' + location.host + '/?c=' + code)) : null;
+    if (M) { var q = 220, px = Math.floor(q / M.length), qs = px * M.length, ox = W - qs - 78, oy = 260; x.fillStyle = '#fff'; x.fillRect(ox - 18, oy - 18, qs + 36, qs + 36); x.fillStyle = '#000'; for (var r = 0; r < M.length; r++) for (var k = 0; k < M.length; k++) if (M[r][k]) x.fillRect(ox + k * px, oy + r * px, px, px); }
+    var u = cv.toDataURL('image/png'); $('fw-img').src = u; $('fw-save').href = u; $('fid-wallet').hidden = false;
+  }
+  $('fw-inst').addEventListener('click', function () { var t = document.querySelector('[data-install]'); if (INST) { INST.prompt(); INST = null; } else { var b = document.createElement('button'); b.setAttribute('data-install', ''); b.hidden = true; document.body.appendChild(b); b.click(); b.remove(); } });
+  try { var qc = (new URLSearchParams(location.search).get('c') || localStorage.getItem('gde-carte') || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''); if (qc.length >= 6) { var fromLink = new URLSearchParams(location.search).get('c'); setTimeout(function () { $('fid-code').value = qc; $('fid-code').dispatchEvent(new Event('input')); if (fromLink) show('parrainer', false); }, 500); } } catch (e) {}
   $('fid-code').addEventListener('input', function () {
     clearTimeout(fidT);
     var c = this.value.trim().toUpperCase().replace(/\s+/g, '');
@@ -2156,6 +2211,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         if (!r.ok) { $('fid-pastille').textContent = 'Exemple'; $('fid-res').textContent = r.s === 429 ? 'Trop d\'essais. Réessaie dans quelques minutes.' : 'Carte introuvable. Vérifie le numéro.'; diamants(4); return; }
         FID = { numero: c, nom: r.j.nom || '', achats: r.j.achats || 0 }; var n = r.j.achats || 0, th = STATE.vip, lv = n >= th[2] ? 3 : n >= th[1] ? 2 : n >= th[0] ? 1 : n >= 1 ? 0 : -1;
         $('fid-pastille').textContent = 'Ta carte'; diamants(Math.min(10, n));
+        try { localStorage.setItem('gde-carte', c); } catch (e) {} dessinerCarte(c, r.j.nom || '', n);
         $('fid-res').textContent = 'Bonjour ' + (r.j.nom || '') + '. ' + n + ' achat' + (n > 1 ? 's' : '') + ', ' + usd(n * 2) + ' reçus' + (lv >= 0 ? ', niveau ' + NIV[lv] : '') + '. ' +
           (n >= 10 ? 'Tu as droit à ton produit de 20 $. Écris-nous sur WhatsApp.' : 'Encore ' + (10 - n) + ' achat' + (10 - n > 1 ? 's' : '') + ' pour ton produit de 20 $.');
       }).catch(function () { $('fid-res').textContent = 'Pas de connexion. Réessaie.'; });
@@ -2163,12 +2219,13 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   });
 
   /* Fenêtre « Plus » */
-  function tuile(v, ico, t, s) { return '<button type="button" class="tuile" ' + (v === 'pay' || v === 'install' ? 'data-' + v : 'data-go="' + v + '"') + '><svg viewBox="0 0 24 24" aria-hidden="true">' + ico + '</svg><span><b>' + t + '</b><span class="s">' + s + '</span></span></button>'; }
+  function tuile(v, ico, t, s) { return '<button type="button" class="tuile" ' + (v === 'pay' || v === 'install' || v === 'share' ? 'data-' + v : 'data-go="' + v + '"') + '><svg viewBox="0 0 24 24" aria-hidden="true">' + ico + '</svg><span><b>' + t + '</b><span class="s">' + s + '</span></span></button>'; }
   function ouvrirPlus() {
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Plus</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Aller plus loin</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
       tuile('groupes', '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.6.2 4.5 2.3 4.5 5.1"/>', 'Achats groupés', 'Plus on est nombreux, moins c\'est cher') +
       tuile('voyages', '<path d="M3 17l18-6-6 9-3-4-5 1z"/><path d="M12 16v4"/>', 'Nos voyages', 'Départs, dates limites et arrivées') +
       (STATE.pay && STATE.pay.length ? tuile('pay', '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h3"/>', 'Payer l\'acompte', 'Orange Money, M-Pesa, Airtel') : '') +
+      tuile('share', '<circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="18" cy="18" r="2.4"/><path d="M8.1 10.9l7.8-3.8M8.1 13.1l7.8 3.8"/>', 'Partager le site', 'WhatsApp, Facebook, TikTok, Instagram...') +
       tuile('install', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M12 7v7m-3-3 3 3 3-3"/>', 'Installer l\'application', 'L\'icône sur ton téléphone') +
       (campActives().length ? tuile('paniers', '<path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 0 1 6 0"/>', campActives()[0].nom, 'Produits et lots du moment') : '') +
       (iphOn() ? tuile('iphone', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>', 'Prix du jour', 'Tous les modèles, commande en un clic') : '') +
@@ -2375,7 +2432,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     box.innerHTML = L.map(function (g) {
       var p = (g.p || []).filter(function (x) { return x[1] > 0; }).sort(function (x, y) { return x[0] - y[0]; });
       if (!p.length) p = [[1, 0]];
-      var gn = (g.n || 0) + nJ('g', g.id); var actif = -1; p.forEach(function (x, i) { if (gn >= x[0]) actif = i; });
+      var gn = nJ('g', g.id); var actif = -1; p.forEach(function (x, i) { if (gn >= x[0]) actif = i; });
       var cur = p[Math.max(actif, 0)], suiv = p[actif + 1];
       var pct = suiv ? Math.min(100, Math.round(gn / suiv[0] * 100)) : 100;
       var txt = suiv ? (suiv[0] - gn) + ' personne' + (suiv[0] - gn > 1 ? 's' : '') + ' de plus pour passer à ' + usd(suiv[1]) : 'Dernier palier atteint';

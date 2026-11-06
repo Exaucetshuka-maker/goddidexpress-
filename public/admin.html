@@ -437,7 +437,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
 
   function demarrer() {
     if (STATE) { $('ecran').classList.add('cache'); $('app').classList.remove('cache'); return Promise.resolve(); }
-    return Promise.all([api('/api/state'), fetch('/products.json').then(function (r) { return r.json(); }), api('/api/couts'), api('/api/cartes'), api('/api/cmds'), api('/api/joins/all'), api('/api/iph'), api('/api/clics'), api('/api/avisv'), api('/api/demandes')]).then(function (rs) {
+    return Promise.all([api('/api/state'), fetch('/products.json').then(function (r) { return r.json(); }), api('/api/couts'), api('/api/cartes'), api('/api/cmds'), api('/api/joins/all'), api('/api/iph'), api('/api/clics'), api('/api/avisv'), api('/api/demandes'), api('/api/vues')]).then(function (rs) {
       STATE = defState(rs[0].j); PRODS = rs[1];
       if (rs[2].ok) COUTS = { reglages: Object.assign(COUTS.reglages, rs[2].j.reglages || {}), produits: rs[2].j.produits || {} };
       if (rs[3].ok) CARTES = rs[3].j.cartes || [];
@@ -447,6 +447,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       if (rs[7] && rs[7].ok) CLICS = rs[7].j.clics || {};
       if (rs[8] && rs[8].ok) AVV = rs[8].j.avis || [];
       if (rs[9] && rs[9].ok) DEM = rs[9].j.demandes || [];
+      if (rs[10] && rs[10].ok) VUES = rs[10].j.vues || {};
       $('ecran').classList.add('cache'); $('app').classList.remove('cache');
       remplirSelects(); rendreProduits(); rendreGroupes(); rendreVoyages(); rendreAvisAdmin(); rendreReglagesPrix(); rendrePrix(); rendreCartes(); rendreCmds(); rendreInscrits(); rendreReglages(); rendreIph(); rendrePaniers(); rendreAvv(); rendrePay(); rendreCli(); rendreDem(); marquer(false);
     });
@@ -666,7 +667,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         '<div class="grille g2"><div><label>Durée (jours)</label><input data-g="' + i + '" data-f="durj" inputmode="decimal" value="' + esc(g.durj) + '"></div>' +
         '<div><label>Places maximum (facultatif)</label><input data-g="' + i + '" data-f="max" inputmode="numeric" value="' + esc(g.max || '') + '" placeholder="Illimité"></div></div>' +
         '<div class="rang"><button class="btn mini" data-ga="lancer" data-g="' + i + '" type="button">Lancer maintenant</button><span class="note">Démarre le compte à rebours et remet les inscrits à 0.</span></div>' +
-        '<div><label>Inscrits</label><div class="compteur"><button class="btn ghost" data-ga="moins" data-g="' + i + '" type="button" aria-label="Moins un">−</button><input data-g="' + i + '" data-f="n" inputmode="numeric" value="' + esc(g.n) + '"><button class="btn" data-ga="plus" data-g="' + i + '" type="button" aria-label="Plus un">+</button></div></div>' +
+        '<div><label>Inscrits</label><p class="note" style="margin:0"><b>' + (JOINS || []).filter(function (j) { return j.k === 'g' && j.id === g.id; }).length + '</b> inscrit(s), comptés automatiquement depuis le site. Pour ajouter quelqu\'un à la main, utilise l\'onglet Inscrits.</p></div>' +
         pal + '</div></details>';
     }).join('');
   }
@@ -767,7 +768,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   });
 
   /* ---------- Listes de prix du jour ---------- */
-  var CLICS = {};
+  var CLICS = {}, VUES = {};
   var IPHS = {}, iphDirty = false, IPF = null, LI = 0;
   function listeCour() { STATE.listes = STATE.listes || []; return STATE.listes[LI]; }
   function privCour() { var l = listeCour(); if (!l) return null; return IPHS[l.id] || (IPHS[l.id] = { brut: '', mode: 'usd', marge: '', items: [] }); }
@@ -907,10 +908,12 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     cm.forEach(function (c) { if (c.cran < 6) { du += Math.max(0, (c.total || 0) - (c.paye || 0)); } paye += c.paye || 0; });
     var parEt = {}; cm.forEach(function (c) { var k = c.cran; parEt[k] = (parEt[k] || 0) + 1; }); var cours = cm.filter(function (c) { return c.cran < 6; }).length;
     var voy = (STATE.voy || []).filter(function (v) { return v.on !== false && v.orig; }).map(function (v) { var n = (JOINS || []).filter(function (j) { return j.k === 'v' && j.id === v.id; }).length; return '<div class="rang" style="justify-content:space-between"><span>' + esc(v.sens === 'depuis' ? 'Kinshasa → ' + v.orig : v.orig + ' → Kinshasa') + (v.dep ? ' · ' + esc(v.dep) : '') + '</span><b>' + n + (v.max > 0 ? ' / ' + v.max : '') + ' inscrit' + (n > 1 ? 's' : '') + '</b></div>'; }).join('');
-    var grp = (STATE.grp || []).filter(function (g) { return g.on && g.nom; }).map(function (g) { var n = (g.n || 0) + (JOINS || []).filter(function (j) { return j.k === 'g' && j.id === g.id; }).length; return '<div class="rang" style="justify-content:space-between"><span>' + esc(g.nom) + '</span><b>' + n + ' inscrit' + (n > 1 ? 's' : '') + '</b></div>'; }).join('');
+    var grp = (STATE.grp || []).filter(function (g) { return g.on && g.nom; }).map(function (g) { var n = (JOINS || []).filter(function (j) { return j.k === 'g' && j.id === g.id; }).length; return '<div class="rang" style="justify-content:space-between"><span>' + esc(g.nom) + '</span><b>' + n + ' inscrit' + (n > 1 ? 's' : '') + '</b></div>'; }).join('');
     var top = Object.keys(CLICS || {}).sort(function (a, b) { return CLICS[b] - CLICS[a]; }).slice(0, 8).map(function (k) { var nom = k, p = tous().filter(function (x) { return x.id === k; })[0]; if (p) nom = p.t; else if (k.indexOf('i:') === 0) nom = k.slice(2).replace('|', ' '); else if (k.indexOf('lot:') === 0) nom = 'Lot ' + k.split(':').slice(2).join(':'); return '<div class="rang" style="justify-content:space-between"><span>' + esc(nom) + '</span><b>' + CLICS[k] + ' fois</b></div>'; }).join('');
+    var vj = function (n) { var o = { v: 0, u: 0 }; for (var i = 0; i < n; i++) { var k = new Date(Date.now() - i * 864e5).toISOString().slice(0, 10), d = VUES[k]; if (d) { o.v += d.v; o.u += d.u; } } return o; }, v1 = vj(1), v7 = vj(7), v30 = vj(30);
     function tuile(t, v) { return '<div class="carte" style="text-align:center"><div class="note">' + t + '</div><div style="font-size:30px;font-weight:800;color:var(--orange)">' + v + '</div></div>'; }
-    $('tdb').innerHTML = '<div class="grille g2" style="gap:10px">' + tuile('Commandes en cours', cours) + tuile('À encaisser', Math.round(du * 100) / 100 + ' $') + tuile('Déjà encaissé', Math.round(paye * 100) / 100 + ' $') + tuile('Inscrits (voyages et groupes)', (JOINS || []).length) + '</div>' +
+    $('tdb').innerHTML = '<div class="carte"><div class="kicker">Visiteurs du site (comptés automatiquement)</div><div class="grille g2" style="gap:8px;margin-top:8px">' + tuile('Aujourd\'hui', v1.u + ' pers.') + tuile('7 derniers jours', v7.u + ' pers.') + tuile('30 derniers jours', v30.u + ' pers.') + tuile('Pages ouvertes (30 j)', v30.v) + '</div><p class="note" style="margin-top:8px">Une personne compte une fois par jour et par téléphone. Aucun chiffre n\'est saisi à la main.</p></div>' +
+      '<div class="grille g2" style="gap:10px">' + tuile('Commandes en cours', cours) + tuile('À encaisser', Math.round(du * 100) / 100 + ' $') + tuile('Déjà encaissé', Math.round(paye * 100) / 100 + ' $') + tuile('Inscrits (voyages et groupes)', (JOINS || []).length) + '</div>' +
       '<div class="carte"><div class="kicker">Remplissage des voyages</div>' + (voy || '<p class="note">Aucun voyage.</p>') + '</div>' +
       '<div class="carte"><div class="kicker">Achats groupés</div>' + (grp || '<p class="note">Aucun achat groupé actif.</p>') + '</div>' +
       '<div class="carte"><div class="kicker">Les plus touchés par les clients</div>' + (top || '<p class="note">Pas encore de données : elles s\'ajoutent à chaque fois qu\'un client ouvre un produit ou touche un prix.</p>') + '</div>' +
@@ -1157,7 +1160,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   function rendreCartes() {
     var q = $('f-q').value.trim().toLowerCase();
     $('f-liste').innerHTML = CARTES.filter(function (c) { return !q || (c.nom + ' ' + c.code).toLowerCase().indexOf(q) >= 0; }).map(function (c) {
-      var i = CARTES.indexOf(c), msg = 'Bonjour ' + c.nom + ', voici ta carte fidélité GOD DID EXPRESS : ' + c.code + '. Tape ce numéro sur le site, dans Plus puis Membre, pour voir tes achats. ' + location.origin;
+      var i = CARTES.indexOf(c), msg = 'Bonjour ' + c.nom + ', voici ta carte fidélité GOD DID EXPRESS : ' + c.code + '. Ouvre ce lien : ta carte et tes achats s\'affichent tout de suite. ' + location.origin + '/?c=' + c.code;
       return '<div class="carte" data-ci="' + i + '"><div class="rang" style="justify-content:space-between"><strong>' + esc(c.nom) + '</strong><span class="pastille">' + esc(c.code) + '</span></div>' +
         '<div><label>Achats</label><div class="compteur"><button class="btn ghost" data-fa="moins" type="button" aria-label="Moins un">−</button><input data-fn="1" inputmode="numeric" value="' + esc(c.achats) + '"><button class="btn" data-fa="plus" type="button" aria-label="Plus un">+</button></div></div>' +
         '<div class="rang"><button class="btn mini" data-fa="img" type="button">Carte en image</button><a class="btn ghost mini" style="text-decoration:none;display:inline-flex;align-items:center" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(msg) + '">Message texte</a><button class="btn danger mini" data-fa="suppr" type="button">Supprimer</button></div></div>';
