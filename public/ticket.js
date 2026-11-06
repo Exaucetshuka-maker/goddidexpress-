@@ -100,6 +100,12 @@
       return c;
     });
   }
+  var LOGO = new Image(); LOGO.src = 'logo-web.png';
+  function marque(ctx, x, y, repli) {
+    if (!(LOGO.complete && LOGO.naturalWidth)) { repli(); return; }
+    var h = 74, w = Math.round(h * LOGO.naturalWidth / LOGO.naturalHeight), px = 14, py = 8, top = y - 54;
+    ctx.save(); ctx.fillStyle = '#fff'; ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x - px, top - py, w + 2 * px, h + 2 * py, 16); else ctx.rect(x - px, top - py, w + 2 * px, h + 2 * py); ctx.fill(); ctx.drawImage(LOGO, x, top, w, h); ctx.restore();
+  }
   function blob(c) { return new Promise(function (res) { c.toBlob(function (b) { res(b); }, 'image/png'); }); }
   /* Photo « position du colis » : globe, produit, kilomètres parcourus et restants */
   var ETP = ['Demande reçue', 'Devis envoyé', 'Acompte reçu', 'Acheté chez le fournisseur', 'En transit', 'Arrivé à Kinshasa', 'Livré'];
@@ -115,7 +121,7 @@
       var g = ctx.createLinearGradient(0, 640, 0, 880); g.addColorStop(0, 'rgba(5,8,15,0)'); g.addColorStop(1, '#05080f'); ctx.fillStyle = g; ctx.fillRect(0, 640, Wp, 240);
       var P2 = 56; ctx.textBaseline = 'alphabetic';
       function tx(s, x, y, size, col, w, al, f, ls) { ctx.font = w + ' ' + size + 'px ' + (f || FB); ctx.fillStyle = col; ctx.textAlign = al || 'left'; try { ctx.letterSpacing = (ls || 0) + 'px'; } catch (e) {} ctx.fillText(s, x, y); try { ctx.letterSpacing = '0px'; } catch (e) {} }
-      tx('GOD DID EXPRESS', P2, 84, 30, '#fff', 700, 'left', FB, 5);
+      marque(ctx, P2, 84, function () { tx('GOD DID EXPRESS', P2, 84, 30, '#fff', 700, 'left', FB, 5); });
       ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 2; rr(ctx, Wp - P2 - 330, 48, 330, 50, 6); ctx.stroke(); tx('POSITION DU COLIS', Wp - P2 - 165, 82, 22, 'rgba(255,255,255,.9)', 700, 'center', FB, 4);
       tx((o.ref ? 'COLIS ' + o.ref : 'COLIS') + (o.nom ? ' · ' + String(o.nom).toUpperCase() : ''), P2, 910, 28, '#FF7A1A', 700, 'left', FB, 4);
       var nom = String(o.produit || 'Ton colis').toUpperCase(), size = 100; ctx.font = '800 ' + size + 'px ' + FD;
@@ -145,7 +151,7 @@
       var sh = ctx.createRadialGradient(Wc * .8, 120, 20, Wc * .8, 120, 700); sh.addColorStop(0, 'rgba(255,240,220,.55)'); sh.addColorStop(1, 'rgba(255,240,220,0)'); ctx.fillStyle = sh; ctx.fillRect(0, 0, Wc, Hc);
       var P2 = 72, ink = '#140C06'; ctx.textBaseline = 'alphabetic';
       function tx(s, x, y, size, col, w, al, f, ls) { ctx.font = w + ' ' + size + 'px ' + (f || FB); ctx.fillStyle = col; ctx.textAlign = al || 'left'; try { ctx.letterSpacing = (ls || 0) + 'px'; } catch (e) {} ctx.fillText(s, x, y); try { ctx.letterSpacing = '0px'; } catch (e) {} }
-      tx('GOD DID EXPRESS', P2, 120, 52, ink, 800, 'left', FD, 4); tx(o.niveau ? 'MEMBRE ' + String(o.niveau).toUpperCase() : 'MEMBRE', Wc - P2, 116, 28, 'rgba(20,12,6,.75)', 700, 'right', FB, 4);
+      marque(ctx, P2, 120, function () { tx('GOD DID EXPRESS', P2, 120, 52, ink, 800, 'left', FD, 4); }); tx(o.niveau ? 'MEMBRE ' + String(o.niveau).toUpperCase() : 'MEMBRE', Wc - P2, 116, 28, 'rgba(20,12,6,.75)', 700, 'right', FB, 4);
       tx('PRÉNOM', P2, 250, 24, 'rgba(20,12,6,.65)', 700, 'left', FB, 4);
       var nom = String(o.nom || 'Client').toUpperCase(), size = 150; ctx.font = '800 ' + size + 'px ' + FD; while (ctx.measureText(nom).width > Wc - P2 * 2 && size > 60) { size -= 6; ctx.font = '800 ' + size + 'px ' + FD; }
       tx(nom, P2, 250 + size * .95, size, ink, 800, 'left', FD, 2);
@@ -182,7 +188,7 @@
       else { var g0 = ctx.createLinearGradient(0, 0, Wa, ph); g0.addColorStop(0, '#2A1A0E'); g0.addColorStop(1, '#0E0D0C'); ctx.fillStyle = g0; ctx.fillRect(0, 0, Wa, ph); }
       var g = ctx.createLinearGradient(0, 0, 0, 170); g.addColorStop(0, 'rgba(14,13,12,.85)'); g.addColorStop(1, 'rgba(14,13,12,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, Wa, 170);
       var g2 = ctx.createLinearGradient(0, ph - 260, 0, ph); g2.addColorStop(0, 'rgba(14,13,12,0)'); g2.addColorStop(1, '#0E0D0C'); ctx.fillStyle = g2; ctx.fillRect(0, ph - 260, Wa, 260);
-      tx('GOD DID EXPRESS', P2, 84, 34, '#fff', 800, 'left', FD, 5);
+      marque(ctx, P2, 84, function () { tx('GOD DID EXPRESS', P2, 84, 34, '#fff', 800, 'left', FD, 5); });
       if (o.badge) { ctx.fillStyle = '#FF7A1A'; rr(ctx, Wa - P2 - 250, 40, 250, 64, 8); ctx.fill(); tx(o.badge, Wa - P2 - 125, 85, 36, '#0E0D0C', 800, 'center', FD, 2); }
       var y = ph + 30; tx(String(o.kicker || 'OFFRE').toUpperCase(), P2, y, 26, '#FF7A1A', 700, 'left', FB, 5);
       var nom = String(o.titre || 'Produit').toUpperCase(), size = 96; ctx.font = '800 ' + size + 'px ' + FD; while (ctx.measureText(nom).width > Wa - P2 * 2 && size > 56) { size -= 4; ctx.font = '800 ' + size + 'px ' + FD; }
@@ -205,7 +211,7 @@
       ctx.fillStyle = '#0E0D0C'; ctx.fillRect(0, 0, Wv, Hv);
       var g = ctx.createRadialGradient(Wv * .85, Hv * .08, 40, Wv * .85, Hv * .08, Hv * .75); g.addColorStop(0, 'rgba(255,122,26,.34)'); g.addColorStop(1, 'rgba(255,122,26,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, Wv, Hv);
       ctx.strokeStyle = 'rgba(255,255,255,.05)'; ctx.lineWidth = 2; for (var k = 1; k < 6; k++) { ctx.beginPath(); ctx.arc(Wv * .85, Hv * .08, k * 190, 0, 7); ctx.stroke(); }
-      tx('GOD DID EXPRESS', P2, 92, 36, '#fff', 800, 'left', FD, 5);
+      marque(ctx, P2, 92, function () { tx('GOD DID EXPRESS', P2, 92, 36, '#fff', 800, 'left', FD, 5); });
       ctx.fillStyle = '#FF7A1A'; rr(ctx, Wv - P2 - 230, 48, 230, 62, 8); ctx.fill(); tx('VOYAGE', Wv - P2 - 115, 92, 36, '#0E0D0C', 800, 'center', FD, 4);
       var dep = o.sens === 'depuis', orig = String(o.orig || '').toUpperCase(), a = dep ? 'KINSHASA' : orig, b = dep ? orig : 'KINSHASA';
       var y = sq ? 190 : 300; tx(dep ? 'ENVOIE TES COLIS' : 'COMMANDE POUR CE VOYAGE', P2, y, 28, '#FF7A1A', 700, 'left', FB, 6);
@@ -237,7 +243,7 @@
       function tx(s, x, y, size, col, w, al, f, ls) { ctx.font = w + ' ' + size + 'px ' + (f || FB); ctx.fillStyle = col; ctx.textAlign = al || 'left'; try { ctx.letterSpacing = (ls || 0) + 'px'; } catch (e) {} ctx.fillText(s, x, y); try { ctx.letterSpacing = '0px'; } catch (e) {} }
       ctx.fillStyle = '#0E0D0C'; ctx.fillRect(0, 0, Wv, Hv);
       var g = ctx.createRadialGradient(Wv * .85, 0, 40, Wv * .85, 0, 900); g.addColorStop(0, 'rgba(255,122,26,.30)'); g.addColorStop(1, 'rgba(255,122,26,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, Wv, 900);
-      tx('GOD DID EXPRESS', P2, 92, 36, '#fff', 800, 'left', FD, 5);
+      marque(ctx, P2, 92, function () { tx('GOD DID EXPRESS', P2, 92, 36, '#fff', 800, 'left', FD, 5); });
       if (o.date) { ctx.fillStyle = '#FF7A1A'; ctx.font = '800 34px ' + FD; var dw = ctx.measureText(o.date.toUpperCase()).width + 48; rr(ctx, Wv - P2 - dw, 52, dw, 58, 8); ctx.fill(); tx(o.date.toUpperCase(), Wv - P2 - dw / 2, 94, 34, '#0E0D0C', 800, 'center', FD, 2); }
       tx('PRIX DU JOUR', P2, 200, 28, '#FF7A1A', 700, 'left', FB, 6);
       var tt = String(o.titre || 'iPhone').toUpperCase(), tf = 150; ctx.font = '800 ' + tf + 'px ' + FD; var tmax = Wv - P2 * 2 - (o.mention ? 330 : 0); while (ctx.measureText(tt).width > tmax && tf > 50) { tf -= 6; ctx.font = '800 ' + tf + 'px ' + FD; }
@@ -271,7 +277,7 @@
       function tx(s, x, y, size, col, w, al, f, ls) { ctx.font = w + ' ' + size + 'px ' + (f || FB); ctx.fillStyle = col; ctx.textAlign = al || 'left'; try { ctx.letterSpacing = (ls || 0) + 'px'; } catch (e) {} ctx.fillText(s, x, y); try { ctx.letterSpacing = '0px'; } catch (e) {} }
       ctx.fillStyle = '#0E0D0C'; ctx.fillRect(0, 0, Wv, Hv);
       var g = ctx.createRadialGradient(Wv * .85, 0, 40, Wv * .85, 0, 1000); g.addColorStop(0, 'rgba(255,122,26,.34)'); g.addColorStop(1, 'rgba(255,122,26,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, Wv, 1000);
-      tx('GOD DID EXPRESS', P2, 92, 36, '#fff', 800, 'left', FD, 5);
+      marque(ctx, P2, 92, function () { tx('GOD DID EXPRESS', P2, 92, 36, '#fff', 800, 'left', FD, 5); });
       if (o.periode) { ctx.font = '800 32px ' + FD; var dw = ctx.measureText(o.periode.toUpperCase()).width + 48; ctx.fillStyle = '#FF7A1A'; rr(ctx, Wv - P2 - dw, 52, dw, 58, 8); ctx.fill(); tx(o.periode.toUpperCase(), Wv - P2 - dw / 2, 93, 32, '#0E0D0C', 800, 'center', FD, 2); }
       tx('PANIER DE SAISON', P2, 200, 28, '#FF7A1A', 700, 'left', FB, 6);
       var nom = String(o.titre || '').toUpperCase(), fs = 130; ctx.font = '800 ' + fs + 'px ' + FD; while (ctx.measureText(nom).width > Wv - P2 * 2 && fs > 56) { fs -= 6; ctx.font = '800 ' + fs + 'px ' + FD; }

@@ -559,7 +559,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   <div class="hl" id="hl" hidden>Pas de réseau. Tu peux continuer à parcourir, et ta demande est gardée sur ton téléphone.</div>
   <header class="top">
     <div class="marque">
-      <b>God Did <span>Express</span></b>
+      <a href="/" aria-label="GOD DID EXPRESS, accueil" style="display:block;background:#fff;border-radius:10px;padding:6px 10px;line-height:0"><img src="logo-web.png" alt="GOD DID EXPRESS" width="240" height="60" style="height:38px;width:auto;max-width:56vw"></a>
       <div class="base">Kinshasa, RDC<br>et le monde</div>
     </div>
     <div class="ruban" aria-hidden="true"><div class="ruban-in" id="ruban-in"></div></div>
@@ -1063,7 +1063,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 <a class="fab fab-wa" id="fab-wa" href="#" target="_blank" rel="noopener" aria-label="Écrire sur WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4.2A8 8 0 1 1 8.4 18.8z"/><path d="M9.2 9.2c.4 2 2.4 4 4.4 4.5l1.1-1.2-1.7-1-.8.7a3.6 3.6 0 0 1-1.9-1.9l.7-.8-1-1.7z"/></svg>WhatsApp</a>
 <div class="tourbar" id="tourbar" hidden><span id="tour-txt">Visite guidée</span><button class="btn mini" type="button" id="tour-stop">Arrêter</button></div>
 <script type="application/json" id="gde-state">{}</script>
-<div class="boot" id="boot" hidden><div><div class="boot-logo">God Did <span>Express</span></div><div class="boot-ligne"><i></i></div><div class="boot-txt">Kinshasa vers le monde</div></div></div>
+<div class="boot" id="boot" hidden><div><div class="boot-logo" style="background:#fff;border-radius:16px;padding:12px 18px;line-height:0"><img src="logo-web.png" alt="GOD DID EXPRESS" style="width:min(78vw,340px);height:auto"></div><div class="boot-ligne"><i></i></div><div class="boot-txt">Kinshasa vers le monde</div></div></div>
 
 <script src="holo.js"></script>
 <script src="qr.js"></script>
@@ -2187,12 +2187,13 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     if (mcFile && navigator.canShare && navigator.canShare({ files: [mcFile] })) navigator.share({ files: [mcFile], title: 'GOD DID EXPRESS' }).catch(function () {});
     else { $('mc-save').click(); toast('Carte enregistrée : envoie-la depuis ta galerie'); }
   });
+  window.GDELOGO = new Image(); GDELOGO.src = 'logo-web.png';
   function dessinerCarte(code, nom, n) {
     var W = 900, H = 560, cv = document.createElement('canvas'); cv.width = W; cv.height = H; var x = cv.getContext('2d');
     var g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#ff8a1f'); g.addColorStop(1, '#e8650a'); x.fillStyle = g;
     x.beginPath(); if (x.roundRect) x.roundRect(0, 0, W, H, 40); else x.rect(0, 0, W, H); x.fill();
-    x.fillStyle = '#111'; x.font = '800 40px system-ui,Arial'; x.fillText('GOD DID EXPRESS', 48, 78);
-    x.font = '600 26px system-ui,Arial'; x.fillStyle = 'rgba(0,0,0,.65)'; x.fillText('Carte fidélité', 48, 114);
+    var lg = window.GDELOGO; if (lg && lg.complete && lg.naturalWidth) { x.fillStyle = '#fff'; x.beginPath(); if (x.roundRect) x.roundRect(34, 30, 330, 100, 18); else x.rect(34, 30, 330, 100); x.fill(); x.drawImage(lg, 48, 42, 302, 76); x.fillStyle = '#111'; } else { x.fillStyle = '#111'; x.font = '800 40px system-ui,Arial'; x.fillText('GOD DID EXPRESS', 48, 78); }
+    x.font = '600 26px system-ui,Arial'; x.fillStyle = 'rgba(0,0,0,.65)'; x.fillText('Carte fidélité', 48, 168);
     x.fillStyle = '#111'; x.font = '700 24px system-ui,Arial'; x.fillText('ACHATS', W - 230, 70); x.font = '800 56px system-ui,Arial'; x.fillText(Math.min(n, 99) + ' / 10', W - 230, 128);
     for (var i = 0; i < 10; i++) { var cx = 90 + (i % 5) * 92, cy = 215 + Math.floor(i / 5) * 92; x.beginPath(); x.arc(cx, cy, 36, 0, 7); x.fillStyle = i < n ? '#111' : 'rgba(255,255,255,.35)'; x.fill(); if (i < n) { x.strokeStyle = '#ff8a1f'; x.lineWidth = 7; x.lineCap = 'round'; x.beginPath(); x.moveTo(cx - 14, cy + 1); x.lineTo(cx - 4, cy + 12); x.lineTo(cx + 15, cy - 11); x.stroke(); } }
     x.fillStyle = '#111'; x.font = '600 22px system-ui,Arial'; x.fillText('MEMBRE', 48, 440); x.font = '800 40px system-ui,Arial'; x.fillText(String(nom || '').slice(0, 18), 48, 486); x.font = '700 28px ui-monospace,monospace'; x.fillText(code, 48, 528);
