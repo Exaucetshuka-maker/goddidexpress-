@@ -145,8 +145,6 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       <label style="display:flex;gap:8px;align-items:center;margin:0;color:var(--papier)"><input type="checkbox" id="ip-on" style="width:22px;min-height:22px"> Afficher cette liste sur le site</label>
       <div id="ip-liste" class="grille" style="gap:6px"></div>
       <button class="btn" id="ip-aff" type="button">Créer l'affiche</button>
-      <div class="carte" style="display:grid;gap:8px"><b>Mettre ces prix sur tes autres sites</b><p class="note">Colle ce code dans la page de ton autre site : la liste s'affiche et se met à jour toute seule quand tu publies ici. Les prix fournisseurs ne sont jamais montrés.</p>
-        <textarea id="ip-emb" rows="3" readonly></textarea><div class="rang"><button class="btn" id="ip-emb-cp" type="button">Copier le code</button><button class="btn ghost" id="ip-json-cp" type="button">Copier le lien des données</button></div></div>
       <div id="ip-sortie" class="carte cache" style="display:grid;gap:12px">
         <img id="ip-img" alt="Affiche des prix" style="width:100%;border-radius:6px;background:#0E0D0C">
         <div class="rang"><button class="btn" id="ip-share" type="button">Envoyer l'image</button><a class="btn ghost" id="ip-save" download="prix-du-jour.png" style="text-decoration:none;text-align:center">Enregistrer</a></div>
@@ -835,11 +833,6 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   $('ip-liste').addEventListener('input', function (e) { var i = e.target.getAttribute('data-ip'); if (i == null) return; privCour().items[+i].p = Number(String(e.target.value).replace(',', '.')) || 0; iphSync(); });
   $('ip-liste').addEventListener('click', function (e) { var b = e.target.closest('[data-ipx]'); if (!b) return; privCour().items.splice(+b.getAttribute('data-ipx'), 1); iphSync(); rendreIph(); });
   function iphGroupes() { var G = [], idx = {}; privCour().items.forEach(function (t) { if (!(t.m in idx)) { idx[t.m] = G.length; G.push({ m: t.m, v: [] }); } G[idx[t.m]].v.push([t.g, t.p]); }); return G; }
-  function majEmbed() { var id = ($('ip-sel') || {}).value || ''; $('ip-emb').value = '<iframe src="' + location.origin + '/api/prix-embed' + (id ? '?liste=' + encodeURIComponent(id) : '') + '" style="width:100%;height:520px;border:0" title="Prix du jour GOD DID EXPRESS"></iframe>'; }
-  function copier(t, m) { (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { infoEtat(m, 'ok'); }, function () { prompt('Copie ceci :', t); }); }
-  $('ip-emb-cp').addEventListener('click', function () { majEmbed(); copier($('ip-emb').value, 'Code copié.'); });
-  $('ip-json-cp').addEventListener('click', function () { copier(location.origin + '/api/prix.json', 'Lien copié.'); });
-  $('ip-sel').addEventListener('change', majEmbed); majEmbed();
   $('ip-aff').addEventListener('click', function () {
     var l = listeCour(); if (!privCour().items.length) { alert('Lis d\'abord la liste.'); return; }
     var b = this; b.disabled = true;

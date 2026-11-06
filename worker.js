@@ -307,19 +307,6 @@ export default {
     }
 
 
-    /* Prix du jour à mettre sur d'autres sites : flux JSON et page à intégrer (public, sans prix fournisseur) */
-    if ((p === '/api/prix.json' || p === '/api/prix-embed') && request.method === 'GET') {
-      const et = await lireEtat(env), want = url.searchParams.get('liste') || '';
-      const L = (Array.isArray(et.listes) ? et.listes : []).filter((l) => l && l.on === true && (!want || l.id === want));
-      if (p === '/api/prix.json') {
-        return new Response(JSON.stringify({ source: 'GOD DID EXPRESS', site: 'https://goddidexpress.com', listes: L.map((l) => ({ id: l.id, nom: l.nom, date: l.date, mention: l.mention, douane_incluse: l.douane !== false, slogan: l.slogan, articles: (l.items || []).map((x) => ({ modele: x.m, variante: x.g, prix_usd: x.p })) })) }), { headers: { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': '*', 'cache-control': 'public, max-age=60' } });
-      }
-      const h = (t) => String(t == null ? '' : t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-      const corps = L.map((l) => `<section><h2>${h(l.nom)} <small>${h(l.date)}${l.mention ? ' · ' + h(l.mention) : ''}${l.douane !== false ? ' · douane incluse' : ''}</small></h2>${(l.items || []).map((x) => `<div class="r"><span>${h(x.m)} ${h(x.g)}</span><b>${x.p > 0 ? h(x.p) + ' $' : 'Prix du jour'}</b></div>`).join('')}${l.slogan ? `<p class="s">${h(l.slogan)}</p>` : ''}</section>`).join('') || '<p>Aucune liste publiée pour le moment.</p>';
-      const page = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Prix du jour · GOD DID EXPRESS</title><style>body{margin:0;background:#0E0D0C;color:#fff;font:15px/1.4 system-ui,Arial,sans-serif;padding:14px}h2{font-size:18px;margin:12px 0 6px;color:#FF7A1A}h2 small{color:#bbb;font-weight:500;font-size:12px}.r{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-bottom:1px solid #2a2724}.r b{color:#FF7A1A;white-space:nowrap}.s{color:#FF7A1A;font-weight:700;text-align:center}a.c{display:block;margin-top:14px;background:#FF7A1A;color:#0E0D0C;text-align:center;padding:12px;border-radius:8px;font-weight:800;text-decoration:none}</style></head><body>${corps}<a class="c" href="https://goddidexpress.com/#prix" target="_blank" rel="noopener">Commander sur GOD DID EXPRESS</a></body></html>`;
-      return new Response(page, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=60', 'content-security-policy': 'frame-ancestors *' } });
-    }
-
     /* Inscriptions réelles : achats groupés et voyages (public, prénom seulement) */
     if (p === '/api/joins' && request.method === 'GET') {
       const L = await lireListe(env, 'joins'), out = { g: {}, v: {} };
