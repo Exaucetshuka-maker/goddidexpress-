@@ -343,7 +343,7 @@ export default {
       const ip = request.headers.get('cf-connecting-ip') || 'x', rk = 'dm:' + ip, n0 = Number((await env.GDE.get(rk)) || 0);
       if (n0 >= 5) return json({ erreur: 'Tu as déjà envoyé plusieurs demandes. Réessaie dans une heure ou écris sur WhatsApp.' }, 429);
       let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
-      const nom = txt(b.nom, 60), tel = txt(b.tel, 30).replace(/[^0-9+ ]/g, ''), tx = txt(b.txt, 600), lien = txt(b.lien, 300), qte = txt(b.qte, 20), bud = txt(b.bud, 20), mar = ['Chine', 'Dubaï', 'Turquie', 'Tous les marchés'].includes(b.mar) ? b.mar : '', pre = b.pre === true;
+      const nom = txt(b.nom, 60), tel = txt(b.tel, 30).replace(/[^0-9+ ]/g, ''), tx = txt(b.txt, 600), lien = txt(b.lien, 300), qte = txt(b.qte, 20), bud = txt(b.bud, 20), mar = ['Chine', 'Dubaï', 'Turquie', 'Tous les marchés'].includes(b.mar) ? b.mar : '', pre = b.pre === true, voy = txt(b.voy, 90);
       if (lien && !/^https?:\/\/\S+$/i.test(lien)) return json({ erreur: 'Le lien doit commencer par http ou https.' }, 400);
       if (!nom || tel.replace(/\D/g, '').length < 8) return json({ erreur: 'Écris ton prénom et ton numéro WhatsApp.' }, 400);
       let photo = '', id = 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -352,7 +352,7 @@ export default {
       if (!tx && !lien && !m) return json({ erreur: 'Envoie au moins une photo, un lien ou une description.' }, 400);
       if (m) { if (m[1].length > 600000) return json({ erreur: 'Photo trop grande.' }, 413); const bin = Uint8Array.from(atob(m[1]), (c) => c.charCodeAt(0)); await env.GDE.put('img:' + id, bin, { expirationTtl: 90 * 86400 }); photo = '/api/img/' + id; }
       await env.GDE.put(rk, String(n0 + 1), { expirationTtl: 3600 });
-      const L = await lireListe(env, 'demandes'); L.push({ id, nom, tel, txt: tx, lien, photo, qte, bud, mar, pre, t: Date.now(), vu: false });
+      const L = await lireListe(env, 'demandes'); L.push({ id, nom, tel, txt: tx, lien, photo, qte, bud, mar, pre, voy, t: Date.now(), vu: false });
       await env.GDE.put('demandes', JSON.stringify(L.slice(-300))); return json({ ok: true });
     }
     if (p === '/api/clic' && request.method === 'POST') {
@@ -504,7 +504,7 @@ export default {
     if (p === '/api/demandes' && request.method === 'GET') return json({ demandes: await lireListe(env, 'demandes') });
     if (p === '/api/demandes' && request.method === 'PUT') {
       let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
-      const old = await lireListe(env, 'demandes'), L = (Array.isArray(b.demandes) ? b.demandes : []).slice(0, 300).map((d) => ({ id: String(d.id || '').slice(0, 30), nom: txt(d.nom, 60), tel: txt(d.tel, 30), txt: txt(d.txt, 600), lien: txt(d.lien, 300), qte: txt(d.qte, 20), bud: txt(d.bud, 20), mar: ['Chine', 'Dubaï', 'Turquie', 'Tous les marchés'].includes(d.mar) ? d.mar : '', pre: d.pre === true, photo: /^\/api\/img\/d[A-Za-z0-9_-]{1,38}$/.test(d.photo || '') ? d.photo : '', t: nombre(d.t), vu: d.vu === true }));
+      const old = await lireListe(env, 'demandes'), L = (Array.isArray(b.demandes) ? b.demandes : []).slice(0, 300).map((d) => ({ id: String(d.id || '').slice(0, 30), nom: txt(d.nom, 60), tel: txt(d.tel, 30), txt: txt(d.txt, 600), lien: txt(d.lien, 300), qte: txt(d.qte, 20), bud: txt(d.bud, 20), mar: ['Chine', 'Dubaï', 'Turquie', 'Tous les marchés'].includes(d.mar) ? d.mar : '', pre: d.pre === true, voy: txt(d.voy, 90), photo: /^\/api\/img\/d[A-Za-z0-9_-]{1,38}$/.test(d.photo || '') ? d.photo : '', t: nombre(d.t), vu: d.vu === true }));
       const gardes = new Set(L.map((d) => d.id));
       for (const d of old) if (!gardes.has(d.id) && d.photo) await env.GDE.delete('img:' + d.photo.slice(9));
       await env.GDE.put('demandes', JSON.stringify(L)); return json({ demandes: L });

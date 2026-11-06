@@ -574,6 +574,10 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <h1>Tu choisis.<br><em>On trouve.</em><br>On te livre.</h1>
       <p class="lead">Dites-nous ce que vous voulez, de la RDC ou de l'étranger. On achète, on importe, on livre. Acompte de 50 % et preuve en photo à chaque étape.</p>
       <div class="slogan"><div class="kicker" id="slogan-k"></div><p id="slogan-txt"></p></div>
+      <div class="carte" id="appro" style="gap:8px;margin:14px 0"><div class="kicker">Approvisionnement</div><h3 style="margin:0">On cherche, on achète, on importe, on livre</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:14px;font-weight:700"><span>1 · On cherche le fournisseur</span><span>2 · On achète</span><span>3 · On importe</span><span>4 · On te livre</span></div>
+        <p class="note" style="margin:0">Chine, Dubaï, Turquie ou RDC. Devis avant tout paiement, acompte de 50 %, preuve en photo à chaque étape.</p>
+        <div class="rangee"><button class="btn" type="button" data-go="commander">Demander un approvisionnement</button><button class="btn ghost" type="button" data-go="voyages">Réserver sur un prochain arrivage</button></div></div>
       <div class="radar cadre"><div class="phr" id="phr" aria-hidden="true"></div><canvas class="globe" id="g-home" role="img" aria-label="Globe terrestre : trajet du colis de la Chine à Kinshasa"></canvas><div class="radar-leg"><span>Chine → Kinshasa</span><span>Glisse pour tourner</span></div></div>
       <div class="rangee">
         <button class="btn" type="button" data-go="catalogue">Voir le catalogue</button>
@@ -758,6 +762,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <div class="champ"><label for="dm-photo">Photo du produit</label><input id="dm-photo" type="file" accept="image/*"><img id="dm-prev" alt="" hidden style="width:100%;max-height:220px;object-fit:cover;border-radius:6px;margin-top:6px"></div>
       <div class="champ"><label for="dm-lien">Lien du produit (facultatif)</label><input id="dm-lien" inputmode="url" maxlength="300" placeholder="https://…"></div>
       <div class="duo"><div class="champ"><label for="dm-qte">Quantité</label><input id="dm-qte" inputmode="numeric" maxlength="12" placeholder="Ex. 20"></div><div class="champ"><label for="dm-bud">Budget indicatif ($)</label><input id="dm-bud" inputmode="decimal" maxlength="12" placeholder="Ex. 500"></div></div>
+      <div class="champ"><label for="dm-quand">Quand ?</label><select id="dm-quand"><option value="">Dès que possible</option><option value="arrivage">Réserver pour le prochain arrivage (acompte 50 %)</option></select></div>
       <div class="champ"><label for="dm-mar">Où chercher ?</label><select id="dm-mar"><option>Tous les marchés</option><option>Chine</option><option>Dubaï</option><option>Turquie</option></select></div>
       <div class="champ"><label for="dm-txt">Ce que tu veux (taille, couleur, quantité…)</label><textarea id="dm-txt" rows="3" maxlength="600"></textarea></div>
       <button class="btn" id="dm-ok" type="button">Envoyer ma demande</button>
@@ -1932,7 +1937,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     f.addEventListener('change', function () { DM_PH = ''; $('dm-prev').hidden = true; if (!f.files[0]) return; reduireDm(f.files[0]).then(function (u) { DM_PH = u; $('dm-prev').src = u; $('dm-prev').hidden = false; }).catch(function () { $('dm-msg').textContent = 'Cette photo ne peut pas être lue. Essaie une autre.'; }); });
     $('dm-ok').addEventListener('click', function () {
       var b = $('dm-ok'), m = $('dm-msg'); b.disabled = true; m.textContent = 'Envoi…';
-      fetch('/api/demande', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nom: $('dm-nom').value, tel: $('dm-tel').value, lien: $('dm-lien').value.trim(), txt: $('dm-txt').value, qte: $('dm-qte').value, bud: $('dm-bud').value, mar: $('dm-mar').value, photo: DM_PH }) })
+      fetch('/api/demande', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nom: $('dm-nom').value, tel: $('dm-tel').value, lien: $('dm-lien').value.trim(), txt: $('dm-txt').value, qte: $('dm-qte').value, bud: $('dm-bud').value, mar: $('dm-mar').value, pre: !!$('dm-quand').value, voy: $('dm-quand').value === 'arrivage' ? 'Prochain arrivage' : $('dm-quand').value, photo: DM_PH }) })
         .then(function (r) { return r.json().then(function (j) { return [r.ok, j]; }); })
         .then(function (x) {
           if (x[0]) { m.textContent = 'Merci ! On cherche ton produit et on te répond sur WhatsApp avec le devis.'; ['dm-lien', 'dm-txt', 'dm-photo'].forEach(function (id) { $(id).value = ''; }); DM_PH = ''; $('dm-prev').hidden = true; b.textContent = 'Demande envoyée ✓'; setTimeout(function () { b.textContent = 'Envoyer une autre demande'; b.disabled = false; }, 2500); }
@@ -2119,6 +2124,12 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     $('occ-rail').innerHTML = PRODUITS.filter(function (p) { return set.indexOf(p.c) >= 0; }).slice(0, 10).map(function (p) { return mini(p); }).join('');
   }
   rendreOcc();
+  function majQuand() {
+    var t = auj(), M = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'], o = '<option value="">Dès que possible</option><option value="arrivage">Réserver pour le prochain arrivage (acompte 50 %)</option>';
+    voyListe().filter(function (v) { return v.sens !== 'depuis' && v.dep && v.dep > t; }).forEach(function (v) { var d = v.dep.split('-'); var lab = v.orig + ' → Kinshasa, départ ' + Number(d[2]) + ' ' + M[Number(d[1]) - 1]; o += '<option value="' + lab.replace(/"/g, '') + '">Réserver : ' + lab + ' (acompte 50 %)</option>'; });
+    $('dm-quand').innerHTML = o;
+  }
+  majQuand();
   function rendreTendance() {
     var T = (STATE.tend || []).map(function (x) { return { p: PRODUITS.filter(function (q) { return q.id === x.pid; })[0], tag: x.tag }; }).filter(function (x) { return x.p; });
     var L = { Chine: 'Tendance en Chine', 'Dubaï': 'Tendance à Dubaï', Turquie: 'Tendance en Turquie', RDC: 'Demandé en RDC', Nouveau: 'Nouveauté' };
