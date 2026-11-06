@@ -263,7 +263,8 @@
       if (M) { var n = M.length, cell = Math.floor((qs - 24) / n), ox = Wv - P2 - qs + (qs - cell * n) / 2, oy = by + (qs - cell * n) / 2; ctx.fillStyle = '#0E0D0C'; for (var yy = 0; yy < n; yy++) for (var xx = 0; xx < n; xx++) if (M[yy][xx]) ctx.fillRect(ox + xx * cell, oy + yy * cell, cell, cell); }
       tx('goddidexpress.com', P2, by + 80, 64, '#fff', 800, 'left', FD, 2);
       tx('Scanne ou clique pour commander.', P2, by + 124, 28, 'rgba(255,255,255,.7)', 500, 'left', FB, 0);
-      tx('Prix du jour, ils peuvent changer.', P2, by + 164, 24, 'rgba(255,255,255,.5)', 500, 'left', FB, 0);
+      if (o.slogan) { var sg = String(o.slogan), sz = 32, sx = Wv - P2 * 2 - qs - 24; ctx.font = '800 ' + sz + 'px ' + FD; while (ctx.measureText(sg).width > sx && sz > 18) { sz -= 2; ctx.font = '800 ' + sz + 'px ' + FD; } tx(sg, P2, by + 166, sz, '#FF7A1A', 800, 'left', FD, 0); }
+      else tx('Prix du jour, ils peuvent changer.', P2, by + 164, 24, 'rgba(255,255,255,.5)', 500, 'left', FB, 0);
       ctx.fillStyle = '#FF7A1A'; rr(ctx, P2, Hv - 150, Wv - P2 * 2, 96, 10); ctx.fill();
       tx('Commande sur WhatsApp : ' + (window.GDETicket && GDETicket.tel || '+243 983 129 294'), Wv / 2, Hv - 88, 42, '#0E0D0C', 800, 'center', FD, 1);
       tx('Super Lemba, Kinshasa · Devis avant de payer · Preuve en photo', Wv / 2, Hv - 26, 22, 'rgba(255,255,255,.5)', 500, 'center', FB, 1);

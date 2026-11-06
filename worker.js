@@ -175,6 +175,7 @@ function nettoyer(s) {
     date: txt(l && l.date, 40),
     mention: txt(l && l.mention, 60),
     douane: !(l && l.douane === false),
+    slogan: txt(l && l.slogan, 100),
     items: (Array.isArray(l && l.items) ? l.items : []).slice(0, 200).map((t) => ({ m: txt(t && t.m, 60), g: txt(t && t.g, 20), p: Math.max(0, Math.min(99999, Math.round(nombre(t && t.p) * 100) / 100)) })).filter((t) => t.m),
   }));
   return o;

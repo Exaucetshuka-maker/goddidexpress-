@@ -1411,7 +1411,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
           var key = 'i:' + t.m + '|' + t.g, lab = t.g ? h(t.g) + ' · ' : '';
           return '<span style="display:flex;flex:1;min-width:170px;gap:4px"><a class="btn ghost" style="flex:1;text-align:center;white-space:nowrap" target="_blank" rel="noopener" data-clic="' + ea(key) + '" href="' + ea(wa(msg)) + '">' + lab + '<b>' + (t.p > 0 ? usd(t.p) : 'Prix du jour') + '</b>' + (I.douane !== false && t.p > 0 ? ' <small style="font-size:11px;opacity:.75;font-weight:600">douane incluse</small>' : '') + '</a><button class="btn ghost" type="button" data-iadd="' + ea(key) + '" aria-label="Ajouter à ma liste" aria-pressed="' + (liste[key] ? 'true' : 'false') + '" style="min-width:48px">' + (liste[key] ? '✓' : '+') + '</button></span>';
         }).join('') + '</div></article>';
-      }).join('');
+      }).join('') + (I.slogan ? '<p style="text-align:center;font-weight:800;font-size:18px;color:var(--orange);margin:2px 0 8px">' + h(I.slogan) + '</p>' : '');
     }).join('');
     $('iph-part').href = 'https://wa.me/?text=' + encodeURIComponent('Prix du jour chez GOD DID EXPRESS : ' + location.origin + '/?s=prix#prix');
   }
