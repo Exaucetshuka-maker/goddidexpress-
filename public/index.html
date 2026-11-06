@@ -852,6 +852,10 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     </header>
     <div class="wrap" style="gap:12px">
       <div id="iph-liste" style="display:grid;gap:10px"></div>
+      <div class="carte" id="iph-offre" style="gap:8px"><div class="kicker">Ton prix</div><h3>Donne ton prix, je vais acheter</h3><p class="note">Tu as un prix en tête pour un modèle de la liste ? Écris-le ici : on te dit tout de suite si c'est possible.</p>
+        <div class="champ"><label for="of-modele">Modèle</label><input id="of-modele" maxlength="60" placeholder="Ex. iPhone 13 128 Go"></div>
+        <div class="champ"><label for="of-prix">Ton prix en dollars</label><input id="of-prix" inputmode="decimal" maxlength="8" placeholder="Ex. 250"></div>
+        <a class="btn" id="of-wa" href="#" target="_blank" rel="noopener">Proposer mon prix sur WhatsApp</a></div>
       <a class="btn ghost" id="iph-part" href="#" target="_blank" rel="noopener">Partager la liste sur WhatsApp</a>
     </div>
   </section>
@@ -2187,6 +2191,10 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     if (mcFile && navigator.canShare && navigator.canShare({ files: [mcFile] })) navigator.share({ files: [mcFile], title: 'GOD DID EXPRESS' }).catch(function () {});
     else { $('mc-save').click(); toast('Carte enregistrée : envoie-la depuis ta galerie'); }
   });
+  (function () {
+    function maj() { var m = $('of-modele').value.trim(), p = $('of-prix').value.trim().replace(',', '.'); $('of-wa').href = wa('Bonjour GOD DID EXPRESS, je veux acheter' + (m ? ' ' + m : '') + (p ? ' à ' + p + ' $' : '') + '. Donnez-moi votre meilleur prix, je suis prêt à acheter.'); }
+    ['of-modele', 'of-prix'].forEach(function (id) { $(id).addEventListener('input', maj); }); maj();
+  })();
   window.GDELOGO = new Image(); GDELOGO.src = 'logo-web.png';
   function dessinerCarte(code, nom, n) {
     var W = 900, H = 560, cv = document.createElement('canvas'); cv.width = W; cv.height = H; var x = cv.getContext('2d');
