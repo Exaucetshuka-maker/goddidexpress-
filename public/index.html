@@ -1405,11 +1405,11 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     $('iph-sous').textContent = 'Les prix peuvent changer chaque jour. Touche un prix pour commander sur WhatsApp, ou « + » pour l\'ajouter à ta liste.';
     box.innerHTML = LS.map(function (I) {
       var G = [], idx = {}; I.items.forEach(function (t) { if (!(t.m in idx)) { idx[t.m] = G.length; G.push({ m: t.m, v: [] }); } G[idx[t.m]].v.push(t); });
-      return '<div class="kicker" style="margin-top:6px">' + h(I.nom) + (I.date ? ' · ' + h(I.date) : '') + (I.mention ? ' · ' + h(I.mention) : '') + '</div>' + G.map(function (g) {
+      return '<div class="kicker" style="margin-top:6px">' + h(I.nom) + (I.date ? ' · ' + h(I.date) : '') + (I.mention ? ' · ' + h(I.mention) : '') + (I.douane !== false ? ' · douane incluse' : '') + '</div>' + G.map(function (g) {
         return '<article class="carte"><h3 style="margin-bottom:8px">' + h(g.m) + '</h3><div style="display:flex;flex-wrap:wrap;gap:8px">' + g.v.map(function (t) {
           var msg = 'Bonjour GOD DID EXPRESS, je veux commander : ' + t.m + (t.g ? ' ' + t.g : '') + (t.p > 0 ? ' (prix affiché ' + usd(t.p) + ')' : '') + '. Est-il disponible ?';
           var key = 'i:' + t.m + '|' + t.g, lab = t.g ? h(t.g) + ' · ' : '';
-          return '<span style="display:flex;flex:1;min-width:170px;gap:4px"><a class="btn ghost" style="flex:1;text-align:center;white-space:nowrap" target="_blank" rel="noopener" data-clic="' + ea(key) + '" href="' + ea(wa(msg)) + '">' + lab + '<b>' + (t.p > 0 ? usd(t.p) : 'Prix du jour') + '</b></a><button class="btn ghost" type="button" data-iadd="' + ea(key) + '" aria-label="Ajouter à ma liste" aria-pressed="' + (liste[key] ? 'true' : 'false') + '" style="min-width:48px">' + (liste[key] ? '✓' : '+') + '</button></span>';
+          return '<span style="display:flex;flex:1;min-width:170px;gap:4px"><a class="btn ghost" style="flex:1;text-align:center;white-space:nowrap" target="_blank" rel="noopener" data-clic="' + ea(key) + '" href="' + ea(wa(msg)) + '">' + lab + '<b>' + (t.p > 0 ? usd(t.p) : 'Prix du jour') + '</b>' + (I.douane !== false && t.p > 0 ? ' <small style="font-size:11px;opacity:.75;font-weight:600">douane incluse</small>' : '') + '</a><button class="btn ghost" type="button" data-iadd="' + ea(key) + '" aria-label="Ajouter à ma liste" aria-pressed="' + (liste[key] ? 'true' : 'false') + '" style="min-width:48px">' + (liste[key] ? '✓' : '+') + '</button></span>';
         }).join('') + '</div></article>';
       }).join('');
     }).join('');

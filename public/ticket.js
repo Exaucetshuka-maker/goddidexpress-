@@ -246,9 +246,10 @@
       marque(ctx, P2, 92, function () { tx('GOD DID EXPRESS', P2, 92, 36, '#fff', 800, 'left', FD, 5); });
       if (o.date) { ctx.fillStyle = '#FF7A1A'; ctx.font = '800 34px ' + FD; var dw = ctx.measureText(o.date.toUpperCase()).width + 48; rr(ctx, Wv - P2 - dw, 52, dw, 58, 8); ctx.fill(); tx(o.date.toUpperCase(), Wv - P2 - dw / 2, 94, 34, '#0E0D0C', 800, 'center', FD, 2); }
       tx('PRIX DU JOUR', P2, 200, 28, '#FF7A1A', 700, 'left', FB, 6);
-      var tt = String(o.titre || 'iPhone').toUpperCase(), tf = 150; ctx.font = '800 ' + tf + 'px ' + FD; var tmax = Wv - P2 * 2 - (o.mention ? 330 : 0); while (ctx.measureText(tt).width > tmax && tf > 50) { tf -= 6; ctx.font = '800 ' + tf + 'px ' + FD; }
+      var tt = String(o.titre || 'iPhone').toUpperCase(), tf = 150; ctx.font = '800 ' + tf + 'px ' + FD; var tmax = Wv - P2 * 2 - (o.mention || o.douane ? 380 : 0); while (ctx.measureText(tt).width > tmax && tf > 50) { tf -= 6; ctx.font = '800 ' + tf + 'px ' + FD; }
       tx(tt, P2, 330, tf, '#fff', 800, 'left', FD, 2);
-      if (o.mention) { ctx.font = '800 34px ' + FD; var mw = ctx.measureText(String(o.mention).toUpperCase()).width + 44; ctx.strokeStyle = '#FF7A1A'; ctx.lineWidth = 3; rr(ctx, Wv - P2 - mw, 270, mw, 60, 8); ctx.stroke(); tx(String(o.mention).toUpperCase(), Wv - P2 - mw / 2, 312, 34, '#FF7A1A', 800, 'center', FD, 2); }
+      var pil = []; if (o.mention) pil.push(String(o.mention).toUpperCase()); if (o.douane) pil.push('DOUANE INCLUSE'); var py2 = pil.length > 1 ? 232 : 270;
+      pil.forEach(function (tt2) { ctx.font = '800 30px ' + FD; var mw = ctx.measureText(tt2).width + 40; ctx.strokeStyle = '#FF7A1A'; ctx.lineWidth = 3; rr(ctx, Wv - P2 - mw, py2, mw, 56, 8); ctx.stroke(); tx(tt2, Wv - P2 - mw / 2, py2 + 39, 30, '#FF7A1A', 800, 'center', FD, 2); py2 += 68; });
       ctx.fillStyle = 'rgba(255,255,255,.2)'; ctx.fillRect(P2, 372, Wv - P2 * 2, 2);
       G.forEach(function (r, i) {
         var y = top + i * rh; if (i % 2 === 0) { ctx.fillStyle = 'rgba(255,255,255,.04)'; ctx.fillRect(P2 - 16, y - 40, Wv - P2 * 2 + 32, rh - 8); }
