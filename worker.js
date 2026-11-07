@@ -231,8 +231,14 @@ async function servirPageAvecEtat(request, env) {
   return new Response(html, { status: 200, headers: h });
 }
 
+const entetesSecurite = { 'strict-transport-security': 'max-age=31536000; includeSubDomains', 'x-content-type-options': 'nosniff', 'referrer-policy': 'strict-origin-when-cross-origin', 'content-security-policy': "frame-ancestors 'self'" };
 export default {
   async fetch(request, env) {
+    const rep = await traiter(request, env);
+    try { const h = new Headers(rep.headers); for (const k in entetesSecurite) if (!h.has(k)) h.set(k, entetesSecurite[k]); return new Response(rep.body, { status: rep.status, statusText: rep.statusText, headers: h, webSocket: rep.webSocket }); } catch (e) { return rep; }
+  },
+};
+async function traiter(request, env) {
     const url = new URL(request.url);
     const p = url.pathname;
 
@@ -558,5 +564,4 @@ export default {
     }
 
     return json({ erreur: 'Introuvable' }, 404);
-  },
-};
+}
