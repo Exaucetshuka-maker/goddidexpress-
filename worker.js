@@ -64,6 +64,32 @@ async function freinage(env, request) {
   return { k, n, bloque: n >= 8 };
 }
 
+
+/* Face ID / empreinte (WebAuthn) : on ne garde que la clé publique de l'appareil */
+const unb64u = (s) => unb64(String(s).replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(String(s).length / 4) * 4, '='));
+const b64u = (buf) => b64(buf).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+async function lirePk(env) { try { const t = await env.GDE.get('passkeys'); const l = t ? JSON.parse(t) : []; return Array.isArray(l) ? l : []; } catch (e) { return []; } }
+function derVersRaw(d) {
+  let i = 2; if (d[0] !== 0x30) return null; if (d[1] & 0x80) i = 2 + (d[1] & 0x7f);
+  const lire = () => { if (d[i] !== 0x02) return null; const n = d[i + 1]; let v = d.slice(i + 2, i + 2 + n); i += 2 + n; while (v.length > 32 && v[0] === 0) v = v.slice(1); const o = new Uint8Array(32); if (v.length > 32) return null; o.set(v, 32 - v.length); return o; };
+  const r = lire(); if (!r) return null; const sg = lire(); if (!sg) return null;
+  const raw = new Uint8Array(64); raw.set(r, 0); raw.set(sg, 32); return raw;
+}
+async function pkVerifier(env, request, b) {
+  try {
+    const k = (await lirePk(env)).find((x) => x.id === b.id); if (!k) return false;
+    const cdj = unb64u(b.cdj), ad = unb64u(b.ad), sig = derVersRaw(unb64u(b.sig)); if (!sig || ad.length < 37) return false;
+    const c = JSON.parse(new TextDecoder().decode(cdj)); if (c.type !== 'webauthn.get') return false;
+    const kc = 'pkc:' + String(c.challenge).slice(0, 80); if (!(await env.GDE.get(kc))) return false; await env.GDE.delete(kc);
+    const u = new URL(request.url); if (c.origin !== u.origin) return false;
+    const rp = new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(u.hostname))); for (let i = 0; i < 32; i++) if (rp[i] !== ad[i]) return false;
+    if (!(ad[32] & 1) || !(ad[32] & 4)) return false; /* présence + vérification (Face ID ou empreinte) */
+    const h = new Uint8Array(await crypto.subtle.digest('SHA-256', cdj)); const data = new Uint8Array(ad.length + 32); data.set(ad, 0); data.set(h, ad.length);
+    const pub = await crypto.subtle.importKey('spki', unb64(k.pub), { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
+    return await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, pub, sig, data);
+  } catch (e) { return false; }
+}
+
 const MAXTXT = 600;
 function txt(v, max = MAXTXT) { return String(v == null ? '' : v).slice(0, max); }
 function nombre(v, def = 0) { const n = Number(v); return isFinite(n) ? n : def; }
@@ -97,6 +123,7 @@ function nettoyer(s) {
     if (new RegExp('^\\d{4}-\\d{2}-\\d{2}$').test(String(p.arr || ''))) r.arr = String(p.arr);
     if (p.photo && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(p.photo)) r.photo = p.photo;
     { const ph = phs(p.ph); if (ph.length) r.ph = ph; }
+    { const vd = vidUrl(p.vid); if (vd) r.vid = vd; }
     o.prod[id] = r;
   });
   o.extra = (Array.isArray(s.extra) ? s.extra : []).slice(0, 300).map((e) => {
@@ -107,6 +134,7 @@ function nettoyer(s) {
     };
     if (e.photo && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(e.photo)) r.photo = e.photo;
     { const ph = phs(e.ph); if (ph.length) r.ph = ph; }
+    { const vd = vidUrl(e.vid); if (vd) r.vid = vd; }
     if (e.cache) r.cache = true;
     if (e.desc) r.desc = txt(e.desc, 600);
     { const dd = nettoyerDet(e.det); if (dd) r.det = dd; }
@@ -198,6 +226,7 @@ async function lireEtat(env) {
 function echapper(s) { return s.replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029'); }
 
 
+function vidUrl(v) { v = String(v == null ? '' : v).trim(); return /^https:\/\/[^\s"'<>\\]{4,300}$/.test(v) ? v : ''; }
 function phs(a) { return (Array.isArray(a) ? a : []).filter((x) => typeof x === 'string' && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(x)).slice(0, 5); }
 function attr(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
 async function metaPartage(url, etat, env, request) {
@@ -284,6 +313,20 @@ async function traiter(request, env) {
       return json({ token: await faireToken(env, auth) });
     }
 
+    /* Face ID : défi puis connexion */
+    if (p === '/api/pk/defi' && request.method === 'POST') {
+      const f = await freinage(env, request); if (f.bloque) return json({ erreur: 'Trop d\'essais. Réessaie dans 15 minutes.' }, 429);
+      const l = await lirePk(env); if (!l.length) return json({ erreur: 'Face ID pas activé' }, 404);
+      const ch = b64u(crypto.getRandomValues(new Uint8Array(32)).buffer); await env.GDE.put('pkc:' + ch, '1', { expirationTtl: 120 });
+      return json({ challenge: ch, ids: l.map((x) => x.id) });
+    }
+    if (p === '/api/pk/connexion' && request.method === 'POST') {
+      const f = await freinage(env, request); if (f.bloque) return json({ erreur: 'Trop d\'essais. Réessaie dans 15 minutes.' }, 429);
+      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const auth = await lireAuth(env); if (!auth) return json({ erreur: 'Aucun mot de passe choisi' }, 409);
+      if (!(await pkVerifier(env, request, b || {}))) { await env.GDE.put(f.k, String(f.n + 1), { expirationTtl: 900 }); return json({ erreur: 'Face ID refusé' }, 401); }
+      return json({ token: await faireToken(env, auth) });
+    }
     /* Connexion */
     if (p === '/api/login' && request.method === 'POST') {
       const f = await freinage(env, request);
@@ -429,6 +472,21 @@ async function traiter(request, env) {
 
     /* Tout ce qui suit demande d'être connecté */
     if (!(await verifierToken(env, request))) return json({ erreur: 'Connexion requise' }, 401);
+    if (p === '/api/pk/enregistrer' && request.method === 'POST') {
+      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const id = String(b.id || ''), pub = String(b.pub || '');
+      if (!/^[A-Za-z0-9_-]{16,300}$/.test(id) || !/^[A-Za-z0-9+/=]{60,200}$/.test(pub)) return json({ erreur: 'Données invalides' }, 400);
+      try { await crypto.subtle.importKey('spki', unb64(pub), { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']); } catch (e) { return json({ erreur: 'Clé non acceptée' }, 400); }
+      let l = (await lirePk(env)).filter((x) => x.id !== id); if (l.length >= 5) return json({ erreur: '5 appareils au maximum' }, 400);
+      l.push({ id, pub, nom: txt(b.nom, 40) || 'Appareil', t: Date.now() }); await env.GDE.put('passkeys', JSON.stringify(l));
+      return json({ ok: true });
+    }
+    if (p === '/api/pk/liste' && request.method === 'GET') return json({ appareils: (await lirePk(env)).map((x) => ({ id: x.id, nom: x.nom, t: x.t })) });
+    if (p === '/api/pk/retirer' && request.method === 'POST') {
+      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      await env.GDE.put('passkeys', JSON.stringify((await lirePk(env)).filter((x) => x.id !== String(b.id || '')))); return json({ ok: true });
+    }
+
 
     if (p === '/api/moi') return json({ ok: true });
 

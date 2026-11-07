@@ -72,6 +72,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     <button class="btn" id="b-login" type="submit">Entrer</button>
     <p class="msg mal" id="login-msg" role="alert"></p>
   </form>
+  <button class="btn cache" id="b-fid" type="button">🔒 Déverrouiller avec Face ID / empreinte</button>
   <a class="note" href="/">← Retour au site</a>
 </main>
 
@@ -371,6 +372,14 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         <button class="btn ghost" id="r-addpromo" type="button">+ Ajouter un code</button>
       </div>
       <div class="carte">
+        <h3>Face ID / empreinte digitale</h3>
+        <p class="note">Active-le sur ce téléphone : à chaque ouverture de l'admin, il te demande ton visage ou ton doigt. Le mot de passe reste en secours.</p>
+        <button class="btn" id="pk-on" type="button">Activer sur cet appareil</button>
+        <button class="btn ghost cache" id="pk-off" type="button">Désactiver sur cet appareil</button>
+        <div id="pk-liste" class="note"></div>
+        <p class="msg" id="pk-msg" role="status"></p>
+      </div>
+      <div class="carte">
         <h3>Changer mon mot de passe</h3>
         <div><label for="m-a">Mot de passe actuel</label><input id="m-a" type="password" autocomplete="current-password"></div>
         <div><label for="m-n">Nouveau mot de passe (8 caractères minimum)</label><input id="m-n" type="password" autocomplete="new-password"></div>
@@ -462,9 +471,59 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     });
   }
 
+
+  /* ---------- Face ID / empreinte (WebAuthn) ---------- */
+  var PKL = false; try { PKL = !!localStorage.getItem('gde-pk'); } catch (e) {}
+  function u8(b) { return new Uint8Array(b); }
+  function toB64(buf) { var s = '', a = u8(buf); for (var i = 0; i < a.length; i++) s += String.fromCharCode(a[i]); return btoa(s); }
+  function toB64u(buf) { return toB64(buf).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  function fromB64u(t) { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; var s = atob(t), a = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; }
+  function pkOk() { return !!(window.PublicKeyCredential && navigator.credentials && navigator.credentials.get); }
+  function pkConnexion() {
+    var msg = $('login-msg'); msg.textContent = '';
+    if (!pkOk()) { msg.textContent = 'Face ID non disponible ici. Utilise ton mot de passe.'; return Promise.resolve(false); }
+    return api('/api/pk/defi', { method: 'POST' }).then(function (d) {
+      if (!d.ok) throw new Error(d.j && d.j.erreur || 'Face ID pas prêt');
+      return navigator.credentials.get({ publicKey: { challenge: fromB64u(d.j.challenge), rpId: location.hostname, userVerification: 'required', timeout: 60000, allowCredentials: d.j.ids.map(function (i) { return { type: 'public-key', id: fromB64u(i) }; }) } });
+    }).then(function (c) {
+      var r = c.response;
+      return api('/api/pk/connexion', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: toB64u(c.rawId), cdj: toB64u(r.clientDataJSON), ad: toB64u(r.authenticatorData), sig: toB64u(r.signature) }) });
+    }).then(function (r) {
+      if (!r.ok) throw new Error(r.j && r.j.erreur || 'Face ID refusé');
+      setTok(r.j.token); demarrer(); return true;
+    }).catch(function (e) { msg.textContent = (e && e.name === 'NotAllowedError') ? 'Face ID annulé. Réessaie ou entre ton mot de passe.' : ((e && e.message) || 'Face ID impossible.'); return false; });
+  }
+  $('b-fid').addEventListener('click', pkConnexion);
+  function pkMaj() {
+    $('pk-on').classList.toggle('cache', PKL); $('pk-off').classList.toggle('cache', !PKL);
+    api('/api/pk/liste').then(function (r) { var l = (r.j && r.j.appareils) || []; $('pk-liste').textContent = l.length ? 'Appareils activés : ' + l.map(function (a) { return a.nom; }).join(', ') : ''; });
+  }
+  $('pk-on').addEventListener('click', function () {
+    var m = $('pk-msg'); m.className = 'msg'; m.textContent = '';
+    if (!pkOk()) { m.className = 'msg mal'; m.textContent = 'Cet appareil ne propose pas Face ID ici.'; return; }
+    navigator.credentials.create({ publicKey: { rp: { name: 'GOD DID EXPRESS', id: location.hostname }, user: { id: crypto.getRandomValues(new Uint8Array(16)), name: 'admin', displayName: 'Admin' }, challenge: crypto.getRandomValues(new Uint8Array(32)), pubKeyCredParams: [{ type: 'public-key', alg: -7 }], authenticatorSelection: { userVerification: 'required', residentKey: 'discouraged' }, timeout: 60000 } }).then(function (c) {
+      var pub = c.response.getPublicKey && c.response.getPublicKey(); if (!pub) throw new Error('Appareil non compatible');
+      var nom = /iPhone/.test(navigator.userAgent) ? 'iPhone' : /iPad/.test(navigator.userAgent) ? 'iPad' : /Android/.test(navigator.userAgent) ? 'Android' : /Mac/.test(navigator.userAgent) ? 'Mac' : 'Ordinateur';
+      return api('/api/pk/enregistrer', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: toB64u(c.rawId), pub: toB64(pub), nom: nom }) }).then(function (r) {
+        if (!r.ok) throw new Error(r.j && r.j.erreur || 'Impossible'); try { localStorage.setItem('gde-pk', toB64u(c.rawId)); } catch (e) {} PKL = true; m.className = 'msg ok'; m.textContent = 'Face ID activé sur cet appareil.'; pkMaj();
+      });
+    }).catch(function (e) { m.className = 'msg mal'; m.textContent = (e && e.name === 'NotAllowedError') ? 'Annulé.' : ((e && e.message) || 'Impossible.'); });
+  });
+  $('pk-off').addEventListener('click', function () {
+    var id = ''; try { id = localStorage.getItem('gde-pk') || ''; localStorage.removeItem('gde-pk'); } catch (e) {} PKL = false;
+    (id ? api('/api/pk/retirer', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: id }) }) : Promise.resolve()).then(function () { $('pk-msg').className = 'msg ok'; $('pk-msg').textContent = 'Face ID désactivé sur cet appareil.'; pkMaj(); });
+  });
+  /* verrou : si l'admin reste caché plus de 30 s, il redemande Face ID */
+  var cacheDepuis = 0;
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { cacheDepuis = Date.now(); return; }
+    if (PKL && cacheDepuis && Date.now() - cacheDepuis > 30000 && !dirty && STATE) location.reload();
+  });
+
   function boot() {
     api('/api/statut').then(function (r) {
       if (!r.j.pret) return montrerEcran('Première visite. Choisis ton mot de passe : toi seul le connais. Garde-le bien, ne le partage avec personne.', true);
+      if (PKL && pkOk()) { setTok(''); montrerEcran('Admin verrouillé. Touche le bouton pour entrer avec ton visage ou ton doigt.', false); $('b-fid').classList.remove('cache'); pkConnexion(); return; }
       if (!TOK) return montrerEcran('Entre ton mot de passe.', false);
       api('/api/moi').then(function (m) { if (m.ok) demarrer(); else { setTok(''); montrerEcran('Entre ton mot de passe.', false); } });
     }).catch(function () { montrerEcran('Pas de connexion. Réessaie dans un instant.', false); });
@@ -535,6 +594,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         '<div><label>Dès 10</label><input data-k="px" data-i="2" inputmode="decimal" value="' + esc(v(2)) + '"></div></div>' +
         '<details><summary class="note">Détail : neuf ou occasion, carton, sur commande</summary>' + detForm(p.det, 'det-', p.arr) + '</details>' +
         '<details><summary class="note">Description pour les clients</summary><textarea data-k="desc" maxlength="600" style="min-height:70px" placeholder="Une ou deux phrases sur le produit">' + esc(p.desc) + '</textarea></details>' +
+        '<details' + (p.vid ? ' open' : '') + '><summary class="note">Vidéo du produit (lien)</summary><input data-k="vid" maxlength="300" inputmode="url" value="' + esc(p.vid || '') + '" placeholder="https://… YouTube, TikTok, Facebook ou fichier MP4"></details>' +
         '<details open><summary class="note" style="color:var(--orange,#FF7A1A);font-weight:700">+ Ajouter des photos : ' + (1 + (p.ph || []).length) + ' sur 6</summary><div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0">' + (p.ph || []).map(function (u, k) { return '<span style="position:relative"><img src="' + esc(u) + '" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:6px"><button type="button" data-a="ph-x:' + k + '" aria-label="Retirer cette photo" style="position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:0;background:#c0392b;color:#fff;font-size:14px">×</button></span>'; }).join('') + '</div>' + ((p.ph || []).length < 5 ? '<button class="btn ghost mini" data-a="ph-add" type="button">+ Ajouter des photos</button>' : '<span class="note">6 photos au maximum.</span>') + '<input type="file" accept="image/*" multiple class="cache" data-k="files"></details>' +
         '<div class="rang"><button class="btn ghost mini" data-a="photo" type="button">Changer la photo</button>' +
         (p.custom ? '<button class="btn ghost mini" data-a="photo-off" type="button">Enlever la photo</button>' : '') +
@@ -554,11 +614,12 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   }
 
   $('liste').addEventListener('input', function (e) {
-    var t = e.target, row = t.closest('[data-id]'), k = t.getAttribute('data-k'); if (!row || (k !== 'px' && k !== 'desc' && String(k).indexOf('det-') !== 0)) return;
+    var t = e.target, row = t.closest('[data-id]'), k = t.getAttribute('data-k'); if (!row || (k !== 'px' && k !== 'desc' && k !== 'vid' && String(k).indexOf('det-') !== 0)) return;
     var o = refProd(row.getAttribute('data-id'));
     if (k === 'det-arr') { if (t.value) o.arr = t.value; else delete o.arr; marquer(true); return; }
     if (String(k).indexOf('det-') === 0) { o.det = o.det || {}; var dk = k.slice(4); if (t.value) o.det[dk] = t.value; else delete o.det[dk]; if (!Object.keys(o.det).length) delete o.det; marquer(true); return; }
     if (k === 'desc') { o.desc = t.value; marquer(true); return; }
+    if (k === 'vid') { var vv = t.value.trim(); if (vv) o.vid = vv; else delete o.vid; marquer(true); return; }
     o.px = o.px || [null, null, null]; o.px[Number(t.getAttribute('data-i'))] = nb(t.value);
     marquer(true);
   });
@@ -1350,7 +1411,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
 
   /* ---------- Réglages ---------- */
   function rendreReglages() {
-    $('r-wanum').value = STATE.wanum; $('r-avant').value = (STATE.avant || []).join('\n'); rendreContacts(); ['avion', 'bateau', 'zones', 'introuvable'].forEach(function (k) { $('r-i-' + k).value = STATE.info[k] || ''; });
+    $('r-wanum').value = STATE.wanum; $('r-avant').value = (STATE.avant || []).join('\n'); pkMaj(); rendreContacts(); ['avion', 'bateau', 'zones', 'introuvable'].forEach(function (k) { $('r-i-' + k).value = STATE.info[k] || ''; });
     $('r-wag').value = STATE.wag; $('r-wac').value = STATE.wac;
     ['tiktok', 'instagram', 'facebook'].forEach(function (k) { $('r-' + k).value = STATE.soc[k] || ''; });
     $('r-lien').value = STATE.lien; $('r-phr').value = (STATE.phr || []).join('\n');
