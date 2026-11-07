@@ -657,6 +657,11 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       </div>
     </section>
 
+    <section class="bloc rv" id="vedette">
+      <header><div class="kicker">À découvrir</div><h2>Les produits du moment</h2></header>
+      <div class="rail" id="vedette-rail"></div>
+    </section>
+
     <section class="bloc rv" id="tendance" hidden>
       <header><div class="kicker">Tendances</div><h2>Les produits qui font parler d'eux</h2></header>
       <div class="rail" id="tendance-rail"></div>
@@ -1804,7 +1809,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   function carte(p) {
     var dans = !!liste[p.id];
     return '<article class="prod"><button class="ph" type="button" data-open="' + p.id + '" aria-label="Agrandir : ' + p.t + '">' +
-      '<img src="' + ea(pic(p)) + '" alt="' + ea(p.t) + '" loading="lazy" width="960" height="600">' +
+      '<img src="' + ea(pic(p)) + '" alt="' + ea(p.t) + '" loading="lazy" width="960" height="600"' + rotAttr(p) + '>' +
       '<span class="tag">Chine · Dubaï · Istanbul</span>' + (p.l ? '<span class="tag live">Au live</span>' : '') + '</button>' +
       '<div class="corps"><h3>' + p.t + '</h3><p class="sub">' + p.s + '</p>' + detTags(p) + prixLigne(p) + '</div>' +
       '<div class="act"><a class="btn mini" href="' + wa(msgProduit(p)) + '" target="_blank" rel="noopener">Commander</a>' +
@@ -2060,6 +2065,18 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 
   /* ===== 2050 : accueil vivant ===== */
   function img(p) { return pic(p); }
+  function rotAttr(p) { return p.ph && p.ph.length ? ' data-rot="' + ea(JSON.stringify([pic(p)].concat(p.ph))) + '"' : ''; }
+  setInterval(function () {
+    if (document.hidden) return;
+    Array.prototype.forEach.call(document.querySelectorAll('img[data-rot]'), function (im) {
+      var r = im.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight || !r.width) return;
+      var L; try { L = JSON.parse(im.getAttribute('data-rot')); } catch (e) { return; }
+      var i = ((Number(im.getAttribute('data-ri')) || 0) + 1) % L.length, n = new Image();
+      n.onload = function () { im.style.transition = 'opacity .35s'; im.style.opacity = '0'; setTimeout(function () { im.src = L[i]; im.setAttribute('data-ri', i); im.style.opacity = '1'; }, 350); };
+      n.src = L[i];
+    });
+  }, 2800);
+
   function esc(s) { return String(s).replace(/[<>&"]/g, ''); }
 
   /* Salutation, lueur selon l'heure, horloge */
@@ -2149,7 +2166,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   ];
   var occActuel = 0;
   function mini(p, rang) {
-    return '<button type="button" class="mc" data-open="' + p.id + '"><span class="im"><img src="' + img(p) + '" alt="" loading="lazy" width="156" height="98">' + (rang ? '<span class="rang">' + rang + '</span>' : '') + '</span><b>' + p.t + '</b></button>';
+    return '<button type="button" class="mc" data-open="' + p.id + '"><span class="im"><img src="' + img(p) + '" alt="" loading="lazy" width="156" height="98"' + rotAttr(p) + '>' + (rang ? '<span class="rang">' + rang + '</span>' : '') + '</span><b>' + p.t + '</b></button>';
   }
   function rendreOcc() {
     $('occ-chips').innerHTML = OCC.map(function (o, i) { return '<button type="button" class="chip" data-occ="' + i + '" aria-pressed="' + (i === occActuel) + '">' + o[0] + '</button>'; }).join('');
@@ -2179,12 +2196,18 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     $('dm-quand').innerHTML = o;
   }
   majQuand();
+  function rendreVedette() {
+    var L = PRODUITS.filter(function (p) { return !p.gone; }), A = L.filter(function (p) { return p.ph && p.ph.length; }), B = L.filter(function (p) { return !(p.ph && p.ph.length); });
+    var T = A.concat(B).slice(0, 12); $('vedette').hidden = !T.length;
+    $('vedette-rail').innerHTML = T.map(function (p, i) { return mini(p, i + 1); }).join('');
+  }
+  rendreVedette();
   function rendreTendance() {
     var T = (STATE.tend || []).map(function (x) { return { p: PRODUITS.filter(function (q) { return q.id === x.pid; })[0], tag: x.tag }; }).filter(function (x) { return x.p; });
     var L = { Chine: 'Tendance en Chine', 'Dubaï': 'Tendance à Dubaï', Turquie: 'Tendance en Turquie', RDC: 'Demandé en RDC', Nouveau: 'Nouveauté' };
     $('tendance').hidden = !T.length;
     $('tendance-rail').innerHTML = T.map(function (x) {
-      return '<div class="mc" style="display:grid;gap:6px;align-content:start;min-width:178px"><button type="button" class="mc" data-open="' + x.p.id + '" style="all:unset;cursor:pointer;display:grid;gap:6px"><span class="im"><img src="' + img(x.p) + '" alt="" loading="lazy" width="156" height="98"></span><span class="pastille" style="justify-self:start">' + (L[x.tag] || '') + '</span><b>' + x.p.t + '</b></button>' +
+      return '<div class="mc" style="display:grid;gap:6px;align-content:start;min-width:178px"><button type="button" class="mc" data-open="' + x.p.id + '" style="all:unset;cursor:pointer;display:grid;gap:6px"><span class="im"><img src="' + img(x.p) + '" alt="" loading="lazy" width="156" height="98"' + rotAttr(x.p) + '></span><span class="pastille" style="justify-self:start">' + (L[x.tag] || '') + '</span><b>' + x.p.t + '</b></button>' +
         '<a class="btn mini" href="' + wa('Bonjour GOD DID EXPRESS, quel est le prix de : ' + x.p.t + ' ? Pouvez-vous aussi me donner le délai de livraison ?') + '" target="_blank" rel="noopener">Demander le prix</a>' +
         '<a class="btn ghost mini" href="' + wa('Bonjour GOD DID EXPRESS, je veux précommander : ' + x.p.t + '. Quelles sont les conditions (acompte, délai) ?') + '" target="_blank" rel="noopener">Précommander</a></div>';
     }).join('');
