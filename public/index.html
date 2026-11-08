@@ -1698,6 +1698,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       if (o.photo) p.photo = o.photo;
       if (o.ph) p.ph = o.ph;
       if (o.vid) p.vid = o.vid;
+      if (o.ac >= 10 && o.ac <= 100) p.ac = o.ac;
       if (o.desc) p.desc = o.desc;
       if (o.det) p.det = o.det;
       if (o.arr) p.arr = o.arr;
@@ -1747,16 +1748,17 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     if (mn !== null && mn < Number(px[main])) s += '<span class="gros">Gros : ' + usd(mn) + ' la pièce</span>';
     return s;
   }
+  function acPct(p) { var a = Number(p && p.ac); return a >= 10 && a <= 100 ? a : 50; }
   function fichePrix(p) {
     var px = pxList(p), s = '<p class="note" style="font-size:14px">' + p.s + '.</p>' + (p.desc ? '<p style="font-size:14.5px;margin:8px 0 0">' + h(p.desc) + '</p>' : '');
-    if (prixMin(p) === null) return s + '<p class="note">Prix sur demande, envoyé sur WhatsApp avant tout paiement. Acompte de 50 %.</p>';
+    if (prixMin(p) === null) return s + '<p class="note">Prix sur demande, envoyé sur WhatsApp avant tout paiement. ' + (acPct(p) === 100 ? 'Paiement complet à la commande.' : 'Acompte de ' + acPct(p) + ' %.') + '</p>';
     s += '<div class="paliers">' + QP.map(function (q, i) {
       return '<div class="palier" data-pal="' + i + '"><span>' + (i === QP.length - 1 ? q + '+' : 'dès ' + q) + ' pièce' + (q > 1 ? 's' : '') + '</span><b>' + (okPx(px[i]) ? usd(Number(px[i])) : '—') + '</b></div>';
     }).join('') + '</div>';
     s += '<div class="carte calc" data-calc="' + p.id + '"><div class="duo">' +
       '<div class="champ"><label for="k-q">Quantité</label><input id="k-q" type="number" min="1" value="1" inputmode="numeric" data-k="q"></div>' +
       '<div class="champ"><label for="k-c">Code promo</label><input id="k-c" data-k="c" autocomplete="off" placeholder="Facultatif" style="text-transform:uppercase"></div></div>' +
-      '<div class="acompte"><div><small>Total estimé</small><strong data-o="tot">—</strong></div><div><small>Acompte à verser (50 %)</small><strong data-o="ac">—</strong></div></div>' +
+      '<div class="acompte"><div><small>Total estimé</small><strong data-o="tot">—</strong></div><div><small>' + (acPct(p) === 100 ? 'À payer à la commande' : 'Acompte à verser (' + acPct(p) + ' %)') + '</small><strong data-o="ac">—</strong></div></div>' +
       '<p class="note" data-o="info"></p></div>';
     return s;
   }
@@ -1777,9 +1779,10 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       return;
     }
     var tot = u * q * (1 - pct / 100);
-    o('tot').textContent = usd(tot); o('ac').textContent = usd(tot / 2);
-    o('info').textContent = usd(u) + ' la pièce' + (pct ? ', promo −' + pct + ' %' : (String(code).trim() ? ', code inconnu' : '')) + ', solde de ' + usd(tot / 2) + ' à la livraison.';
-    if (a) a.href = wa('Bonjour GOD DID EXPRESS, je veux commander : ' + p.t + '.\nQuantité : ' + q + '\nPrix : ' + usd(u) + ' la pièce\nTotal estimé : ' + usd(tot) + (pct ? ' (code ' + String(code).trim().toUpperCase() + ', −' + pct + ' %)' : '') + '\nAcompte 50 % : ' + usd(tot / 2) + '\nMerci de confirmer le prix et le délai.');
+    var AC = acPct(p), acm = tot * AC / 100;
+    o('tot').textContent = usd(tot); o('ac').textContent = usd(acm);
+    o('info').textContent = usd(u) + ' la pièce' + (pct ? ', promo −' + pct + ' %' : (String(code).trim() ? ', code inconnu' : '')) + (AC >= 100 ? ', paiement complet à la commande.' : ', solde de ' + usd(tot - acm) + ' à la livraison.');
+    if (a) a.href = wa('Bonjour GOD DID EXPRESS, je veux commander : ' + p.t + '.\nQuantité : ' + q + '\nPrix : ' + usd(u) + ' la pièce\nTotal estimé : ' + usd(tot) + (pct ? ' (code ' + String(code).trim().toUpperCase() + ', −' + pct + ' %)' : '') + '\n' + (AC >= 100 ? 'Paiement complet : ' : 'Acompte ' + AC + ' % : ') + usd(acm) + '\nMerci de confirmer le prix et le délai.');
   }
   PRODUITS = buildProduits();
   var BY = {};

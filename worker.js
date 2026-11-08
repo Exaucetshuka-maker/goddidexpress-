@@ -138,6 +138,7 @@ function nettoyer(s) {
     if (p.gone) r.gone = true;
     if (p.desc) r.desc = txt(p.desc, 600);
     { const dd = nettoyerDet(p.det); if (dd) r.det = dd; }
+    { const ac = Math.round(nombre(p.ac)); if (ac >= 10 && ac <= 100 && ac !== 50) r.ac = ac; }
     if (new RegExp('^\\d{4}-\\d{2}-\\d{2}$').test(String(p.arr || ''))) r.arr = String(p.arr);
     if (p.photo && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(p.photo)) r.photo = p.photo;
     { const ph = phs(p.ph); if (ph.length) r.ph = ph; }
@@ -156,6 +157,7 @@ function nettoyer(s) {
     if (e.cache) r.cache = true;
     if (e.desc) r.desc = txt(e.desc, 600);
     { const dd = nettoyerDet(e.det); if (dd) r.det = dd; }
+    { const ac = Math.round(nombre(e.ac)); if (ac >= 10 && ac <= 100 && ac !== 50) r.ac = ac; }
     if (new RegExp('^\\d{4}-\\d{2}-\\d{2}$').test(String(e.arr || ''))) r.arr = String(e.arr);
     return r;
   });
