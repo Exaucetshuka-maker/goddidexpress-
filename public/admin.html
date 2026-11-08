@@ -72,6 +72,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     <button class="btn" id="b-login" type="submit">Entrer</button>
     <p class="msg mal" id="login-msg" role="alert"></p>
   </form>
+  <form id="f-pin" class="carte cache" autocomplete="off"><label for="pin-in">Code à 7 chiffres</label><input id="pin-in" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="7" autocomplete="off" placeholder="• • • • • • •"><p class="msg mal" id="pin-msg" role="alert"></p></form>
   <button class="btn cache" id="b-fid" type="button">🔒 Déverrouiller avec Face ID / empreinte</button>
   <a class="note" href="/">← Retour au site</a>
 </main>
@@ -380,6 +381,14 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         <p class="msg" id="pk-msg" role="status"></p>
       </div>
       <div class="carte">
+        <h3>Code à 7 chiffres</h3>
+        <p class="note">Si Face ID ne marche pas, ce code ouvre l'admin sur cet appareil. Ce n'est pas ton mot de passe. Après 5 erreurs, il se bloque et demande le mot de passe.</p>
+        <input id="pin-new" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="7" autocomplete="off" placeholder="7 chiffres de ton choix">
+        <button class="btn" id="pin-on" type="button">Activer ce code sur cet appareil</button>
+        <button class="btn ghost cache" id="pin-off" type="button">Désactiver le code</button>
+        <p class="msg" id="pin-m2" role="status"></p>
+      </div>
+      <div class="carte">
         <h3>Changer mon mot de passe</h3>
         <div><label for="m-a">Mot de passe actuel</label><input id="m-a" type="password" autocomplete="current-password"></div>
         <div><label for="m-n">Nouveau mot de passe (8 caractères minimum)</label><input id="m-n" type="password" autocomplete="new-password"></div>
@@ -517,13 +526,45 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   var cacheDepuis = 0;
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) { cacheDepuis = Date.now(); return; }
-    if (PKL && cacheDepuis && Date.now() - cacheDepuis > 30000 && !dirty && STATE) location.reload();
+    if (verrou() && cacheDepuis && Date.now() - cacheDepuis > 30000 && !dirty && STATE) location.reload();
+  });
+
+
+  /* ---------- Code à 7 chiffres ---------- */
+  var PINL = false; try { PINL = !!localStorage.getItem('gde-pin'); } catch (e) {}
+  function verrou() { return PKL || PINL; }
+  function pinConnexion() {
+    var v = $('pin-in').value, m = $('pin-msg'); m.textContent = ''; if (!/^\d{7}$/.test(v)) return;
+    api('/api/pin/connexion', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ pin: v }) }).then(function (r) {
+      $('pin-in').value = ''; if (!r.ok) { m.textContent = (r.j && r.j.erreur) || 'Code refusé.'; return; } setTok(r.j.token); demarrer();
+    }).catch(function () { m.textContent = 'Pas de connexion.'; });
+  }
+  $('pin-in').addEventListener('input', function () { this.value = this.value.replace(/\D/g, '').slice(0, 7); if (this.value.length === 7) pinConnexion(); });
+  $('f-pin').addEventListener('submit', function (e) { e.preventDefault(); pinConnexion(); });
+  function pinMaj() { $('pin-on').classList.toggle('cache', PINL); $('pin-off').classList.toggle('cache', !PINL); }
+  $('pin-on').addEventListener('click', function () {
+    var m = $('pin-m2'), v = $('pin-new').value; m.className = 'msg';
+    if (!/^\d{7}$/.test(v)) { m.className = 'msg mal'; m.textContent = 'Il faut exactement 7 chiffres.'; return; }
+    api('/api/pin/definir', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ pin: v }) }).then(function (r) {
+      if (!r.ok) { m.className = 'msg mal'; m.textContent = (r.j && r.j.erreur) || 'Impossible.'; return; }
+      try { localStorage.setItem('gde-pin', '1'); } catch (e) {} PINL = true; $('pin-new').value = ''; m.className = 'msg ok'; m.textContent = 'Code activé. Retiens-le bien.'; pinMaj();
+    });
+  });
+  $('pin-off').addEventListener('click', function () {
+    try { localStorage.removeItem('gde-pin'); } catch (e) {} PINL = false;
+    api('/api/pin/retirer', { method: 'POST' }).then(function () { $('pin-m2').className = 'msg ok'; $('pin-m2').textContent = 'Code désactivé.'; pinMaj(); });
   });
 
   function boot() {
     api('/api/statut').then(function (r) {
       if (!r.j.pret) return montrerEcran('Première visite. Choisis ton mot de passe : toi seul le connais. Garde-le bien, ne le partage avec personne.', true);
-      if (PKL && pkOk()) { setTok(''); montrerEcran('Admin verrouillé. Touche le bouton pour entrer avec ton visage ou ton doigt.', false); $('b-fid').classList.remove('cache'); pkConnexion(); return; }
+      if (verrou()) {
+        setTok(''); var fid = PKL && pkOk();
+        montrerEcran('Admin verrouillé.' + (fid ? ' Utilise ton visage ou ton doigt, ou ton code à 7 chiffres.' : ' Entre ton code à 7 chiffres.'), false);
+        $('b-fid').classList.toggle('cache', !fid); $('f-pin').classList.toggle('cache', !PINL);
+        if (fid) pkConnexion(); else if (PINL) setTimeout(function () { $('pin-in').focus(); }, 100);
+        return;
+      }
       if (!TOK) return montrerEcran('Entre ton mot de passe.', false);
       api('/api/moi').then(function (m) { if (m.ok) demarrer(); else { setTok(''); montrerEcran('Entre ton mot de passe.', false); } });
     }).catch(function () { montrerEcran('Pas de connexion. Réessaie dans un instant.', false); });
@@ -1411,7 +1452,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
 
   /* ---------- Réglages ---------- */
   function rendreReglages() {
-    $('r-wanum').value = STATE.wanum; $('r-avant').value = (STATE.avant || []).join('\n'); pkMaj(); rendreContacts(); ['avion', 'bateau', 'zones', 'introuvable'].forEach(function (k) { $('r-i-' + k).value = STATE.info[k] || ''; });
+    $('r-wanum').value = STATE.wanum; $('r-avant').value = (STATE.avant || []).join('\n'); pkMaj(); pinMaj(); rendreContacts(); ['avion', 'bateau', 'zones', 'introuvable'].forEach(function (k) { $('r-i-' + k).value = STATE.info[k] || ''; });
     $('r-wag').value = STATE.wag; $('r-wac').value = STATE.wac;
     ['tiktok', 'instagram', 'facebook'].forEach(function (k) { $('r-' + k).value = STATE.soc[k] || ''; });
     $('r-lien').value = STATE.lien; $('r-phr').value = (STATE.phr || []).join('\n');

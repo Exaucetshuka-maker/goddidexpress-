@@ -327,6 +327,22 @@ async function traiter(request, env) {
       if (!(await pkVerifier(env, request, b || {}))) { await env.GDE.put(f.k, String(f.n + 1), { expirationTtl: 900 }); return json({ erreur: 'Face ID refusé' }, 401); }
       return json({ token: await faireToken(env, auth) });
     }
+    /* Code à 7 chiffres (secours de Face ID) : 5 essais par adresse, 10 au total par heure */
+    if (p === '/api/pin/connexion' && request.method === 'POST') {
+      const ip = request.headers.get('cf-connecting-ip') || 'x', ki = 'pinf:' + ip;
+      const ni = Number((await env.GDE.get(ki)) || 0), ng = Number((await env.GDE.get('pinfail')) || 0);
+      if (ni >= 5 || ng >= 10) return json({ erreur: 'Code bloqué. Entre ton mot de passe.' }, 429);
+      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const auth = await lireAuth(env); let pn = null; try { pn = JSON.parse((await env.GDE.get('pin')) || 'null'); } catch (e) {}
+      if (!auth || !pn) return json({ erreur: 'Code pas activé. Entre ton mot de passe.' }, 404);
+      const h = await pbkdf2(String(b.pin || ''), pn.salt, pn.iter);
+      if (!/^\d{7}$/.test(String(b.pin || '')) || !egal(h, pn.hash)) {
+        await env.GDE.put(ki, String(ni + 1), { expirationTtl: 900 }); await env.GDE.put('pinfail', String(ng + 1), { expirationTtl: 3600 });
+        return json({ erreur: 'Code incorrect (' + Math.max(0, 4 - ni) + ' essai(s) restant(s))' }, 401);
+      }
+      await env.GDE.delete(ki);
+      return json({ token: await faireToken(env, auth) });
+    }
     /* Connexion */
     if (p === '/api/login' && request.method === 'POST') {
       const f = await freinage(env, request);
@@ -339,6 +355,7 @@ async function traiter(request, env) {
         await env.GDE.put(f.k, String(f.n + 1), { expirationTtl: 900 });
         return json({ erreur: 'Mot de passe incorrect' }, 401);
       }
+      await env.GDE.delete('pinfail'); await env.GDE.delete(f.k);
       return json({ token: await faireToken(env, auth) });
     }
 
@@ -472,6 +489,13 @@ async function traiter(request, env) {
 
     /* Tout ce qui suit demande d'être connecté */
     if (!(await verifierToken(env, request))) return json({ erreur: 'Connexion requise' }, 401);
+    if (p === '/api/pin/definir' && request.method === 'POST') {
+      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const pin = String(b.pin || ''); if (!/^\d{7}$/.test(pin)) return json({ erreur: 'Le code doit avoir exactement 7 chiffres' }, 400);
+      const salt = rnd(16); await env.GDE.put('pin', JSON.stringify({ salt, iter: ITER, hash: await pbkdf2(pin, salt, ITER) })); await env.GDE.delete('pinfail');
+      return json({ ok: true });
+    }
+    if (p === '/api/pin/retirer' && request.method === 'POST') { await env.GDE.delete('pin'); return json({ ok: true }); }
     if (p === '/api/pk/enregistrer' && request.method === 'POST') {
       let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const id = String(b.id || ''), pub = String(b.pub || '');
