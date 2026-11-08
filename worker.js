@@ -90,6 +90,24 @@ async function pkVerifier(env, request, b) {
   } catch (e) { return false; }
 }
 
+
+/* Limite en mémoire (sans écrire dans KV) pour les adresses publiques : évite le spam et protège le quota d'écriture */
+const TAUX = new Map();
+function limite(request, nom, max) {
+  const ip = request.headers.get('cf-connecting-ip') || 'x', k = nom + ':' + ip, mn = Math.floor(Date.now() / 60000), e = TAUX.get(k);
+  if (TAUX.size > 3000) TAUX.clear();
+  if (!e || e.m !== mn) { TAUX.set(k, { m: mn, n: 1 }); return false; }
+  e.n++; return e.n > max;
+}
+/* Compteurs de visites et de clics : regroupés, écrits au plus une fois toutes les 2 minutes */
+const ATT = { vue: {}, clic: {}, tv: 0, tc: 0 };
+async function mdpOk(env, request) {
+  const c = request.headers.get('x-confirm') || ''; const f = await freinage(env, request); if (f.bloque) return json({ erreur: 'Trop d\'essais. Réessaie dans 15 minutes.' }, 429);
+  const auth = await lireAuth(env);
+  if (!c) return json({ erreur: 'Mot de passe demandé.', mdp: true }, 403);
+  if (!auth || !egal(await pbkdf2(c, auth.salt, auth.iter), auth.hash)) { await env.GDE.put(f.k, String(f.n + 1), { expirationTtl: 900 }); return json({ erreur: 'Mot de passe incorrect', mdp: true }, 403); }
+  return null;
+}
 const MAXTXT = 600;
 function txt(v, max = MAXTXT) { return String(v == null ? '' : v).slice(0, max); }
 function nombre(v, def = 0) { const n = Number(v); return isFinite(n) ? n : def; }
@@ -260,7 +278,7 @@ async function servirPageAvecEtat(request, env) {
   return new Response(html, { status: 200, headers: h });
 }
 
-const entetesSecurite = { 'strict-transport-security': 'max-age=31536000; includeSubDomains', 'x-content-type-options': 'nosniff', 'referrer-policy': 'strict-origin-when-cross-origin', 'content-security-policy': "frame-ancestors 'self'" };
+const entetesSecurite = { 'strict-transport-security': 'max-age=31536000; includeSubDomains', 'x-content-type-options': 'nosniff', 'referrer-policy': 'strict-origin-when-cross-origin', 'content-security-policy': "frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" };
 export default {
   async fetch(request, env) {
     const rep = await traiter(request, env);
@@ -395,6 +413,7 @@ async function traiter(request, env) {
       return json({ avion: calc('avion'), bateau: calc('bateau') });
     }
     if (p === '/api/avis' && request.method === 'POST') {
+      if (limite(request, 'avis', 8)) return json({ erreur: 'Trop d\'essais, réessaie dans une minute.' }, 429);
       let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const ref = String(b.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), tx = txt(b.txt, 400), nom = txt(b.nom, 40);
       if (tx.length < 8) return json({ erreur: 'Écris au moins une phrase.' }, 400);
@@ -427,6 +446,7 @@ async function traiter(request, env) {
       return new Response(JSON.stringify(v), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=30' } });
     }
     if (p === '/api/vote' && request.method === 'POST') {
+      if (limite(request, 'vote', 15)) return json({ erreur: 'Trop de votes, réessaie dans une minute.' }, 429);
       let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const id = String(b && b.id || ''); if (!/^[A-Za-z0-9_-]{1,40}$/.test(id) || !env.GDE) return json({ erreur: 'Vote refusé' }, 400);
       const ip = request.headers.get('cf-connecting-ip') || 'x', kv = 'vt:' + ip + ':' + id, kn = 'vtn:' + ip;
@@ -439,19 +459,30 @@ async function traiter(request, env) {
       return json({ ok: true, n: v[id] });
     }
     if (p === '/api/clic' && request.method === 'POST') {
+      if (limite(request, 'clic', 40)) return new Response(null, { status: 204 });
       let b; try { b = await request.json(); } catch (e) { return new Response(null, { status: 204 }); }
       const id = String(b && b.id || '').slice(0, 60); if (!id || /[<>"]/.test(id) || !env.GDE) return new Response(null, { status: 204 });
-      const t = await env.GDE.get('clics'); let c = {}; try { c = t ? JSON.parse(t) : {}; } catch (e) {}
-      if (!(id in c) && Object.keys(c).length >= 600) return new Response(null, { status: 204 });
-      c[id] = (c[id] || 0) + 1; await env.GDE.put('clics', JSON.stringify(c)); return new Response(null, { status: 204 });
+      ATT.clic[id] = (ATT.clic[id] || 0) + 1;
+      if (Date.now() - ATT.tc > 120000) {
+        ATT.tc = Date.now(); const att = ATT.clic; ATT.clic = {};
+        const t = await env.GDE.get('clics'); let c = {}; try { c = t ? JSON.parse(t) : {}; } catch (e) {}
+        for (const k in att) { if (!(k in c) && Object.keys(c).length >= 600) continue; c[k] = (c[k] || 0) + att[k]; }
+        await env.GDE.put('clics', JSON.stringify(c));
+      }
+      return new Response(null, { status: 204 });
     }
     if (p === '/api/vue' && request.method === 'POST') {
+      if (limite(request, 'vue', 20)) return new Response(null, { status: 204 });
       let b; try { b = await request.json(); } catch (e) { return new Response(null, { status: 204 }); }
-      if (!env.GDE) return new Response(null, { status: 204 });
-      const jour = new Date().toISOString().slice(0, 10), t = await env.GDE.get('vues'); let v = {}; try { v = t ? JSON.parse(t) : {}; } catch (e) {}
-      const d = v[jour] || (v[jour] = { v: 0, u: 0 }); d.v++; if (b && b.n === true) d.u++;
-      Object.keys(v).sort().slice(0, Math.max(0, Object.keys(v).length - 60)).forEach((k) => delete v[k]);
-      await env.GDE.put('vues', JSON.stringify(v)); return new Response(null, { status: 204 });
+      const jour = new Date().toISOString().slice(0, 10), d0 = ATT.vue[jour] || (ATT.vue[jour] = { v: 0, u: 0 }); d0.v++; if (b && b.n === true) d0.u++;
+      if (Date.now() - ATT.tv > 120000) {
+        ATT.tv = Date.now(); const att = ATT.vue; ATT.vue = {};
+        const t = await env.GDE.get('vues'); let v = {}; try { v = t ? JSON.parse(t) : {}; } catch (e) {}
+        for (const j in att) { const d = v[j] || (v[j] = { v: 0, u: 0 }); d.v += att[j].v; d.u += att[j].u; }
+        Object.keys(v).sort().slice(0, Math.max(0, Object.keys(v).length - 60)).forEach((k) => delete v[k]);
+        await env.GDE.put('vues', JSON.stringify(v));
+      }
+      return new Response(null, { status: 204 });
     }
     if (p === '/api/join' && request.method === 'POST') {
       const ip = request.headers.get('cf-connecting-ip') || 'x', rk = 'jn:' + ip;
@@ -490,6 +521,7 @@ async function traiter(request, env) {
     /* Tout ce qui suit demande d'être connecté */
     if (!(await verifierToken(env, request))) return json({ erreur: 'Connexion requise' }, 401);
     if (p === '/api/pin/definir' && request.method === 'POST') {
+      { const x = await mdpOk(env, request); if (x) return x; }
       let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const pin = String(b.pin || ''); if (!/^\d{7}$/.test(pin)) return json({ erreur: 'Le code doit avoir exactement 7 chiffres' }, 400);
       const salt = rnd(16); await env.GDE.put('pin', JSON.stringify({ salt, iter: ITER, hash: await pbkdf2(pin, salt, ITER) })); await env.GDE.delete('pinfail');
@@ -497,6 +529,7 @@ async function traiter(request, env) {
     }
     if (p === '/api/pin/retirer' && request.method === 'POST') { await env.GDE.delete('pin'); return json({ ok: true }); }
     if (p === '/api/pk/enregistrer' && request.method === 'POST') {
+      { const x = await mdpOk(env, request); if (x) return x; }
       let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const id = String(b.id || ''), pub = String(b.pub || '');
       if (!/^[A-Za-z0-9_-]{16,300}$/.test(id) || !/^[A-Za-z0-9+/=]{60,200}$/.test(pub)) return json({ erreur: 'Données invalides' }, 400);

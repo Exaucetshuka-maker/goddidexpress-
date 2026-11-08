@@ -514,8 +514,8 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     navigator.credentials.create({ publicKey: { rp: { name: 'GOD DID EXPRESS', id: location.hostname }, user: { id: crypto.getRandomValues(new Uint8Array(16)), name: 'admin', displayName: 'Admin' }, challenge: crypto.getRandomValues(new Uint8Array(32)), pubKeyCredParams: [{ type: 'public-key', alg: -7 }], authenticatorSelection: { userVerification: 'required', residentKey: 'discouraged' }, timeout: 60000 } }).then(function (c) {
       var pub = c.response.getPublicKey && c.response.getPublicKey(); if (!pub) throw new Error('Appareil non compatible');
       var nom = /iPhone/.test(navigator.userAgent) ? 'iPhone' : /iPad/.test(navigator.userAgent) ? 'iPad' : /Android/.test(navigator.userAgent) ? 'Android' : /Mac/.test(navigator.userAgent) ? 'Mac' : 'Ordinateur';
-      return api('/api/pk/enregistrer', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: toB64u(c.rawId), pub: toB64(pub), nom: nom }) }).then(function (r) {
-        if (!r.ok) throw new Error(r.j && r.j.erreur || 'Impossible'); try { localStorage.setItem('gde-pk', toB64u(c.rawId)); } catch (e) {} PKL = true; m.className = 'msg ok'; m.textContent = 'Face ID activé sur cet appareil.'; pkMaj();
+      return avecMdp('/api/pk/enregistrer', { id: toB64u(c.rawId), pub: toB64(pub), nom: nom }).then(function (r) {
+        if (!r) throw new Error('Annulé'); if (!r.ok) throw new Error(r.j && r.j.erreur || 'Impossible'); try { localStorage.setItem('gde-pk', toB64u(c.rawId)); } catch (e) {} PKL = true; m.className = 'msg ok'; m.textContent = 'Face ID activé sur cet appareil.'; pkMaj();
       });
     }).catch(function (e) { m.className = 'msg mal'; m.textContent = (e && e.name === 'NotAllowedError') ? 'Annulé.' : ((e && e.message) || 'Impossible.'); });
   });
@@ -546,8 +546,8 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   $('pin-on').addEventListener('click', function () {
     var m = $('pin-m2'), v = $('pin-new').value; m.className = 'msg';
     if (!/^\d{7}$/.test(v)) { m.className = 'msg mal'; m.textContent = 'Il faut exactement 7 chiffres.'; return; }
-    api('/api/pin/definir', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ pin: v }) }).then(function (r) {
-      if (!r.ok) { m.className = 'msg mal'; m.textContent = (r.j && r.j.erreur) || 'Impossible.'; return; }
+    avecMdp('/api/pin/definir', { pin: v }).then(function (r) {
+      if (!r) return; if (!r.ok) { m.className = 'msg mal'; m.textContent = (r.j && r.j.erreur) || 'Impossible.'; return; }
       try { localStorage.setItem('gde-pin', '1'); } catch (e) {} PINL = true; $('pin-new').value = ''; m.className = 'msg ok'; m.textContent = 'Code activé. Retiens-le bien.'; pinMaj();
     });
   });
@@ -1504,6 +1504,16 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       v.querySelector('form').addEventListener('submit', function (e) { e.preventDefault(); var x = i.value; document.body.removeChild(v); ok(x); });
       v.querySelector('#cf-non').addEventListener('click', function () { document.body.removeChild(v); ok(null); });
     });
+  }
+
+  /* envoie une requête qui exige le mot de passe (le demande, le redemande si faux) */
+  async function avecMdp(chemin, corps) {
+    var cf = null, r;
+    while (true) {
+      r = await api(chemin, { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, cf ? { 'x-confirm': cf } : {}), body: JSON.stringify(corps) });
+      if (!(r.status === 403 && r.j && r.j.mdp)) return r;
+      cf = await demanderMdp(cf ? r.j.erreur : 'Entre ton mot de passe pour continuer.'); if (cf === null) return null;
+    }
   }
   /* ---------- Enregistrer ---------- */
   function expire() { $('f-login').classList.remove('cache'); setTok(''); montrerEcran('Ta connexion a expiré. Entre ton mot de passe : tes modifications sont gardées.', false); $('b-save').disabled = false; }
