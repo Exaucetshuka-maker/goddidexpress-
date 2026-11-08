@@ -1491,6 +1491,17 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     });
   });
 
+
+  /* demande du mot de passe avant de changer numéros, adresses, e-mails */
+  function demanderMdp(note) {
+    return new Promise(function (ok) {
+      var v = document.createElement('div'); v.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+      v.innerHTML = '<form class="carte" style="max-width:360px;width:100%"><h3>Mot de passe demandé</h3><p class="note">' + esc(note || 'Entre ton mot de passe pour changer les numéros, adresses et e-mails.') + '</p><input type="password" autocomplete="current-password" id="cf-mdp" required><div style="display:flex;gap:8px;margin-top:10px"><button class="btn" type="submit">Confirmer</button><button class="btn ghost" type="button" id="cf-non">Annuler</button></div></form>';
+      document.body.appendChild(v); var i = v.querySelector('#cf-mdp'); setTimeout(function () { i.focus(); }, 50);
+      v.querySelector('form').addEventListener('submit', function (e) { e.preventDefault(); var x = i.value; document.body.removeChild(v); ok(x); });
+      v.querySelector('#cf-non').addEventListener('click', function () { document.body.removeChild(v); ok(null); });
+    });
+  }
   /* ---------- Enregistrer ---------- */
   function expire() { setTok(''); montrerEcran('Ta connexion a expiré. Entre ton mot de passe : tes modifications sont gardées.', false); $('b-save').disabled = false; }
   $('b-save').addEventListener('click', async function () {
@@ -1498,6 +1509,15 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     var H = { 'content-type': 'application/json' };
     try {
       var r = await api('/api/state', { method: 'PUT', headers: H, body: JSON.stringify(STATE) });
+      if (r.status === 403 && r.j && r.j.mdp) {
+        var cf = await demanderMdp(r.j.erreur);
+        if (cf === null) { $('b-save').disabled = false; infoEtat('Enregistrement annulé'); return; }
+        r = await api('/api/state', { method: 'PUT', headers: Object.assign({ 'x-confirm': cf }, H), body: JSON.stringify(STATE) });
+        while (r.status === 403 && r.j && r.j.mdp) {
+          cf = await demanderMdp(r.j.erreur); if (cf === null) { $('b-save').disabled = false; infoEtat('Enregistrement annulé'); return; }
+          r = await api('/api/state', { method: 'PUT', headers: Object.assign({ 'x-confirm': cf }, H), body: JSON.stringify(STATE) });
+        }
+      }
       if (r.status === 401) return expire();
       if (!r.ok) throw new Error((r.j && r.j.erreur) || 'Échec de l\'enregistrement');
       STATE = defState(r.j);

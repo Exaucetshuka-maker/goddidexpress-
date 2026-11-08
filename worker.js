@@ -520,6 +520,14 @@ async function traiter(request, env) {
       let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const ancien = await lireEtat(env);
       const propre = nettoyer({ ...b, rev: Math.max(nombre(b.rev), nombre(ancien.rev)) });
+      /* Numéros, adresses, e-mails : changer ça redemande le mot de passe */
+      const sens = (o) => JSON.stringify([o.mail, o.contacts, o.wanum, o.pay]);
+      if (sens(propre) !== sens(nettoyer({ ...ancien }))) {
+        const f = await freinage(env, request); if (f.bloque) return json({ erreur: 'Trop d\'essais. Réessaie dans 15 minutes.' }, 429);
+        const auth = await lireAuth(env); const c = request.headers.get('x-confirm') || '';
+        if (!c) return json({ erreur: 'Mot de passe demandé pour changer les numéros, adresses et e-mails.', mdp: true }, 403);
+        if (!auth || !egal(await pbkdf2(c, auth.salt, auth.iter), auth.hash)) { await env.GDE.put(f.k, String(f.n + 1), { expirationTtl: 900 }); return json({ erreur: 'Mot de passe incorrect', mdp: true }, 403); }
+      }
       await env.GDE.put('state', JSON.stringify(propre));
       return json(propre);
     }
