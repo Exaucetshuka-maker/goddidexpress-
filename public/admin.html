@@ -73,6 +73,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     <p class="msg mal" id="login-msg" role="alert"></p>
   </form>
   <form id="f-pin" class="carte cache" autocomplete="off"><label for="pin-in">Code à 7 chiffres</label><input id="pin-in" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="7" autocomplete="off" placeholder="• • • • • • •"><p class="msg mal" id="pin-msg" role="alert"></p></form>
+  <a href="#" class="note cache" id="b-mdp-lien">Code oublié ? Utiliser le mot de passe</a>
   <button class="btn cache" id="b-fid" type="button">🔒 Déverrouiller avec Face ID / empreinte</button>
   <a class="note" href="/">← Retour au site</a>
 </main>
@@ -555,6 +556,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     api('/api/pin/retirer', { method: 'POST' }).then(function () { $('pin-m2').className = 'msg ok'; $('pin-m2').textContent = 'Code désactivé.'; pinMaj(); });
   });
 
+  $('b-mdp-lien').addEventListener('click', function (e) { e.preventDefault(); $('f-login').classList.remove('cache'); $('b-mdp-lien').classList.add('cache'); $('mdp').focus(); });
   function boot() {
     api('/api/statut').then(function (r) {
       if (!r.j.pret) return montrerEcran('Première visite. Choisis ton mot de passe : toi seul le connais. Garde-le bien, ne le partage avec personne.', true);
@@ -562,6 +564,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         setTok(''); var fid = PKL && pkOk();
         montrerEcran('Admin verrouillé.' + (fid ? ' Utilise ton visage ou ton doigt, ou ton code à 7 chiffres.' : ' Entre ton code à 7 chiffres.'), false);
         $('b-fid').classList.toggle('cache', !fid); $('f-pin').classList.toggle('cache', !PINL);
+        if (PINL) { $('f-login').classList.add('cache'); $('b-mdp-lien').classList.remove('cache'); }
         if (fid) pkConnexion(); else if (PINL) setTimeout(function () { $('pin-in').focus(); }, 100);
         return;
       }
@@ -1503,7 +1506,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     });
   }
   /* ---------- Enregistrer ---------- */
-  function expire() { setTok(''); montrerEcran('Ta connexion a expiré. Entre ton mot de passe : tes modifications sont gardées.', false); $('b-save').disabled = false; }
+  function expire() { $('f-login').classList.remove('cache'); setTok(''); montrerEcran('Ta connexion a expiré. Entre ton mot de passe : tes modifications sont gardées.', false); $('b-save').disabled = false; }
   $('b-save').addEventListener('click', async function () {
     $('b-save').disabled = true; infoEtat('Enregistrement…');
     var H = { 'content-type': 'application/json' };
