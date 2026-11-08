@@ -620,13 +620,20 @@ async function traiter(request, env) {
       const L = (Array.isArray(b.avis) ? b.avis : []).slice(0, 200).map((a) => ({ ref: String(a.ref || '').slice(0, 30), nom: txt(a.nom, 40), txt: txt(a.txt, 400), t: nombre(a.t) }));
       await env.GDE.put('avisv', JSON.stringify(L)); return json({ avis: L });
     }
+    if (p === '/api/partenaires' && request.method === 'GET') return json({ parts: await lireListe(env, 'parts') });
+    if (p === '/api/partenaires' && request.method === 'PUT') {
+      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const vus = new Set(), TY = ['influenceur', 'equipe', 'marque', 'commercant', 'star'];
+      const propre = (Array.isArray(b.parts) ? b.parts : []).slice(0, 100).map((x) => ({ nom: txt(x.nom, 40), typ: TY.includes(x.typ) ? x.typ : 'influenceur', code: txt(x.code, 30).toUpperCase().replace(/[^A-Z0-9_-]/g, ''), com: Math.max(0, Math.min(50, nombre(x.com))), tel: txt(x.tel, 30) })).filter((x) => x.code && !vus.has(x.code) && vus.add(x.code));
+      await env.GDE.put('parts', JSON.stringify(propre)); return json({ parts: propre });
+    }
     if (p === '/api/cmds' && request.method === 'GET') return json({ cmds: await lireListe(env, 'cmds') });
     if (p === '/api/cmds' && request.method === 'PUT') {
       let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const vues = new Set(), dt = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? String(v) : '');
       const propre = (Array.isArray(b.cmds) ? b.cmds : []).slice(0, 400).map((c) => ({
         ref: String(c.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), nom: txt(c.nom, 40), tel: txt(c.tel, 30), prod: txt(c.prod, 100),
-        cran: Math.max(0, Math.min(7, Math.round(nombre(c.cran)))), mode: c.mode === 'bateau' ? 'bateau' : 'avion', orig: ['Chine', 'Dubaï', 'Istanbul'].includes(c.orig) ? c.orig : 'Chine', typ: c.typ === 'expedition' ? 'expedition' : 'achat', ou: txt(c.ou, 80), total: Math.max(0, Math.min(1e6, nombre(c.total))), paye: Math.max(0, Math.min(1e6, nombre(c.paye))), arr: dt(c.arr), maj: dt(c.maj) || new Date().toISOString().slice(0, 10),
+        cran: Math.max(0, Math.min(7, Math.round(nombre(c.cran)))), mode: c.mode === 'bateau' ? 'bateau' : 'avion', orig: ['Chine', 'Dubaï', 'Istanbul'].includes(c.orig) ? c.orig : 'Chine', typ: c.typ === 'expedition' ? 'expedition' : 'achat', ou: txt(c.ou, 80), code: txt(c.code, 30).toUpperCase().replace(/[^A-Z0-9_-]/g, ''), total: Math.max(0, Math.min(1e6, nombre(c.total))), paye: Math.max(0, Math.min(1e6, nombre(c.paye))), arr: dt(c.arr), maj: dt(c.maj) || new Date().toISOString().slice(0, 10),
       })).filter((c) => /^[A-Z0-9-]{4,30}$/.test(c.ref) && !vues.has(c.ref) && vues.add(c.ref));
       await env.GDE.put('cmds', JSON.stringify(propre));
       return json({ cmds: propre });

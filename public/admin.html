@@ -269,6 +269,13 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
           <button class="btn" id="cm-ok" type="button">Ajouter la commande</button>
         </div>
       </details>
+      <details class="carte" id="pt-carte">
+        <summary><strong>Partenaires : influenceurs, équipes, marques, commerçants, stars</strong></summary>
+        <p class="note">Chaque partenaire a son code. Ses fans le tapent pour avoir une remise. Dans une commande, tu écris le code utilisé, et tu vois ici ce que chaque partenaire a rapporté et la commission à lui verser. La commission ne se voit jamais sur le site.</p>
+        <div id="pt-liste" class="grille"></div>
+        <button class="btn ghost" id="pt-add" type="button">+ Ajouter un partenaire</button>
+        <div id="pt-bilan" class="note"></div>
+      </details>
       <div><label for="cm-q">Chercher</label><input id="cm-q" type="search" placeholder="Prénom, produit ou référence"></div>
       <div id="cm-liste" class="grille"></div>
       <div id="cm-sortie" class="carte cache">
@@ -466,7 +473,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   function demarrer() {
     if (STATE) { $('ecran').classList.add('cache'); $('app').classList.remove('cache'); return Promise.resolve(); }
     return Promise.all([api('/api/state'), fetch('/products.json').then(function (r) { return r.json(); }), api('/api/couts'), api('/api/cartes'), api('/api/cmds'), api('/api/joins/all'), api('/api/iph'), api('/api/clics'), api('/api/avisv'), api('/api/demandes'), api('/api/vues')]).then(function (rs) {
-      STATE = defState(rs[0].j); PRODS = rs[1];
+      STATE = defState(rs[0].j); PRODS = rs[1]; api('/api/partenaires').then(function (q) { if (q.ok) { PARTS = q.j.parts || []; rendrePart(); } });
       if (rs[2].ok) COUTS = { reglages: Object.assign(COUTS.reglages, rs[2].j.reglages || {}), produits: rs[2].j.produits || {} };
       if (rs[3].ok) CARTES = rs[3].j.cartes || [];
       if (rs[4].ok) CMDS = rs[4].j.cmds || [];
@@ -557,6 +564,34 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   });
 
   $('b-mdp-lien').addEventListener('click', function (e) { e.preventDefault(); $('f-login').classList.remove('cache'); $('b-mdp-lien').classList.add('cache'); $('mdp').focus(); });
+
+  /* ---------- Partenaires ---------- */
+  var PARTS = [], parDirty = false, PTY = { influenceur: 'Influenceur', equipe: 'Équipe (foot, basket)', marque: 'Marque', commercant: 'Commerçant local', star: 'Star / artiste' };
+  function rendrePart() {
+    $('pt-liste').innerHTML = PARTS.map(function (x, i) {
+      return '<div class="carte" data-pt="' + i + '"><div class="grille g2"><div><label>Nom</label><input data-pf="nom" maxlength="40" value="' + esc(x.nom) + '"></div><div><label>Type</label><select data-pf="typ">' + Object.keys(PTY).map(function (k) { return '<option value="' + k + '"' + (x.typ === k ? ' selected' : '') + '>' + PTY[k] + '</option>'; }).join('') + '</select></div></div>' +
+        '<div class="grille g3"><div><label>Code</label><input data-pf="code" maxlength="30" style="text-transform:uppercase" value="' + esc(x.code) + '"></div><div><label>Remise client %</label><input data-pf="pct" inputmode="numeric" value="' + esc(pctDe(x.code)) + '"></div><div><label>Commission %</label><input data-pf="com" inputmode="numeric" value="' + esc(x.com || '') + '"></div></div>' +
+        '<div class="grille g2"><div><label>WhatsApp du partenaire</label><input data-pf="tel" inputmode="tel" maxlength="30" value="' + esc(x.tel || '') + '"></div><div></div></div>' +
+        '<button class="btn danger mini" data-pdel="' + i + '" type="button">Retirer</button></div>';
+    }).join('') || '<p class="note">Aucun partenaire pour le moment.</p>';
+    var tot = {}; CMDS.forEach(function (c) { if (c.code) { var t = tot[c.code] || (tot[c.code] = { n: 0, ca: 0 }); t.n++; t.ca += Number(c.total) || 0; } });
+    $('pt-bilan').innerHTML = PARTS.length ? '<strong>Résultats</strong><br>' + PARTS.map(function (x) {
+      var t = tot[x.code] || { n: 0, ca: 0 }, c = Math.round(t.ca * (x.com || 0)) / 100;
+      return esc(x.nom || x.code) + ' (' + esc(x.code) + ') : ' + t.n + ' commande(s), ' + (Math.round(t.ca * 100) / 100) + ' $ vendus' + (x.com ? ', commission à verser : <b>' + c + ' $</b>' : '');
+    }).join('<br>') : '';
+  }
+  function pctDe(code) { var p = STATE.promo.filter(function (x) { return x.code === code; })[0]; return p ? p.pct : ''; }
+  $('pt-liste').addEventListener('change', function (e) {
+    var f = e.target.getAttribute('data-pf'); if (!f) return; var i = Number(e.target.closest('[data-pt]').getAttribute('data-pt')), x = PARTS[i], v = e.target.value.trim(), ancien = x.code;
+    if (f === 'code') { v = v.toUpperCase().replace(/[^A-Z0-9_-]/g, ''); if (v && PARTS.some(function (y, j) { return j !== i && y.code === v; })) { alert('Ce code existe déjà.'); rendrePart(); return; } x.code = v; var pr = STATE.promo.filter(function (y) { return y.code === ancien; })[0]; if (pr) pr.code = v; }
+    else if (f === 'pct') { var n = Math.max(0, Math.min(90, Math.round(parseFloat(v)) || 0)); var pr2 = STATE.promo.filter(function (y) { return y.code === x.code; })[0]; if (pr2) pr2.pct = n; else if (x.code) STATE.promo.push({ code: x.code, pct: n, actif: true }); marquer(true); }
+    else if (f === 'com') x.com = Math.max(0, Math.min(50, parseFloat(v.replace(',', '.')) || 0)); else x[f] = v;
+    if (f === 'code' || f === 'pct') { if (x.code && !STATE.promo.some(function (y) { return y.code === x.code; })) STATE.promo.push({ code: x.code, pct: 10, actif: true }); marquer(true); try { rendrePromo(); } catch (er) {} }
+    parDirty = true; marquer(true); rendrePart();
+  });
+  $('pt-liste').addEventListener('click', function (e) { var d = e.target.getAttribute('data-pdel'); if (d == null) return; if (!confirm('Retirer ce partenaire ? Son code promo reste actif tant que tu ne le retires pas dans Réglages.')) return; PARTS.splice(Number(d), 1); parDirty = true; marquer(true); rendrePart(); });
+  $('pt-add').addEventListener('click', function () { PARTS.push({ nom: '', typ: 'influenceur', code: '', com: 0, tel: '' }); parDirty = true; marquer(true); rendrePart(); });
+
   function boot() {
     api('/api/statut').then(function (r) {
       if (!r.j.pret) return montrerEcran('Première visite. Choisis ton mot de passe : toi seul le connais. Garde-le bien, ne le partage avec personne.', true);
@@ -1399,7 +1434,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       return '<div class="carte" data-cm="' + i + '"><div class="rang" style="justify-content:space-between"><strong>' + esc(c.prod || 'Colis') + '</strong><span class="pastille">' + esc(c.ref) + '</span></div>' +
         '<div class="note">' + esc(c.nom) + (c.tel ? ', ' + esc(c.tel) : '') + (c.typ === 'expedition' ? ' · expédition seulement' + (c.ou ? ' (colis chez : ' + esc(c.ou) + ')' : '') : '') + ' · ' + esc(c.orig || 'Chine') + ' → Kinshasa, par ' + (c.mode === 'bateau' ? 'bateau' : 'avion') + (c.arr ? ' · arrivée ' + esc(dateFr(c.arr)) : '') + '</div>' +
         '<div class="grille g2"><div><label>Étape</label><select data-cf="cran">' + opts + '</select></div><div><label>Arrivée estimée</label><input type="date" data-cf="arr" value="' + esc(c.arr) + '"></div></div>' +
-        '<div class="grille g2"><div><label>Total à payer ($)</label><input data-cf="total" inputmode="decimal" value="' + (c.total || '') + '" placeholder="Ex. 120"></div><div><label>Déjà payé ($)</label><input data-cf="paye" inputmode="decimal" value="' + (c.paye || '') + '" placeholder="Ex. 60"></div></div>' + '<div class="note" data-reste>' + (c.total > 0 ? 'Reste à payer : <b>' + Math.max(0, Math.round((c.total - (c.paye || 0)) * 100) / 100) + ' $</b>' : '') + '</div>' +
+        '<div class="grille g2"><div><label>Total à payer ($)</label><input data-cf="total" inputmode="decimal" value="' + (c.total || '') + '" placeholder="Ex. 120"></div><div><label>Déjà payé ($)</label><input data-cf="paye" inputmode="decimal" value="' + (c.paye || '') + '" placeholder="Ex. 60"></div></div>' + '<div><label>Code partenaire utilisé (facultatif)</label><input data-cf="code" maxlength="30" style="text-transform:uppercase" value="' + esc(c.code || '') + '" placeholder="Ex. MARIE10"></div>' + '<div class="note" data-reste>' + (c.total > 0 ? 'Reste à payer : <b>' + Math.max(0, Math.round((c.total - (c.paye || 0)) * 100) / 100) + ' $</b>' : '') + '</div>' +
         '<div class="rang"><button class="btn mini" data-ca="suiv" type="button">Étape suivante</button><button class="btn mini" data-ca="msg" type="button">Prévenir le client</button><button class="btn ghost mini" data-ca="photo" type="button">Photo de position</button><button class="btn danger mini" data-ca="suppr" type="button">Supprimer</button></div></div>';
     }).join('') || '<p class="note">Aucune commande pour le moment.</p>';
   }
@@ -1413,7 +1448,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   });
   $('cm-liste').addEventListener('change', function (e) {
     var f = e.target.getAttribute('data-cf'); if (!f) return; var c = CMDS[Number(e.target.closest('[data-cm]').getAttribute('data-cm'))];
-    if (f === 'cran') c.cran = Number(e.target.value); else if (f === 'arr') c.arr = e.target.value; else if (f === 'total' || f === 'paye') { c[f] = Number(String(e.target.value).replace(',', '.')) || 0; cmTouch(c); var rs = e.target.closest('[data-cm]').querySelector('[data-reste]'); if (rs) rs.innerHTML = c.total > 0 ? 'Reste à payer : <b>' + Math.max(0, Math.round((c.total - (c.paye || 0)) * 100) / 100) + ' $</b>' : ''; return; } cmTouch(c); rendreCmds();
+    if (f === 'code') { c.code = e.target.value.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, ''); cmTouch(c); rendrePart(); return; } if (f === 'cran') c.cran = Number(e.target.value); else if (f === 'arr') c.arr = e.target.value; else if (f === 'total' || f === 'paye') { c[f] = Number(String(e.target.value).replace(',', '.')) || 0; cmTouch(c); var rs = e.target.closest('[data-cm]').querySelector('[data-reste]'); if (rs) rs.innerHTML = c.total > 0 ? 'Reste à payer : <b>' + Math.max(0, Math.round((c.total - (c.paye || 0)) * 100) / 100) + ' $</b>' : ''; return; } cmTouch(c); rendreCmds();
   });
   $('cm-liste').addEventListener('click', function (e) {
     var b = e.target.closest('[data-ca]'); if (!b) return; var c = CMDS[Number(b.closest('[data-cm]').getAttribute('data-cm'))], a = b.getAttribute('data-ca');
@@ -1572,8 +1607,14 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         if (!r.ok) throw new Error('Les commandes ne sont pas enregistrées');
         CMDS = r.j.cmds; cmDirty = false;
       }
+      if (parDirty) {
+        r = await api('/api/partenaires', { method: 'PUT', headers: H, body: JSON.stringify({ parts: PARTS }) });
+        if (r.status === 401) return expire();
+        if (!r.ok) throw new Error('Les partenaires ne sont pas enregistrés');
+        PARTS = r.j.parts; parDirty = false;
+      }
       marquer(false); infoEtat('Publié sur le site ✓', 'ok');
-      rendreProduits(); rendreGroupes(); rendreVoyages(); rendreAvisAdmin(); rendrePrix(); rendreCartes(); rendreCmds(); rendreContacts(); rendreInscrits();
+      rendreProduits(); rendreGroupes(); rendreVoyages(); rendreAvisAdmin(); rendrePrix(); rendreCartes(); rendreCmds(); rendrePart(); rendreContacts(); rendreInscrits();
     } catch (er) { $('b-save').disabled = false; infoEtat(er.message || 'Pas de connexion', 'mal'); }
   });
 
