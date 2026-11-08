@@ -1114,6 +1114,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   var $ = function (id) { return document.getElementById(id); };
   var smooth = !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   function wa(text) { return 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text); }
+  function fc(n) { var t = Number(STATE && STATE.fc) || 0; return t > 0 ? '≈ ' + (Math.round(n * t / 100) * 100).toLocaleString('fr-FR') + ' FC' : ''; }
   function usd(n) { return n.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' $'; }
   var toastTimer;
   function toast(msg) {
@@ -1758,7 +1759,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     s += '<div class="carte calc" data-calc="' + p.id + '"><div class="duo">' +
       '<div class="champ"><label for="k-q">Quantité</label><input id="k-q" type="number" min="1" value="1" inputmode="numeric" data-k="q"></div>' +
       '<div class="champ"><label for="k-c">Code promo</label><input id="k-c" data-k="c" autocomplete="off" placeholder="Facultatif" style="text-transform:uppercase"></div></div>' +
-      '<div class="acompte"><div><small>Total estimé</small><strong data-o="tot">—</strong></div><div><small>' + (acPct(p) === 100 ? 'À payer à la commande' : 'Acompte à verser (' + acPct(p) + ' %)') + '</small><strong data-o="ac">—</strong></div></div>' +
+      '<div class="acompte"><div><small>Total estimé</small><strong data-o="tot">—</strong><small data-o="fc"></small></div><div><small>' + (acPct(p) === 100 ? 'À payer à la commande' : 'Acompte à verser (' + acPct(p) + ' %)') + '</small><strong data-o="ac">—</strong></div></div>' +
       '<p class="note" data-o="info"></p></div>';
     return s;
   }
@@ -1773,14 +1774,14 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     Array.prototype.forEach.call(document.querySelectorAll('#sheet [data-pal]'), function (t) { t.classList.toggle('on', Number(t.getAttribute('data-pal')) === act); });
     var a = document.querySelector('#sheet [data-cmd-wa]');
     if (u === null) {
-      o('tot').textContent = '—'; o('ac').textContent = '—';
+      o('tot').textContent = '—'; o('ac').textContent = '—'; o('fc').textContent = '';
       o('info').textContent = 'Prix pour ' + q + ' pièce' + (q > 1 ? 's' : '') + ' : sur devis.';
       if (a) a.href = wa(msgProduit(p) + ' Quantité : ' + q + '.');
       return;
     }
     var tot = u * q * (1 - pct / 100);
     var AC = acPct(p), acm = tot * AC / 100;
-    o('tot').textContent = usd(tot); o('ac').textContent = usd(acm);
+    o('tot').textContent = usd(tot); o('fc').textContent = fc(tot); o('ac').textContent = usd(acm);
     o('info').textContent = usd(u) + ' la pièce' + (pct ? ', promo −' + pct + ' %' : (String(code).trim() ? ', code inconnu' : '')) + (AC >= 100 ? ', paiement complet à la commande.' : ', solde de ' + usd(tot - acm) + ' à la livraison.');
     if (a) a.href = wa('Bonjour GOD DID EXPRESS, je veux commander : ' + p.t + '.\nQuantité : ' + q + '\nPrix : ' + usd(u) + ' la pièce\nTotal estimé : ' + usd(tot) + (pct ? ' (code ' + String(code).trim().toUpperCase() + ', −' + pct + ' %)' : '') + '\n' + (AC >= 100 ? 'Paiement complet : ' : 'Acompte ' + AC + ' % : ') + usd(acm) + '\nMerci de confirmer le prix et le délai.');
   }

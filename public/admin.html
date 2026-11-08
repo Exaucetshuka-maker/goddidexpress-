@@ -376,6 +376,11 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         <div id="r-slog" class="grille"></div>
       </div>
       <div class="carte">
+        <h3>Prix en francs congolais</h3>
+        <p class="note">Beaucoup de clients pensent en francs. Écris combien de FC vaut 1 $ aujourd'hui : le site affichera aussi le total en FC sur la fiche du produit. Laisse vide pour ne rien afficher. Pense à le mettre à jour quand le taux change.</p>
+        <label for="r-fc">1 $ = ? FC</label><input id="r-fc" inputmode="numeric" maxlength="6" placeholder="Ex. 2800">
+      </div>
+      <div class="carte">
         <h3>Codes promo</h3>
         <div id="r-promo" class="grille"></div>
         <button class="btn ghost" id="r-addpromo" type="button">+ Ajouter un code</button>
@@ -441,7 +446,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     s = s || {};
     s.rev = s.rev || 0; s.prod = s.prod || {}; s.extra = s.extra || []; s.slog = s.slog || {};
     s.soc = Object.assign({ tiktok: '', instagram: '', facebook: '' }, s.soc || {});
-    s.promo = s.promo || []; s.avis = s.avis || []; s.vip = (s.vip && s.vip.length === 3) ? s.vip : [3, 6, 10]; s.lien = s.lien || '';
+    s.fc = Number(s.fc) || 0; s.promo = s.promo || []; s.avis = s.avis || []; s.vip = (s.vip && s.vip.length === 3) ? s.vip : [3, 6, 10]; s.lien = s.lien || '';
     s.voy = s.voy || []; s.info = s.info || {}; s.mail = s.mail || ''; s.wag = s.wag || WAG0; s.wac = s.wac || WAC0; s.tel2 = s.tel2 || ''; s.adr2 = s.adr2 || ''; s.wanum = s.wanum || ''; s.avant = s.avant || [];
     s.contacts = s.contacts || [];
     if (!s.contacts.length) { if (s.tel2) s.contacts.push({ type: 'tel', label: 'Deuxième numéro', v: s.tel2 }); if (s.mail) s.contacts.push({ type: 'mail', label: 'E-mail', v: s.mail }); if (s.adr2) s.contacts.push({ type: 'adresse', label: 'Autre adresse', v: s.adr2 }); s.tel2 = ''; s.mail = ''; s.adr2 = ''; } s.phr = s.phr || [];
@@ -1492,13 +1497,14 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
 
   /* ---------- Réglages ---------- */
   function rendreReglages() {
-    $('r-wanum').value = STATE.wanum; $('r-avant').value = (STATE.avant || []).join('\n'); pkMaj(); pinMaj(); rendreContacts(); ['avion', 'bateau', 'zones', 'introuvable'].forEach(function (k) { $('r-i-' + k).value = STATE.info[k] || ''; });
+    $('r-wanum').value = STATE.wanum; $('r-avant').value = (STATE.avant || []).join('\n'); $('r-fc').value = STATE.fc || ''; pkMaj(); pinMaj(); rendreContacts(); ['avion', 'bateau', 'zones', 'introuvable'].forEach(function (k) { $('r-i-' + k).value = STATE.info[k] || ''; });
     $('r-wag').value = STATE.wag; $('r-wac').value = STATE.wac;
     ['tiktok', 'instagram', 'facebook'].forEach(function (k) { $('r-' + k).value = STATE.soc[k] || ''; });
     $('r-lien').value = STATE.lien; $('r-phr').value = (STATE.phr || []).join('\n');
     $('r-slog').innerHTML = MOIS.map(function (m, i) { return '<div><label for="sl-' + i + '">' + m + '</label><input id="sl-' + i + '" data-sl="' + (i + 1) + '" maxlength="160" value="' + esc(STATE.slog[String(i + 1)] || '') + '" placeholder="Slogan d\'origine"></div>'; }).join('');
     rendrePromo();
   }
+  $('r-fc').addEventListener('input', function () { STATE.fc = Math.max(0, Math.min(100000, Math.round(parseFloat(this.value)) || 0)); marquer(true); });
   function rendrePromo() {
     $('r-promo').innerHTML = STATE.promo.map(function (p, i) {
       return '<div class="grille g3" style="align-items:end"><div><label>Code</label><input data-pr="' + i + '" data-f="code" style="text-transform:uppercase" value="' + esc(p.code) + '"></div>' +

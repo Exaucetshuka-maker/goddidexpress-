@@ -169,6 +169,7 @@ function nettoyer(s) {
   o.promo = (Array.isArray(s.promo) ? s.promo : []).slice(0, 40).map((p) => ({ code: txt(p.code, 30).toUpperCase(), pct: Math.max(0, Math.min(90, nombre(p.pct))), actif: p.actif !== false }));
   o.avis = (Array.isArray(s.avis) ? s.avis : []).slice(0, 30).map((a) => ({ txt: txt(a.txt, 400), nom: txt(a.nom, 80), photo: a.photo && /^\/api\/img\//.test(a.photo) ? a.photo : undefined }));
   o.vip = Array.isArray(s.vip) && s.vip.length === 3 ? s.vip.map((v) => nombre(v, 0)) : [3, 6, 10];
+  o.fc = Math.max(0, Math.min(100000, Math.round(nombre(s.fc)))) || 0;
   o.lien = /^https:\/\//i.test(s.lien || '') ? txt(s.lien, 300) : '';
   o.mail = /^[^\s@<>"']{1,64}@[^\s@<>"']{1,120}\.[^\s@<>"']{2,20}$/.test(String(s.mail || '').trim()) ? String(s.mail).trim() : '';
   o.wag = /^https:\/\//i.test(s.wag || '') ? txt(s.wag, 300) : '';
