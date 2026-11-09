@@ -655,9 +655,9 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   function tous() {
     var base = PRODS.map(function (p) {
       var o = STATE.prod[p.id] || {};
-      return { id: p.id, t: p.t, s: p.s, c: p.c, px: o.px || [null, null, null], photo: o.photo || ('img/' + p.id + '.jpg'), custom: !!o.photo, ph: o.ph || [], desc: o.desc || '', vid: o.vid || '', ac: o.ac || 0, cache: !!o.cache, gone: !!o.gone, det: o.det || null, arr: o.arr || '', extra: false };
+      return { id: p.id, t: p.t, s: p.s, c: p.c, px: o.px || [null, null, null], photo: o.photo || ('img/' + p.id + '.jpg'), custom: !!o.photo, ph: o.ph || [], desc: o.desc || '', vid: o.vid || '', ac: o.ac || 0, pq: o.pq || null, cache: !!o.cache, gone: !!o.gone, det: o.det || null, arr: o.arr || '', extra: false };
     });
-    var ex = STATE.extra.map(function (e) { return { id: e.id, t: e.t, s: e.s, c: e.c, px: e.px || [null, null, null], photo: e.photo || '', custom: !!e.photo, ph: e.ph || [], desc: e.desc || '', vid: e.vid || '', ac: e.ac || 0, cache: !!e.cache, gone: false, det: e.det || null, arr: e.arr || '', extra: true }; });
+    var ex = STATE.extra.map(function (e) { return { id: e.id, t: e.t, s: e.s, c: e.c, px: e.px || [null, null, null], photo: e.photo || '', custom: !!e.photo, ph: e.ph || [], desc: e.desc || '', vid: e.vid || '', ac: e.ac || 0, pq: e.pq || null, cache: !!e.cache, gone: false, det: e.det || null, arr: e.arr || '', extra: true }; });
     return ex.concat(base);
   }
   function opt(v, cur, t) { return '<option value="' + v + '"' + (cur === v ? ' selected' : '') + '>' + t + '</option>'; }
@@ -680,8 +680,9 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         '<img src="' + esc(p.photo) + '" alt="" loading="lazy">' +
         '<div class="grille" style="gap:8px;min-width:0"><div><strong>' + esc(p.t) + '</strong><div class="note">' + esc(CATL[p.c] || '') + (p.extra ? ', ajouté par toi' : '') + '</div></div>' +
         '<div class="grille g3"><div><label>1 pièce $</label><input data-k="px" data-i="0" inputmode="decimal" value="' + esc(v(0)) + '"></div>' +
-        '<div><label>Dès 5</label><input data-k="px" data-i="1" inputmode="decimal" value="' + esc(v(1)) + '"></div>' +
-        '<div><label>Dès 10</label><input data-k="px" data-i="2" inputmode="decimal" value="' + esc(v(2)) + '"></div></div>' +
+        '<div><label>Dès ' + ((p.pq && p.pq[1]) || 5) + '</label><input data-k="px" data-i="1" inputmode="decimal" value="' + esc(v(1)) + '"></div>' +
+        '<div><label>Dès ' + ((p.pq && p.pq[2]) || 10) + '</label><input data-k="px" data-i="2" inputmode="decimal" value="' + esc(v(2)) + '"></div></div>' +
+        '<div class="grille g3"><div><label>2e prix dès (pièces)</label><input data-k="pq" data-i="1" inputmode="numeric" maxlength="5" placeholder="5" value="' + esc(p.pq ? p.pq[1] : '') + '"></div><div><label>3e prix dès (pièces)</label><input data-k="pq" data-i="2" inputmode="numeric" maxlength="5" placeholder="10" value="' + esc(p.pq ? p.pq[2] : '') + '"></div><div></div></div>' +
         '<details><summary class="note">Détail : neuf ou occasion, carton, sur commande</summary>' + detForm(p.det, 'det-', p.arr) + '</details>' +
         '<details><summary class="note">Description pour les clients</summary><textarea data-k="desc" maxlength="600" style="min-height:70px" placeholder="Une ou deux phrases sur le produit">' + esc(p.desc) + '</textarea></details>' +
         '<div><label>Acompte demandé au client (%)</label><input data-k="ac" inputmode="numeric" maxlength="3" value="' + esc(p.ac && p.ac !== 50 ? p.ac : '') + '" placeholder="50 par défaut. Mets 100 pour un paiement complet."></div>' +
@@ -705,11 +706,12 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   }
 
   $('liste').addEventListener('input', function (e) {
-    var t = e.target, row = t.closest('[data-id]'), k = t.getAttribute('data-k'); if (!row || (k !== 'px' && k !== 'desc' && k !== 'vid' && k !== 'ac' && String(k).indexOf('det-') !== 0)) return;
+    var t = e.target, row = t.closest('[data-id]'), k = t.getAttribute('data-k'); if (!row || (k !== 'px' && k !== 'desc' && k !== 'vid' && k !== 'ac' && k !== 'pq' && String(k).indexOf('det-') !== 0)) return;
     var o = refProd(row.getAttribute('data-id'));
     if (k === 'det-arr') { if (t.value) o.arr = t.value; else delete o.arr; marquer(true); return; }
     if (String(k).indexOf('det-') === 0) { o.det = o.det || {}; var dk = k.slice(4); if (t.value) o.det[dk] = t.value; else delete o.det[dk]; if (!Object.keys(o.det).length) delete o.det; marquer(true); return; }
     if (k === 'desc') { o.desc = t.value; marquer(true); return; }
+    if (k === 'pq') return;
     if (k === 'ac') { var av = Math.round(parseFloat(t.value)); if (av >= 10 && av <= 100 && av !== 50) o.ac = av; else delete o.ac; marquer(true); return; }
     if (k === 'vid') { var vv = t.value.trim(); if (vv) o.vid = vv; else delete o.vid; marquer(true); return; }
     o.px = o.px || [null, null, null]; o.px[Number(t.getAttribute('data-i'))] = nb(t.value);
@@ -783,6 +785,14 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       infoEtat('Envoi des photos…');
       fl.reduce(function (pr, f, k) { return pr.then(function () { return envoyerPhoto(idM + '-' + Date.now().toString(36) + k, f).then(function (u) { oM.ph.push(u); done++; infoEtat('Photo ' + done + ' sur ' + fl.length + ' envoyée…'); }); }); }, Promise.resolve()).then(function () { marquer(true); rendreProduits(); infoEtat(done + ' photo' + (done > 1 ? 's' : '') + ' envoyée' + (done > 1 ? 's' : '') + '. Pense à enregistrer.', 'ok'); }).catch(function (er) { infoEtat(er.message, 'mal'); });
       return;
+    }
+    if (t.getAttribute('data-k') === 'pq') {
+      var rowp = t.closest('[data-id]'), op = refProd(rowp.getAttribute('data-id')), cur = (op.pq && op.pq.slice()) || [1, 5, 10], ix = Number(t.getAttribute('data-i'));
+      cur[ix] = Math.round(parseFloat(t.value)) || (ix === 1 ? 5 : 10);
+      if (cur[1] === 5 && cur[2] === 10) delete op.pq;
+      else if (cur[1] >= 2 && cur[2] > cur[1]) op.pq = [1, cur[1], cur[2]];
+      else { alert('Le 2e palier doit être plus petit que le 3e (exemple : 8 puis 20).'); rendreProduits(); return; }
+      marquer(true); rendreProduits(); return;
     }
     if (t.getAttribute('data-k') !== 'file' || !t.files[0]) return;
     var row = t.closest('[data-id]'), id = row.getAttribute('data-id');

@@ -108,6 +108,11 @@ async function mdpOk(env, request) {
   if (!auth || !egal(await pbkdf2(c, auth.salt, auth.iter), auth.hash)) { await env.GDE.put(f.k, String(f.n + 1), { expirationTtl: 900 }); return json({ erreur: 'Mot de passe incorrect', mdp: true }, 403); }
   return null;
 }
+
+function pqNet(v) {
+  if (!Array.isArray(v)) return null; const a = Math.round(nombre(v[1])), b = Math.round(nombre(v[2]));
+  return a >= 2 && b > a && b <= 10000 && !(a === 5 && b === 10) ? [1, a, b] : null;
+}
 const MAXTXT = 600;
 function txt(v, max = MAXTXT) { return String(v == null ? '' : v).slice(0, max); }
 function nombre(v, def = 0) { const n = Number(v); return isFinite(n) ? n : def; }
@@ -138,6 +143,7 @@ function nettoyer(s) {
     if (p.gone) r.gone = true;
     if (p.desc) r.desc = txt(p.desc, 600);
     { const dd = nettoyerDet(p.det); if (dd) r.det = dd; }
+    { const q = pqNet(p.pq); if (q) r.pq = q; }
     { const ac = Math.round(nombre(p.ac)); if (ac >= 10 && ac <= 100 && ac !== 50) r.ac = ac; }
     if (new RegExp('^\\d{4}-\\d{2}-\\d{2}$').test(String(p.arr || ''))) r.arr = String(p.arr);
     if (p.photo && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(p.photo)) r.photo = p.photo;
@@ -157,6 +163,7 @@ function nettoyer(s) {
     if (e.cache) r.cache = true;
     if (e.desc) r.desc = txt(e.desc, 600);
     { const dd = nettoyerDet(e.det); if (dd) r.det = dd; }
+    { const q = pqNet(e.pq); if (q) r.pq = q; }
     { const ac = Math.round(nombre(e.ac)); if (ac >= 10 && ac <= 100 && ac !== 50) r.ac = ac; }
     if (new RegExp('^\\d{4}-\\d{2}-\\d{2}$').test(String(e.arr || ''))) r.arr = String(e.arr);
     return r;

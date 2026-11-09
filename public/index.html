@@ -1687,6 +1687,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   }
   STATE = defState(STATE);
   var QP = [1, 5, 10];
+  function qpOf(p) { var a = p && p.pq; return a && a.length === 3 && a[1] >= 2 && a[2] > a[1] ? a : QP; }
   function h(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   function ea(s) { return h(s); }
   function pic(p) { return p.photo || ('img/' + p.id + '.jpg'); }
@@ -1701,6 +1702,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       if (o.ph) p.ph = o.ph;
       if (o.vid) p.vid = o.vid;
       if (o.ac >= 10 && o.ac <= 100) p.ac = o.ac;
+      if (o.pq) p.pq = o.pq;
       if (o.desc) p.desc = o.desc;
       if (o.det) p.det = o.det;
       if (o.arr) p.arr = o.arr;
@@ -1728,7 +1730,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   function okPx(v) { return v !== null && v !== undefined && v !== '' && !isNaN(Number(v)) && Number(v) > 0; }
   function prixPour(p, q) {
     var px = pxList(p), u = null;
-    for (var i = 0; i < QP.length; i++) if (q >= QP[i] && okPx(px[i])) u = Number(px[i]);
+    var QQ = qpOf(p); for (var i = 0; i < QQ.length; i++) if (q >= QQ[i] && okPx(px[i])) u = Number(px[i]);
     return u;
   }
   function prixMin(p) {
@@ -1745,7 +1747,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var px = pxList(p), main = null, i;
     for (i = 0; i < 3; i++) if (okPx(px[i])) { main = i; break; }
     if (main === null) return '<span class="prix-l">Prix sur demande</span>';
-    var s = '<span class="prix-l"><b class="pv">' + usd(Number(px[main])) + '</b>' + (main === 0 ? '' : ' <small>dès ' + QP[main] + ' pièces</small>') + '</span>';
+    var s = '<span class="prix-l"><b class="pv">' + usd(Number(px[main])) + '</b>' + (main === 0 ? '' : ' <small>dès ' + qpOf(p)[main] + ' pièces</small>') + '</span>';
     var mn = prixMin(p);
     if (mn !== null && mn < Number(px[main])) s += '<span class="gros">Gros : ' + usd(mn) + ' la pièce</span>';
     return s;
@@ -1754,7 +1756,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   function fichePrix(p) {
     var px = pxList(p), s = '<p class="note" style="font-size:14px">' + p.s + '.</p>' + (p.desc ? '<p style="font-size:14.5px;margin:8px 0 0">' + h(p.desc) + '</p>' : '');
     if (prixMin(p) === null) return s + '<p class="note">Prix sur demande, envoyé sur WhatsApp avant tout paiement. ' + (acPct(p) === 100 ? 'Paiement complet à la commande.' : 'Acompte de ' + acPct(p) + ' %.') + '</p>';
-    s += '<div class="paliers">' + QP.map(function (q, i) {
+    s += '<div class="paliers">' + qpOf(p).map(function (q, i) {
       return '<div class="palier" data-pal="' + i + '"><span>' + (i === QP.length - 1 ? q + '+' : 'dès ' + q) + ' pièce' + (q > 1 ? 's' : '') + '</span><b>' + (okPx(px[i]) ? usd(Number(px[i])) : '—') + '</b></div>';
     }).join('') + '</div>';
     s += '<div class="carte calc" data-calc="' + p.id + '"><div class="duo">' +
@@ -1771,7 +1773,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var u = prixPour(p, q), pct = promoPct(code);
     function o(k) { return box.querySelector('[data-o="' + k + '"]'); }
     var act = -1, px = pxList(p);
-    QP.forEach(function (x, i) { if (q >= x && okPx(px[i])) act = i; });
+    qpOf(p).forEach(function (x, i) { if (q >= x && okPx(px[i])) act = i; });
     Array.prototype.forEach.call(document.querySelectorAll('#sheet [data-pal]'), function (t) { t.classList.toggle('on', Number(t.getAttribute('data-pal')) === act); });
     var a = document.querySelector('#sheet [data-cmd-wa]');
     if (u === null) {
@@ -3100,7 +3102,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       var px = pxList(p);
       return '<div class="carte arow' + (p.cache ? ' off' : '') + '" data-pid="' + p.id + '"><img src="' + ea(pic(p)) + '" alt="">' +
         '<div style="display:grid;gap:8px;min-width:0"><b>' + p.t + (p.cache ? ' (masqué)' : '') + '</b>' +
-        '<div class="px3">' + QP.map(function (qq, i) { return '<div class="champ"><label for="px-' + p.id + '-' + i + '">' + (i === 0 ? '1 pièce' : 'Dès ' + qq) + ' ($)</label><input id="px-' + p.id + '-' + i + '" type="number" min="0" step="0.01" inputmode="decimal" data-a="px" data-id="' + p.id + '" data-i="' + i + '" value="' + (okPx(px[i]) ? Number(px[i]) : '') + '"></div>'; }).join('') + '</div>' +
+        '<div class="px3">' + qpOf(p).map(function (qq, i) { return '<div class="champ"><label for="px-' + p.id + '-' + i + '">' + (i === 0 ? '1 pièce' : 'Dès ' + qq) + ' ($)</label><input id="px-' + p.id + '-' + i + '" type="number" min="0" step="0.01" inputmode="decimal" data-a="px" data-id="' + p.id + '" data-i="' + i + '" value="' + (okPx(px[i]) ? Number(px[i]) : '') + '"></div>'; }).join('') + '</div>' +
         '<div class="rangee"><label class="btn ghost mini">Changer la photo<input type="file" accept="image/*" hidden data-a="photo" data-id="' + p.id + '"></label>' +
         '<button type="button" class="btn ghost mini" data-a="hide" data-id="' + p.id + '">' + (p.cache ? 'Afficher' : 'Masquer') + '</button>' +
         (p.extra ? '<button type="button" class="btn ghost mini" data-a="delprod" data-id="' + p.id + '">Supprimer</button>' : '') + '</div></div></div>';
