@@ -587,10 +587,6 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         <button class="btn ghost" type="button" data-assist>Poser une question</button>
         <button class="btn ghost" type="button" data-tour>Visite guidée parlée</button>
       </div>
-      <div class="carte" id="appro" style="gap:8px;margin:14px 0"><div class="kicker">Approvisionnement</div><h3 style="margin:0">On cherche, on achète, on importe, on livre</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:14px;font-weight:700"><span>1 · On cherche le fournisseur</span><span>2 · On achète</span><span>3 · On importe</span><span>4 · On te livre</span></div>
-        <p class="note" style="margin:0">Chine, Dubaï, Turquie ou RDC. Devis avant tout paiement, acompte de 50 %, preuve en photo à chaque étape.</p>
-        <div class="rangee"><button class="btn" type="button" data-go="commander">Demander un approvisionnement</button><button class="btn ghost" type="button" data-go="voyages">Réserver sur un prochain arrivage</button></div></div>
       <div class="stats">
         <div><strong id="st-prod" data-n="0">0</strong><small>produits au catalogue</small></div>
         <div><strong data-n="26">0</strong><small>provinces visées</small></div>
@@ -2348,7 +2344,6 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       tuile('voyages', '<path d="M3 17l18-6-6 9-3-4-5 1z"/><path d="M12 16v4"/>', 'Nos voyages', 'Départs, dates limites et arrivées') +
       (STATE.pay && STATE.pay.length ? tuile('pay', '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h3"/>', 'Payer l\'acompte', 'Orange Money, M-Pesa, Airtel') : '') +
       tuile('pro', '<path d="M4 9h16v10H4z"/><path d="M9 9V6h6v3"/>', 'Espace commerçants', 'Devis de gros, commandes régulières') +
-      tuile('share', '<circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="18" cy="18" r="2.4"/><path d="M8.1 10.9l7.8-3.8M8.1 13.1l7.8 3.8"/>', 'Partager le site', 'WhatsApp, Facebook, TikTok, Instagram...') +
       tuile('install', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M12 7v7m-3-3 3 3 3-3"/>', 'Installer l\'application', 'L\'icône sur ton téléphone') +
       (campActives().length ? tuile('paniers', '<path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 0 1 6 0"/>', campActives()[0].nom, 'Produits et lots du moment') : '') +
       (iphOn() ? tuile('iphone', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>', 'Prix du jour', 'Tous les modèles, commande en un clic') : '') +
