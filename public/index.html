@@ -700,6 +700,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <header><div class="kicker">Ils parlent de nous</div><h2>Vos avis, en preuve</h2></header>
       <div class="rail" id="avis-rail"></div>
       <p class="note" id="avis-note">Ces trois cartes sont des modèles d'affichage. Les vrais avis de nos clients les remplaceront, avec leur accord.</p>
+      <button class="btn" id="avis-ouvrir" type="button">Laisser mon avis</button>
       <a class="btn ghost" id="avis-wa" href="#" target="_blank" rel="noopener">Envoyer mon témoignage sur WhatsApp</a>
     </section>
 
@@ -1950,12 +1951,13 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   })();
   function ouvrirAvis(ref) {
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Ton avis</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Donne ton avis</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
-      '<p class="note">Commande ' + h(ref) + '. Ton avis vérifié aide les prochains clients.</p><div><label for="av-nom">Prénom</label><input id="av-nom" maxlength="40" autocomplete="given-name"></div><div><label for="av-txt">Ton avis</label><textarea id="av-txt" rows="4" maxlength="400" placeholder="Comment s\'est passée ta commande ?"></textarea></div><button class="btn" id="av-ok" type="button">Envoyer mon avis</button><p class="note" id="av-msg" aria-live="polite"></p>');
+      '<p class="note">' + (ref ? 'Commande ' + h(ref) + '. Ton avis vérifié aide les prochains clients.' : 'Dis-nous ce que tu penses de GOD DID EXPRESS. Ton avis sera lu avant d\'être affiché sur le site.') + '</p><div><label for="av-nom">Prénom</label><input id="av-nom" maxlength="40" autocomplete="given-name"></div><div><label for="av-txt">Ton avis</label><textarea id="av-txt" rows="4" maxlength="400" placeholder="Comment s\'est passée ta commande ?"></textarea></div><button class="btn" id="av-ok" type="button">Envoyer mon avis</button><p class="note" id="av-msg" aria-live="polite"></p>');
     $('av-ok').addEventListener('click', function () {
       var b = $('av-ok'), m = $('av-msg'); b.disabled = true; m.textContent = 'Envoi…';
       fetch('/api/avis', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ref: ref, nom: $('av-nom').value, txt: $('av-txt').value }) }).then(function (r) { return r.json().then(function (j) { return [r.ok, j]; }); }).then(function (x) { m.textContent = x[0] ? 'Merci ! Ton avis sera publié après vérification.' : (x[1].erreur || 'Impossible pour le moment.'); b.disabled = !!x[0]; }).catch(function () { m.textContent = 'Pas de connexion. Réessaie.'; b.disabled = false; });
     });
   }
+  (function () { var b = document.getElementById('avis-ouvrir'); if (b) b.addEventListener('click', function () { ouvrirAvis(''); }); })();
   try { var qa = new URLSearchParams(location.search).get('avis'); if (qa) setTimeout(function () { ouvrirAvis(qa.toUpperCase().replace(/[^A-Z0-9-]/g, '')); }, 700); } catch (e) {}
   function videoProd(p) {
     var u = p.vid; if (!u || !/^https:\/\//.test(u)) return '';
@@ -2673,7 +2675,10 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   var VIDS = [];
   function initVideos() {
     Array.prototype.forEach.call(document.querySelectorAll('[data-vid]'), function (box) {
-      var v = document.createElement('video'); v.muted = true; v.loop = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'none'; v.poster = 'video/voyages.jpg'; v.setAttribute('aria-label', 'Vidéo : le voyage d\'un colis jusqu\'à Kinshasa');
+      var vp = String(STATE.vp || '');
+      if (STATE.vpOff) { box.remove(); return; }
+      if (vp && !/\.(mp4|webm|mov)(\?|#|$)/i.test(vp)) { box.innerHTML = videoProd({ vid: vp, t: 'GOD DID EXPRESS' }).replace('margin-top:8px', 'margin-top:0'); return; }
+      var v = document.createElement('video'); v.muted = true; v.loop = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'none'; if (!vp) v.poster = 'video/voyages.jpg'; v.setAttribute('aria-label', 'Vidéo : le voyage d\'un colis jusqu\'à Kinshasa');
       var b = document.createElement('button'); b.type = 'button'; b.className = 'son'; b.setAttribute('aria-pressed', 'false'); b.textContent = 'Activer le son';
       box.appendChild(v); box.appendChild(b); VIDS.push(v);
       b.addEventListener('click', function () {
@@ -2684,7 +2689,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       var charge = false;
       if ('IntersectionObserver' in window) new IntersectionObserver(function (es) {
         es.forEach(function (en) {
-          if (en.isIntersecting) { if (!charge) { v.src = 'video/voyages.mp4'; charge = true; } v.play().catch(function () {}); } else v.pause();
+          if (en.isIntersecting) { if (!charge) { v.src = vp || 'video/voyages.mp4'; charge = true; } v.play().catch(function () {}); } else v.pause();
         });
       }, { threshold: .35 }).observe(box);
     });
