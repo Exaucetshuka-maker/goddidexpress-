@@ -579,18 +579,14 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <p class="lead">Dites-nous ce que vous voulez, de la RDC ou de l'étranger. On achète, on importe, on livre. Acompte de 50 % et preuve en photo à chaque étape.</p>
       <div class="slogan"><div class="kicker" id="slogan-k"></div><p id="slogan-txt"></p></div>
       <div class="rangee">
-        <button class="btn" type="button" data-go="catalogue">Voir le catalogue</button>
-        <button class="btn ghost" type="button" data-go="voyages">Nos voyages</button>
+        <button class="btn" type="button" data-go="voyages">Nos voyages</button>
+        <button class="btn ghost" type="button" data-go="catalogue">Voir le catalogue</button>
         <button class="btn ghost" type="button" data-go="iphone" id="home-iph" hidden>Prix du jour</button>
         <button class="btn ghost" type="button" data-go="paniers" id="home-pan" hidden>Panier de saison</button>
         <button class="btn ghost" type="button" data-go="commander">Commander sur mesure</button>
         <button class="btn ghost" type="button" data-assist>Poser une question</button>
         <button class="btn ghost" type="button" data-tour>Visite guidée parlée</button>
       </div>
-      <div class="carte" id="appro" style="gap:8px;margin:14px 0"><div class="kicker">Approvisionnement</div><h3 style="margin:0">On cherche, on achète, on importe, on livre</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:14px;font-weight:700"><span>1 · On cherche le fournisseur</span><span>2 · On achète</span><span>3 · On importe</span><span>4 · On te livre</span></div>
-        <p class="note" style="margin:0">Chine, Dubaï, Turquie ou RDC. Devis avant tout paiement, acompte de 50 %, preuve en photo à chaque étape.</p>
-        <div class="rangee"><button class="btn" type="button" data-go="commander">Demander un approvisionnement</button><button class="btn ghost" type="button" data-go="voyages">Réserver sur un prochain arrivage</button></div></div>
       <div class="stats">
         <div><strong id="st-prod" data-n="0">0</strong><small>produits au catalogue</small></div>
         <div><strong data-n="26">0</strong><small>provinces visées</small></div>
@@ -603,6 +599,13 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <header><h2>Nos voyages</h2><p>Chine, Dubaï, Istanbul : on part à des dates fixes, tu commandes avant le départ.</p></header>
       <div id="prochain"></div>
       <button class="btn ghost" type="button" data-go="voyages">Tous les voyages</button>
+    </section>
+
+    <section class="bloc" id="appro-bloc">
+      <div class="carte" id="appro" style="gap:8px;margin:14px 0"><div class="kicker">Approvisionnement</div><h3 style="margin:0">On cherche, on achète, on importe, on livre</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:14px;font-weight:700"><span>1 · On cherche le fournisseur</span><span>2 · On achète</span><span>3 · On importe</span><span>4 · On te livre</span></div>
+        <p class="note" style="margin:0">Chine, Dubaï, Turquie ou RDC. Devis avant tout paiement, acompte de 50 %, preuve en photo à chaque étape.</p>
+        <div class="rangee"><button class="btn" type="button" data-go="commander">Demander un approvisionnement</button><button class="btn ghost" type="button" data-go="voyages">Réserver sur un prochain arrivage</button></div></div>
     </section>
 
     <section class="bloc rv" id="marches-bloc">
