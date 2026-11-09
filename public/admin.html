@@ -122,6 +122,19 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
           <button class="btn" id="n-ok" type="button">Ajouter ce produit</button>
         </div>
       </details>
+      <details class="carte" id="mk-carte">
+        <summary><strong>Créer une affiche avec ma photo</strong></summary>
+        <p class="note">Choisis une photo, écris le titre et le prix : l'affiche est prête pour WhatsApp, Facebook, Instagram et TikTok, avec ton logo, ton numéro, l'adresse du site et un QR code. Prends une photo nette, d'au moins 1000 pixels de large, pour une affiche claire.</p>
+        <div><label for="mk-f">Photo</label><input id="mk-f" type="file" accept="image/*"></div>
+        <div class="grille g2"><div><label for="mk-t">Titre</label><input id="mk-t" maxlength="60" placeholder="Ex. iPhone 15 Pro Max"></div><div><label for="mk-k">Petit texte au-dessus</label><input id="mk-k" maxlength="30" placeholder="Ex. Nouvel arrivage"></div></div>
+        <div><label for="mk-s">Description (facultatif)</label><input id="mk-s" maxlength="120" placeholder="Ex. Neuf, garantie 1 an, livraison à Kinshasa"></div>
+        <div class="grille g2"><div><label for="mk-l1">Prix 1 : nom</label><input id="mk-l1" maxlength="16" placeholder="1 pièce"></div><div><label for="mk-v1">Prix 1 : montant</label><input id="mk-v1" maxlength="16" placeholder="25 $"></div></div>
+        <div class="grille g2"><div><label for="mk-l2">Prix 2 : nom (facultatif)</label><input id="mk-l2" maxlength="16" placeholder="Dès 10"></div><div><label for="mk-v2">Prix 2 : montant</label><input id="mk-v2" maxlength="16" placeholder="20 $"></div></div>
+        <div class="grille g2"><div><label for="mk-b">Étiquette orange (facultatif)</label><input id="mk-b" maxlength="14" placeholder="-10 %"></div><div><label for="mk-c">Code promo (facultatif)</label><input id="mk-c" maxlength="30" placeholder="MARIE10" style="text-transform:uppercase"></div></div>
+        <div><label for="mk-fmt">Format</label><select id="mk-fmt"><option value="portrait">Portrait : Facebook, Instagram, WhatsApp</option><option value="story">Vertical : Status, TikTok, Story</option></select></div>
+        <button class="btn" id="mk-ok" type="button">Créer l'affiche</button>
+        <p class="msg" id="mk-msg" role="status"></p>
+      </details>
       <div id="af-sortie" class="carte cache">
         <div class="kicker">Affiche promo</div>
         <img id="af-img" alt="Affiche promo" style="width:100%;border-radius:6px;background:#0E0D0C">
@@ -682,7 +695,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         '<div class="grille g3"><div><label>1 pièce $</label><input data-k="px" data-i="0" inputmode="decimal" value="' + esc(v(0)) + '"></div>' +
         '<div><label>Dès ' + ((p.pq && p.pq[1]) || 5) + '</label><input data-k="px" data-i="1" inputmode="decimal" value="' + esc(v(1)) + '"></div>' +
         '<div><label>Dès ' + ((p.pq && p.pq[2]) || 10) + '</label><input data-k="px" data-i="2" inputmode="decimal" value="' + esc(v(2)) + '"></div></div>' +
-        '<div class="grille g3"><div><label>2e prix dès (pièces)</label><input data-k="pq" data-i="1" inputmode="numeric" maxlength="5" placeholder="5" value="' + esc(p.pq ? p.pq[1] : '') + '"></div><div><label>3e prix dès (pièces)</label><input data-k="pq" data-i="2" inputmode="numeric" maxlength="5" placeholder="10" value="' + esc(p.pq ? p.pq[2] : '') + '"></div><div></div></div>' +
+        '<div class="grille g3"><div><label>1er prix dès (pièces)</label><input data-k="pq" data-i="0" inputmode="numeric" maxlength="5" placeholder="1" value="' + esc(p.pq && p.pq[0] > 1 ? p.pq[0] : '') + '"></div><div><label>2e prix dès (pièces)</label><input data-k="pq" data-i="1" inputmode="numeric" maxlength="5" placeholder="5" value="' + esc(p.pq ? p.pq[1] : '') + '"></div><div><label>3e prix dès (pièces)</label><input data-k="pq" data-i="2" inputmode="numeric" maxlength="5" placeholder="10" value="' + esc(p.pq ? p.pq[2] : '') + '"></div><div></div></div>' +
         '<details><summary class="note">Détail : neuf ou occasion, carton, sur commande</summary>' + detForm(p.det, 'det-', p.arr) + '</details>' +
         '<details><summary class="note">Description pour les clients</summary><textarea data-k="desc" maxlength="600" style="min-height:70px" placeholder="Une ou deux phrases sur le produit">' + esc(p.desc) + '</textarea></details>' +
         '<div><label>Acompte demandé au client (%)</label><input data-k="ac" inputmode="numeric" maxlength="3" value="' + esc(p.ac && p.ac !== 50 ? p.ac : '') + '" placeholder="50 par défaut. Mets 100 pour un paiement complet."></div>' +
@@ -744,7 +757,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   var AFF = null;
   function affichePromo(id, b) {
     var p = tous().filter(function (x) { return x.id === id; })[0]; if (!p) return;
-    var pr = [['1 pièce', p.px[0]], ['Dès 5', p.px[1]], ['Dès 10', p.px[2]]].filter(function (x) { return x[1] > 0; }).map(function (x) { return [x[0], x[1] + ' $']; });
+    var pq = p.pq || [1, 5, 10], pr = [[pq[0] > 1 ? 'Dès ' + pq[0] : '1 pièce', p.px[0]], ['Dès ' + pq[1], p.px[1]], ['Dès ' + pq[2], p.px[2]]].filter(function (x) { return x[1] > 0; }).map(function (x) { return [x[0], x[1] + ' $']; });
     var dt = p.det || {}, tags = [];
     if (dt.e) tags.push(dt.e === 'neuf' ? 'Neuf' : 'Occasion'); if (dt.v) tags.push(dt.v === 'carton' ? 'En carton' : dt.v === 'detail' ? 'Au détail' : 'Carton ou détail'); if (dt.d) tags.push(dt.d === 'stock' ? 'Déjà là' : 'Sur commande'); if (dt.ct) tags.push(dt.ct);
     var promo = (STATE.promo || []).filter(function (x) { return x.actif !== false && x.code; })[0], code = '', rem = '';
@@ -756,6 +769,26 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       var u = URL.createObjectURL(bl); $('af-img').src = u; $('af-save').href = u; $('af-sortie').classList.remove('cache'); $('af-sortie').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }).catch(function () { alert('L\'affiche n\'a pas pu être créée.'); }).then(function () { b.disabled = false; });
   }
+
+  /* Affiche à partir de n'importe quelle photo */
+  $('mk-ok').addEventListener('click', function () {
+    var m = $('mk-msg'), f = $('mk-f').files[0], t = $('mk-t').value.trim(); m.className = 'msg';
+    if (!f) { m.className = 'msg mal'; m.textContent = 'Choisis une photo.'; return; }
+    if (!t) { m.className = 'msg mal'; m.textContent = 'Écris un titre.'; return; }
+    var pr = []; [['mk-l1', 'mk-v1'], ['mk-l2', 'mk-v2']].forEach(function (x) { var v = $(x[1]).value.trim(); if (v) pr.push([$(x[0]).value.trim() || 'Prix', v]); });
+    var code = $('mk-c').value.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, ''), b = $('mk-b').value.trim(), url = URL.createObjectURL(f), btn = $('mk-ok'); btn.disabled = true; m.textContent = 'Création…';
+    var im = new Image();
+    im.onload = function () {
+      var petite = im.width < 800;
+      GDETicket.affiche({ titre: t, sous: $('mk-s').value.trim(), kicker: $('mk-k').value.trim() || 'GOD DID EXPRESS', photo: url, prix: pr, code: code, badge: b, fmt: $('mk-fmt').value }).then(function (cv) { return GDETicket.blob(cv); }).then(function (bl) {
+        try { AFF = new File([bl], 'affiche.png', { type: 'image/png' }); } catch (e) { AFF = null; }
+        var u = URL.createObjectURL(bl); $('af-img').src = u; $('af-save').href = u; $('af-sortie').classList.remove('cache'); $('af-sortie').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        m.className = petite ? 'msg mal' : 'msg ok'; m.textContent = petite ? 'Affiche créée, mais ta photo est petite (' + im.width + ' px) : elle peut paraître floue. Une photo plus grande sera plus nette.' : 'Affiche créée ✓';
+      }).catch(function () { m.className = 'msg mal'; m.textContent = 'L\'affiche n\'a pas pu être créée.'; }).then(function () { btn.disabled = false; });
+    };
+    im.onerror = function () { btn.disabled = false; m.className = 'msg mal'; m.textContent = 'Cette photo ne s\'ouvre pas. Essaie une autre.'; };
+    im.src = url;
+  });
   $('af-share').addEventListener('click', function () {
     if (AFF && navigator.canShare && navigator.canShare({ files: [AFF] })) navigator.share({ files: [AFF], title: 'GOD DID EXPRESS' }).catch(function () {});
     else { $('af-save').click(); alert('Image enregistrée. Envoie-la dans WhatsApp depuis ta galerie.'); }
@@ -788,10 +821,11 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     }
     if (t.getAttribute('data-k') === 'pq') {
       var rowp = t.closest('[data-id]'), op = refProd(rowp.getAttribute('data-id')), cur = (op.pq && op.pq.slice()) || [1, 5, 10], ix = Number(t.getAttribute('data-i'));
-      cur[ix] = Math.round(parseFloat(t.value)) || (ix === 1 ? 5 : 10);
-      if (cur[1] === 5 && cur[2] === 10) delete op.pq;
-      else if (cur[1] >= 2 && cur[2] > cur[1]) op.pq = [1, cur[1], cur[2]];
-      else { alert('Le 2e palier doit être plus petit que le 3e (exemple : 8 puis 20).'); rendreProduits(); return; }
+      cur[ix] = Math.round(parseFloat(t.value)) || [1, 5, 10][ix];
+      for (var qi = ix + 1; qi < 3; qi++) if (cur[qi] <= cur[qi - 1]) cur[qi] = cur[qi - 1] * 2;
+      if (cur[0] === 1 && cur[1] === 5 && cur[2] === 10) delete op.pq;
+      else if (cur[0] >= 1 && cur[1] > cur[0] && cur[2] > cur[1]) op.pq = [cur[0], cur[1], cur[2]];
+      else { alert('Les paliers doivent grandir. Exemple : 8, puis 20, puis 50.'); rendreProduits(); return; }
       marquer(true); rendreProduits(); return;
     }
     if (t.getAttribute('data-k') !== 'file' || !t.files[0]) return;

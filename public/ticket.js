@@ -78,6 +78,7 @@
     // pied
     set(ctx, 700, 34, FB, INK); var pied = o.pied || ('GOD DID EXPRESS · WhatsApp ' + (window.GDETicket && GDETicket.tel || '+243 983 129 294') + ' · Super Lemba, Kinshasa');
     var ps = wrap(ctx, pied, W - PAD * 2); if (draw) ps.forEach(function (l, k) { ctx.fillText(l, PAD, y + k * 46); }); y += ps.length * 46;
+    y += 30; if (draw) { set(ctx, 800, 46, FD, INK); ctx.fillText('goddidexpress.com', PAD, y + 62); set(ctx, 500, 28, FB, MUT); ctx.fillText('Scanne pour commander', PAD, y + 106); qrSite(ctx, W - PAD - 150, y + 6, 150); } y += 170;
     // tampon
     if (draw && o.stamp) {
       var cx = W - PAD - 150, cy = dashY + 190;
@@ -88,6 +89,13 @@
       ctx.restore();
     }
     return Math.ceil(y + PAD);
+  }
+  /* QR code du site : petit carré blanc avec le code, pour que tout ticket mène au site */
+  function qrSite(ctx, x, y, qs, url) {
+    var M = window.GDEQR ? GDEQR.make(url || 'https://goddidexpress.com/') : null; if (!M) return;
+    ctx.fillStyle = '#fff'; rr(ctx, x - 8, y - 8, qs + 16, qs + 16, 10); ctx.fill();
+    var n = M.length, cell = Math.floor(qs / n), ox = x + (qs - cell * n) / 2, oy = y + (qs - cell * n) / 2; ctx.fillStyle = '#0E0D0C';
+    for (var yy = 0; yy < n; yy++) for (var xx = 0; xx < n; xx++) if (M[yy][xx]) ctx.fillRect(ox + xx * cell, oy + yy * cell, cell, cell);
   }
   function rr(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
   function draw(o) {
@@ -113,7 +121,7 @@
   function kmf(n) { return Math.round(n).toLocaleString('fr-FR').replace(/[  ]/g, ' '); }
   function position(o) {
     return fonts().then(function () {
-      var Wp = 1080, Hp = 1590, c = document.createElement('canvas'); c.width = Wp; c.height = Hp; var ctx = c.getContext('2d');
+      var Wp = 1080, Hp = 1800, c = document.createElement('canvas'); c.width = Wp; c.height = Hp; var ctx = c.getContext('2d');
       var cran = Math.max(0, Math.min(7, Math.round(o.cran || 0))), mode = o.mode === 'bateau' ? 'bateau' : 'avion';
       var orig = o.orig || 'Chine', tot = (window.holoKm && holoKm(orig, mode)) || (window.HOLO_KM && HOLO_KM[mode]) || 11000, pr = (window.HOLO_PR && HOLO_PR[cran]) || 0, fait = tot * pr, reste = tot - fait, livre = cran >= 6;
       ctx.fillStyle = '#05080f'; ctx.fillRect(0, 0, Wp, Hp);
@@ -139,7 +147,8 @@
       ctx.fillStyle = livre ? '#3CDC82' : '#FF7A1A'; rr(ctx, P2, sy - 50, sw, 76, 8); ctx.fill(); tx(st, P2 + 35, sy + 4, 44, '#0E0D0C', 800, 'left', FD, 2);
       tx('Étape ' + Math.min(7, cran + 1) + ' sur 7', P2 + sw + 28, sy + 2, 30, 'rgba(255,255,255,.7)', 500, 'left', FB, 0);
       if (o.arr && !livre) tx('Arrivée estimée à Kinshasa : ' + o.arr, P2, sy + 64, 30, '#fff', 600, 'left', FB, 0);
-      tx('GOD DID EXPRESS · WhatsApp ' + (window.GDETicket && GDETicket.tel || '+243 983 129 294'), Wp / 2, Hp - 30, 24, 'rgba(255,255,255,.45)', 500, 'center', FB, 1);
+      qrSite(ctx, Wp - P2 - 150, Hp - 235, 150); tx('goddidexpress.com', P2, Hp - 150, 44, '#fff', 800, 'left', FD, 2); tx('Scanne pour commander', P2, Hp - 106, 26, 'rgba(255,255,255,.6)', 500, 'left', FB, 0);
+      tx('GOD DID EXPRESS · goddidexpress.com · WhatsApp ' + (window.GDETicket && GDETicket.tel || '+243 983 129 294'), Wp / 2, Hp - 30, 24, 'rgba(255,255,255,.45)', 500, 'center', FB, 1);
       return c;
     });
   }
@@ -172,7 +181,7 @@
         var vy = Hc - 210; ctx.fillStyle = 'rgba(20,12,6,.9)'; rr(ctx, P2, vy, Wc - P2 * 2, 120, 18); ctx.fill();
         tx('PROCHAIN VOYAGE', P2 + 36, vy + 46, 22, '#FFB070', 700, 'left', FB, 4); tx(o.voyage, P2 + 36, vy + 92, 40, '#fff', 800, 'left', FD, 1);
       }
-      tx('GOD DID EXPRESS · WhatsApp ' + (window.GDETicket && GDETicket.tel || '+243 983 129 294'), Wc / 2, Hc - 40, 24, 'rgba(20,12,6,.7)', 600, 'center', FB, 1);
+      tx('GOD DID EXPRESS · goddidexpress.com · WhatsApp ' + (window.GDETicket && GDETicket.tel || '+243 983 129 294'), Wc / 2, Hc - 40, 24, 'rgba(20,12,6,.7)', 600, 'center', FB, 1);
       return c;
     });
   }
@@ -180,10 +189,10 @@
   function chargerImg(src) { return new Promise(function (res) { if (!src) return res(null); var im = new Image(); im.onload = function () { res(im); }; im.onerror = function () { res(null); }; im.src = src; }); }
   function affiche(o) {
     return Promise.all([fonts(), chargerImg(o.photo)]).then(function (rs) {
-      var im = rs[1], Wa = 1080, Ha = 1500, c = document.createElement('canvas'); c.width = Wa; c.height = Ha; var ctx = c.getContext('2d');
+      var im = rs[1], Wa = 1080, Ha = o.fmt === 'story' ? 1920 : 1500, c = document.createElement('canvas'); c.width = Wa; c.height = Ha; var ctx = c.getContext('2d'); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
       ctx.fillStyle = '#0E0D0C'; ctx.fillRect(0, 0, Wa, Ha); var P2 = 56; ctx.textBaseline = 'alphabetic';
       function tx(s, x, y, size, col, w, al, f, ls) { ctx.font = w + ' ' + size + 'px ' + (f || FB); ctx.fillStyle = col; ctx.textAlign = al || 'left'; try { ctx.letterSpacing = (ls || 0) + 'px'; } catch (e) {} ctx.fillText(s, x, y); try { ctx.letterSpacing = '0px'; } catch (e) {} }
-      var ph = 760;
+      var ph = o.fmt === 'story' ? 1180 : 760;
       if (im) { var k = Math.max(Wa / im.width, ph / im.height), w = im.width * k, h = im.height * k; ctx.save(); ctx.beginPath(); ctx.rect(0, 0, Wa, ph); ctx.clip(); ctx.drawImage(im, (Wa - w) / 2, (ph - h) / 2, w, h); ctx.restore(); }
       else { var g0 = ctx.createLinearGradient(0, 0, Wa, ph); g0.addColorStop(0, '#2A1A0E'); g0.addColorStop(1, '#0E0D0C'); ctx.fillStyle = g0; ctx.fillRect(0, 0, Wa, ph); }
       var g = ctx.createLinearGradient(0, 0, 0, 170); g.addColorStop(0, 'rgba(14,13,12,.85)'); g.addColorStop(1, 'rgba(14,13,12,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, Wa, 170);
@@ -198,9 +207,14 @@
       var px = (o.prix || []); y += 40;
       if (px.length) { var cw = (Wa - P2 * 2) / Math.max(1, px.length); px.forEach(function (p, i) { var xx = P2 + i * cw; tx(p[0].toUpperCase(), xx, y + 20, 22, 'rgba(255,255,255,.55)', 700, 'left', FB, 4); tx(p[1], xx, y + 100, 80, i === 0 ? '#FF7A1A' : '#fff', 800, 'left', FD, 0); }); y += 120; }
       if (o.code) { y += 44; ctx.fillStyle = 'rgba(255,122,26,.15)'; rr(ctx, P2, y - 34, Wa - P2 * 2, 70, 8); ctx.fill(); tx('CODE PROMO  ' + o.code, P2 + 28, y + 12, 32, '#FF7A1A', 800, 'left', FD, 3); if (o.remise) tx(o.remise, Wa - P2 - 28, y + 12, 32, '#fff', 800, 'right', FD, 1); }
-      ctx.fillStyle = '#FF7A1A'; rr(ctx, P2, Ha - 150, Wa - P2 * 2, 92, 10); ctx.fill();
-      tx('Commande sur WhatsApp : ' + (window.GDETicket && GDETicket.tel || '+243 983 129 294'), Wa / 2, Ha - 90, 40, '#0E0D0C', 800, 'center', FD, 1);
-      tx('Chine · Dubaï · Istanbul · livré à Kinshasa', Wa / 2, Ha - 26, 22, 'rgba(255,255,255,.5)', 500, 'center', FB, 1);
+      /* bas de l'affiche : WhatsApp à gauche, QR du site à droite, adresse du site en dessous */
+      var bw = Wa - P2 * 2 - 190, M = window.GDEQR ? GDEQR.make('https://goddidexpress.com/') : null;
+      ctx.fillStyle = '#FF7A1A'; rr(ctx, P2, Ha - 190, bw, 92, 10); ctx.fill();
+      var wt = 'WhatsApp : ' + (window.GDETicket && GDETicket.tel || '+243 983 129 294'), ws = 40; ctx.font = '800 ' + ws + 'px ' + FD; while (ctx.measureText(wt).width > bw - 40 && ws > 24) { ws -= 2; ctx.font = '800 ' + ws + 'px ' + FD; }
+      tx(wt, P2 + bw / 2, Ha - 190 + 62, ws, '#0E0D0C', 800, 'center', FD, 1);
+      if (M) { var qs = 170, qx = Wa - P2 - qs, qy = Ha - 210; ctx.fillStyle = '#fff'; rr(ctx, qx - 10, qy - 10, qs + 20, qs + 20, 12); ctx.fill(); var n = M.length, cell = Math.floor(qs / n), ox = qx + (qs - cell * n) / 2, oy = qy + (qs - cell * n) / 2; ctx.fillStyle = '#0E0D0C'; for (var yy = 0; yy < n; yy++) for (var xx = 0; xx < n; xx++) if (M[yy][xx]) ctx.fillRect(ox + xx * cell, oy + yy * cell, cell, cell); }
+      tx('goddidexpress.com', P2, Ha - 52, 40, '#fff', 800, 'left', FD, 2);
+      tx('Chine · Dubaï · Istanbul · livré à Kinshasa', P2, Ha - 18, 22, 'rgba(255,255,255,.5)', 500, 'left', FB, 1);
       return c;
     });
   }

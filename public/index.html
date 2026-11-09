@@ -1687,7 +1687,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   }
   STATE = defState(STATE);
   var QP = [1, 5, 10];
-  function qpOf(p) { var a = p && p.pq; return a && a.length === 3 && a[1] >= 2 && a[2] > a[1] ? a : QP; }
+  function qpOf(p) { var a = p && p.pq; return a && a.length === 3 && a[0] >= 1 && a[1] > a[0] && a[2] > a[1] ? a : QP; }
   function h(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   function ea(s) { return h(s); }
   function pic(p) { return p.photo || ('img/' + p.id + '.jpg'); }
@@ -1747,7 +1747,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var px = pxList(p), main = null, i;
     for (i = 0; i < 3; i++) if (okPx(px[i])) { main = i; break; }
     if (main === null) return '<span class="prix-l">Prix sur demande</span>';
-    var s = '<span class="prix-l"><b class="pv">' + usd(Number(px[main])) + '</b>' + (main === 0 ? '' : ' <small>dès ' + qpOf(p)[main] + ' pièces</small>') + '</span>';
+    var s = '<span class="prix-l"><b class="pv">' + usd(Number(px[main])) + '</b>' + (main === 0 && qpOf(p)[0] === 1 ? '' : ' <small>dès ' + qpOf(p)[main] + ' pièces</small>') + '</span>';
     var mn = prixMin(p);
     if (mn !== null && mn < Number(px[main])) s += '<span class="gros">Gros : ' + usd(mn) + ' la pièce</span>';
     return s;
@@ -1757,10 +1757,10 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var px = pxList(p), s = '<p class="note" style="font-size:14px">' + p.s + '.</p>' + (p.desc ? '<p style="font-size:14.5px;margin:8px 0 0">' + h(p.desc) + '</p>' : '');
     if (prixMin(p) === null) return s + '<p class="note">Prix sur demande, envoyé sur WhatsApp avant tout paiement. ' + (acPct(p) === 100 ? 'Paiement complet à la commande.' : 'Acompte de ' + acPct(p) + ' %.') + '</p>';
     s += '<div class="paliers">' + qpOf(p).map(function (q, i) {
-      return '<div class="palier" data-pal="' + i + '"><span>' + (i === QP.length - 1 ? q + '+' : 'dès ' + q) + ' pièce' + (q > 1 ? 's' : '') + '</span><b>' + (okPx(px[i]) ? usd(Number(px[i])) : '—') + '</b></div>';
+      return '<div class="palier" data-pal="' + i + '"><span>' + (i === QP.length - 1 ? q + '+' : (i === 0 && q === 1 ? '' : 'dès ') + q) + ' pièce' + (q > 1 ? 's' : '') + '</span><b>' + (okPx(px[i]) ? usd(Number(px[i])) : '—') + '</b></div>';
     }).join('') + '</div>';
     s += '<div class="carte calc" data-calc="' + p.id + '"><div class="duo">' +
-      '<div class="champ"><label for="k-q">Quantité</label><input id="k-q" type="number" min="1" value="1" inputmode="numeric" data-k="q"></div>' +
+      '<div class="champ"><label for="k-q">Quantité</label><input id="k-q" type="number" min="' + qpOf(p)[0] + '" value="' + qpOf(p)[0] + '" inputmode="numeric" data-k="q"></div>' +
       '<div class="champ"><label for="k-c">Code promo</label><input id="k-c" data-k="c" autocomplete="off" placeholder="Facultatif" style="text-transform:uppercase"></div></div>' +
       '<div class="acompte"><div><small>Total estimé</small><strong data-o="tot">—</strong><small data-o="fc"></small></div><div><small>' + (acPct(p) === 100 ? 'À payer à la commande' : 'Acompte à verser (' + acPct(p) + ' %)') + '</small><strong data-o="ac">—</strong></div></div>' +
       '<p class="note" data-o="info"></p></div>';
@@ -1769,7 +1769,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   function majCalc() {
     var box = document.querySelector('#sheet [data-calc]'); if (!box) return;
     var p = BY[box.getAttribute('data-calc')]; if (!p) return;
-    var q = Math.max(1, parseInt(box.querySelector('[data-k="q"]').value, 10) || 1), code = box.querySelector('[data-k="c"]').value;
+    var q = Math.max(qpOf(p)[0], parseInt(box.querySelector('[data-k="q"]').value, 10) || qpOf(p)[0]), code = box.querySelector('[data-k="c"]').value;
     var u = prixPour(p, q), pct = promoPct(code);
     function o(k) { return box.querySelector('[data-o="' + k + '"]'); }
     var act = -1, px = pxList(p);

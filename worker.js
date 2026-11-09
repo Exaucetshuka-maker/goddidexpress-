@@ -110,8 +110,8 @@ async function mdpOk(env, request) {
 }
 
 function pqNet(v) {
-  if (!Array.isArray(v)) return null; const a = Math.round(nombre(v[1])), b = Math.round(nombre(v[2]));
-  return a >= 2 && b > a && b <= 10000 && !(a === 5 && b === 10) ? [1, a, b] : null;
+  if (!Array.isArray(v)) return null; const z = Math.round(nombre(v[0], 1)), a = Math.round(nombre(v[1])), b = Math.round(nombre(v[2]));
+  return z >= 1 && a > z && b > a && b <= 10000 && !(z === 1 && a === 5 && b === 10) ? [z, a, b] : null;
 }
 const MAXTXT = 600;
 function txt(v, max = MAXTXT) { return String(v == null ? '' : v).slice(0, max); }
