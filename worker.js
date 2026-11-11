@@ -261,7 +261,7 @@ function phs(a) { return (Array.isArray(a) ? a : []).filter((x) => typeof x === 
 function attr(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
 async function metaPartage(url, etat, env, request) {
   const s = url.searchParams.get('s'), pid = url.searchParams.get('p'), org = url.origin;
-  let titre = 'GOD DID EXPRESS', desc = 'Tu choisis. On trouve. On te livre. Chine, Dubaï, Istanbul vers Kinshasa.', img = org + '/logo-og.png';
+  let home = false, canon = '', ld = '', titre = 'GOD DID EXPRESS', desc = 'Tu choisis. On trouve. On te livre. Chine, Dubaï, Istanbul vers Kinshasa.', img = org + '/logo-og.png';
   if (s === 'iphone' || s === 'prix') { titre = 'Prix du jour · GOD DID EXPRESS'; desc = 'Les prix du jour, commande en un clic sur WhatsApp.'; }
   else if (s === 'voyages') { titre = 'Nos voyages · GOD DID EXPRESS'; const v = (etat.voy || []).filter((x) => x.on !== false && x.orig && x.dep && x.dep >= new Date().toISOString().slice(0, 10))[0]; desc = v ? (v.sens === 'depuis' ? 'Kinshasa → ' + v.orig : v.orig + ' → Kinshasa') + ' · départ le ' + v.dep + '. Réserve ta place.' : 'Dates de départ, dernier jour pour commander, arrivées estimées.'; }
   else if (s === 'groupes') { titre = 'Achats groupés · GOD DID EXPRESS'; desc = 'Plus on est nombreux, moins c\'est cher.'; }
@@ -269,10 +269,11 @@ async function metaPartage(url, etat, env, request) {
   else if (pid && /^[A-Za-z0-9_-]{1,40}$/.test(pid)) {
     let p = (etat.extra || []).find((e) => e.id === pid) || null, ov = (etat.prod || {})[pid] || {};
     if (!p) { try { const r = await env.ASSETS.fetch(new Request(org + '/products.json')); const L = await r.json(); p = (Array.isArray(L) ? L : L.produits || []).find((e) => e.id === pid) || null; } catch (e) {} }
-    if (p) { const px = (ov.px || p.px || [])[0]; titre = p.t + ' · GOD DID EXPRESS'; desc = (px > 0 ? px + ' $ · ' : '') + 'Commande sur WhatsApp, livré à Kinshasa.'; const ph = ov.photo || p.photo || ('img/' + pid + '.jpg'); img = org + (ph.startsWith('/') ? '' : '/') + ph; if (/^https?:/.test(ph)) img = ph; }
-  } else return null;
+    if (p) { const px = (ov.px || p.px || [])[0]; titre = p.t + ' · GOD DID EXPRESS'; desc = (px > 0 ? px + ' $ · ' : '') + 'Commande sur WhatsApp, livré à Kinshasa.'; const ph = ov.photo || p.photo || ('img/' + pid + '.jpg'); img = org + (ph.startsWith('/') ? '' : '/') + ph; if (/^https?:/.test(ph)) img = ph;
+      canon = org + '/?p=' + pid; ld = JSON.stringify({ '@context': 'https://schema.org', '@type': 'Product', name: p.t, image: [img], description: String(ov.desc || p.s || desc).slice(0, 300), brand: { '@type': 'Brand', name: 'GOD DID EXPRESS' }, offers: px > 0 ? { '@type': 'Offer', priceCurrency: 'USD', price: String(px), availability: 'https://schema.org/InStock', url: canon } : undefined }).replace(/</g, '\\u003c'); }
+  } else { home = true; }
   const tags = '<meta property="og:site_name" content="GOD DID EXPRESS"><meta property="og:type" content="website"><meta property="og:title" content="' + attr(titre) + '"><meta property="og:description" content="' + attr(desc) + '"><meta property="og:image" content="' + attr(img) + '"><meta property="og:url" content="' + attr(org + url.pathname + url.search) + '"><meta name="twitter:card" content="summary"><meta name="description" content="' + attr(desc) + '">';
-  return { titre, tags };
+  return { titre: home ? null : titre, tags, canon, ld };
 }
 
 async function servirPageAvecEtat(request, env) {
@@ -282,7 +283,12 @@ async function servirPageAvecEtat(request, env) {
   const etat = await lireEtat(env);
   let html = await rep.text();
   html = html.replace(/(<script type="application\/json" id="gde-state">)[\s\S]*?(<\/script>)/, (m, a, b) => a + echapper(JSON.stringify(etat)) + b);
-  try { const m = await metaPartage(new URL(request.url), etat, env, request); if (m) html = html.replace(/<title>[\s\S]*?<\/title>/, '<title>' + attr(m.titre) + '</title>' + m.tags); } catch (e) {}
+  try { const m = await metaPartage(new URL(request.url), etat, env, request); if (m) {
+      html = html.replace(/<meta name="description"[^>]*>/, '');
+      if (m.canon) html = html.replace(/<link rel="canonical"[^>]*>/, '<link rel="canonical" href="' + attr(m.canon) + '">');
+      if (m.ld) html = html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '<script type="application/ld+json">' + m.ld + '</script>');
+      html = m.titre ? html.replace(/<title>[\s\S]*?<\/title>/, '<title>' + attr(m.titre) + '</title>' + m.tags) : html.replace(/<\/title>/, '</title>' + m.tags);
+    } } catch (e) {}
   const h = new Headers(rep.headers);
   h.set('cache-control', 'no-store');
   h.delete('content-length');
@@ -302,6 +308,14 @@ async function traiter(request, env) {
     const p = url.pathname;
 
     if (!p.startsWith('/api/')) {
+    if (p === '/sitemap.xml') {
+      const etat = await lireEtat(env), org = url.origin; let L = [];
+      try { const r = await env.ASSETS.fetch(new Request(org + '/products.json')); const j = await r.json(); L = Array.isArray(j) ? j : j.produits || []; } catch (e) {}
+      const ids = L.concat(etat.extra || []).map((x) => x.id).filter((id) => /^[A-Za-z0-9_-]{1,40}$/.test(id) && !((etat.prod || {})[id] || {}).cache);
+      const urls = [org + '/', org + '/?s=voyages', org + '/?s=groupes', org + '/?s=paniers'].concat(ids.map((id) => org + '/?p=' + id));
+      const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + urls.map((u) => '<url><loc>' + attr(u) + '</loc></url>').join('') + '</urlset>';
+      return new Response(xml, { headers: { 'content-type': 'application/xml; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
+    }
       if (p === '/' || p === '/index.html') return servirPageAvecEtat(request, env);
       const rep = await env.ASSETS.fetch(request);
       if (p === '/admin' || p === '/admin.html' || p === '/admin/') {
