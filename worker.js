@@ -174,7 +174,7 @@ function nettoyer(s) {
     tiktok: txt(s.soc && s.soc.tiktok, 200), instagram: txt(s.soc && s.soc.instagram, 200), facebook: txt(s.soc && s.soc.facebook, 200),
   };
   o.promo = (Array.isArray(s.promo) ? s.promo : []).slice(0, 40).map((p) => ({ code: txt(p.code, 30).toUpperCase(), pct: Math.max(0, Math.min(90, nombre(p.pct))), actif: p.actif !== false }));
-  o.avis = (Array.isArray(s.avis) ? s.avis : []).slice(0, 30).map((a) => ({ txt: txt(a.txt, 400), nom: txt(a.nom, 80), photo: a.photo && /^\/api\/img\//.test(a.photo) ? a.photo : undefined }));
+  o.avis = (Array.isArray(s.avis) ? s.avis : []).slice(0, 30).map((a) => ({ txt: txt(a.txt, 400), nom: txt(a.nom, 80), et: Math.max(0, Math.min(5, Math.round(nombre(a.et)))) || undefined, photo: a.photo && /^\/api\/img\//.test(a.photo) ? a.photo : undefined }));
   o.vip = Array.isArray(s.vip) && s.vip.length === 3 ? s.vip.map((v) => nombre(v, 0)) : [3, 6, 10];
   o.vp = /^https:\/\/[^\s"'<>\\]{4,300}$/.test(String(s.vp || '').trim()) ? String(s.vp).trim() : '';
   o.vpOff = !!s.vpOff;

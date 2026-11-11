@@ -217,6 +217,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       <details class="carte" id="av-ajout" open>
         <summary>+ Ajouter un avis</summary>
         <div class="grille" style="margin-top:10px">
+          <div><label for="av-et">Étoiles (facultatif)</label><select id="av-et"><option value="0">Pas d'étoiles</option><option value="1">★ (1)</option><option value="2">★★ (2)</option><option value="3">★★★ (3)</option><option value="4">★★★★ (4)</option><option value="5">★★★★★ (5)</option></select></div>
           <div><label for="av-n">Nom du client</label><input id="av-n" maxlength="80" placeholder="Ex. Marie, Lemba"></div>
           <div><label for="av-t">Ce que le client a dit</label><textarea id="av-t" maxlength="400" style="min-height:90px"></textarea></div>
           <div><label for="av-f">Photo (facultatif)</label><input id="av-f" type="file" accept="image/*"></div>
@@ -917,9 +918,10 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   function rendreAvisAdmin() {
     $('av-liste').innerHTML = STATE.avis.map(function (a, i) {
       return '<div class="carte" data-av="' + i + '">' + (a.photo ? '<img src="' + esc(a.photo) + '" alt="" style="width:100%;max-height:180px;object-fit:cover;border-radius:3px">' : '') +
-        '<div><strong>' + esc(a.nom) + '</strong></div><p style="margin:0">' + esc(a.txt) + '</p><div><button class="btn danger mini" data-avdel="' + i + '" type="button">Supprimer cet avis</button></div></div>';
+        '<div><strong>' + esc(a.nom) + '</strong></div><p style="margin:0">' + esc(a.txt) + '</p><div><label>Étoiles données à cet avis</label><select data-aet="' + i + '">' + '<option value="0">Pas d\'étoiles</option>' + [1,2,3,4,5].map(function (n) { return '<option value="' + n + '"' + ((a.et|0) === n ? ' selected' : '') + '>' + '★'.repeat(n) + ' (' + n + ')</option>'; }).join('') + '</select></div><div><button class="btn danger mini" data-avdel="' + i + '" type="button">Supprimer cet avis</button></div></div>';
     }).join('') || '<p class="note">Aucun avis pour l\'instant.</p>';
   }
+  $('av-liste').addEventListener('change', function (e) { var k = e.target.getAttribute('data-aet'); if (k == null) return; var n = Number(e.target.value) || 0; if (n) STATE.avis[Number(k)].et = n; else delete STATE.avis[Number(k)].et; marquer(true); });
   $('av-liste').addEventListener('click', function (e) {
     var d = e.target.getAttribute('data-avdel'); if (d == null) return;
     if (confirm('Supprimer cet avis ?')) { STATE.avis.splice(Number(d), 1); marquer(true); rendreAvisAdmin(); }
@@ -927,8 +929,8 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   $('av-ok').addEventListener('click', function () {
     var nom = $('av-n').value.trim(), txt = $('av-t').value.trim(), f = $('av-f').files[0];
     if (!nom || !txt) { alert('Écris le nom du client et ce qu\'il a dit.'); return; }
-    var av = { nom: nom, txt: txt };
-    function fin() { STATE.avis.push(av); marquer(true); $('av-n').value = ''; $('av-t').value = ''; $('av-f').value = ''; rendreAvisAdmin(); infoEtat('Avis ajouté. Pense à enregistrer.', 'ok'); }
+    var av = { nom: nom, txt: txt }; var et = Number($('av-et').value) || 0; if (et) av.et = et;
+    function fin() { STATE.avis.push(av); marquer(true); $('av-n').value = ''; $('av-t').value = ''; $('av-et').value = '0'; $('av-f').value = ''; rendreAvisAdmin(); infoEtat('Avis ajouté. Pense à enregistrer.', 'ok'); }
     if (f) { infoEtat('Envoi de la photo…'); envoyerPhoto('a' + Date.now().toString(36), f).then(function (u) { av.photo = u; fin(); }).catch(function (er) { infoEtat(er.message, 'mal'); }); }
     else fin();
   });

@@ -2271,7 +2271,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     ['Pour mon commerce, ils trouvent exactement ce que je demande.', 'Commerçant de Lemba']
   ];
   $('avis-rail').innerHTML = AVIS.map(function (a) {
-    return '<div class="avis-c"><span class="etoiles" aria-hidden="true">★★★★★</span><q>' + a[0] + '</q><div class="qui"><span>' + a[1] + '</span><span class="pastille">Modèle</span></div></div>';
+    return '<div class="avis-c"><q>' + a[0] + '</q><div class="qui"><span>' + a[1] + '</span><span class="pastille">Modèle</span></div></div>';
   }).join('');
   $('avis-wa').href = wa('Bonjour GOD DID EXPRESS, je veux laisser mon témoignage (avec ma photo ou une vidéo).');
   $('fond-wa').href = wa('Bonjour GOD DID EXPRESS, je veux faire partie des premiers clients : mon badge de membre fondateur, s\'il vous plaît.');
@@ -2730,12 +2730,12 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var reels = STATE.avis || [];
     if (reels.length) {
       $('avis-rail').innerHTML = reels.map(function (a) {
-        return '<div class="avis-c">' + (a.photo ? '<img class="avis-ph" src="' + ea(a.photo) + '" alt="" loading="lazy">' : '') + '<span class="etoiles" aria-hidden="true">★★★★★</span><q>' + h(a.txt) + '</q><div class="qui"><span>' + h(a.nom) + '</span></div></div>';
+        return '<div class="avis-c">' + (a.photo ? '<img class="avis-ph" src="' + ea(a.photo) + '" alt="" loading="lazy">' : '') + '' + (a.et ? '<span class="etoiles" role="img" aria-label="' + a.et + ' étoiles sur 5">' + '★'.repeat(a.et) + '</span>' : '') + '<q>' + h(a.txt) + '</q><div class="qui"><span>' + h(a.nom) + '</span></div></div>';
       }).join('');
       $('avis-note').hidden = true;
     } else {
       $('avis-rail').innerHTML = AVIS.map(function (a) {
-        return '<div class="avis-c"><span class="etoiles" aria-hidden="true">★★★★★</span><q>' + a[0] + '</q><div class="qui"><span>' + a[1] + '</span><span class="pastille">Modèle</span></div></div>';
+        return '<div class="avis-c"><q>' + a[0] + '</q><div class="qui"><span>' + a[1] + '</span><span class="pastille">Modèle</span></div></div>';
       }).join('');
       $('avis-note').hidden = false;
     }
