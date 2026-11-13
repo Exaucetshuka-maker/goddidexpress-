@@ -669,9 +669,9 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   function tous() {
     var base = PRODS.map(function (p) {
       var o = STATE.prod[p.id] || {};
-      return { id: p.id, t: p.t, s: p.s, c: p.c, px: o.px || [null, null, null], photo: o.photo || ('img/' + p.id + '.jpg'), custom: !!o.photo, ph: o.ph || [], desc: o.desc || '', vid: o.vid || '', ac: o.ac || 0, pq: o.pq || null, cache: !!o.cache, gone: !!o.gone, det: o.det || null, arr: o.arr || '', extra: false };
+      return { id: p.id, t: p.t, s: p.s, c: p.c, px: o.px || [null, null, null], photo: o.photo || ('img/' + p.id + '.jpg'), custom: !!o.photo, ph: o.ph || [], desc: o.desc || '', vid: o.vid || '', ac: o.ac || 0, st: o.st || '', pq: o.pq || null, cache: !!o.cache, gone: !!o.gone, det: o.det || null, arr: o.arr || '', extra: false };
     });
-    var ex = STATE.extra.map(function (e) { return { id: e.id, t: e.t, s: e.s, c: e.c, px: e.px || [null, null, null], photo: e.photo || '', custom: !!e.photo, ph: e.ph || [], desc: e.desc || '', vid: e.vid || '', ac: e.ac || 0, pq: e.pq || null, cache: !!e.cache, gone: false, det: e.det || null, arr: e.arr || '', extra: true }; });
+    var ex = STATE.extra.map(function (e) { return { id: e.id, t: e.t, s: e.s, c: e.c, px: e.px || [null, null, null], photo: e.photo || '', custom: !!e.photo, ph: e.ph || [], desc: e.desc || '', vid: e.vid || '', ac: e.ac || 0, st: e.st || '', pq: e.pq || null, cache: !!e.cache, gone: false, det: e.det || null, arr: e.arr || '', extra: true }; });
     return ex.concat(base);
   }
   function opt(v, cur, t) { return '<option value="' + v + '"' + (cur === v ? ' selected' : '') + '>' + t + '</option>'; }
@@ -699,6 +699,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         '<div class="grille g3"><div><label>1er prix dès (pièces)</label><input data-k="pq" data-i="0" inputmode="numeric" maxlength="5" placeholder="1" value="' + esc(p.pq && p.pq[0] > 1 ? p.pq[0] : '') + '"></div><div><label>2e prix dès (pièces)</label><input data-k="pq" data-i="1" inputmode="numeric" maxlength="5" placeholder="5" value="' + esc(p.pq ? p.pq[1] : '') + '"></div><div><label>3e prix dès (pièces)</label><input data-k="pq" data-i="2" inputmode="numeric" maxlength="5" placeholder="10" value="' + esc(p.pq ? p.pq[2] : '') + '"></div><div></div></div>' +
         '<details><summary class="note">Détail : neuf ou occasion, carton, sur commande</summary>' + detForm(p.det, 'det-', p.arr) + '</details>' +
         '<details><summary class="note">Description pour les clients</summary><textarea data-k="desc" maxlength="600" style="min-height:70px" placeholder="Une ou deux phrases sur le produit">' + esc(p.desc) + '</textarea></details>' +
+        '<div><label>Disponibilité</label><select data-k="st"><option value=""' + (p.st === 'stock' ? '' : ' selected') + '>Sur commande</option><option value="stock"' + (p.st === 'stock' ? ' selected' : '') + '>Stock déjà disponible</option></select></div>' +
         '<div><label>Acompte demandé au client (%)</label><input data-k="ac" inputmode="numeric" maxlength="3" value="' + esc(p.ac && p.ac !== 50 ? p.ac : '') + '" placeholder="50 par défaut. Mets 100 pour un paiement complet."></div>' +
         '<details' + (p.vid ? ' open' : '') + '><summary class="note">Vidéo du produit (lien)</summary><input data-k="vid" maxlength="300" inputmode="url" value="' + esc(p.vid || '') + '" placeholder="https://… YouTube, TikTok, Facebook ou fichier MP4"></details>' +
         '<details open><summary class="note" style="color:var(--orange,#FF7A1A);font-weight:700">+ Ajouter des photos : ' + (1 + (p.ph || []).length) + ' sur 6</summary><div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0">' + (p.ph || []).map(function (u, k) { return '<span style="position:relative"><img src="' + esc(u) + '" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:6px"><button type="button" data-a="ph-x:' + k + '" aria-label="Retirer cette photo" style="position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:0;background:#c0392b;color:#fff;font-size:14px">×</button></span>'; }).join('') + '</div>' + ((p.ph || []).length < 5 ? '<button class="btn ghost mini" data-a="ph-add" type="button">+ Ajouter des photos</button>' : '<span class="note">6 photos au maximum.</span>') + '<input type="file" accept="image/*" multiple class="cache" data-k="files"></details>' +
@@ -720,12 +721,13 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   }
 
   $('liste').addEventListener('input', function (e) {
-    var t = e.target, row = t.closest('[data-id]'), k = t.getAttribute('data-k'); if (!row || (k !== 'px' && k !== 'desc' && k !== 'vid' && k !== 'ac' && k !== 'pq' && String(k).indexOf('det-') !== 0)) return;
+    var t = e.target, row = t.closest('[data-id]'), k = t.getAttribute('data-k'); if (!row || (k !== 'px' && k !== 'desc' && k !== 'vid' && k !== 'ac' && k !== 'st' && k !== 'pq' && String(k).indexOf('det-') !== 0)) return;
     var o = refProd(row.getAttribute('data-id'));
     if (k === 'det-arr') { if (t.value) o.arr = t.value; else delete o.arr; marquer(true); return; }
     if (String(k).indexOf('det-') === 0) { o.det = o.det || {}; var dk = k.slice(4); if (t.value) o.det[dk] = t.value; else delete o.det[dk]; if (!Object.keys(o.det).length) delete o.det; marquer(true); return; }
     if (k === 'desc') { o.desc = t.value; marquer(true); return; }
     if (k === 'pq') return;
+    if (k === 'st') { if (t.value === 'stock') o.st = 'stock'; else delete o.st; marquer(true); return; }
     if (k === 'ac') { var av = Math.round(parseFloat(t.value)); if (av >= 10 && av <= 100 && av !== 50) o.ac = av; else delete o.ac; marquer(true); return; }
     if (k === 'vid') { var vv = t.value.trim(); if (vv) o.vid = vv; else delete o.vid; marquer(true); return; }
     o.px = o.px || [null, null, null]; o.px[Number(t.getAttribute('data-i'))] = nb(t.value);

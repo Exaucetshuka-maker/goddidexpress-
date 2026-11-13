@@ -145,6 +145,7 @@ function nettoyer(s) {
     { const dd = nettoyerDet(p.det); if (dd) r.det = dd; }
     { const q = pqNet(p.pq); if (q) r.pq = q; }
     { const ac = Math.round(nombre(p.ac)); if (ac >= 10 && ac <= 100 && ac !== 50) r.ac = ac; }
+    if (p.st === 'stock') r.st = 'stock';
     if (new RegExp('^\\d{4}-\\d{2}-\\d{2}$').test(String(p.arr || ''))) r.arr = String(p.arr);
     if (p.photo && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(p.photo)) r.photo = p.photo;
     { const ph = phs(p.ph); if (ph.length) r.ph = ph; }
@@ -165,6 +166,7 @@ function nettoyer(s) {
     { const dd = nettoyerDet(e.det); if (dd) r.det = dd; }
     { const q = pqNet(e.pq); if (q) r.pq = q; }
     { const ac = Math.round(nombre(e.ac)); if (ac >= 10 && ac <= 100 && ac !== 50) r.ac = ac; }
+    if (e.st === 'stock') r.st = 'stock';
     if (new RegExp('^\\d{4}-\\d{2}-\\d{2}$').test(String(e.arr || ''))) r.arr = String(e.arr);
     return r;
   });
@@ -270,7 +272,7 @@ async function metaPartage(url, etat, env, request) {
     let p = (etat.extra || []).find((e) => e.id === pid) || null, ov = (etat.prod || {})[pid] || {};
     if (!p) { try { const r = await env.ASSETS.fetch(new Request(org + '/products.json')); const L = await r.json(); p = (Array.isArray(L) ? L : L.produits || []).find((e) => e.id === pid) || null; } catch (e) {} }
     if (p) { const px = (ov.px || p.px || [])[0]; titre = p.t + ' · GOD DID EXPRESS'; desc = (px > 0 ? px + ' $ · ' : '') + 'Commande sur WhatsApp, livré à Kinshasa.'; const ph = ov.photo || p.photo || ('img/' + pid + '.jpg'); img = org + (ph.startsWith('/') ? '' : '/') + ph; if (/^https?:/.test(ph)) img = ph;
-      canon = org + '/?p=' + pid; ld = JSON.stringify({ '@context': 'https://schema.org', '@type': 'Product', name: p.t, image: [img], description: String(ov.desc || p.s || desc).slice(0, 300), brand: { '@type': 'Brand', name: 'GOD DID EXPRESS' }, offers: px > 0 ? { '@type': 'Offer', priceCurrency: 'USD', price: String(px), availability: 'https://schema.org/InStock', url: canon } : undefined }).replace(/</g, '\\u003c'); }
+      canon = org + '/?p=' + pid; ld = JSON.stringify({ '@context': 'https://schema.org', '@type': 'Product', name: p.t, image: [img], description: String(ov.desc || p.s || desc).slice(0, 300), brand: { '@type': 'Brand', name: 'GOD DID EXPRESS' }, offers: px > 0 ? { '@type': 'Offer', priceCurrency: 'USD', price: String(px), availability: (ov.st === 'stock' || p.st === 'stock') ? 'https://schema.org/InStock' : 'https://schema.org/PreOrder', url: canon } : undefined }).replace(/</g, '\\u003c'); }
   } else { home = true; }
   const tags = '<meta property="og:site_name" content="GOD DID EXPRESS"><meta property="og:type" content="website"><meta property="og:title" content="' + attr(titre) + '"><meta property="og:description" content="' + attr(desc) + '"><meta property="og:image" content="' + attr(img) + '"><meta property="og:url" content="' + attr(org + url.pathname + url.search) + '"><meta name="twitter:card" content="summary"><meta name="description" content="' + attr(desc) + '">';
   return { titre: home ? null : titre, tags, canon, ld };
