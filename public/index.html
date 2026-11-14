@@ -1452,7 +1452,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     $('iph-sous').textContent = 'Les prix peuvent changer chaque jour. Touche un prix pour commander sur WhatsApp, ou « + » pour l\'ajouter à ta liste.';
     box.innerHTML = LS.map(function (I) {
       var G = [], idx = {}; I.items.forEach(function (t) { if (!(t.m in idx)) { idx[t.m] = G.length; G.push({ m: t.m, v: [] }); } G[idx[t.m]].v.push(t); });
-      return '<div class="kicker" style="margin-top:6px">' + h(I.nom) + (I.date ? ' · ' + h(I.date) : '') + (I.mention ? ' · ' + h(I.mention) : '') + (I.douane !== false ? ' · douane incluse' : '') + '</div><div style="margin:2px 0 4px">' + dispo({ st: I.dispo }) + (I.dispo === 'stock' ? ' <small class="note">Livraison rapide à Kinshasa</small>' : ' <small class="note">Livraison rapide à Kinshasa dès l\'arrivée de la commande</small>') + '</div>' + G.map(function (g) {
+      return '<div class="kicker" style="margin-top:6px">' + h(I.nom) + (I.date ? ' · ' + h(I.date) : '') + (I.mention ? ' · ' + h(I.mention) : '') + (I.douane !== false ? ' · douane incluse' : '') + '</div><div style="margin:2px 0 4px">' + dispo({ st: I.dispo }) + (I.dispo === 'stock' ? ' <small class="note">Livraison partout dans le monde</small>' : ' <small class="note">Livraison partout dans le monde</small>') + '</div>' + G.map(function (g) {
         return '<article class="carte"><h3 style="margin-bottom:8px">' + h(g.m) + '</h3><div style="display:flex;flex-wrap:wrap;gap:8px">' + g.v.map(function (t) {
           var msg = 'Bonjour GOD DID EXPRESS, je veux commander : ' + t.m + (t.g ? ' ' + t.g : '') + (t.p > 0 ? ' (prix affiché ' + usd(t.p) + ')' : '') + ' (' + (I.dispo === 'stock' ? 'en stock' : 'sur commande') + '). Est-il disponible ?';
           var key = 'i:' + t.m + '|' + t.g, lab = t.g ? h(t.g) + ' · ' : '';
@@ -1752,7 +1752,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     return r ? (Number(r.pct) || 0) : 0;
   }
   function dispo(p) { return p && p.st === 'stock' ? '<span class="dispo stock">En stock</span>' : '<span class="dispo cmd">Sur commande</span>'; }
-  function livr(p) { return dispo(p) + '<span class="dispo liv">Livraison rapide</span>'; }
+  function livr(p) { return dispo(p) + '<span class="dispo liv">Livraison dans le monde</span>'; }
   function prixLigne(p) {
     var px = pxList(p), main = null, i;
     for (i = 0; i < 3; i++) if (okPx(px[i])) { main = i; break; }
@@ -1764,7 +1764,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   }
   function acPct(p) { var a = Number(p && p.ac); return a >= 10 && a <= 100 ? a : 50; }
   function fichePrix(p) {
-    var px = pxList(p), s = '<p class="note" style="font-size:14px">' + p.s + '.</p><p style="margin:6px 0">' + dispo(p) + (p.st === 'stock' ? ' <small class="note">Disponible maintenant, livraison rapide à Kinshasa.</small>' : ' <small class="note">Commandé pour vous après l\'acompte, livraison rapide à Kinshasa dès son arrivée.</small>') + '</p>' + (p.desc ? '<p style="font-size:14.5px;margin:8px 0 0">' + h(p.desc) + '</p>' : '');
+    var px = pxList(p), s = '<p class="note" style="font-size:14px">' + p.s + '.</p><p style="margin:6px 0">' + dispo(p) + (p.st === 'stock' ? ' <small class="note">Disponible maintenant, livraison partout dans le monde.</small>' : ' <small class="note">Commandé pour vous après l\'acompte, livraison partout dans le monde.</small>') + '</p>' + (p.desc ? '<p style="font-size:14.5px;margin:8px 0 0">' + h(p.desc) + '</p>' : '');
     if (prixMin(p) === null) return s + '<p class="note">Prix sur demande, envoyé sur WhatsApp avant tout paiement. ' + (acPct(p) === 100 ? 'Paiement complet à la commande.' : 'Acompte de ' + acPct(p) + ' %.') + '</p>';
     s += '<div class="paliers">' + qpOf(p).map(function (q, i) {
       return '<div class="palier" data-pal="' + i + '"><span>' + (i === QP.length - 1 ? q + '+' : (i === 0 && q === 1 ? '' : 'dès ') + q) + ' pièce' + (q > 1 ? 's' : '') + '</span><b>' + (okPx(px[i]) ? usd(Number(px[i])) : '—') + '</b></div>';
