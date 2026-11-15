@@ -181,6 +181,7 @@ function nettoyer(s) {
   o.vp = /^https:\/\/[^\s"'<>\\]{4,300}$/.test(String(s.vp || '').trim()) ? String(s.vp).trim() : '';
   o.vpOff = !!s.vpOff;
   o.fc = Math.max(0, Math.min(100000, Math.round(nombre(s.fc)))) || 0;
+  o.gsc = /^[A-Za-z0-9_-]{10,100}$/.test(String(s.gsc || '').trim()) ? String(s.gsc).trim() : '';
   o.lien = /^https:\/\//i.test(s.lien || '') ? txt(s.lien, 300) : '';
   o.mail = /^[^\s@<>"']{1,64}@[^\s@<>"']{1,120}\.[^\s@<>"']{2,20}$/.test(String(s.mail || '').trim()) ? String(s.mail).trim() : '';
   o.wag = /^https:\/\//i.test(s.wag || '') ? txt(s.wag, 300) : '';
@@ -275,8 +276,10 @@ async function metaPartage(url, etat, env, request) {
     if (p) { const px = (ov.px || p.px || [])[0]; titre = p.t + ' · GOD DID EXPRESS'; desc = (px > 0 ? px + ' $ · ' : '') + 'Commande sur WhatsApp, livré à Kinshasa.'; const ph = ov.photo || p.photo || ('img/' + pid + '.jpg'); img = org + (ph.startsWith('/') ? '' : '/') + ph; if (/^https?:/.test(ph)) img = ph;
       canon = org + '/?p=' + pid; ld = JSON.stringify({ '@context': 'https://schema.org', '@type': 'Product', name: p.t, image: [img], description: String(ov.desc || p.s || desc).slice(0, 300), brand: { '@type': 'Brand', name: 'GOD DID EXPRESS' }, offers: px > 0 ? { '@type': 'Offer', priceCurrency: 'USD', price: String(px), availability: (ov.st === 'stock' || p.st === 'stock') ? 'https://schema.org/InStock' : 'https://schema.org/PreOrder', url: canon } : undefined }).replace(/</g, '\\u003c'); }
   } else { home = true; }
+  let extra = '';
+  if (home && etat.gsc) extra += '<meta name="google-site-verification" content="' + attr(etat.gsc) + '">';
   const tags = '<meta property="og:site_name" content="GOD DID EXPRESS"><meta property="og:type" content="website"><meta property="og:title" content="' + attr(titre) + '"><meta property="og:description" content="' + attr(desc) + '"><meta property="og:image" content="' + attr(img) + '"><meta property="og:url" content="' + attr(org + url.pathname + url.search) + '"><meta name="twitter:card" content="summary"><meta name="description" content="' + attr(desc) + '">';
-  return { titre: home ? null : titre, tags, canon, ld };
+  return { titre: home ? null : titre, tags: tags + extra, canon, ld, home };
 }
 
 async function servirPageAvecEtat(request, env) {
@@ -289,6 +292,7 @@ async function servirPageAvecEtat(request, env) {
   try { const m = await metaPartage(new URL(request.url), etat, env, request); if (m) {
       html = html.replace(/<meta name="description"[^>]*>/, '');
       if (m.canon) html = html.replace(/<link rel="canonical"[^>]*>/, '<link rel="canonical" href="' + attr(m.canon) + '">');
+      if (m.home) { const sa = ['tiktok', 'instagram', 'facebook'].map((k) => String((etat.soc || {})[k] || '').trim()).filter((u) => /^https:\/\/[^\s"<>]{4,200}$/.test(u)); if (sa.length) html = html.replace(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/, (mm, j) => { try { const o = JSON.parse(j); o.sameAs = sa; return '<script type="application/ld+json">' + JSON.stringify(o) + '</script>'; } catch (e) { return mm; } }); }
       if (m.ld) html = html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '<script type="application/ld+json">' + m.ld + '</script>');
       html = m.titre ? html.replace(/<title>[\s\S]*?<\/title>/, '<title>' + attr(m.titre) + '</title>' + m.tags) : html.replace(/<\/title>/, '</title>' + m.tags);
     } } catch (e) {}
