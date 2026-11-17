@@ -742,5 +742,13 @@ async function traiter(request, env) {
       return json({ token: await faireToken(env, na) });
     }
 
+    /* Déconnecter tous les appareils (téléphone perdu) : change la clé secrète, demande le mot de passe */
+    if (p === '/api/deconnexion' && request.method === 'POST') {
+      const refus = await mdpOk(env, request); if (refus) return refus;
+      const auth = await lireAuth(env); const na = Object.assign({}, auth, { secret: rnd(32) });
+      await env.GDE.put('auth', JSON.stringify(na));
+      return json({ token: await faireToken(env, na) });
+    }
+
     return json({ erreur: 'Introuvable' }, 404);
 }

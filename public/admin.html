@@ -434,6 +434,12 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         <button class="btn ghost" id="m-ok" type="button">Changer le mot de passe</button>
         <p class="msg" id="m-msg" role="status"></p>
       </div>
+      <div class="carte">
+        <h3>Téléphone perdu ou prêté ?</h3>
+        <p class="note">Ce bouton déconnecte tous les autres appareils d'un coup (téléphones, ordinateurs). Toi, tu restes connecté ici. Ton mot de passe est demandé.</p>
+        <button class="btn ghost" id="deco-tous" type="button">Déconnecter tous les autres appareils</button>
+        <p class="msg" id="deco-m" role="status"></p>
+      </div>
     </section>
   </div>
 
@@ -1601,6 +1607,12 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   });
 
 
+  $('deco-tous').addEventListener('click', async function () {
+    var m = $('deco-m'); m.className = 'msg'; m.textContent = '';
+    var r = await avecMdp('/api/deconnexion', {}); if (!r) return;
+    if (!r.ok) { m.className = 'msg mal'; m.textContent = (r.j && r.j.erreur) || 'Impossible.'; return; }
+    setTok(r.j.token); m.className = 'msg ok'; m.textContent = 'Fait : tous les autres appareils sont déconnectés.';
+  });
   /* demande du mot de passe avant de changer numéros, adresses, e-mails */
   function demanderMdp(note) {
     return new Promise(function (ok) {
