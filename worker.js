@@ -306,6 +306,13 @@ async function servirPageAvecEtat(request, env) {
 const entetesSecurite = { 'strict-transport-security': 'max-age=31536000; includeSubDomains', 'x-content-type-options': 'nosniff', 'referrer-policy': 'strict-origin-when-cross-origin', 'content-security-policy': "frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" };
 export default {
   async fetch(request, env) {
+    try {
+      const u = new URL(request.url), ref = request.headers.get('referer');
+      if (ref && request.method === 'GET' && /^\/(img|video)\/|^\/api\/img\//.test(u.pathname)) {
+        let rh = ''; try { rh = new URL(ref).hostname; } catch (e) {}
+        if (rh && rh !== u.hostname && !/(^|\.)goddidexpress\.com$/.test(rh) && !/\.workers\.dev$/.test(rh) && !/(^|\.)(google\.[a-z.]+|bing\.com|facebook\.com|instagram\.com|whatsapp\.com|tiktok\.com|t\.co|twitter\.com)$/.test(rh)) return new Response('Interdit', { status: 403, headers: { 'cache-control': 'no-store' } });
+      }
+    } catch (e) {}
     const rep = await traiter(request, env);
     try { const h = new Headers(rep.headers); for (const k in entetesSecurite) if (!h.has(k)) h.set(k, entetesSecurite[k]); return new Response(rep.body, { status: rep.status, statusText: rep.statusText, headers: h, webSocket: rep.webSocket }); } catch (e) { return rep; }
   },
