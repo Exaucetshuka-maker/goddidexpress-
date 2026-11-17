@@ -303,6 +303,7 @@ async function servirPageAvecEtat(request, env) {
   return new Response(html, { status: 200, headers: h });
 }
 
+async function lireObjet(request) { const b = await request.json(); if (!b || typeof b !== 'object' || Array.isArray(b)) throw new Error('corps'); return b; }
 const entetesSecurite = { 'strict-transport-security': 'max-age=31536000; includeSubDomains', 'x-content-type-options': 'nosniff', 'referrer-policy': 'strict-origin-when-cross-origin', 'content-security-policy': "frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" };
 export default {
   async fetch(request, env) {
@@ -313,7 +314,7 @@ export default {
         if (rh && rh !== u.hostname && !/(^|\.)goddidexpress\.com$/.test(rh) && !/\.workers\.dev$/.test(rh) && !/(^|\.)(google\.[a-z.]+|bing\.com|facebook\.com|instagram\.com|whatsapp\.com|tiktok\.com|t\.co|twitter\.com)$/.test(rh)) return new Response('Interdit', { status: 403, headers: { 'cache-control': 'no-store' } });
       }
     } catch (e) {}
-    const rep = await traiter(request, env);
+    let rep; try { rep = await traiter(request, env); } catch (e) { rep = new Response(JSON.stringify({ erreur: 'Erreur du serveur, réessaie.' }), { status: 500, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } }); }
     try { const h = new Headers(rep.headers); for (const k in entetesSecurite) if (!h.has(k)) h.set(k, entetesSecurite[k]); return new Response(rep.body, { status: rep.status, statusText: rep.statusText, headers: h, webSocket: rep.webSocket }); } catch (e) { return rep; }
   },
 };
@@ -362,7 +363,7 @@ async function traiter(request, env) {
     /* Choix du mot de passe (une seule fois) */
     if (p === '/api/setup' && request.method === 'POST') {
       if (await lireAuth(env)) return json({ erreur: 'Mot de passe déjà choisi' }, 409);
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const mdp = String(b.password || '');
       if (mdp.length < 8) return json({ erreur: 'Au moins 8 caractères' }, 400);
       const salt = rnd(16);
@@ -380,7 +381,7 @@ async function traiter(request, env) {
     }
     if (p === '/api/pk/connexion' && request.method === 'POST') {
       const f = await freinage(env, request); if (f.bloque) return json({ erreur: 'Trop d\'essais. Réessaie dans 15 minutes.' }, 429);
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const auth = await lireAuth(env); if (!auth) return json({ erreur: 'Aucun mot de passe choisi' }, 409);
       if (!(await pkVerifier(env, request, b || {}))) { await env.GDE.put(f.k, String(f.n + 1), { expirationTtl: 900 }); return json({ erreur: 'Face ID refusé' }, 401); }
       return json({ token: await faireToken(env, auth) });
@@ -390,7 +391,7 @@ async function traiter(request, env) {
       const ip = request.headers.get('cf-connecting-ip') || 'x', ki = 'pinf:' + ip;
       const ni = Number((await env.GDE.get(ki)) || 0), ng = Number((await env.GDE.get('pinfail')) || 0);
       if (ni >= 5 || ng >= 10) return json({ erreur: 'Code bloqué. Entre ton mot de passe.' }, 429);
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const auth = await lireAuth(env); let pn = null; try { pn = JSON.parse((await env.GDE.get('pin')) || 'null'); } catch (e) {}
       if (!auth || !pn) return json({ erreur: 'Code pas activé. Entre ton mot de passe.' }, 404);
       const h = await pbkdf2(String(b.pin || ''), pn.salt, pn.iter);
@@ -405,7 +406,7 @@ async function traiter(request, env) {
     if (p === '/api/login' && request.method === 'POST') {
       const f = await freinage(env, request);
       if (f.bloque) return json({ erreur: 'Trop d\'essais. Réessaie dans 15 minutes.' }, 429);
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const auth = await lireAuth(env);
       if (!auth) return json({ erreur: 'Aucun mot de passe choisi' }, 409);
       const h = await pbkdf2(String(b.password || ''), auth.salt, auth.iter);
@@ -454,7 +455,7 @@ async function traiter(request, env) {
     }
     if (p === '/api/avis' && request.method === 'POST') {
       if (limite(request, 'avis', 8)) return json({ erreur: 'Trop d\'essais, réessaie dans une minute.' }, 429);
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const ref = String(b.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), tx = txt(b.txt, 400), nom = txt(b.nom, 40);
       if (tx.length < 8) return json({ erreur: 'Écris au moins une phrase.' }, 400);
       const L = await lireListe(env, 'avisv');
@@ -475,7 +476,7 @@ async function traiter(request, env) {
     if (p === '/api/demande' && request.method === 'POST') {
       const ip = request.headers.get('cf-connecting-ip') || 'x', rk = 'dm:' + ip, n0 = Number((await env.GDE.get(rk)) || 0);
       if (n0 >= 5) return json({ erreur: 'Tu as déjà envoyé plusieurs demandes. Réessaie dans une heure ou écris sur WhatsApp.' }, 429);
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const nom = txt(b.nom, 60), tel = txt(b.tel, 30).replace(/[^0-9+ ]/g, ''), tx = txt(b.txt, 600), lien = txt(b.lien, 300), qte = txt(b.qte, 20), bud = txt(b.bud, 20), mar = ['Chine', 'Dubaï', 'Turquie', 'Tous les marchés'].includes(b.mar) ? b.mar : '', pre = b.pre === true, voy = txt(b.voy, 90), act = txt(b.act, 40), freq = ['Une fois', 'Chaque mois', 'Chaque semaine'].includes(b.freq) ? b.freq : '';
       if (lien && !/^https?:\/\/\S+$/i.test(lien)) return json({ erreur: 'Le lien doit commencer par http ou https.' }, 400);
       if (!nom || tel.replace(/\D/g, '').length < 8) return json({ erreur: 'Écris ton prénom et ton numéro WhatsApp.' }, 400);
@@ -495,7 +496,7 @@ async function traiter(request, env) {
     }
     if (p === '/api/vote' && request.method === 'POST') {
       if (limite(request, 'vote', 15)) return json({ erreur: 'Trop de votes, réessaie dans une minute.' }, 429);
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const id = String(b && b.id || ''); if (!/^[A-Za-z0-9_-]{1,40}$/.test(id) || !env.GDE) return json({ erreur: 'Vote refusé' }, 400);
       const ip = request.headers.get('cf-connecting-ip') || 'x', kv = 'vt:' + ip + ':' + id, kn = 'vtn:' + ip;
       const t = await env.GDE.get('votes'); let v = {}; try { v = t ? JSON.parse(t) : {}; } catch (e) {}
@@ -508,7 +509,7 @@ async function traiter(request, env) {
     }
     if (p === '/api/clic' && request.method === 'POST') {
       if (limite(request, 'clic', 40)) return new Response(null, { status: 204 });
-      let b; try { b = await request.json(); } catch (e) { return new Response(null, { status: 204 }); }
+      let b; try { b = await lireObjet(request); } catch (e) { return new Response(null, { status: 204 }); }
       const id = String(b && b.id || '').slice(0, 60); if (!id || /[<>"]/.test(id) || !env.GDE) return new Response(null, { status: 204 });
       ATT.clic[id] = (ATT.clic[id] || 0) + 1;
       if (Date.now() - ATT.tc > 120000) {
@@ -521,7 +522,7 @@ async function traiter(request, env) {
     }
     if (p === '/api/vue' && request.method === 'POST') {
       if (limite(request, 'vue', 20)) return new Response(null, { status: 204 });
-      let b; try { b = await request.json(); } catch (e) { return new Response(null, { status: 204 }); }
+      let b; try { b = await lireObjet(request); } catch (e) { return new Response(null, { status: 204 }); }
       const jour = new Date().toISOString().slice(0, 10), d0 = ATT.vue[jour] || (ATT.vue[jour] = { v: 0, u: 0 }); d0.v++; if (b && b.n === true) d0.u++;
       if (Date.now() - ATT.tv > 120000) {
         ATT.tv = Date.now(); const att = ATT.vue; ATT.vue = {};
@@ -537,7 +538,7 @@ async function traiter(request, env) {
       const nrl = Number((await env.GDE.get(rk)) || 0);
       if (nrl >= 20) return json({ erreur: 'Trop d\'essais, réessaie dans quelques minutes' }, 429);
       await env.GDE.put(rk, String(nrl + 1), { expirationTtl: 600 });
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const k = b.k === 'v' ? 'v' : b.k === 'g' ? 'g' : '', id = String(b.id || '');
       const nom = String(b.nom || '').trim().replace(/\s+/g, ' ');
       if (!k || !/^[A-Za-z0-9_-]{1,20}$/.test(id)) return json({ erreur: 'Demande invalide' }, 400);
@@ -570,7 +571,7 @@ async function traiter(request, env) {
     if (!(await verifierToken(env, request))) return json({ erreur: 'Connexion requise' }, 401);
     if (p === '/api/pin/definir' && request.method === 'POST') {
       { const x = await mdpOk(env, request); if (x) return x; }
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const pin = String(b.pin || ''); if (!/^\d{7}$/.test(pin)) return json({ erreur: 'Le code doit avoir exactement 7 chiffres' }, 400);
       const salt = rnd(16); await env.GDE.put('pin', JSON.stringify({ salt, iter: ITER, hash: await pbkdf2(pin, salt, ITER) })); await env.GDE.delete('pinfail');
       return json({ ok: true });
@@ -578,7 +579,7 @@ async function traiter(request, env) {
     if (p === '/api/pin/retirer' && request.method === 'POST') { await env.GDE.delete('pin'); return json({ ok: true }); }
     if (p === '/api/pk/enregistrer' && request.method === 'POST') {
       { const x = await mdpOk(env, request); if (x) return x; }
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const id = String(b.id || ''), pub = String(b.pub || '');
       if (!/^[A-Za-z0-9_-]{16,300}$/.test(id) || !/^[A-Za-z0-9+/=]{60,200}$/.test(pub)) return json({ erreur: 'Données invalides' }, 400);
       try { await crypto.subtle.importKey('spki', unb64(pub), { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']); } catch (e) { return json({ erreur: 'Clé non acceptée' }, 400); }
@@ -588,7 +589,7 @@ async function traiter(request, env) {
     }
     if (p === '/api/pk/liste' && request.method === 'GET') return json({ appareils: (await lirePk(env)).map((x) => ({ id: x.id, nom: x.nom, t: x.t })) });
     if (p === '/api/pk/retirer' && request.method === 'POST') {
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       await env.GDE.put('passkeys', JSON.stringify((await lirePk(env)).filter((x) => x.id !== String(b.id || '')))); return json({ ok: true });
     }
 
@@ -598,7 +599,7 @@ async function traiter(request, env) {
     if (p === '/api/state' && request.method === 'PUT') {
       const len = Number(request.headers.get('content-length') || 0);
       if (len > 400000) return json({ erreur: 'Trop volumineux' }, 413);
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const ancien = await lireEtat(env);
       const propre = nettoyer({ ...b, rev: Math.max(nombre(b.rev), nombre(ancien.rev)) });
       /* Numéros, adresses, e-mails : changer ça redemande le mot de passe */
@@ -624,7 +625,7 @@ async function traiter(request, env) {
 
     if (p === '/api/cartes' && request.method === 'GET') return json({ cartes: await lireListe(env, 'cartes') });
     if (p === '/api/cartes' && request.method === 'PUT') {
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const vues = new Set();
       const propre = (Array.isArray(b.cartes) ? b.cartes : []).slice(0, 3000).map((c) => ({
         code: String(c.code || '').toUpperCase(), nom: txt(c.nom, 40), achats: Math.max(0, Math.min(999, Math.round(nombre(c.achats)))), maj: nombre(c.maj, Date.now()),
@@ -637,7 +638,7 @@ async function traiter(request, env) {
 
     if (p === '/api/joins/all' && request.method === 'GET') return json({ joins: (await lireListe(env, 'joins')).map((j) => ({ k: j.k, id: j.id, nom: j.nom, t: j.t, m: !!j.m })) });
     if (p === '/api/joins/all' && request.method === 'POST') {
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       let L = await lireListe(env, 'joins');
       if (b.action === 'add') {
         const k = b.k === 'v' ? 'v' : 'g', id = String(b.id || ''), nom = String(b.nom || '').trim().slice(0, 30);
@@ -662,20 +663,20 @@ async function traiter(request, env) {
 
     if (p === '/api/avisv' && request.method === 'GET') return json({ avis: await lireListe(env, 'avisv') });
     if (p === '/api/avisv' && request.method === 'PUT') {
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const L = (Array.isArray(b.avis) ? b.avis : []).slice(0, 200).map((a) => ({ ref: String(a.ref || '').slice(0, 30), nom: txt(a.nom, 40), txt: txt(a.txt, 400), t: nombre(a.t) }));
       await env.GDE.put('avisv', JSON.stringify(L)); return json({ avis: L });
     }
     if (p === '/api/partenaires' && request.method === 'GET') return json({ parts: await lireListe(env, 'parts') });
     if (p === '/api/partenaires' && request.method === 'PUT') {
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const vus = new Set(), TY = ['influenceur', 'equipe', 'marque', 'commercant', 'star'];
       const propre = (Array.isArray(b.parts) ? b.parts : []).slice(0, 100).map((x) => ({ nom: txt(x.nom, 40), typ: TY.includes(x.typ) ? x.typ : 'influenceur', code: txt(x.code, 30).toUpperCase().replace(/[^A-Z0-9_-]/g, ''), com: Math.max(0, Math.min(50, nombre(x.com))), tel: txt(x.tel, 30) })).filter((x) => x.code && !vus.has(x.code) && vus.add(x.code));
       await env.GDE.put('parts', JSON.stringify(propre)); return json({ parts: propre });
     }
     if (p === '/api/cmds' && request.method === 'GET') return json({ cmds: await lireListe(env, 'cmds') });
     if (p === '/api/cmds' && request.method === 'PUT') {
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const vues = new Set(), dt = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? String(v) : '');
       const propre = (Array.isArray(b.cmds) ? b.cmds : []).slice(0, 400).map((c) => ({
         ref: String(c.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), nom: txt(c.nom, 40), tel: txt(c.tel, 30), prod: txt(c.prod, 100),
@@ -691,7 +692,7 @@ async function traiter(request, env) {
       return json({ listes: j.listes });
     }
     if (p === '/api/iph' && request.method === 'PUT') {
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const num = (v) => (v === '' || v == null || !isFinite(Number(v)) ? 0 : Math.max(0, Math.min(99999, Number(v))));
       const out = { listes: {} };
       Object.keys(b.listes || {}).slice(0, 6).forEach((id) => {
@@ -704,7 +705,7 @@ async function traiter(request, env) {
     }
     if (p === '/api/demandes' && request.method === 'GET') return json({ demandes: await lireListe(env, 'demandes') });
     if (p === '/api/demandes' && request.method === 'PUT') {
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const old = await lireListe(env, 'demandes'), L = (Array.isArray(b.demandes) ? b.demandes : []).slice(0, 300).map((d) => ({ id: String(d.id || '').slice(0, 30), nom: txt(d.nom, 60), tel: txt(d.tel, 30), txt: txt(d.txt, 600), lien: txt(d.lien, 300), qte: txt(d.qte, 20), bud: txt(d.bud, 20), mar: ['Chine', 'Dubaï', 'Turquie', 'Tous les marchés'].includes(d.mar) ? d.mar : '', pre: d.pre === true, voy: txt(d.voy, 90), act: txt(d.act, 40), freq: ['Une fois', 'Chaque mois', 'Chaque semaine'].includes(d.freq) ? d.freq : '', photo: /^\/api\/img\/d[A-Za-z0-9_-]{1,38}$/.test(d.photo || '') ? d.photo : '', t: nombre(d.t), vu: d.vu === true }));
       const gardes = new Set(L.map((d) => d.id));
       for (const d of old) if (!gardes.has(d.id) && d.photo) await env.GDE.delete('img:' + d.photo.slice(9));
@@ -715,7 +716,7 @@ async function traiter(request, env) {
       return json({ reglages: j.reglages || {}, produits: j.produits || {} });
     }
     if (p === '/api/couts' && request.method === 'PUT') {
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const r = b.reglages || {}, num = (v) => (v === '' || v == null || !isFinite(Number(v)) ? '' : Math.max(0, Math.min(1e6, Number(v))));
       const reglages = { devise: r.devise === 'CNY' ? 'CNY' : 'USD', taux: num(r.taux), kgAvion: num(r.kgAvion), kgBateau: num(r.kgBateau), douane: num(r.douane), m1: num(r.m1), m5: num(r.m5), m10: num(r.m10), arrondi: ['0.01', '0.5', '1'].includes(String(r.arrondi)) ? String(r.arrondi) : '0.5' };
       const produits = {};
@@ -729,7 +730,7 @@ async function traiter(request, env) {
     }
 
     if (p === '/api/password' && request.method === 'POST') {
-      let b; try { b = await request.json(); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const auth = await lireAuth(env);
       const h = await pbkdf2(String(b.ancien || ''), auth.salt, auth.iter);
       if (!egal(h, auth.hash)) return json({ erreur: 'Ancien mot de passe incorrect' }, 401);
