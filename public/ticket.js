@@ -252,7 +252,9 @@
   }
   function iphone(o) {
     return fonts().then(function () {
-      var Wv = 1080, P2 = 56, G = o.groupes || [], rh = 86, top = 430, bot = 520, Hv = Math.max(1350, top + G.length * rh + bot);
+      var Wv = 1080, P2 = 56, G = o.groupes || [], rh = 86, top = 430, bot = 520, mc = document.createElement('canvas').getContext('2d'), tot = 0;
+      G.forEach(function (r) { mc.font = '800 44px ' + FD; var mw = mc.measureText(String(r.m || '').toUpperCase()).width + 24, cw = 0; r.v.forEach(function (v) { var lab = (v[0] || '') + (v[2] ? (v[0] ? ' · ' : '') + v[2] : ''), pr = v[1] > 0 ? Math.round(v[1]) + ' $' : 'Prix du jour'; mc.font = '700 28px ' + FB; cw += Math.max(168, mc.measureText(pr).width + (lab ? mc.measureText(lab).width : 0) + (lab ? 46 : 36)) + 10; }); r._s = cw > Wv - P2 * 2 - mw; r._h = r._s ? Math.max(rh, r.v.length * 70 + 16) : rh; r._o = tot; tot += r._h; });
+      var Hv = Math.max(1350, top + tot + bot);
       var c = document.createElement('canvas'); c.width = Wv; c.height = Hv; var ctx = c.getContext('2d'); ctx.textBaseline = 'alphabetic';
       function tx(s, x, y, size, col, w, al, f, ls) { ctx.font = w + ' ' + size + 'px ' + (f || FB); ctx.fillStyle = col; ctx.textAlign = al || 'left'; try { ctx.letterSpacing = (ls || 0) + 'px'; } catch (e) {} ctx.fillText(s, x, y); try { ctx.letterSpacing = '0px'; } catch (e) {} }
       ctx.fillStyle = '#0E0D0C'; ctx.fillRect(0, 0, Wv, Hv);
@@ -266,12 +268,12 @@
       pil.forEach(function (tt2) { ctx.font = '800 30px ' + FD; var mw = ctx.measureText(tt2).width + 40; ctx.strokeStyle = '#FF7A1A'; ctx.lineWidth = 3; rr(ctx, Wv - P2 - mw, py2, mw, 56, 8); ctx.stroke(); tx(tt2, Wv - P2 - mw / 2, py2 + 39, 30, '#FF7A1A', 800, 'center', FD, 2); py2 += 68; });
       ctx.fillStyle = 'rgba(255,255,255,.2)'; ctx.fillRect(P2, 372, Wv - P2 * 2, 2);
       G.forEach(function (r, i) {
-        var y = top + i * rh; if (i % 2 === 0) { ctx.fillStyle = 'rgba(255,255,255,.04)'; ctx.fillRect(P2 - 16, y - 40, Wv - P2 * 2 + 32, rh - 8); }
+        var y = top + r._o; if (i % 2 === 0) { ctx.fillStyle = 'rgba(255,255,255,.04)'; ctx.fillRect(P2 - 16, y - 40, Wv - P2 * 2 + 32, r._h - 8); }
         tx(r.m.toUpperCase(), P2, y + 18, 44, '#fff', 800, 'left', FD, 1);
-        var x = Wv - P2; r.v.slice().reverse().forEach(function (v) { var lab = v[0] ? v[0] : '', pr = v[1] > 0 ? Math.round(v[1]) + ' $' : 'Prix du jour'; ctx.font = '700 28px ' + FB; var w1 = ctx.measureText(pr).width, w2 = lab ? ctx.measureText(lab).width : 0, w = Math.max(168, w1 + w2 + (lab ? 46 : 36)); x -= w;
-          ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 2; rr(ctx, x, y - 34, w, 58, 8); ctx.stroke(); if (lab) { tx(lab, x + 16, y + 6, 24, 'rgba(255,255,255,.65)', 600, 'left', FB, 0); tx(pr, x + w - 16, y + 7, 30, '#FF7A1A', 800, 'right', FB, 0); } else tx(pr, x + w / 2, y + 7, 30, '#FF7A1A', 800, 'center', FB, 0); x -= 10; });
+        var x = Wv - P2, jj = 0; r.v.slice().reverse().forEach(function (v) { var yy = y + (r._s ? (r.v.length - 1 - jj) * 70 : 0); if (r._s) x = Wv - P2; jj++; var lab = (v[0] || '') + (v[2] ? (v[0] ? ' · ' : '') + v[2] : ''), pr = v[1] > 0 ? Math.round(v[1]) + ' $' : 'Prix du jour'; ctx.font = '700 28px ' + FB; var w1 = ctx.measureText(pr).width, w2 = lab ? ctx.measureText(lab).width : 0, w = Math.max(168, w1 + w2 + (lab ? 46 : 36)); x -= w;
+          ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 2; rr(ctx, x, yy - 34, w, 58, 8); ctx.stroke(); if (lab) { tx(lab, x + 16, yy + 6, 24, 'rgba(255,255,255,.65)', 600, 'left', FB, 0); tx(pr, x + w - 16, yy + 7, 30, '#FF7A1A', 800, 'right', FB, 0); } else tx(pr, x + w / 2, yy + 7, 30, '#FF7A1A', 800, 'center', FB, 0); x -= 10; });
       });
-      var by = top + G.length * rh + 20;
+      var by = top + tot + 20;
       var M = window.GDEQR ? GDEQR.make('https://goddidexpress.com/#iphone') : null, qs = 190;
       ctx.fillStyle = '#fff'; rr(ctx, Wv - P2 - qs, by, qs, qs, 14); ctx.fill();
       if (M) { var n = M.length, cell = Math.floor((qs - 24) / n), ox = Wv - P2 - qs + (qs - cell * n) / 2, oy = by + (qs - cell * n) / 2; ctx.fillStyle = '#0E0D0C'; for (var yy = 0; yy < n; yy++) for (var xx = 0; xx < n; xx++) if (M[yy][xx]) ctx.fillRect(ox + xx * cell, oy + yy * cell, cell, cell); }

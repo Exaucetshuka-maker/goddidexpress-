@@ -239,7 +239,7 @@ function nettoyer(s) {
     douane: !(l && l.douane === false),
     dispo: l && l.dispo === 'stock' ? 'stock' : 'cmd',
     slogan: txt(l && l.slogan, 100),
-    items: (Array.isArray(l && l.items) ? l.items : []).slice(0, 200).map((t) => ({ m: txt(t && t.m, 60), g: txt(t && t.g, 20), p: Math.max(0, Math.min(99999, Math.round(nombre(t && t.p) * 100) / 100)) })).filter((t) => t.m),
+    items: (Array.isArray(l && l.items) ? l.items : []).slice(0, 200).map((t) => ({ m: txt(t && t.m, 60), g: txt(t && t.g, 20), d: txt(t && t.d, 40), p: Math.max(0, Math.min(99999, Math.round(nombre(t && t.p) * 100) / 100)) })).filter((t) => t.m),
   }));
   return o;
 }
@@ -698,7 +698,7 @@ async function traiter(request, env) {
       Object.keys(b.listes || {}).slice(0, 6).forEach((id) => {
         if (!/^[A-Za-z0-9_-]{1,20}$/.test(id)) return; const l = b.listes[id] || {};
         out.listes[id] = { brut: String(l.brut || '').slice(0, 8000), mode: l.mode === 'pct' ? 'pct' : 'usd', marge: l.marge === '' || l.marge == null ? '' : num(l.marge),
-          items: (Array.isArray(l.items) ? l.items : []).slice(0, 200).map((t) => ({ m: String(t.m || '').slice(0, 60), g: String(t.g || '').slice(0, 20), c: num(t.c), p: num(t.p) })) };
+          items: (Array.isArray(l.items) ? l.items : []).slice(0, 200).map((t) => ({ m: String(t.m || '').slice(0, 60), g: String(t.g || '').slice(0, 20), d: String(t.d || '').replace(/[<>]/g, '').slice(0, 40), c: num(t.c), p: num(t.p) })) };
       });
       await env.GDE.put('iph', JSON.stringify(out));
       return json(out);

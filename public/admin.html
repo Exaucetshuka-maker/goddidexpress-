@@ -160,6 +160,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       <div><label for="ip-dispo">Disponibilité de cette liste (écrite sur le site)</label><select id="ip-dispo"><option value="cmd">Sur commande</option><option value="stock">Stock déjà disponible</option></select><p class="note">Pour mélanger, crée deux listes : une « en stock » et une « sur commande ».</p></div>
       <label class="rang" style="gap:8px;align-items:center"><input type="checkbox" id="ip-douane" checked style="width:auto"> <span>Écrire « douane incluse » à côté des prix (décoche si les prix n'incluent pas la douane)</span></label>
       <label style="display:flex;gap:8px;align-items:center;margin:0;color:var(--papier)"><input type="checkbox" id="ip-on" style="width:22px;min-height:22px"> Afficher cette liste sur le site</label>
+      <datalist id="ip-dl"><option value="Neuf"><option value="Sous scellé"><option value="Reconditionné"><option value="Occasion"><option value="Écran changé"><option value="Batterie neuve"><option value="Batterie 100 %"><option value="Sans Face ID"></datalist>
       <div id="ip-liste" class="grille" style="gap:6px"></div>
       <button class="btn" id="ip-aff" type="button">Créer l'affiche</button>
       <div id="ip-sortie" class="carte cache" style="display:grid;gap:12px">
@@ -1019,7 +1020,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   function iphSync() {
     var l = listeCour(), P = privCour(); if (!l) return;
     l.nom = $('ip-nom').value.trim() || l.nom; l.on = $('ip-on').checked; l.date = $('ip-date').value.trim(); l.mention = $('ip-mention').value.trim(); l.douane = $('ip-douane').checked; l.dispo = $('ip-dispo').value === 'stock' ? 'stock' : 'cmd'; l.slogan = $('ip-slogan').value.trim();
-    l.items = P.items.map(function (t) { return { m: t.m, g: t.g, p: t.p }; }); iphDirty = true; marquer(true);
+    l.items = P.items.map(function (t) { return { m: t.m, g: t.g, d: t.d || '', p: t.p }; }); iphDirty = true; marquer(true);
   }
   function rendreIph() {
     STATE.listes = STATE.listes || []; if (!STATE.listes.length) STATE.listes.push({ id: 'l' + Date.now().toString(36), nom: 'iPhone', on: false, date: '', mention: 'Prix en carton', items: [] });
@@ -1028,8 +1029,8 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     $('ip-sel').innerHTML = STATE.listes.map(function (x, i) { return '<option value="' + i + '"' + (i === LI ? ' selected' : '') + '>' + esc(x.nom) + (x.on ? '' : ' (cachée)') + '</option>'; }).join('');
     $('ip-nom').value = l.nom; $('ip-brut').value = P.brut || ''; $('ip-mode').value = P.mode || 'usd'; $('ip-marge').value = P.marge === 0 || P.marge ? P.marge : '';
     $('ip-on').checked = !!l.on; $('ip-date').value = l.date || ''; $('ip-mention').value = l.mention || ''; $('ip-douane').checked = l.douane !== false; $('ip-dispo').value = l.dispo === 'stock' ? 'stock' : 'cmd'; $('ip-slogan').value = l.slogan || '';
-    if (!P.items || !P.items.length) P.items = (l.items || []).map(function (t) { return { m: t.m, g: t.g, c: 0, p: t.p }; });
-    $('ip-liste').innerHTML = P.items.map(function (t, i) { return '<div class="rang" style="align-items:center;gap:8px"><span style="flex:1">' + esc(t.m) + ' ' + esc(t.g) + '<small style="display:block;color:var(--muted,#999)">fournisseur ' + (t.c > 0 ? t.c + ' $' : 'sans prix') + '</small></span><input data-ip="' + i + '" inputmode="decimal" style="width:90px" value="' + (t.p || '') + '" placeholder="Prix du jour"><button class="btn danger mini" data-ipx="' + i + '" type="button">×</button></div>'; }).join('') || '<p class="note">Aucun article. Colle la liste puis appuie sur « Lire la liste ».</p>';
+    if (!P.items || !P.items.length) P.items = (l.items || []).map(function (t) { return { m: t.m, g: t.g, d: t.d || '', c: 0, p: t.p }; });
+    $('ip-liste').innerHTML = P.items.map(function (t, i) { return '<div class="rang" style="align-items:center;gap:8px"><span style="flex:1">' + esc(t.m) + ' ' + esc(t.g) + '<small style="display:block;color:var(--muted,#999)">fournisseur ' + (t.c > 0 ? t.c + ' $' : 'sans prix') + '</small><input data-ipd="' + i + '" list="ip-dl" maxlength="40" style="margin-top:6px;min-height:36px" placeholder="Détail : reconditionné, écran changé…" value="' + esc(t.d || '') + '"></span><input data-ip="' + i + '" inputmode="decimal" style="width:90px" value="' + (t.p || '') + '" placeholder="Prix du jour"><button class="btn danger mini" data-ipx="' + i + '" type="button">×</button></div>'; }).join('') || '<p class="note">Aucun article. Colle la liste puis appuie sur « Lire la liste ».</p>';
   }
   function iphRecalc() { privCour().items.forEach(function (t) { t.p = iphPrix(t.c); }); }
   $('ip-sel').addEventListener('change', function () { LI = Number(this.value) || 0; rendreIph(); });
@@ -1038,15 +1039,15 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   $('ip-nom').addEventListener('input', function () { var l = listeCour(); l.nom = this.value; iphSync(); var o = $('ip-sel').options[LI]; if (o) o.textContent = this.value + (l.on ? '' : ' (cachée)'); });
   $('ip-lire').addEventListener('click', function () {
     var P = privCour(); P.brut = $('ip-brut').value; var L = iphParse(P.brut); if (!L.length) { alert('Aucun article reconnu. Vérifie que chaque ligne a un nom et un prix en dollars, comme 234$.'); return; }
-    P.items = L; P.mode = $('ip-mode').value; P.marge = $('ip-marge').value.trim(); iphRecalc(); if (!$('ip-date').value) $('ip-date').value = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+    var anc = {}; (P.items || []).forEach(function (t) { if (t.d) anc[t.m + '|' + t.g] = t.d; }); L.forEach(function (t) { if (anc[t.m + '|' + t.g]) t.d = anc[t.m + '|' + t.g]; }); P.items = L; P.mode = $('ip-mode').value; P.marge = $('ip-marge').value.trim(); iphRecalc(); if (!$('ip-date').value) $('ip-date').value = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
     iphSync(); rendreIph(); infoEtat(L.length + ' articles lus. Pense à publier.', 'ok');
   });
   ['ip-mode', 'ip-marge'].forEach(function (id) { $(id).addEventListener('input', function () { var P = privCour(); P.mode = $('ip-mode').value; P.marge = $('ip-marge').value.trim(); iphRecalc(); iphSync(); rendreIph(); }); });
   ['ip-on', 'ip-date', 'ip-mention', 'ip-douane', 'ip-dispo', 'ip-slogan'].forEach(function (id) { $(id).addEventListener('input', iphSync); $(id).addEventListener('change', function () { iphSync(); rendreIph(); }); });
   $('ip-brut').addEventListener('input', function () { privCour().brut = this.value; iphDirty = true; marquer(true); });
-  $('ip-liste').addEventListener('input', function (e) { var i = e.target.getAttribute('data-ip'); if (i == null) return; privCour().items[+i].p = Number(String(e.target.value).replace(',', '.')) || 0; iphSync(); });
+  $('ip-liste').addEventListener('input', function (e) { var di = e.target.getAttribute('data-ipd'); if (di != null) { privCour().items[+di].d = e.target.value.replace(/[<>]/g, '').slice(0, 40); iphSync(); return; } var i = e.target.getAttribute('data-ip'); if (i == null) return; privCour().items[+i].p = Number(String(e.target.value).replace(',', '.')) || 0; iphSync(); });
   $('ip-liste').addEventListener('click', function (e) { var b = e.target.closest('[data-ipx]'); if (!b) return; privCour().items.splice(+b.getAttribute('data-ipx'), 1); iphSync(); rendreIph(); });
-  function iphGroupes() { var G = [], idx = {}; privCour().items.forEach(function (t) { if (!(t.m in idx)) { idx[t.m] = G.length; G.push({ m: t.m, v: [] }); } G[idx[t.m]].v.push([t.g, t.p]); }); return G; }
+  function iphGroupes() { var G = [], idx = {}; privCour().items.forEach(function (t) { if (!(t.m in idx)) { idx[t.m] = G.length; G.push({ m: t.m, v: [] }); } G[idx[t.m]].v.push([t.g, t.p, t.d || '']); }); return G; }
   $('ip-aff').addEventListener('click', function () {
     var l = listeCour(); if (!privCour().items.length) { alert('Lis d\'abord la liste.'); return; }
     var b = this; b.disabled = true;
