@@ -153,9 +153,17 @@
     });
   }
   /* Carte membre en image : prénom, numéro, code promo, avantages, prochain voyage */
+  /* Avantages d'un client : ceux de son niveau (et des niveaux d'avant) d'abord, puis ceux de tous les membres */
+  function avantagesNiveau(base, avlv, lv) {
+    var out = []; for (var i = Math.min(3, lv); i >= 0; i--) ((avlv && avlv[i]) || []).forEach(function (x) { if (x && out.indexOf(x) < 0) out.push(x); });
+    (base || []).forEach(function (x) { if (x && out.indexOf(x) < 0) out.push(x); });
+    return out.slice(0, 10);
+  }
   function carte(o) {
-    return fonts().then(function () {
-      var Wc = 1080, Hc = 1420, c = document.createElement('canvas'); c.width = Wc; c.height = Hc; var ctx = c.getContext('2d');
+    return fonts().then(function () { var c = carteDessin(o, 1420); return c._need ? carteDessin(o, c._need) : c; });
+  }
+  function carteDessin(o, Hc0) {
+      var Wc = 1080, Hc = Hc0, c = document.createElement('canvas'); c.width = Wc; c.height = Hc; var ctx = c.getContext('2d');
       var g = ctx.createLinearGradient(0, 0, Wc, Hc); g.addColorStop(0, '#F6B07A'); g.addColorStop(.5, '#EE7E36'); g.addColorStop(1, '#D9601F'); ctx.fillStyle = g; ctx.fillRect(0, 0, Wc, Hc);
       var sh = ctx.createRadialGradient(Wc * .8, 120, 20, Wc * .8, 120, 700); sh.addColorStop(0, 'rgba(255,240,220,.55)'); sh.addColorStop(1, 'rgba(255,240,220,0)'); ctx.fillStyle = sh; ctx.fillRect(0, 0, Wc, Hc);
       var P2 = 72, ink = '#140C06'; ctx.textBaseline = 'alphabetic';
@@ -172,18 +180,18 @@
       tx('À 10 ACHATS : UN PRODUIT DE 20 $ OFFERT', Wc - P2 - 36, y + 90, 26, '#FFB070', 700, 'right', FB, 1);
       var bx = P2 + 36, bw = Wc - P2 * 2 - 72; ctx.fillStyle = 'rgba(255,255,255,.18)'; rr(ctx, bx, y + 128, bw, 8, 4); ctx.fill(); ctx.fillStyle = '#FF7A1A'; rr(ctx, bx, y + 128, Math.max(8, bw * Math.min(1, (o.achats || 0) / 10)), 8, 4); ctx.fill();
       y += 215; tx('TES AVANTAGES', P2, y, 24, 'rgba(20,12,6,.7)', 800, 'left', FB, 5); y += 18;
-      (o.avantages || []).slice(0, 6).forEach(function (a) {
+      (o.avantages || []).slice(0, 10).forEach(function (a) {
         var ls = wrap(ctx, a, Wc - P2 * 2 - 56); ctx.font = '600 33px ' + FB; ls = wrap(ctx, a, Wc - P2 * 2 - 56).slice(0, 2);
         ctx.fillStyle = ink; ctx.beginPath(); ctx.arc(P2 + 10, y + 36, 8, 0, 7); ctx.fill();
         ls.forEach(function (l, i) { tx(l, P2 + 40, y + 46 + i * 40, 33, ink, 600, 'left', FB, 0); }); y += 22 + ls.length * 40 + 12;
       });
       if (o.voyage) {
         var vy = Hc - 210; ctx.fillStyle = 'rgba(20,12,6,.9)'; rr(ctx, P2, vy, Wc - P2 * 2, 120, 18); ctx.fill();
-        tx('PROCHAIN VOYAGE', P2 + 36, vy + 46, 22, '#FFB070', 700, 'left', FB, 4); tx(o.voyage, P2 + 36, vy + 92, 40, '#fff', 800, 'left', FD, 1);
+        tx('PROCHAIN VOYAGE', P2 + 36, vy + 46, 22, '#FFB070', 700, 'left', FB, 4); var vs = 40; ctx.font = '800 ' + vs + 'px ' + FD; while (ctx.measureText(o.voyage).width + o.voyage.length > Wc - P2 * 2 - 76 && vs > 20) { vs -= 2; ctx.font = '800 ' + vs + 'px ' + FD; } tx(o.voyage, P2 + 36, vy + 92, vs, '#fff', 800, 'left', FD, 1);
       }
       tx('GOD DID EXPRESS · goddidexpress.com · WhatsApp ' + (window.GDETicket && GDETicket.tel || '+243 983 129 294'), Wc / 2, Hc - 40, 24, 'rgba(20,12,6,.7)', 600, 'center', FB, 1);
+      if (!c._need && y > Hc - 250) c._need = Math.ceil(y + 250);
       return c;
-    });
   }
   /* Affiche promo : une image pour présenter un produit à un client */
   function chargerImg(src) { return new Promise(function (res) { if (!src) return res(null); var im = new Image(); im.onload = function () { res(im); }; im.onerror = function () { res(null); }; im.src = src; }); }
@@ -316,5 +324,5 @@
       return c;
     });
   }
-  window.GDETicket = { panier: panier, iphone: iphone, voyage: voyage, draw: draw, position: position, carte: carte, affiche: affiche, blob: blob, usd: usd, W: W, tel: '' };
+  window.GDETicket = { panier: panier, iphone: iphone, voyage: voyage, draw: draw, position: position, carte: carte, avantagesNiveau: avantagesNiveau, affiche: affiche, blob: blob, usd: usd, W: W, tel: '' };
 })();

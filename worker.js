@@ -192,6 +192,7 @@ function nettoyer(s) {
     type: ['tel', 'wa', 'mail', 'adresse'].includes(c && c.type) ? c.type : 'tel', label: txt(c && c.label, 40), v: txt(c && c.v, 200),
   })).filter((c) => c.v);
   o.avant = (Array.isArray(s.avant) ? s.avant : []).slice(0, 8).map((x) => txt(x, 140)).filter(Boolean);
+  o.avlv = [0, 1, 2, 3].map((i) => (Array.isArray(s.avlv && s.avlv[i]) ? s.avlv[i] : []).slice(0, 3).map((x) => txt(x, 140)).filter(Boolean));
   o.wanum = /^\d{8,15}$/.test(String(s.wanum || '').replace(/\D/g, '')) ? String(s.wanum).replace(/\D/g, '') : '';
   o.tel2 = txt(s.tel2, 40);
   o.adr2 = txt(s.adr2, 200);

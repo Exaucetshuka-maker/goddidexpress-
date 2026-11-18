@@ -2295,7 +2295,10 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   diamants(4);
   $('fid-wa').href = wa('Bonjour GOD DID EXPRESS, je veux ma carte fidélité.');
   var fidT = null, FID = null, mcFile = null;
-  function avantagesCarte(code) {
+  function avantagesCarte(code, lv) {
+    var l0 = avantagesBase(code); return GDETicket.avantagesNiveau(l0, STATE.avlv, lv == null ? -1 : lv);
+  }
+  function avantagesBase(code) {
     if (STATE.avant && STATE.avant.length) return STATE.avant;
     var l = ['2 $ offerts à chaque achat', 'À 10 achats : un produit de 20 $ sans frais de douane', 'Prix de gros dès 5 pièces', 'Priorité sur les nouveaux arrivages'];
     if (code) l.splice(2, 0, 'Code ' + code + ' : 5 % de réduction sur ta prochaine commande pour chaque ami qui commande');
@@ -2308,7 +2311,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   $('mc-go').addEventListener('click', function () {
     var nom = $('p-nom').value.trim() || (FID && FID.nom) || ''; if (!nom) { toast('Tape d\'abord ton prénom dans « Votre code de parrainage »'); return; }
     var n = FID ? FID.achats : 0, th = STATE.vip, lv = n >= th[2] ? 3 : n >= th[1] ? 2 : n >= th[0] ? 1 : n >= 1 ? 0 : -1, b = this; b.disabled = true;
-    GDETicket.carte({ nom: nom, numero: FID ? FID.numero : '', code: codeActuel || codeParrain(nom), achats: n, niveau: lv >= 0 ? NIV[lv] : '', avantages: avantagesCarte(codeActuel || codeParrain(nom)), voyage: prochainVoyageTexte() })
+    GDETicket.carte({ nom: nom, numero: FID ? FID.numero : '', code: codeActuel || codeParrain(nom), achats: n, niveau: lv >= 0 ? NIV[lv] : '', avantages: avantagesCarte(codeActuel || codeParrain(nom), lv), voyage: prochainVoyageTexte() })
       .then(function (cv) { return GDETicket.blob(cv); }).then(function (bl) {
         try { mcFile = new File([bl], 'carte-membre.png', { type: 'image/png' }); } catch (e) { mcFile = null; }
         var u = URL.createObjectURL(bl); $('mc-img').src = u; $('mc-save').href = u; $('mc-out').hidden = false;
