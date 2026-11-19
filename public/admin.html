@@ -110,7 +110,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         <summary>+ Ajouter un produit</summary>
         <div class="grille" style="margin-top:10px">
           <div><label for="n-t">Nom du produit</label><input id="n-t" maxlength="120"></div>
-          <div><label for="n-s">Description courte</label><input id="n-s" maxlength="240"></div>
+          <div><label for="n-s">Description courte (facultatif : écrite automatiquement si tu laisses vide)</label><input id="n-s" maxlength="240"></div>
           <div><label for="n-c">Catégorie</label><select id="n-c"></select></div>
           <div class="grille g3">
             <div><label for="n-p1">Prix 1 pièce ($)</label><input id="n-p1" inputmode="decimal"></div>
@@ -861,6 +861,9 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     var t = $('n-t').value.trim(); if (!t) { alert('Écris le nom du produit.'); return; }
     var id = 'x' + Date.now().toString(36), f = $('n-f').files[0];
     var p = { id: id, t: t, s: $('n-s').value.trim(), c: $('n-c').value, px: [nb($('n-p1').value), nb($('n-p5').value), nb($('n-p10').value)] };
+    var cat = (CATL[p.c] || '').toLowerCase();
+    if (!p.s) p.s = (cat ? cat.charAt(0).toUpperCase() + cat.slice(1) + ', ' : '') + 'sourcé et livré par GOD DID EXPRESS';
+    p.desc = ((p.px[1] > 0 || p.px[2] > 0) ? 'Prix dégressif : plus tu prends de pièces, moins chaque pièce coûte. ' : '') + 'Commande sur WhatsApp : on confirme le prix, le délai et la disponibilité avant tout paiement, puis on te livre à Kinshasa.';
     var dn = {}; [['e', 'nd-e'], ['v', 'nd-v'], ['d', 'nd-d'], ['ct', 'nd-ct']].forEach(function (x) { var v = document.querySelector('#n-det [data-k="' + x[1] + '"]').value.trim(); if (v) dn[x[0]] = v; }); if (Object.keys(dn).length) p.det = dn; var da = document.querySelector('#n-det [data-k="nd-arr"]').value; if (da) p.arr = da;
     function fin() {
       STATE.extra.unshift(p); marquer(true);
