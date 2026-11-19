@@ -865,7 +865,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       if (r.ok && r.j && r.j.ok && !$('n-t').value.trim()) {
         $('n-t').value = r.j.nom; if (!$('n-s').value.trim()) $('n-s').value = r.j.court || '';
         note.textContent = 'Nom et description proposés. Corrige-les si besoin, puis mets le prix.';
-      } else note.textContent = 'Je n\'ai pas reconnu le produit. Écris le nom, la description s\'écrit toute seule.';
+      } else note.textContent = 'Je n\'ai pas reconnu le produit. Écris le nom, la description s\'écrit toute seule.' + (r.j && r.j.raison ? ' (' + r.j.raison + (r.j.detail ? ' : ' + r.j.detail : '') + ')' : ' (code ' + r.status + ')');
     }).catch(function () { note.textContent = 'Reconnaissance indisponible. Écris le nom, la description s\'écrit toute seule.'; });
   });
 

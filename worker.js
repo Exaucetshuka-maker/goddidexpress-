@@ -615,7 +615,7 @@ async function traiter(request, env) {
         const nom = txt(o.nom, 60).replace(/[<>]/g, '').trim(), court = txt(o.court, 140).replace(/[<>]/g, '').trim().replace(/\.$/, '');
         if (!nom) return json({ ok: false, raison: 'vide' });
         return json({ ok: true, nom, court });
-      } catch (e) { return json({ ok: false, raison: 'ia-erreur' }); }
+      } catch (e) { return json({ ok: false, raison: 'ia-erreur', detail: txt(e && e.message, 160) }); }
     }
 
     if (p === '/api/state' && request.method === 'PUT') {
