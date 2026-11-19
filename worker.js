@@ -597,6 +597,27 @@ async function traiter(request, env) {
 
     if (p === '/api/moi') return json({ ok: true });
 
+    /* Reconnaissance de photo : propose un nom et une petite description (admin seulement). Jamais bloquant. */
+    if (p === '/api/ia-produit' && request.method === 'POST') {
+      if (!env.AI) return json({ ok: false, raison: 'ia-indisponible' });
+      if (limite(request, 'iaprod', 20)) return json({ ok: false, raison: 'trop-vite' }, 429);
+      const buf = new Uint8Array(await request.arrayBuffer());
+      if (!buf.length || buf.length > 900000) return json({ ok: false, raison: 'photo' }, 413);
+      try {
+        const v = await env.AI.run('@cf/llava-hf/llava-1.5-7b-hf', { image: Array.from(buf), prompt: 'Describe the product in this photo in one or two sentences: what it is, its colour, its material and what it is used for.', max_tokens: 120 });
+        const en = txt(v && (v.description || v.response), 600).trim();
+        if (!en) return json({ ok: false, raison: 'vide' });
+        const r = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', { messages: [
+          { role: 'system', content: 'Tu écris pour une boutique de Kinshasa. À partir de la description anglaise d\'un produit, réponds uniquement par un objet JSON {"nom":"...","court":"..."} en français. "nom" : le nom du produit, 2 à 5 mots, sans marque inventée. "court" : une petite description, 8 à 18 mots, sans prix, sans promesse.' },
+          { role: 'user', content: en }], max_tokens: 160 });
+        const brut = txt(r && (r.response || r.result), 800), m = brut.match(/\{[\s\S]*\}/);
+        let o = {}; try { o = JSON.parse(m ? m[0] : '{}'); } catch (e) { o = {}; }
+        const nom = txt(o.nom, 60).replace(/[<>]/g, '').trim(), court = txt(o.court, 140).replace(/[<>]/g, '').trim().replace(/\.$/, '');
+        if (!nom) return json({ ok: false, raison: 'vide' });
+        return json({ ok: true, nom, court });
+      } catch (e) { return json({ ok: false, raison: 'ia-erreur' }); }
+    }
+
     if (p === '/api/state' && request.method === 'PUT') {
       const len = Number(request.headers.get('content-length') || 0);
       if (len > 400000) return json({ erreur: 'Trop volumineux' }, 413);

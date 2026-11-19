@@ -118,7 +118,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
             <div><label for="n-p10">Dès 10 pièces</label><input id="n-p10" inputmode="decimal"></div>
           </div>
           <div id="n-det"></div>
-          <div><label for="n-f">Photo</label><input id="n-f" type="file" accept="image/*"></div>
+          <div><label for="n-f">Photo (le nom et la description se remplissent tout seuls)</label><input id="n-f" type="file" accept="image/*"><p class="note" id="n-ia" aria-live="polite" style="margin:4px 0 0"></p></div>
           <button class="btn" id="n-ok" type="button">Ajouter ce produit</button>
         </div>
       </details>
@@ -857,6 +857,18 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     }).catch(function (er) { infoEtat(er.message, 'mal'); });
   });
 
+  /* Photo → nom et petite description proposés (modifiables) */
+  $('n-f').addEventListener('change', function () {
+    var f = this.files[0], note = $('n-ia'); note.textContent = ''; if (!f || $('n-t').value.trim()) return;
+    note.textContent = 'Je regarde la photo…';
+    reduire(f).then(function (blob) { return api('/api/ia-produit', { method: 'POST', headers: { 'content-type': 'image/jpeg' }, body: blob }); }).then(function (r) {
+      if (r.ok && r.j && r.j.ok && !$('n-t').value.trim()) {
+        $('n-t').value = r.j.nom; if (!$('n-s').value.trim()) $('n-s').value = r.j.court || '';
+        note.textContent = 'Nom et description proposés. Corrige-les si besoin, puis mets le prix.';
+      } else note.textContent = 'Je n\'ai pas reconnu le produit. Écris le nom, la description s\'écrit toute seule.';
+    }).catch(function () { note.textContent = 'Reconnaissance indisponible. Écris le nom, la description s\'écrit toute seule.'; });
+  });
+
   $('n-ok').addEventListener('click', function () {
     var t = $('n-t').value.trim(); if (!t) { alert('Écris le nom du produit.'); return; }
     var id = 'x' + Date.now().toString(36), f = $('n-f').files[0];
@@ -867,7 +879,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     var dn = {}; [['e', 'nd-e'], ['v', 'nd-v'], ['d', 'nd-d'], ['ct', 'nd-ct']].forEach(function (x) { var v = document.querySelector('#n-det [data-k="' + x[1] + '"]').value.trim(); if (v) dn[x[0]] = v; }); if (Object.keys(dn).length) p.det = dn; var da = document.querySelector('#n-det [data-k="nd-arr"]').value; if (da) p.arr = da;
     function fin() {
       STATE.extra.unshift(p); marquer(true);
-      ['n-t', 'n-s', 'n-p1', 'n-p5', 'n-p10', 'n-f'].forEach(function (k) { $(k).value = ''; }); $('n-det').innerHTML = detForm(null, 'nd-');
+      ['n-t', 'n-s', 'n-p1', 'n-p5', 'n-p10', 'n-f'].forEach(function (k) { $(k).value = ''; }); $('n-ia').textContent = ''; $('n-det').innerHTML = detForm(null, 'nd-');
       $('ajout').open = false; rendreProduits(); infoEtat('Produit ajouté. Pense à enregistrer.', 'ok');
     }
     if (f) { infoEtat('Envoi de la photo…'); envoyerPhoto(id, f).then(function (u) { p.photo = u; fin(); }).catch(function (er) { infoEtat(er.message, 'mal'); }); }
