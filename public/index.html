@@ -581,7 +581,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <div class="hud-bar"><span class="kicker" id="h-salut">Bonjour</span><span class="mono horloge" id="h-heure"></span></div>
       <h1>Tu choisis.<br><em>On trouve.</em><br>On te livre.</h1>
       <div class="radar cadre"><div class="phr" id="phr" aria-hidden="true"></div><canvas class="globe" id="g-home" role="img" aria-label="Globe terrestre : trajet du colis de la Chine à Kinshasa"></canvas><div class="radar-leg"><span>Chine → Kinshasa</span><span>Glisse pour tourner</span></div></div>
-      <p class="lead">Particuliers, boutiques, revendeurs, entreprises, PME et start-up : dites-nous ce que vous voulez, de la RDC ou de l'étranger. On achète, on importe, on livre. Acompte de 50 % et preuve en photo à chaque étape.</p>
+      <p class="lead">Entreprises, PME, start-up, revendeurs et vendeurs : on vous approvisionne depuis la RDC ou l'étranger. Particuliers et boutiques aussi bienvenus. On achète, on importe, on livre. Acompte indiqué sur ton devis et preuve en photo à chaque étape.</p>
       <div class="slogan"><div class="kicker" id="slogan-k"></div><p id="slogan-txt"></p></div>
       <div class="rangee">
         <button class="btn" type="button" data-go="voyages">Nos voyages</button>
@@ -610,7 +610,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <div class="carte" id="appro" style="gap:8px;margin:14px 0"><div class="kicker">Approvisionnement</div><h3 style="margin:0">Pour les entreprises, les PME et les start&#8209;up</h3>
         <p class="note" style="margin:0">Équipements, stocks et produits pour votre activité : on cherche le fournisseur, on achète, on importe, on livre. Boutiques, revendeurs, commerçants et particuliers sont aussi les bienvenus.</p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:14px;font-weight:700"><span>1 · On cherche le fournisseur</span><span>2 · On achète</span><span>3 · On importe</span><span>4 · On te livre</span></div>
-        <p class="note" style="margin:0">Chine, Dubaï, Turquie ou RDC. Devis avant tout paiement, acompte de 50 %, preuve en photo à chaque étape.</p>
+        <p class="note" style="margin:0">Chine, Dubaï, Turquie ou RDC. Devis avant tout paiement, acompte indiqué sur ton devis, preuve en photo à chaque étape.</p>
         <div class="rangee"><button class="btn" type="button" data-go="commander">Demander un approvisionnement</button><button class="btn ghost" type="button" data-go="voyages">Réserver sur un prochain arrivage</button></div></div>
     </section>
 
@@ -692,7 +692,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <ol class="etapes3">
         <li><div><h3>Tu choisis</h3><p>Dans le catalogue, ou avec une photo ou un lien envoyé sur WhatsApp.</p></div></li>
         <li><div><h3>On trouve</h3><p>On identifie le fournisseur et on vous envoie le devis complet avant tout paiement.</p></div></li>
-        <li><div><h3>On importe</h3><p>Acompte de 50 %. Achat, expédition et arrivée sont prouvés en photo.</p></div></li>
+        <li><div><h3>On importe</h3><p>Acompte indiqué sur ton devis. Achat, expédition et arrivée sont prouvés en photo.</p></div></li>
         <li><div><h3>On te livre</h3><p>Vous recevez votre colis, avec une vidéo de remise.</p></div></li>
       </ol>
     </section>
@@ -738,7 +738,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     <header>
       <div class="kicker">Catalogue</div>
       <h2>Voyez avant de commander</h2>
-      <p>Touchez un produit pour l'agrandir, voir les prix de gros et calculer votre total. Le devis final vous est envoyé sur WhatsApp avant tout paiement, avec un acompte de 50 %.</p>
+      <p>Touchez un produit pour l'agrandir, voir les prix de gros et calculer votre total. Le devis final vous est envoyé sur WhatsApp avant tout paiement, avec l'acompte indiqué sur ton devis.</p>
     </header>
     <div class="cat-tools">
       <div class="champ"><label for="c-q">Chercher un produit</label>
@@ -771,7 +771,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     <header>
       <div class="kicker">Commande sur mesure</div>
       <h2>Demandez, on cherche</h2>
-      <p>Décrivez le produit. Vous recevez un devis détaillé : prix fournisseur, transport, douane et notre marge. Vous versez 50 % pour lancer l'achat, le reste à la livraison.</p>
+      <p>Décrivez le produit. Vous recevez un devis détaillé : prix fournisseur, transport, douane et notre marge. Vous versez l'acompte indiqué sur le devis pour lancer l'achat, le reste à la livraison.</p>
     </header>
     <div class="carte" id="dem-box" style="margin:0 0 14px;display:grid;gap:10px">
       <div class="kicker">Produit introuvable ?</div><h3 style="margin:0">Tu cherches un produit ? Nous le trouvons.</h3>
@@ -780,7 +780,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <div class="champ"><label for="dm-photo">Photo du produit</label><input id="dm-photo" type="file" accept="image/*"><img id="dm-prev" alt="" hidden style="width:100%;max-height:220px;object-fit:cover;border-radius:6px;margin-top:6px"></div>
       <div class="champ"><label for="dm-lien">Lien du produit (facultatif)</label><input id="dm-lien" inputmode="url" maxlength="300" placeholder="https://…"></div>
       <div class="duo"><div class="champ"><label for="dm-qte">Quantité</label><input id="dm-qte" inputmode="numeric" maxlength="12" placeholder="Ex. 20"></div><div class="champ"><label for="dm-bud">Budget indicatif ($)</label><input id="dm-bud" inputmode="decimal" maxlength="12" placeholder="Ex. 500"></div></div>
-      <div class="champ"><label for="dm-quand">Quand ?</label><select id="dm-quand"><option value="">Dès que possible</option><option value="arrivage">Réserver pour le prochain arrivage (acompte 50 %)</option></select></div>
+      <div class="champ"><label for="dm-quand">Quand ?</label><select id="dm-quand"><option value="">Dès que possible</option><option value="arrivage">Réserver pour le prochain arrivage (acompte indiqué sur le devis)</option></select></div>
       <div class="champ"><label for="dm-mar">Où chercher ?</label><select id="dm-mar"><option>Tous les marchés</option><option>Chine</option><option>Dubaï</option><option>Turquie</option></select></div>
       <div class="champ"><label for="dm-txt">Ce que tu veux (taille, couleur, quantité…)</label><textarea id="dm-txt" rows="3" maxlength="600"></textarea></div>
       <button class="btn" id="dm-ok" type="button">Envoyer ma demande</button>
@@ -813,7 +813,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         </select></div>
       <div class="carte" aria-live="polite">
         <div class="acompte">
-          <div><small>Acompte à la commande (50 %)</small><strong id="ac-acompte">—</strong></div>
+          <div><small>Acompte estimé (50 %)</small><strong id="ac-acompte">—</strong></div>
           <div><small>Solde à la livraison</small><strong id="ac-solde">—</strong></div>
         </div>
         <p class="note">Estimation sur votre budget, en dollars américains. Le montant exact figure sur le devis, envoyé avant tout paiement.</p>
@@ -848,7 +848,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <p>Plus on est nombreux à commander le même produit, plus le prix baisse. Tout le monde paie le prix du palier atteint à la clôture du groupe.</p>
     </header>
     <div id="liste-groupes" class="wrap" style="gap:14px"></div>
-    <p class="note">Le prix final est celui du palier atteint à la clôture. Tout est confirmé sur WhatsApp avant le paiement, avec un acompte de 50 %.</p>
+    <p class="note">Le prix final est celui du palier atteint à la clôture. Tout est confirmé sur WhatsApp avant le paiement, avec l'acompte indiqué sur ton devis.</p>
     <div class="rangee"><a class="btn ghost js-wag" href="#" target="_blank" rel="noopener" hidden>Rejoindre le groupe WhatsApp</a><a class="btn ghost js-wac" href="#" target="_blank" rel="noopener" hidden>Suivre la chaîne</a></div>
   </section>
 
@@ -921,8 +921,8 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <div class="vid" data-vid></div>
       <article class="carte metier"><h3>Commerce</h3><p>Le catalogue affiche le prix par paliers : plus tu prends de pièces, moins chaque pièce coûte. Les achats groupés font baisser le prix encore plus.</p></article>
       <article class="carte metier"><h3>Sourcing</h3><p>Envoie une photo, un lien ou une description sur WhatsApp. On cherche le fournisseur et on t'envoie un devis complet avant tout paiement.</p></article>
-      <article class="carte metier"><h3>Importation</h3><p>Acompte de 50 %, achat chez le fournisseur, expédition, arrivée à Kinshasa. Tu vois la preuve en photo à chaque étape.</p></article>
-      <article class="carte metier"><h3>Approvisionnement</h3><p>Restaurants, boutiques, hôtels, écoles : dis-nous ce dont ton activité a besoin, on prépare une offre sur WhatsApp.</p></article>
+      <article class="carte metier"><h3>Importation</h3><p>Acompte indiqué sur ton devis, achat chez le fournisseur, expédition, arrivée à Kinshasa. Tu vois la preuve en photo à chaque étape.</p></article>
+      <article class="carte metier"><h3>Approvisionnement</h3><p>PME, start-up, revendeurs, restaurants, boutiques, hôtels, écoles : dis-nous ce dont ton activité a besoin, une fois ou chaque mois, on prépare une offre sur WhatsApp.</p></article>
       <article class="carte metier"><h3>Distribution</h3><p>Ta commande est remise avec une vidéo de remise.</p></article>
       <div class="carte" id="m-info" hidden></div>
       <div class="carte"><h3>Le voyage de ton colis</h3><ol class="voyage" id="voyage"></ol></div>
@@ -946,7 +946,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     <div class="carte"><div class="kicker">Au programme du prochain live (proposition)</div><div class="prog-live" id="live-prog"></div><p class="note">À confirmer. Les produits montrés en direct restent ensuite dans le catalogue, avec l'étiquette « Au live ».</p></div>
     <ol class="etapes3">
       <li><div><h3>On montre</h3><p>Un échantillon par produit vedette, essayé devant la caméra. Pas de stock acheté à l'avance.</p></div></li>
-      <li><div><h3>Vous commandez en direct</h3><p>Vous écrivez votre commande et versez l'acompte de 50 %.</p></div></li>
+      <li><div><h3>Vous commandez en direct</h3><p>Vous écrivez votre commande et versez l'acompte indiqué sur le devis.</p></div></li>
       <li><div><h3>On n'achète que le commandé</h3><p>Zéro stock qui dort. Chaque commande reçoit sa référence et son suivi.</p></div></li>
     </ol>
     <div class="carte">
@@ -956,7 +956,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         <li><label for="c2"><input type="checkbox" id="c2"><span>Lumière du jour ou lampe face à vous</span></label></li>
         <li><label for="c3"><input type="checkbox" id="c3"><span>Téléphone fixé sur un support, son clair</span></label></li>
         <li><label for="c4"><input type="checkbox" id="c4"><span>Une personne qui lit les commentaires et note les commandes</span></label></li>
-        <li><label for="c5"><input type="checkbox" id="c5"><span>Message épinglé : acompte 50 % et numéro WhatsApp</span></label></li>
+        <li><label for="c5"><input type="checkbox" id="c5"><span>Message épinglé : acompte et numéro WhatsApp</span></label></li>
       </ul>
     </div>
   </section>
@@ -1399,15 +1399,12 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   var VUES = ['accueil', 'catalogue', 'commander', 'groupes', 'voyages', 'iphone', 'paniers', 'services', 'live', 'suivi', 'parrainer', 'methode', 'pro', 'admin'];
   var SERVICES = [
     { id: 'venir', ico: '📥', t: 'Faire venir ma marchandise en RDC', d: 'Tu as déjà des marchandises à Dubaï, à Istanbul ou en Chine (téléphones, électronique, vêtements, chaussures…) ? On les amène jusqu\'à Kinshasa, avec le suivi et la preuve en photo à chaque étape.',
-      etapes: ['Tu nous envoies la liste des marchandises, les photos, les quantités et l\'adresse où elles se trouvent.', 'On te donne un devis détaillé : transport, douane et marge, avant tout paiement.', 'Tu verses l\'acompte de 50 %. On récupère et on regroupe ta marchandise.', 'Elle part sur le prochain voyage. Tu suis chaque étape avec ta référence GDE.', 'Livraison à Kinshasa, tu règles le solde à la réception.'],
       besoin: ['Le type de produit (ex. téléphones, parfums, tissus)', 'La quantité, le poids ou le volume', 'Des photos et la facture du fournisseur si tu l\'as', 'La ville de départ : Dubaï, Istanbul ou Chine'],
       m: 'Bonjour GOD DID EXPRESS, j\'ai des marchandises à l\'étranger à faire venir en RDC. Ville de départ : ... Produits : ... Quantité : ... ' },
     { id: 'export', ico: '📤', t: 'Envoyer des produits congolais à l\'étranger', d: 'Tu produis ou tu vends en RDC et tu veux atteindre des clients à l\'étranger ? Dis-nous ton produit et le pays visé : on étudie ce qui est possible et on organise l\'envoi.',
-      etapes: ['Tu décris ton produit, les quantités, les photos et le pays où tu veux vendre.', 'On vérifie ensemble ce qui est possible : règles d\'exportation, documents demandés, emballage. Ça dépend du produit et du pays, on te le confirme avant tout engagement.', 'On te donne un devis clair, tu verses l\'acompte.', 'On prépare et on expédie. Tu reçois les preuves en photo.', 'On te confirme l\'arrivée chez ton client.'],
       besoin: ['Le nom du produit et sa description', 'La quantité disponible et la fréquence d\'envoi', 'Des photos et, si possible, un échantillon', 'Le pays ou la ville de destination'],
       m: 'Bonjour GOD DID EXPRESS, je veux envoyer un produit congolais à l\'étranger. Produit : ... Quantité : ... Pays visé : ... ' },
     { id: 'trouver', ico: '🔎', t: 'Trouver un produit pour moi', d: 'Tu cherches un produit précis et tu ne sais pas où l\'acheter ? Tu choisis, on trouve le fournisseur, on achète, on importe et on te livre.',
-      etapes: ['Tu nous dis le produit : photo, lien ou description, et ton budget.', 'On cherche le fournisseur et on te donne un devis avant tout paiement.', 'Acompte de 50 %, puis on achète chez le fournisseur.', 'Départ sur le prochain voyage Chine, Dubaï ou Istanbul, avec suivi.', 'Livraison et solde à la réception.'],
       besoin: ['Une photo, un lien ou une description du produit', 'La quantité souhaitée', 'Ton budget approximatif', 'Ta commune à Kinshasa pour la livraison'],
       m: 'Bonjour GOD DID EXPRESS, je cherche un produit. Produit : ... Quantité : ... Budget : ... ' }
   ];
@@ -1415,10 +1412,9 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     $('svc-liste').innerHTML = SERVICES.map(function (s, i) {
       return '<details class="carte" id="svc-' + s.id + '"' + (i === 0 ? ' open' : '') + '><summary style="cursor:pointer;display:flex;gap:12px;align-items:center;list-style:none"><span style="font-size:28px" aria-hidden="true">' + s.ico + '</span><b style="font-family:var(--f-display);font-size:22px;text-transform:uppercase;letter-spacing:.02em">' + h(s.t) + '</b></summary>' +
         '<p style="margin:10px 0 0">' + h(s.d) + '</p>' +
-        '<div class="kicker" style="margin-top:12px">Comment ça se passe</div><ol style="margin:6px 0 0;padding-left:20px;display:grid;gap:6px">' + s.etapes.map(function (e) { return '<li>' + h(e) + '</li>'; }).join('') + '</ol>' +
-        '<div class="kicker" style="margin-top:12px">Ce qu\'il nous faut</div><ul style="margin:6px 0 0;padding-left:20px;display:grid;gap:4px">' + s.besoin.map(function (e) { return '<li>' + h(e) + '</li>'; }).join('') + '</ul>' +
-        '<p class="note" style="margin-top:10px">Aucun prix n\'est promis à l\'avance : tu reçois un devis détaillé avant de payer. Acompte de 50 %, solde à la livraison.</p>' +
-        '<a class="btn" style="margin-top:6px" href="' + ea(wa(s.m)) + '" target="_blank" rel="noopener">Démarrer sur WhatsApp</a></details>';
+                '<div class="kicker" style="margin-top:12px">Ce qu\'il nous faut</div><ul style="margin:6px 0 0;padding-left:20px;display:grid;gap:4px">' + s.besoin.map(function (e) { return '<li>' + h(e) + '</li>'; }).join('') + '</ul>' +
+        '<p class="note" style="margin-top:10px">Aucun prix n\'est promis à l\'avance : tu reçois un devis détaillé avant de payer. Acompte indiqué sur ton devis, solde à la livraison.</p>' +
+        '<a class="btn" style="margin-top:6px" href="' + ea(wa(s.m)) + '" target="_blank" rel="noopener">Démarrer sur WhatsApp</a><button class="btn ghost" style="margin-top:6px" type="button" data-go="methode">Voir comment on travaille</button></details>';
     }).join('');
   }
   var EMO = { noel: '🎄', ecole: '🎒', fete: '🎁', autre: '✨' };
@@ -1912,9 +1908,9 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   function ouvrirPay() {
     var P = STATE.pay || [];
     var rows = P.map(function (x) { return '<div class="carte" style="padding:12px;display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>' + h(x.op) + '</b><div class="note">' + h(x.nom || '') + '</div><div style="font-size:20px;font-weight:700">' + h(x.num) + '</div></div><button class="btn mini" type="button" data-copie="' + ea(x.num) + '">Copier</button></div>'; }).join('');
-    ouvrir('<div class="sheet-tete"><div><div class="kicker">Acompte de 50 %</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Payer l\'acompte</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
+    ouvrir('<div class="sheet-tete"><div><div class="kicker">Acompte</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Payer l\'acompte</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
       (rows || '<p class="note">Demande les numéros de paiement sur WhatsApp.</p>') +
-      '<ol style="margin:6px 0 0;padding-left:20px;display:grid;gap:6px"><li>Tu reçois d\'abord le devis.</li><li>Tu envoies 50 % sur l\'un des numéros ci-dessus.</li><li>Tu nous envoies la capture du paiement sur WhatsApp.</li><li>On lance l\'achat. Solde à la livraison.</li></ol>' +
+      '<ol style="margin:6px 0 0;padding-left:20px;display:grid;gap:6px"><li>Tu reçois d\'abord le devis.</li><li>Tu envoies l\'acompte indiqué sur ton devis à l\'un des numéros ci-dessus.</li><li>Tu nous envoies la capture du paiement sur WhatsApp.</li><li>On lance l\'achat. Solde à la livraison.</li></ol>' +
       '<a class="btn" target="_blank" rel="noopener" href="' + ea(wa('Bonjour GOD DID EXPRESS, je viens de payer l\'acompte. Voici la capture du paiement.')) + '">Envoyer la capture sur WhatsApp</a>');
   }
   document.addEventListener('click', function (e) { var b = e.target.closest('[data-copie]'); if (!b) return; var v = b.getAttribute('data-copie'); try { navigator.clipboard.writeText(v); } catch (er) {} b.textContent = 'Copié ✓'; setTimeout(function () { b.textContent = 'Copier'; }, 1500); });
@@ -2037,7 +2033,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       '<button class="btn ghost mini" type="button" data-close>Fermer</button></div>' + rows +
       (totalListe().t > 0 ? '<div class="prix" style="text-align:center">Total estimé : <b>' + usd(totalListe().t) + '</b>' + (totalListe().inc ? '<small>+ ' + totalListe().inc + ' article(s) sur devis</small>' : '') + '</div>' : '') + '<a class="btn" href="' + wa(messageListe()) + '" target="_blank" rel="noopener">Envoyer ma commande sur WhatsApp</a>' +
       (STATE.pay && STATE.pay.length ? '<button class="btn ghost" type="button" data-pay>Comment payer l\'acompte</button>' : '') + '<button class="btn ghost" type="button" data-vider>Vider la liste</button>' +
-      '<p class="note">Vous recevez les prix avant tout paiement. Acompte de 50 % pour lancer l\'achat.</p>');
+      '<p class="note">Vous recevez les prix avant tout paiement. Acompte indiqué sur ton devis pour lancer l\'achat.</p>');
   }
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('veil').hidden) fermer(); });
   $('veil').addEventListener('click', function (e) {
@@ -2122,7 +2118,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 
   /* Ruban de la marque */
   (function () {
-    var it = ['Tu choisis', 'On trouve', 'On approvisionne', 'On importe', 'On te livre', 'Acompte 50 %', 'Preuve photo à chaque étape'];
+    var it = ['Tu choisis', 'On trouve', 'On approvisionne', 'On importe', 'On te livre', 'Acompte sur devis', 'Preuve photo à chaque étape'];
     var h = it.map(function (x) { return '<span>' + x + '</span>'; }).join('');
     $('ruban-in').innerHTML = h + h;
   })();
@@ -2220,8 +2216,8 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var obs = new MutationObserver(function () { var n = nb(); $('pr-liste-t').textContent = n ? 'Ajouter les ' + n + ' article' + (n > 1 ? 's' : '') + ' de ma liste' : 'Ajouter les articles de ma liste (ta liste est vide)'; }); obs.observe($('v-pro'), { attributes: true });
   })();
   function majQuand() {
-    var t = auj(), M = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'], o = '<option value="">Dès que possible</option><option value="arrivage">Réserver pour le prochain arrivage (acompte 50 %)</option>';
-    voyListe().filter(function (v) { return v.sens !== 'depuis' && v.dep && v.dep > t; }).forEach(function (v) { var d = v.dep.split('-'); var lab = v.orig + ' → Kinshasa, départ ' + Number(d[2]) + ' ' + M[Number(d[1]) - 1]; o += '<option value="' + lab.replace(/"/g, '') + '">Réserver : ' + lab + ' (acompte 50 %)</option>'; });
+    var t = auj(), M = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'], o = '<option value="">Dès que possible</option><option value="arrivage">Réserver pour le prochain arrivage (acompte indiqué sur le devis)</option>';
+    voyListe().filter(function (v) { return v.sens !== 'depuis' && v.dep && v.dep > t; }).forEach(function (v) { var d = v.dep.split('-'); var lab = v.orig + ' → Kinshasa, départ ' + Number(d[2]) + ' ' + M[Number(d[1]) - 1]; o += '<option value="' + lab.replace(/"/g, '') + '">Réserver : ' + lab + ' (acompte indiqué sur le devis)</option>'; });
     $('dm-quand').innerHTML = o;
   }
   majQuand();
@@ -2362,10 +2358,10 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   function tuile(v, ico, t, s) { return '<button type="button" class="tuile" ' + (v === 'pay' || v === 'install' || v === 'share' ? 'data-' + v : 'data-go="' + v + '"') + '><svg viewBox="0 0 24 24" aria-hidden="true">' + ico + '</svg><span><b>' + t + '</b><span class="s">' + s + '</span></span></button>'; }
   function ouvrirPlus() {
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Plus</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Aller plus loin</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
+      tuile('pro', '<path d="M4 9h16v10H4z"/><path d="M9 9V6h6v3"/>', 'Espace commerçants', 'Devis de gros pour entreprises et revendeurs, commandes régulières') +
       tuile('groupes', '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.6.2 4.5 2.3 4.5 5.1"/>', 'Achats groupés', 'Plus on est nombreux, moins c\'est cher') +
       tuile('voyages', '<path d="M3 17l18-6-6 9-3-4-5 1z"/><path d="M12 16v4"/>', 'Nos voyages', 'Départs, dates limites et arrivées') +
       (STATE.pay && STATE.pay.length ? tuile('pay', '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h3"/>', 'Payer l\'acompte', 'Orange Money, M-Pesa, Airtel') : '') +
-      tuile('pro', '<path d="M4 9h16v10H4z"/><path d="M9 9V6h6v3"/>', 'Espace commerçants', 'Devis de gros, commandes régulières') +
       tuile('install', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M12 7v7m-3-3 3 3 3-3"/>', 'Installer l\'application', 'L\'icône sur ton téléphone') +
       (campActives().length ? tuile('paniers', '<path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 0 1 6 0"/>', campActives()[0].nom, 'Produits et lots du moment') : '') +
       (iphOn() ? tuile('iphone', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>', 'Prix du jour', 'Tous les prix du moment, commande en un clic') : '') +
@@ -2879,19 +2875,19 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   /* ---------------------------- Assistant ---------------------------- */
   var CHAT = [], VOIX = false, SM = undefined;
   var SAV = [
-    { k: ['acompte', 'avance', 'payer', 'paiement', 'payement', 'airtel', 'orange money', 'mpesa', 'm-pesa', 'africell', 'solde'], r: 'Tu verses 50 % à la commande pour lancer l\'achat, et le solde à la livraison. Paiement par Airtel Money, Orange Money, M-Pesa, Africell Money ou en espèces. Le devis détaillé t\'est envoyé avant tout paiement.', g: [['commander', 'Faire une demande']] },
+    { k: ['acompte', 'avance', 'payer', 'paiement', 'payement', 'airtel', 'orange money', 'mpesa', 'm-pesa', 'africell', 'solde'], r: 'Tu verses l\'acompte indiqué sur ton devis pour lancer l\'achat, et le solde à la livraison. Paiement par Airtel Money, Orange Money, M-Pesa, Africell Money ou en espèces. Le devis détaillé t\'est envoyé avant tout paiement.', g: [['commander', 'Faire une demande']] },
     { k: ['livraison', 'livrer', 'delai', 'combien de temps', 'commune', 'transport'], r: 'On livre dans toutes les communes de Kinshasa, avec une vidéo de remise du colis. Le délai exact figure sur ton devis, car il dépend du produit et du transport.', g: [['commander', 'Faire une demande']] },
     { k: ['suivi', 'suivre', 'colis', 'reference', 'ou est', 'preuve', 'globe'], r: 'Chaque commande a une référence GDE. Dans l\'onglet Suivi, tu la tapes : le globe avance de la Chine à Kinshasa et tu vois la photo de preuve de chaque étape.', g: [['suivi', 'Suivre mon colis']] },
     { k: ['gros', 'grossiste', 'revente', 'revendeur', 'lot', 'palier', 'quantite', 'carton', 'revendre'], r: 'Pour le gros, le prix baisse par paliers : 1 pièce, dès 5 pièces, dès 10 pièces. Ouvre un produit pour voir les prix et calculer ton total avec l\'acompte. Le Club VIP récompense les grossistes fidèles.', g: [['catalogue', 'Voir les prix'], ['parrainer', 'Club VIP']] },
     { k: ['prix', 'cout', 'coute', 'combien', 'tarif', 'cher', 'remise', 'promo', 'reduction'], r: 'Chaque produit affiche son prix quand il est fixé, avec les prix de gros. Sinon, le prix t\'est envoyé sur WhatsApp avant tout paiement. Si tu as un code promo, tu le tapes dans la fiche du produit.', g: [['catalogue', 'Voir le catalogue']] },
     { k: ['parrain', 'filleul', 'ami', 'invite'], r: 'Dans l\'onglet Membre, tu tapes ton prénom et tu reçois ton code de parrainage. Pour chaque ami qui commande avec ton code, tu gagnes 5 % de réduction sur ta prochaine commande.', g: [['parrainer', 'Mon code']] },
     { k: ['fidelite', 'diamant', 'membre', 'vip', 'niveau', 'bronze', 'argent'], r: 'La carte fidélité te donne 2 $ à chaque achat. Le Club VIP a quatre niveaux : Bronze, Argent, Or et Diamant, avec de meilleurs prix et la priorité sur les arrivages.', g: [['parrainer', 'Voir mon niveau']] },
-    { k: ['live', 'direct', 'video'], r: 'Le live shopping te montre le produit réel avant d\'acheter. Tu poses tes questions et tu commandes pendant le live avec l\'acompte de 50 %.', g: [['live', 'Voir le programme']] },
+    { k: ['live', 'direct', 'video'], r: 'Le live shopping te montre le produit réel avant d\'acheter. Tu poses tes questions et tu commandes pendant le live avec l\'acompte indiqué sur ton devis.', g: [['live', 'Voir le programme']] },
     { k: ['contact', 'whatsapp', 'numero', 'adresse', 'ou etes', 'localisation', 'lemba', 'telephone'], r: 'WhatsApp : ' + TELTXT + '. Nous sommes à Super Lemba, Kinshasa, repère : Bar ROYAL, en face de GRAND SHOP AIRTEL.', w: true },
     { k: ['entreprise', 'pme', 'restaurant', 'hotel', 'ecole', 'clinique', 'chantier', 'bureau'], r: 'On approvisionne les entreprises : restaurants, hôtels, écoles, cliniques, boutiques, chantiers. Tu touches ton secteur et ton besoin, et tu reçois une offre sur WhatsApp.', g: [['catalogue', 'Demander une offre']] },
     { k: ['bonjour', 'salut', 'bonsoir', 'hello', 'coucou'], r: 'Bonjour ! Dis-moi ce que tu cherches, ou demande-moi comment fonctionne l\'application.' },
     { k: ['merci'], r: 'Avec plaisir ! Je reste là si tu as une autre question.' },
-    { k: ['comment', 'fonctionne', 'marche', 'explique', 'appli', 'application', 'aide', 'visite'], r: 'C\'est simple : tu choisis, on trouve, on importe, on te livre. Acompte de 50 %, preuve en photo à chaque étape. Touche « Visite guidée » et je t\'explique l\'application à voix haute.', t: true }
+    { k: ['comment', 'fonctionne', 'marche', 'explique', 'appli', 'application', 'aide', 'visite'], r: 'C\'est simple : tu choisis, on trouve, on importe, on te livre. Acompte indiqué sur ton devis, preuve en photo à chaque étape. Touche « Visite guidée » et je t\'explique l\'application à voix haute.', t: true }
   ];
   function repLocale(q) {
     var n = norm(q), best = null, bs = 0;
@@ -2911,7 +2907,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       if (SM === undefined) SM = (window.claude && claude.use) ? await claude.use('sample') : null;
       if (!SM) return null;
       var cat = PRODUITS.slice(0, 80).map(function (p) { var m = prixMin(p); return p.t + (m !== null ? ' (dès ' + m + ' $)' : ''); }).join('; ');
-      var ins = 'Tu es l\'assistant de GOD DID EXPRESS, plateforme d\'importation et de sourcing basée à Kinshasa (RDC). Tutoie le client, réponds en français, en 3 phrases maximum, ton chaleureux et clair. Faits sûrs : acompte de 50 % puis solde à la livraison ; paiement Airtel Money, Orange Money, M-Pesa, Africell Money ou espèces ; devis détaillé avant tout paiement ; preuve en photo à chaque étape du suivi ; prix de gros par paliers (1, 5, 10 pièces) ; WhatsApp ' + TELTXT + ' ; Super Lemba, Kinshasa. N\'invente jamais un prix, un délai ou une promesse : si tu ne sais pas, invite à écrire sur WhatsApp. Produits au catalogue : ' + cat + '.\n\nQuestion du client : ' + q;
+      var ins = 'Tu es l\'assistant de GOD DID EXPRESS, plateforme d\'importation et de sourcing basée à Kinshasa (RDC). Tutoie le client, réponds en français, en 3 phrases maximum, ton chaleureux et clair. Faits sûrs : acompte indiqué sur le devis (souvent 50 %) puis solde à la livraison ; paiement Airtel Money, Orange Money, M-Pesa, Africell Money ou espèces ; devis détaillé avant tout paiement ; preuve en photo à chaque étape du suivi ; prix de gros par paliers (1, 5, 10 pièces) ; WhatsApp ' + TELTXT + ' ; Super Lemba, Kinshasa. N\'invente jamais un prix, un délai ou une promesse : si tu ne sais pas, invite à écrire sur WhatsApp. Produits au catalogue : ' + cat + '.\n\nQuestion du client : ' + q;
       var r = await SM(ins, { modelTier: 'quick' });
       return r && r.text ? String(r.text).trim().slice(0, 700) : null;
     } catch (e) { return null; }
