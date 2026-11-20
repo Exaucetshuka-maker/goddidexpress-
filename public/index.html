@@ -547,13 +547,9 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 .marche span:last-child { font-size: 12.5px; font-weight: 600; }
 .marche:hover, .marche:focus-visible { border-color: var(--orange); }
 .activites { color: var(--brume); font-size: 14px; margin: 12px 0 0; }
+.groupe { margin-top: 10px; }
 .etiq { display: inline-block; font-size: 13px; padding: 6px 10px; border: 1px solid var(--ligne); border-radius: 4px; color: var(--papier); background: transparent; }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; }
-.groupe { margin-top: 18px; }
-.portes { display: grid; border-top: 1px solid var(--ligne); margin-top: 12px; }
-.portes button { display: grid; gap: 2px; text-align: left; padding: 14px 0; background: none; border: 0; border-bottom: 1px solid var(--ligne); color: var(--papier); font: inherit; cursor: pointer; min-height: 44px; }
-.portes b { font-family: var(--f-display); font-weight: 800; font-size: 22px; text-transform: uppercase; letter-spacing: .02em; }
-.portes span { font-size: 13.5px; color: var(--brume); }
 .trois { display: grid; border-top: 1px solid var(--ligne); margin-top: 16px; }
 .trois button { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 0; background: none; border: 0; border-bottom: 1px solid var(--ligne); color: var(--papier); font: inherit; text-align: left; cursor: pointer; min-height: 44px; }
 .trois b { font-family: var(--f-display); font-weight: 800; font-size: 24px; text-transform: uppercase; letter-spacing: .02em; }
@@ -613,23 +609,18 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <button class="btn ghost" type="button" data-go="voyages">Tous les voyages</button>
     </section>
 
-    <section class="bloc rv" id="portes-bloc">
-      <header><div class="kicker">Commerce • Approvisionnement</div><h2>Vous êtes ?</h2></header>
-      <div class="portes" id="portes"></div>
-    </section>
-
     <section class="bloc" id="appro-bloc">
       <div class="carte" id="appro" style="gap:8px;margin:14px 0"><div class="kicker">Approvisionnement</div><h3 style="margin:0">Pour les entreprises, les PME et les start&#8209;up</h3>
         <p class="note" style="margin:0">Équipements, stocks et produits pour votre activité : on cherche le fournisseur, on achète, on importe, on livre. Boutiques, revendeurs, commerçants et particuliers sont aussi les bienvenus.</p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:14px;font-weight:700"><span>1 · On cherche le fournisseur</span><span>2 · On achète</span><span>3 · On importe</span><span>4 · On te livre</span></div>
         <p class="note" style="margin:0">Chine, Dubaï, Turquie ou RDC. Devis avant tout paiement, acompte indiqué sur ton devis, preuve en photo à chaque étape.</p>
-        <div class="rangee"><button class="btn" type="button" data-go="commander">Demander un approvisionnement</button><button class="btn ghost" type="button" data-go="voyages">Réserver sur un prochain arrivage</button></div></div>
+        <div class="rangee"><button class="btn" type="button" data-go="pro">Espace commerçants</button><button class="btn ghost" type="button" data-go="commander">Demander un approvisionnement</button><button class="btn ghost" type="button" data-go="voyages">Réserver sur un prochain arrivage</button></div></div>
     </section>
 
     <section class="bloc rv" id="marches-bloc">
       <header><h2>D'où viennent tes produits</h2></header>
       <div class="marches" id="marches"></div>
-      <p class="activites">Commerce, sourcing, importation, exportation, approvisionnement, distribution. <a href="#services" style="color:var(--papier);display:inline-block;padding:8px 0">Voir les fiches services</a> · <a href="#methode" style="color:var(--papier);display:inline-block;padding:8px 0">Comment on travaille</a></p>
+      <p class="activites">Commerce, sourcing, importation, exportation, approvisionnement, distribution. <a href="#methode" style="color:var(--papier);display:inline-block;padding:8px 0">Comment on travaille</a></p>
       <div class="trois">
         <button type="button" data-go="catalogue"><b>Acheter</b><span>Le catalogue et les achats groupés</span></button>
         <button type="button" data-go="commander"><b>Faire venir</b><span>Un produit sur mesure, d'où tu veux</span></button>
@@ -900,11 +891,12 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 
   <section class="view" id="v-pro" hidden>
     <header>
-      <div class="kicker">Commerçants et entreprises</div>
+      <div class="kicker">Espace commerçants · Commerce • Approvisionnement</div>
       <h2>Tu achètes pour revendre ?</h2>
       <p>Boutiques, hôtels, restaurants, entreprises, revendeurs : demande un devis de gros, un devis groupé sur plusieurs articles ou une commande qui revient chaque mois. Tu reçois une proposition d'approvisionnement avec nos tarifs professionnels.</p>
     </header>
-    <div class="carte" style="display:grid;gap:10px">
+    <div class="wrap" id="pro-secteurs" style="gap:6px"></div>
+    <div class="carte" id="pro-form" style="display:grid;gap:10px;margin-top:14px">
       <div class="duo"><div class="champ"><label for="pr-nom">Ton prénom</label><input id="pr-nom" maxlength="60" autocomplete="given-name"></div><div class="champ"><label for="pr-tel">Ton numéro WhatsApp</label><input id="pr-tel" inputmode="tel" maxlength="30" autocomplete="tel" placeholder="+243…"></div></div>
       <div class="champ"><label for="pr-act">Ton activité</label><select id="pr-act"><option>Hôtels</option><option>Restaurants et cafés</option><option>Entreprises et bureaux</option><option>Startups et entrepreneurs</option><option>Boutiques et distributeurs</option><option>Construction et immobilier</option><option>Écoles et formation</option><option>Santé</option><option>Agriculture et industrie</option><option>Transport et logistique</option><option>Énergie et télécommunications</option><option>Événementiel</option><option>Particuliers</option><option>Autre</option></select></div>
       <div class="champ"><label for="pr-txt">Les produits et quantités que tu veux</label><textarea id="pr-txt" rows="4" maxlength="500" placeholder="Ex. 50 chargeurs rapides, 20 montres connectées…"></textarea></div>
@@ -913,31 +905,6 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <button class="btn" id="pr-ok" type="button">Demander mon devis professionnel</button>
       <p class="note" id="pr-msg" aria-live="polite" style="margin:0"></p>
     </div>
-  </section>
-
-  <section class="view" id="v-secteur" hidden>
-    <header>
-      <div class="kicker" id="sec-k">Approvisionnement</div>
-      <h2 id="sec-t"></h2>
-      <p id="sec-d"></p>
-    </header>
-    <div class="wrap" style="gap:14px">
-      <div class="carte"><div class="kicker">Nos clients</div><div class="tags" id="sec-clients"></div></div>
-      <div class="carte" id="sec-prod-carte"><div class="kicker">Ce qu'on vous apporte</div><div class="tags" id="sec-prod"></div></div>
-      <p class="note" id="sec-note" style="margin:0" hidden></p>
-      <div class="carte"><div class="kicker">Comment ça se passe</div><p class="note" style="margin:0">On cherche le fournisseur, on vous envoie un devis, vous versez l'acompte indiqué, on achète, on importe et on vous livre. Preuve en photo à chaque étape.</p><button class="btn ghost" type="button" data-go="methode">Voir comment on travaille</button></div>
-      <div class="rangee"><a class="btn" id="sec-wa" target="_blank" rel="noopener">Demander un devis sur WhatsApp</a><button class="btn ghost" id="sec-pro" type="button">Devis de gros ou commande régulière</button></div>
-      <button class="btn ghost" type="button" data-go="accueil">Voir les autres activités</button>
-    </div>
-  </section>
-
-  <section class="view" id="v-services" hidden>
-    <header>
-      <div class="kicker">Nos services</div>
-      <h2>Fiches services</h2>
-      <p>Que tu aies des marchandises à l'étranger, des produits congolais à envoyer ou un produit à trouver : choisis ta fiche, on s'occupe du reste.</p>
-    </header>
-    <div class="wrap" style="gap:14px" id="svc-liste"></div>
   </section>
 
   <section class="view" id="v-methode" hidden>
@@ -1424,49 +1391,29 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 
 
   /* Onglets */
-  var VUES = ['accueil', 'catalogue', 'commander', 'groupes', 'voyages', 'iphone', 'paniers', 'services', 'live', 'suivi', 'parrainer', 'methode', 'pro', 'secteur', 'admin'];
+  var VUES = ['accueil', 'catalogue', 'commander', 'groupes', 'voyages', 'iphone', 'paniers', 'live', 'suivi', 'parrainer', 'methode', 'pro', 'admin'];
   /* Portes par type de client : tes listes de clients et de produits */
   var GROUPES = {"ent": {"t": "B2B — Entreprises", "d": "Nous accompagnons les entreprises de tous secteurs dans leurs besoins en équipements, marchandises et fournitures. Nous recherchons des solutions adaptées, facilitons l’approvisionnement et développons des partenariats durables fondés sur des contrats et des commandes régulières."}, "rev": {"t": "B2B — Commerçants et revendeurs", "d": "Nous aidons les commerçants et revendeurs à trouver des produits compétitifs auprès de fournisseurs fiables. Notre objectif est de faciliter leurs achats en gros, de sécuriser leurs réapprovisionnements et de soutenir le développement de leurs activités."}, "par": {"t": "B2C — Particuliers", "d": "Nous permettons à chaque particulier de trouver et d’acheter le produit qu’il recherche, même lorsqu’il ne sait pas où se le procurer. Du produit du quotidien aux articles spécifiques, nous facilitons la recherche, l’achat et l’approvisionnement, avec un accompagnement adapté à chaque demande."}};
   var SECTEURS = [{"id": "hotels", "g": "ent", "t": "Hôtels", "cl": ["Hôtels", "Hôtels de luxe", "Hôtels économiques", "Résidences meublées", "Appart'hôtels", "Maisons d'hôtes", "Motels", "Centres de conférence", "Sociétés de gestion hôtelière"], "pr": [], "note": "", "m": "Bonjour GOD DID EXPRESS, je suis dans le secteur « Hôtels ». Je cherche : ... Quantité : ... Pour quand : ... ", "act": "Hôtels"}, {"id": "restaurants", "g": "ent", "t": "Restaurants et cafés", "cl": ["Restaurants", "Fast-foods", "Cafés", "Bars", "Boulangeries", "Pâtisseries", "Services traiteurs", "Glaciers", "Entreprises de restauration collective", "Services de livraison alimentaire"], "pr": ["Fours", "Réfrigérateurs", "Congélateurs", "Machines", "Ustensiles", "Mobilier", "Emballages", "Équipements professionnels"], "note": "", "m": "Bonjour GOD DID EXPRESS, je suis dans le secteur « Restaurants et cafés ». Je cherche : ... Quantité : ... Pour quand : ... ", "act": "Restaurants et cafés"}, {"id": "bureaux", "g": "ent", "t": "Entreprises et bureaux", "cl": ["PME", "Grandes entreprises", "Bureaux commerciaux", "Cabinets de conseil", "Cabinets comptables", "Cabinets juridiques", "Sociétés de services", "Centres d'appels", "Espaces de coworking", "Sociétés de sécurité", "Agences de communication"], "pr": ["Ordinateurs", "Imprimantes", "Bureaux", "Chaises", "Écrans", "Équipements informatiques", "Fournitures"], "note": "", "m": "Bonjour GOD DID EXPRESS, je suis dans le secteur « Entreprises et bureaux ». Je cherche : ... Quantité : ... Pour quand : ... ", "act": "Entreprises et bureaux"}, {"id": "startups", "g": "ent", "t": "Startups et entrepreneurs", "cl": ["Startups technologiques", "Fintechs", "Entreprises numériques", "Agences digitales", "Entreprises de livraison", "Jeunes entreprises commerciales", "Entrepreneurs indépendants", "Incubateurs", "Accélérateurs de startups"], "pr": ["Ordinateurs", "Smartphones", "Équipements réseau", "Mobilier", "Matériel audiovisuel", "Équipements professionnels"], "note": "", "m": "Bonjour GOD DID EXPRESS, je suis dans le secteur « Startups et entrepreneurs ». Je cherche : ... Quantité : ... Pour quand : ... ", "act": "Startups et entrepreneurs"}, {"id": "boutiques", "g": "rev", "t": "Boutiques et distributeurs", "cl": ["Supermarchés", "Supérettes", "Boutiques", "Magasins d'électronique", "Magasins de vêtements", "Grossistes", "Demi-grossistes", "Distributeurs", "Détaillants", "Importateurs", "Revendeurs indépendants"], "pr": ["Marchandises en gros", "Accessoires", "Appareils", "Emballages", "Rayonnages", "Équipements de magasin"], "note": "", "m": "Bonjour GOD DID EXPRESS, je suis dans le secteur « Boutiques et distributeurs ». Je cherche : ... Quantité : ... Pour quand : ... ", "act": "Boutiques et distributeurs"}, {"id": "construction", "g": "ent", "t": "Construction et immobilier", "cl": ["Entreprises de construction", "Promoteurs immobiliers", "Entreprises de génie civil", "Entrepreneurs en bâtiment", "Sociétés de plomberie", "Entreprises d'électricité", "Entreprises de décoration", "Agences immobilières", "Gestionnaires d'immeubles", "Sociétés de maintenance"], "pr": ["Matériaux", "Outils", "Équipements électriques", "Plomberie", "Sanitaires", "Portes", "Fenêtres", "Mobilier"], "note": "", "m": "Bonjour GOD DID EXPRESS, je suis dans le secteur « Construction et immobilier ». Je cherche : ... Quantité : ... Pour quand : ... ", "act": "Construction et immobilier"}, {"id": "ecoles", "g": "ent", "t": "Écoles et formation", "cl": ["Écoles maternelles", "Écoles primaires", "Écoles secondaires", "Universités", "Instituts supérieurs", "Centres de formation", "Écoles professionnelles", "Centres informatiques", "Établissements privés"], "pr": ["Tables", "Chaises", "Tableaux", "Ordinateurs", "Projecteurs", "Imprimantes", "Équipements de laboratoire", "Fournitures scolaires"], "note": "", "m": "Bonjour GOD DID EXPRESS, je suis dans le secteur « Écoles et formation ». Je cherche : ... Quantité : ... Pour quand : ... ", "act": "Écoles et formation"}, {"id": "sante", "g": "ent", "t": "Santé", "cl": ["Cliniques privées", "Hôpitaux", "Cabinets médicaux", "Cabinets dentaires", "Laboratoires", "Centres d'imagerie", "Centres de soins", "Centres de rééducation"], "pr": ["Mobilier médical", "Équipements informatiques", "Lits", "Matériel non réglementé", "Fournitures autorisées"], "note": "Les dispositifs médicaux et produits de santé doivent faire l'objet des vérifications réglementaires nécessaires.", "m": "Bonjour GOD DID EXPRESS, je suis dans le secteur « Santé ». Je cherche : ... Quantité : ... Pour quand : ... ", "act": "Santé"}, {"id": "agriculture", "g": "ent", "t": "Agriculture et industrie", "cl": ["Exploitations agricoles", "Coopératives agricoles", "Fermes", "Entreprises agroalimentaires", "Unités de transformation", "Usines", "Industries manufacturières", "Entreprises minières", "Entreprises de production", "Ateliers industriels"], "pr": ["Machines", "Pompes", "Équipements de transformation", "Pièces détachées", "Outils", "Matériel de production"], "note": "", "m": "Bonjour GOD DID EXPRESS, je suis dans le secteur « Agriculture et industrie ». Je cherche : ... Quantité : ... Pour quand : ... ", "act": "Agriculture et industrie"}, {"id": "transport", "g": "ent", "t": "Transport et logistique", "cl": ["Sociétés de transport", "Entreprises de livraison", "Sociétés de logistique", "Agences de voyage", "Compagnies de transport", "Gestionnaires de flottes", "Sociétés de location de véhicules", "Entreprises de manutention"], "pr": ["Équipements de transport", "Pneus", "Pièces détachées", "Accessoires", "Matériel informatique", "Équipements de manutention"], "note": "", "m": "Bonjour GOD DID EXPRESS, je suis dans le secteur « Transport et logistique ». Je cherche : ... Quantité : ... Pour quand : ... ", "act": "Transport et logistique"}, {"id": "energie", "g": "ent", "t": "Énergie et télécommunications", "cl": ["Installateurs solaires", "Entreprises d'électricité", "Sociétés de télécommunications", "Fournisseurs Internet", "Installateurs de réseaux", "Entreprises de vidéosurveillance", "Entreprises de climatisation", "Prestataires de maintenance technique"], "pr": ["Panneaux solaires", "Batteries", "Onduleurs", "Câbles", "Routeurs", "Équipements réseau", "Systèmes de surveillance"], "note": "", "m": "Bonjour GOD DID EXPRESS, je suis dans le secteur « Énergie et télécommunications ». Je cherche : ... Quantité : ... Pour quand : ... ", "act": "Énergie et télécommunications"}, {"id": "evenementiel", "g": "ent", "t": "Événementiel", "cl": ["Agences événementielles", "Salles de réception", "Salles de spectacle", "Organisateurs de concerts", "Studios de production", "Sociétés audiovisuelles", "Photographes professionnels", "Agences de décoration"], "pr": ["Sonorisation", "Éclairage", "Écrans", "Caméras", "Mobilier", "Matériel de scène", "Accessoires"], "note": "", "m": "Bonjour GOD DID EXPRESS, je suis dans le secteur « Événementiel ». Je cherche : ... Quantité : ... Pour quand : ... ", "act": "Événementiel"}, {"id": "particuliers", "g": "par", "t": "Particuliers", "cl": ["Étudiants", "Fonctionnaires", "Entrepreneurs individuels", "Familles", "Professionnels indépendants", "Commerçants individuels", "Clients qui recherchent un produit particulier"], "pr": ["Puces", "Cartes SIM lorsque les conditions des opérateurs le permettent", "Téléphones", "Ordinateurs", "Tablettes", "Accessoires", "Appareils électroménagers", "Mobilier", "Autres marchandises"], "note": "", "m": "Bonjour GOD DID EXPRESS, je cherche un produit : ... Je ne sais pas où le trouver. Budget : ... ", "act": "Particuliers"}];
-  function rendrePortes() {
-    var b = $('portes'); if (!b) return;
+  function rendreEspace() {
+    var b = $('pro-secteurs'); if (!b) return;
     b.innerHTML = ['ent', 'rev', 'par'].map(function (g) {
-      return '<div class="groupe"><div class="kicker">' + h(GROUPES[g].t) + '</div><p class="note" style="margin:6px 0 0">' + h(GROUPES[g].d) + '</p><div class="portes">' +
-        SECTEURS.filter(function (x) { return x.g === g; }).map(function (x) { return '<button type="button" data-go="secteur-' + x.id + '"><b>' + h(x.t) + '</b><span>' + h(x.cl.slice(0, 3).join(', ')) + '…</span></button>'; }).join('') + '</div></div>';
+      return '<div class="groupe"><div class="kicker">' + h(GROUPES[g].t) + '</div><p class="note" style="margin:6px 0 10px">' + h(GROUPES[g].d) + '</p><div style="display:grid;gap:8px">' +
+        SECTEURS.filter(function (x) { return x.g === g; }).map(function (x) {
+          return '<details class="carte" id="sec-' + x.id + '"><summary style="cursor:pointer"><b>' + h(x.t) + '</b></summary>' +
+            '<div class="kicker" style="margin-top:12px">Nos clients</div><div class="tags">' + x.cl.map(function (c) { return '<span class="etiq">' + h(c) + '</span>'; }).join('') + '</div>' +
+            (x.pr.length ? '<div class="kicker" style="margin-top:12px">Ce qu\'on vous apporte</div><div class="tags">' + x.pr.map(function (c) { return '<span class="etiq">' + h(c) + '</span>'; }).join('') + '</div>' : '') +
+            (x.note ? '<p class="note" style="margin:10px 0 0">' + h(x.note) + '</p>' : '') +
+            '<button class="btn" style="margin-top:12px" type="button" data-devis="' + h(x.id) + '">Demander un devis pour ce secteur</button></details>';
+        }).join('') + '</div></div>';
     }).join('');
   }
-  function rendreSecteur() {
-    var x = null; SECTEURS.forEach(function (y) { if (y.id === curSecteur) x = y; });
-    if (!x) return false;
-    $('sec-k').textContent = GROUPES[x.g].t; $('sec-t').textContent = x.t; $('sec-d').textContent = GROUPES[x.g].d;
-    $('sec-clients').innerHTML = x.cl.map(function (c) { return '<span class="etiq">' + h(c) + '</span>'; }).join('');
-    $('sec-prod-carte').hidden = !x.pr.length;
-    $('sec-prod').innerHTML = x.pr.map(function (c) { return '<span class="etiq">' + h(c) + '</span>'; }).join('');
-    var n = $('sec-note'); n.hidden = !x.note; n.textContent = x.note || '';
-    $('sec-wa').href = wa(x.m);
-    $('sec-pro').onclick = function () { var sel = $('pr-act'); if (sel) { var ok = false; for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === x.act) ok = true; if (ok) sel.value = x.act; } show('pro', true); };
-    return true;
-  }
-  var SERVICES = [
-    { id: 'venir', ico: '📥', t: 'Faire venir ma marchandise en RDC', d: 'Tu as déjà des marchandises à Dubaï, à Istanbul ou en Chine (téléphones, électronique, vêtements, chaussures…) ? On les amène jusqu\'à Kinshasa, avec le suivi et la preuve en photo à chaque étape.',
-      besoin: ['Le type de produit (ex. téléphones, parfums, tissus)', 'La quantité, le poids ou le volume', 'Des photos et la facture du fournisseur si tu l\'as', 'La ville de départ : Dubaï, Istanbul ou Chine'],
-      m: 'Bonjour GOD DID EXPRESS, j\'ai des marchandises à l\'étranger à faire venir en RDC. Ville de départ : ... Produits : ... Quantité : ... ' },
-    { id: 'export', ico: '📤', t: 'Envoyer des produits congolais à l\'étranger', d: 'Tu produis ou tu vends en RDC et tu veux atteindre des clients à l\'étranger ? Dis-nous ton produit et le pays visé : on étudie ce qui est possible et on organise l\'envoi.',
-      besoin: ['Le nom du produit et sa description', 'La quantité disponible et la fréquence d\'envoi', 'Des photos et, si possible, un échantillon', 'Le pays ou la ville de destination'],
-      m: 'Bonjour GOD DID EXPRESS, je veux envoyer un produit congolais à l\'étranger. Produit : ... Quantité : ... Pays visé : ... ' },
-    { id: 'trouver', ico: '🔎', t: 'Trouver un produit pour moi', d: 'Tu cherches un produit précis et tu ne sais pas où l\'acheter ? Tu choisis, on trouve le fournisseur, on achète, on importe et on te livre.',
-      besoin: ['Une photo, un lien ou une description du produit', 'La quantité souhaitée', 'Ton budget approximatif', 'Ta commune à Kinshasa pour la livraison'],
-      m: 'Bonjour GOD DID EXPRESS, je cherche un produit. Produit : ... Quantité : ... Budget : ... ' }
-  ];
-  function rendreServices() {
-    $('svc-liste').innerHTML = SERVICES.map(function (s, i) {
-      return '<details class="carte" id="svc-' + s.id + '"' + (i === 0 ? ' open' : '') + '><summary style="cursor:pointer;display:flex;gap:12px;align-items:center;list-style:none"><span style="font-size:28px" aria-hidden="true">' + s.ico + '</span><b style="font-family:var(--f-display);font-size:22px;text-transform:uppercase;letter-spacing:.02em">' + h(s.t) + '</b></summary>' +
-        '<p style="margin:10px 0 0">' + h(s.d) + '</p>' +
-                '<div class="kicker" style="margin-top:12px">Ce qu\'il nous faut</div><ul style="margin:6px 0 0;padding-left:20px;display:grid;gap:4px">' + s.besoin.map(function (e) { return '<li>' + h(e) + '</li>'; }).join('') + '</ul>' +
-        '<p class="note" style="margin-top:10px">Aucun prix n\'est promis à l\'avance : tu reçois un devis détaillé avant de payer. Acompte indiqué sur ton devis, solde à la livraison.</p>' +
-        '<a class="btn" style="margin-top:6px" href="' + ea(wa(s.m)) + '" target="_blank" rel="noopener">Démarrer sur WhatsApp</a><button class="btn ghost" style="margin-top:6px" type="button" data-go="methode">Voir comment on travaille</button></details>';
-    }).join('');
-  }
+  document.addEventListener('click', function (e) {
+    var d = e.target.closest('[data-devis]'); if (!d) return;
+    var x = null; SECTEURS.forEach(function (y) { if (y.id === d.getAttribute('data-devis')) x = y; });
+    var sel = $('pr-act'); if (x && sel) for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === x.act) sel.value = x.act;
+    var f = $('pro-form'); if (f) f.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+  });
   var EMO = { noel: '🎄', ecole: '🎒', fete: '🎁', autre: '✨' };
   function auj() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
   function jourApres(d) { var q = d.split('-'), x = new Date(+q[0], +q[1] - 1, +q[2] + 1); return x.getFullYear() + '-' + ('0' + (x.getMonth() + 1)).slice(-2) + '-' + ('0' + x.getDate()).slice(-2); }
@@ -1514,10 +1461,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   var IS_ADMIN = false, GS = null, GH = null, curOrd = null;
   var PRINC = ['accueil', 'catalogue', 'commander', 'suivi'];
   var curCran = 4;
-  var curSecteur = null;
   function show(id, push) {
-    var brut = id;
-    if (/^secteur-/.test(id)) { curSecteur = id.slice(8); id = 'secteur'; }
     if (id === 'prix') id = 'iphone';
     if (VUES.indexOf(id) < 0 || (id === 'admin' && !IS_ADMIN)) id = 'accueil';
     VUES.forEach(function (v) { $('v-' + v).hidden = v !== id; });
@@ -1526,11 +1470,9 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     if (id === 'suivi' && typeof rendreSuivi === 'function') rendreSuivi(curCran);
     if (id === 'iphone') rendreIphone();
     if (id === 'paniers') rendrePaniersSite();
-    if (id === 'services' && typeof rendreServices === 'function') rendreServices();
-    if (id === 'secteur') { if (!rendreSecteur()) { show('accueil', push); return; } }
     if (id === 'methode' && typeof animerVoyage === 'function') animerVoyage();
     if (id === 'admin' && typeof rendreAdmin === 'function') rendreAdmin();
-    if (push) { try { history.replaceState(null, '', '#' + (id === 'secteur' ? brut : id)); } catch (e) {} window.scrollTo(0, 0); }
+    if (push) { try { history.replaceState(null, '', '#' + id); } catch (e) {} window.scrollTo(0, 0); }
   }
   PRINC.forEach(function (v) { $('t-' + v).addEventListener('click', function () { show(v, true); }); });
   $('t-plus').addEventListener('click', function () { ouvrirPlus(); });
@@ -2419,7 +2361,6 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       tuile('install', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M12 7v7m-3-3 3 3 3-3"/>', 'Installer l\'application', 'L\'icône sur ton téléphone') +
       (campActives().length ? tuile('paniers', '<path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 0 1 6 0"/>', campActives()[0].nom, 'Produits et lots du moment') : '') +
       (iphOn() ? tuile('iphone', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>', 'Prix du jour', 'Tous les prix du moment, commande en un clic') : '') +
-      tuile('services', '<path d="M4 7h16v12H4z"/><path d="M9 7V4h6v3M4 12h16"/>', 'Fiches services', 'Faire venir, exporter, trouver un produit') +
       tuile('live', '<circle cx="12" cy="12" r="2.4"/><path d="M7.5 7.5a6.4 6.4 0 0 0 0 9M16.5 7.5a6.4 6.4 0 0 1 0 9M4.5 4.5a10.6 10.6 0 0 0 0 15M19.5 4.5a10.6 10.6 0 0 1 0 15"/>', 'Live shopping', 'Voir le produit réel avant d\'acheter') +
       tuile('parrainer', '<rect x="3" y="9" width="18" height="4" rx="1"/><path d="M12 9v12M5 13v7h14v-7M12 9c-3 0-4.5-1-4.5-2.6S9 4 10.2 4C11.6 4 12 6 12 9zm0 0c3 0 4.5-1 4.5-2.6S15 4 13.8 4C12.4 4 12 6 12 9z"/>', 'Membre, fidélité, parrainage', 'Votre carte, le Club VIP, devenir point relais') + tuile('methode', '<circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8.2 18H13a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h4.8"/>', 'Comment on travaille', 'Les cinq métiers et le voyage du colis') + (IS_ADMIN ? tuile('admin', '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>', 'Espace admin', 'Prix, produits, photos, commandes') : ''));
   }
@@ -3340,7 +3281,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   try { var qp = new URLSearchParams(location.search).get('p'); if (qp) setTimeout(function () { if (BY[qp]) { show('catalogue', false); ouvrirProduit(qp); } }, 400); } catch (e) {}
   rendreSlogan(); rendreReseaux(); rendreVip(); rendreAvis(); majPub(); chargerJoins(); rendreGroupes(); rendreIphone(); rendrePaniersSite(); rendrePhrases(); rendreMarches(); rendreInfo(); rendreVoyages(); initVideos();
 
-  rendrePortes();
+  rendreEspace();
   show(location.hash.slice(1), false);
 })();
 </script>
