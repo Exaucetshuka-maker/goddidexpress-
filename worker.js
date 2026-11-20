@@ -603,19 +603,24 @@ async function traiter(request, env) {
       if (limite(request, 'iaprod', 20)) return json({ ok: false, raison: 'trop-vite' }, 429);
       const buf = new Uint8Array(await request.arrayBuffer());
       if (!buf.length || buf.length > 900000) return json({ ok: false, raison: 'photo' }, 413);
-      try {
-        const v = await env.AI.run('@cf/llava-hf/llava-1.5-7b-hf', { image: Array.from(buf), prompt: 'Describe the product in this photo in one or two sentences: what it is, its colour, its material and what it is used for.', max_tokens: 120 });
-        const en = txt(v && (v.description || v.response), 600).trim();
-        if (!en) return json({ ok: false, raison: 'vide' });
-        const r = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', { messages: [
-          { role: 'system', content: 'Tu écris pour une boutique de Kinshasa. À partir de la description anglaise d\'un produit, réponds uniquement par un objet JSON {"nom":"...","court":"..."} en français. "nom" : le nom du produit, 2 à 5 mots, sans marque inventée. "court" : une petite description, 8 à 18 mots, sans prix, sans promesse.' },
-          { role: 'user', content: en }], max_tokens: 160 });
-        const brut = txt(r && (r.response || r.result), 800), m = brut.match(/\{[\s\S]*\}/);
-        let o = {}; try { o = JSON.parse(m ? m[0] : '{}'); } catch (e) { o = {}; }
-        const nom = txt(o.nom, 60).replace(/[<>]/g, '').trim(), court = txt(o.court, 140).replace(/[<>]/g, '').trim().replace(/\.$/, '');
-        if (!nom) return json({ ok: false, raison: 'vide' });
-        return json({ ok: true, nom, court });
-      } catch (e) { return json({ ok: false, raison: 'ia-erreur', detail: txt(e && e.message, 160) }); }
+      const erreurs = [];
+      const essai = async (modeles, fabrique, lire) => { for (const m of modeles) { try { const r = await env.AI.run(m, fabrique(m)); const t = txt(lire(r), 800).trim(); if (t) return t; erreurs.push(m.split('/').pop() + ': vide'); } catch (e) { erreurs.push(m.split('/').pop() + ': ' + txt(e && e.message, 90)); } } return ''; };
+      let b64 = ''; for (let k = 0; k < buf.length; k += 8192) b64 += String.fromCharCode.apply(null, buf.subarray(k, k + 8192)); b64 = btoa(b64);
+      const consigne = 'Describe the product in this photo in one or two sentences: what it is, its colour, its material and what it is used for.';
+      const lireTexte = (r) => (r && (r.description || r.response || (r.choices && r.choices[0] && r.choices[0].message && r.choices[0].message.content) || r.result)) || '';
+      /* 1. Regarder la photo (plusieurs modèles, le premier qui répond) */
+      let en = await essai(['@cf/moondream/moondream3.1-9B-A2B'], () => ({ task: 'caption', image: Array.from(buf), prompt: consigne, max_tokens: 120 }), lireTexte);
+      if (!en) en = await essai(['@cf/google/gemma-4-26b-a4b-it'], () => ({ messages: [{ role: 'user', content: [{ type: 'text', text: consigne }, { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,' + b64 } }] }], max_tokens: 160 }), lireTexte);
+      if (!en) return json({ ok: false, raison: 'ia-erreur', detail: txt(erreurs.join(' | '), 300) });
+      /* 2. Écrire le nom et la description en français */
+      const brut = await essai(['@cf/meta/llama-3.1-8b-instruct-fast', '@cf/zai-org/glm-4.7-flash'], () => ({ messages: [
+        { role: 'system', content: 'Tu écris pour une boutique de Kinshasa. À partir de la description anglaise d\'un produit, réponds uniquement par un objet JSON {"nom":"...","court":"..."} en français. "nom" : le nom du produit, 2 à 5 mots, sans marque inventée. "court" : une petite description, 8 à 18 mots, sans prix, sans promesse.' },
+        { role: 'user', content: en }], max_tokens: 200 }), lireTexte);
+      const m = brut.match(/\{[\s\S]*\}/);
+      let o = {}; try { o = JSON.parse(m ? m[0] : '{}'); } catch (e) { o = {}; }
+      const nom = txt(o.nom, 60).replace(/[<>]/g, '').trim(), court = txt(o.court, 140).replace(/[<>]/g, '').trim().replace(/\.$/, '');
+      if (!nom) return json({ ok: false, raison: 'ia-erreur', detail: txt(erreurs.join(' | ') || 'texte non compris', 300) });
+      return json({ ok: true, nom, court });
     }
 
     if (p === '/api/state' && request.method === 'PUT') {
