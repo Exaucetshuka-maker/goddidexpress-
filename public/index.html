@@ -406,6 +406,15 @@ footer .tel { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; co
   .paliers { grid-template-columns: minmax(0, 1fr); }
 }
 /* Produits vivants */
+.vitrine { overflow: hidden; display: grid; gap: 10px; margin: 6px 0 16px; -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+.vitrine[hidden] { display: none; }
+.vit-piste { display: flex; gap: 10px; width: max-content; animation: defile var(--d, 90s) linear infinite; will-change: transform; }
+.vit-piste.inv { animation-direction: reverse; }
+@keyframes defile { to { transform: translateX(-50%); } }
+.vitrine:hover .vit-piste, .vitrine.pause .vit-piste { animation-play-state: paused; }
+.prod.vie .ph img { animation: zoomLent 11s ease-in-out infinite alternate; animation-delay: calc(var(--i, 0) * -1.4s); }
+.prod .ph { overflow: hidden; }
+@media (prefers-reduced-motion: reduce) { .vit-piste, .prod.vie .ph img { animation: none !important; } .vitrine { overflow-x: auto; -webkit-mask-image: none; mask-image: none; } }
 @keyframes monte { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 .grid .prod { animation: monte .5s cubic-bezier(.2, .7, .2, 1) backwards; animation-delay: calc(var(--i, 0) * 55ms); }
 @keyframes zoomLent { from { transform: scale(1); } to { transform: scale(1.08); } }
@@ -760,6 +769,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         <input id="c-q" type="search" placeholder="Ex. laptop, miroir, sac, iPhone" autocomplete="off"></div>
       <div class="chips" id="c-chips" role="group" aria-label="Catégories"></div>
     </div>
+    <div class="vitrine" id="vitrine" aria-label="Vitrine : les produits défilent" hidden><div class="vit-piste" id="vit-a"></div><div class="vit-piste inv" id="vit-b"></div></div>
     <div class="compte" id="c-compte" aria-live="polite"></div>
     <div class="grid" id="c-grid"></div>
     <div class="carte" id="ent" style="margin-top:18px"><div class="kicker">Entreprises et revendeurs</div><p class="note" style="margin:6px 0 10px">Équipements, stocks et produits pour votre activité : choisissez votre secteur dans l'Espace commerçants.</p><button class="btn" type="button" data-go="pro">Espace commerçants</button></div>
@@ -1880,7 +1890,9 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       return;
     }
     if (!q && filtreCat === 'all') res = ordreJour(res);
+    $('vitrine').hidden = !!q || filtreCat !== 'all';
     $('c-grid').innerHTML = res.map(function (p, i) { return carte(p, i); }).join('');
+    vieCartes();
   }
   function majBarre() {
     var n = nbListe();
@@ -2259,6 +2271,22 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     $('dm-quand').innerHTML = o;
   }
   majQuand();
+  function vieCartes() {
+    var L = document.querySelectorAll('#c-grid .prod'); if (!L.length) return;
+    if (!('IntersectionObserver' in window)) { Array.prototype.forEach.call(L, function (c) { c.classList.add('vie'); }); return; }
+    if (!vieCartes.io) vieCartes.io = new IntersectionObserver(function (en) { en.forEach(function (x) { x.target.classList.toggle('vie', x.isIntersecting); }); }, { rootMargin: '80px' });
+    Array.prototype.forEach.call(L, function (c) { vieCartes.io.observe(c); });
+  }
+  function rendreVitrine() {
+    var v = $('vitrine'); if (!v) return;
+    var L = melangeJour(PRODUITS.filter(function (p) { return !p.gone; })), h = Math.ceil(L.length / 2), A = L.slice(0, h), B = L.slice(h);
+    function piste(el, T) { if (!T.length) return; var html = T.map(function (p) { return mini(p); }).join(''); el.innerHTML = html + html; el.style.setProperty('--d', Math.max(40, T.length * 3.4) + 's'); }
+    piste($('vit-a'), A); piste($('vit-b'), B);
+    v.addEventListener('click', function (e) { var o = e.target.closest('[data-open]'); if (o) ouvrirProduit(o.getAttribute('data-open')); });
+    var t = null; v.addEventListener('touchstart', function () { v.classList.add('pause'); clearTimeout(t); }, { passive: true });
+    v.addEventListener('touchend', function () { clearTimeout(t); t = setTimeout(function () { v.classList.remove('pause'); }, 2500); }, { passive: true });
+    v.hidden = filtreCat !== 'all' || !!requete;
+  }
   function rendreVedette() {
     var L = PRODUITS.filter(function (p) { return !p.gone; }), A = L.filter(function (p) { return p.ph && p.ph.length; }), B = L.filter(function (p) { return !(p.ph && p.ph.length); });
     var T = melangeJour(A).concat(melangeJour(B)).slice(0, 12); $('vedette').hidden = !T.length;
@@ -2266,6 +2294,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     autoRail($('vedette-rail'));
   }
   rendreVedette();
+  rendreVitrine();
   function rendreTendance() {
     var T = (STATE.tend || []).map(function (x) { return { p: PRODUITS.filter(function (q) { return q.id === x.pid; })[0], tag: x.tag }; }).filter(function (x) { return x.p; });
     var L = { Chine: 'Tendance en Chine', 'Dubaï': 'Tendance à Dubaï', Turquie: 'Tendance en Turquie', RDC: 'Demandé en RDC', Nouveau: 'Nouveauté' };
