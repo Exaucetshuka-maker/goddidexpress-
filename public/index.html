@@ -760,20 +760,9 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         <input id="c-q" type="search" placeholder="Ex. laptop, miroir, sac, iPhone" autocomplete="off"></div>
       <div class="chips" id="c-chips" role="group" aria-label="Catégories"></div>
     </div>
-    <div class="carte ent-bloc" id="ent">
-      <div>
-        <div class="kicker">Entreprises et PME</div>
-        <h3 style="margin-top:4px">On vous approvisionne</h3>
-      </div>
-      <p class="note">Restaurants, hôtels, écoles, cliniques, boutiques, chantiers. Touchez ce qui vous concerne, rien à écrire.</p>
-      <div class="lbl">Votre secteur</div>
-      <div class="chips wrap" id="ent-sect" role="group" aria-label="Secteur"></div>
-      <div class="lbl">Ce dont vous avez besoin</div>
-      <div class="chips wrap" id="ent-besoin" role="group" aria-label="Besoins"></div>
-      <a class="btn" id="ent-wa" href="#" target="_blank" rel="noopener">Recevoir une offre sur WhatsApp</a>
-    </div>
     <div class="compte" id="c-compte" aria-live="polite"></div>
     <div class="grid" id="c-grid"></div>
+    <div class="carte" id="ent" style="margin-top:18px"><div class="kicker">Entreprises et revendeurs</div><p class="note" style="margin:6px 0 10px">Équipements, stocks et produits pour votre activité : choisissez votre secteur dans l'Espace commerçants.</p><button class="btn" type="button" data-go="pro">Espace commerçants</button></div>
     <div class="carte hors">
       <h3>Vous ne voyez pas votre produit ?</h3>
       <p>Envoyez-nous une photo ou un lien sur WhatsApp. On trouve le fournisseur, on négocie, on importe et on vous livre.</p>
@@ -1845,7 +1834,11 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   }
   function ordreJour(L) {
     var sig = L.filter(estNouveau).concat(L.filter(function (p) { return !estNouveau(p) && estBaisse(p); })), rest = L.filter(function (p) { return !(estNouveau(p) || estBaisse(p)); });
-    return sig.concat(melangeJour(rest));
+    var cats = [], par = {};
+    rest.forEach(function (p) { if (!par[p.c]) { par[p.c] = []; cats.push(p.c); } par[p.c].push(p); });
+    var out = [];
+    melangeJour(cats).forEach(function (c) { out = out.concat(melangeJour(par[c])); });
+    return sig.concat(out);
   }
   function autoRail(el) {
     if (!el || el.getAttribute('data-auto') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
@@ -2116,11 +2109,13 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var s = SECT.filter(function (x, i) { return choixS[i]; }), b = BESOIN.filter(function (x, i) { return choixB[i]; });
     var m = 'Bonjour GOD DID EXPRESS, nous sommes une entreprise' + (s.length ? ' (secteur : ' + s.join(', ') + ')' : '') + '. ' +
       (b.length ? 'Nous cherchons : ' + b.join(', ') + '. ' : '') + 'Pouvez-vous nous proposer une offre d\'approvisionnement ?';
-    $('ent-wa').href = wa(m);
+    if ($('ent-wa')) $('ent-wa').href = wa(m);
   }
+  if ($('ent-sect')) {
   chipsEnt($('ent-sect'), SECT, choixS); chipsEnt($('ent-besoin'), BESOIN, choixB); majEnt();
   $('ent-sect').addEventListener('click', function (e) { var b = e.target.closest('[data-i]'); if (!b) return; var i = b.getAttribute('data-i'); choixS[i] = !choixS[i]; chipsEnt($('ent-sect'), SECT, choixS); majEnt(); });
   $('ent-besoin').addEventListener('click', function (e) { var b = e.target.closest('[data-i]'); if (!b) return; var i = b.getAttribute('data-i'); choixB[i] = !choixB[i]; chipsEnt($('ent-besoin'), BESOIN, choixB); majEnt(); });
+  }
 
   /* Programme du live : produits proposés */
   (function () {
