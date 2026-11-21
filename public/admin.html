@@ -484,7 +484,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     s = s || {};
     s.rev = s.rev || 0; s.prod = s.prod || {}; s.extra = s.extra || []; s.slog = s.slog || {};
     s.soc = Object.assign({ tiktok: '', instagram: '', facebook: '' }, s.soc || {});
-    s.fc = Number(s.fc) || 0; s.vp = s.vp || ''; s.vpOff = !!s.vpOff; s.promo = s.promo || []; s.avis = s.avis || []; s.vip = (s.vip && s.vip.length === 3) ? s.vip : [3, 6, 10]; s.lien = s.lien || '';
+    s.fc = Number(s.fc) || 0; s.fcd = s.fcd || ''; s.vp = s.vp || ''; s.vpOff = !!s.vpOff; s.promo = s.promo || []; s.avis = s.avis || []; s.vip = (s.vip && s.vip.length === 3) ? s.vip : [3, 6, 10]; s.lien = s.lien || '';
     s.voy = s.voy || []; s.info = s.info || {}; s.mail = s.mail || ''; s.wag = s.wag || WAG0; s.wac = s.wac || WAC0; s.tel2 = s.tel2 || ''; s.adr2 = s.adr2 || ''; s.wanum = s.wanum || ''; s.avant = s.avant || []; s.avlv = [0, 1, 2, 3].map(function (i) { return (s.avlv && s.avlv[i]) || []; });
     s.contacts = s.contacts || [];
     if (!s.contacts.length) { if (s.tel2) s.contacts.push({ type: 'tel', label: 'Deuxième numéro', v: s.tel2 }); if (s.mail) s.contacts.push({ type: 'mail', label: 'E-mail', v: s.mail }); if (s.adr2) s.contacts.push({ type: 'adresse', label: 'Autre adresse', v: s.adr2 }); s.tel2 = ''; s.mail = ''; s.adr2 = ''; } s.phr = s.phr || [];
@@ -1601,7 +1601,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   $('r-vp').addEventListener('input', function () { STATE.vp = this.value.trim(); marquer(true); });
   $('r-vpoff').addEventListener('change', function () { STATE.vpOff = this.checked; marquer(true); });
   $('r-gsc').addEventListener('input', function () { STATE.gsc = this.value.replace(/[^A-Za-z0-9_-]/g, '').slice(0, 100); marquer(true); });
-  $('r-fc').addEventListener('input', function () { STATE.fc = Math.max(0, Math.min(100000, Math.round(parseFloat(this.value)) || 0)); marquer(true); });
+  $('r-fc').addEventListener('input', function () { STATE.fc = Math.max(0, Math.min(100000, Math.round(parseFloat(this.value)) || 0)); STATE.fcd = jourJ(); marquer(true); });
   function rendrePromo() {
     $('r-promo').innerHTML = STATE.promo.map(function (p, i) {
       return '<div class="grille g3" style="align-items:end"><div><label>Code</label><input data-pr="' + i + '" data-f="code" style="text-transform:uppercase" value="' + esc(p.code) + '"></div>' +

@@ -472,6 +472,11 @@ details.carte > summary::-webkit-details-marker { display: none; }
 .vip-lv b { font-family: var(--f-display); font-weight: 800; font-size: 44px; line-height: 1; text-transform: uppercase; color: var(--orange); }
 .prod .pv { font-weight: 600; font-size: 15px; color: var(--orange); }
 .prod .prix-l small { color: var(--brume); font-size: 11px; }
+.fcl { display: block; font-family: var(--f-mono); font-size: 11px; color: var(--brume); }
+.taux { font-size: 12px; margin: 0 0 8px; }
+.groupe-etapes { display: grid; gap: 8px; margin: 10px 0; padding: 0; list-style: none; counter-reset: g; }
+.groupe-etapes li { counter-increment: g; display: flex; gap: 10px; align-items: flex-start; }
+.groupe-etapes li::before { content: counter(g); flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--orange); color: #000; font-weight: 700; display: grid; place-items: center; font-size: 13px; }
 .gros { font-family: var(--f-mono); font-size: 11px; color: var(--ok); }
 .calc { background: var(--noir); }
 .calc .acompte strong { font-size: 30px; }
@@ -770,6 +775,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <div class="chips" id="c-chips" role="group" aria-label="Catégories"></div>
     </div>
     <div class="vitrine" id="vitrine" aria-label="Vitrine : les produits défilent" hidden><div class="vit-piste" id="vit-a"></div><div class="vit-piste inv" id="vit-b"></div></div>
+    <p class="note taux" id="c-taux"></p>
     <div class="compte" id="c-compte" aria-live="polite"></div>
     <div class="grid" id="c-grid"></div>
     <div class="carte" id="ent" style="margin-top:18px"><div class="kicker">Entreprises et revendeurs</div><p class="note" style="margin:6px 0 10px">Équipements, stocks et produits pour votre activité : choisissez votre secteur dans l'Espace commerçants.</p><button class="btn" type="button" data-go="pro">Espace commerçants</button></div>
@@ -907,9 +913,20 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <p>Boutiques, hôtels, restaurants, entreprises, revendeurs : demande un devis de gros, un devis groupé sur plusieurs articles ou une commande qui revient chaque mois. Tu reçois une proposition d'approvisionnement avec nos tarifs professionnels.</p>
     </header>
     <div class="wrap" id="pro-secteurs" style="gap:6px"></div>
+    <div class="carte" id="pro-groupe" style="margin-top:14px">
+      <h3 style="margin:0 0 4px">Commandes groupées</h3>
+      <p style="margin:0">Petit budget ? Plusieurs commerçants commandent ensemble pour avoir le prix de gros, et les frais de transport sont partagés.</p>
+      <ol class="groupe-etapes">
+        <li><span>Tu dis ce que tu veux et la quantité.</span></li>
+        <li><span>On réunit les commerçants qui veulent le même produit.</span></li>
+        <li><span>On confirme le prix de gros, le délai et la part de chacun avant tout paiement.</span></li>
+        <li><span>On importe, puis chacun reçoit sa part.</span></li>
+      </ol>
+      <button class="btn" type="button" data-groupe="1">Rejoindre une commande groupée</button>
+    </div>
     <div class="carte" id="pro-form" style="display:grid;gap:10px;margin-top:14px">
       <div class="duo"><div class="champ"><label for="pr-nom">Ton prénom</label><input id="pr-nom" maxlength="60" autocomplete="given-name"></div><div class="champ"><label for="pr-tel">Ton numéro WhatsApp</label><input id="pr-tel" inputmode="tel" maxlength="30" autocomplete="tel" placeholder="+243…"></div></div>
-      <div class="champ"><label for="pr-act">Ton activité</label><select id="pr-act"><option>Hôtels</option><option>Restaurants et cafés</option><option>Entreprises et bureaux</option><option>Startups et entrepreneurs</option><option>Boutiques et distributeurs</option><option>Construction et immobilier</option><option>Écoles et formation</option><option>Santé</option><option>Agriculture et industrie</option><option>Transport et logistique</option><option>Énergie et télécommunications</option><option>Événementiel</option><option>Particuliers</option><option>Autre</option></select></div>
+      <div class="champ"><label for="pr-act">Ton activité</label><select id="pr-act"><option>Hôtels</option><option>Restaurants et cafés</option><option>Entreprises et bureaux</option><option>Startups et entrepreneurs</option><option>Boutiques et distributeurs</option><option>Construction et immobilier</option><option>Écoles et formation</option><option>Santé</option><option>Agriculture et industrie</option><option>Transport et logistique</option><option>Énergie et télécommunications</option><option>Événementiel</option><option>Particuliers</option><option>Commande groupée</option><option>Autre</option></select></div>
       <div class="champ"><label for="pr-txt">Les produits et quantités que tu veux</label><textarea id="pr-txt" rows="4" maxlength="500" placeholder="Ex. 50 chargeurs rapides, 20 montres connectées…"></textarea></div>
       <label class="rang" style="gap:8px;align-items:center"><input type="checkbox" id="pr-liste" style="width:auto"> <span id="pr-liste-t">Ajouter les articles de ma liste</span></label>
       <div class="champ"><label for="pr-freq">Fréquence</label><select id="pr-freq"><option>Une fois</option><option>Chaque mois</option><option>Chaque semaine</option></select></div>
@@ -1132,6 +1149,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   var smooth = !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   function wa(text) { return 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text); }
   function fc(n) { var t = Number(STATE && STATE.fc) || 0; return t > 0 ? '≈ ' + (Math.round(n * t / 100) * 100).toLocaleString('fr-FR') + ' FC' : ''; }
+  function tauxTxt() { var t = Number(STATE && STATE.fc) || 0; if (!(t > 0)) return ''; var d = String(STATE.fcd || '').split('-'); return 'Taux' + (d.length === 3 ? ' du ' + d[2] + '/' + d[1] : '') + ' : 1 $ = ' + t.toLocaleString('fr-FR') + ' FC'; }
   function usd(n) { return n.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' $'; }
   var toastTimer;
   function toast(msg) {
@@ -1420,6 +1438,13 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     }).join('');
   }
   document.addEventListener('click', function (e) {
+    var g = e.target.closest('[data-groupe]');
+    if (g) {
+      var sg = $('pr-act'); if (sg) sg.value = 'Commande groupée';
+      var tg = $('pr-txt'); if (tg && !tg.value) tg.value = 'Commande groupée. Produit : ... Quantité que je prends : ... ';
+      var fg = $('pro-form'); if (fg) fg.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+      return;
+    }
     var d = e.target.closest('[data-devis]'); if (!d) return;
     var x = null; SECTEURS.forEach(function (y) { if (y.id === d.getAttribute('data-devis')) x = y; });
     var sel = $('pr-act'); if (x && sel) for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === x.act) sel.value = x.act;
@@ -1765,6 +1790,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     for (i = 0; i < 3; i++) if (okPx(px[i])) { main = i; break; }
     if (main === null) return '<span class="prix-l">Prix sur demande</span>' + livr(p);
     var s = '<span class="prix-l"><b class="pv">' + usd(Number(px[main])) + '</b>' + (main === 0 && estBaisse(p) ? '<s class="vieux">' + usd(p.pa) + '</s><span class="baisse">−' + Math.round((1 - Number(px[0]) / p.pa) * 100) + ' %</span>' : '') + (main === 0 && qpOf(p)[0] === 1 ? '' : ' <small>dès ' + qpOf(p)[main] + ' pièces</small>') + '</span>';
+    var cf = fc(Number(px[main])); if (cf) s += '<span class="fcl">' + cf + '</span>';
     var mn = prixMin(p);
     if (mn !== null && mn < Number(px[main])) s += '<span class="gros">Gros : ' + usd(mn) + ' la pièce</span>';
     return s + livr(p);
@@ -1781,6 +1807,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       '<div class="champ"><label for="k-c">Code promo</label><input id="k-c" data-k="c" autocomplete="off" placeholder="Facultatif" style="text-transform:uppercase"></div></div>' +
       '<div class="acompte"><div><small>Total estimé</small><strong data-o="tot">—</strong><small data-o="fc"></small></div><div><small>' + (acPct(p) === 100 ? 'À payer à la commande' : 'Acompte à verser (' + acPct(p) + ' %)') + '</small><strong data-o="ac">—</strong></div></div>' +
       '<p class="note" data-o="info"></p></div>';
+    if (tauxTxt()) s += '<p class="note taux">' + tauxTxt() + '</p>';
     return s;
   }
   function majCalc() {
@@ -1878,6 +1905,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       '<button class="btn ghost mini" type="button" data-add="' + p.id + '" aria-pressed="' + dans + '">' + (dans ? 'Dans ma liste' : '+ Ma liste') + '</button></div></article>';
   }
   function rendreGrille() {
+    if ($('c-taux')) $('c-taux').textContent = tauxTxt();
     var q = norm(requete).trim();
     var res = PRODUITS.filter(function (p) {
       if (filtreCat !== 'all' && p.c !== filtreCat) return false;

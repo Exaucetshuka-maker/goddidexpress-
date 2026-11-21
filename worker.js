@@ -185,6 +185,7 @@ function nettoyer(s) {
   o.vp = /^https:\/\/[^\s"'<>\\]{4,300}$/.test(String(s.vp || '').trim()) ? String(s.vp).trim() : '';
   o.vpOff = !!s.vpOff;
   o.fc = Math.max(0, Math.min(100000, Math.round(nombre(s.fc)))) || 0;
+  o.fcd = D10.test(String(s.fcd || '')) ? String(s.fcd) : '';
   o.gsc = /^[A-Za-z0-9_-]{10,100}$/.test(String(s.gsc || '').trim()) ? String(s.gsc).trim() : '';
   o.lien = /^https:\/\//i.test(s.lien || '') ? txt(s.lien, 300) : '';
   o.mail = /^[^\s@<>"']{1,64}@[^\s@<>"']{1,120}\.[^\s@<>"']{2,20}$/.test(String(s.mail || '').trim()) ? String(s.mail).trim() : '';
