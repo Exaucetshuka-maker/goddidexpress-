@@ -732,6 +732,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   $('qc').addEventListener('change', rendreProduits);
 
   function nb(v) { v = parseFloat(String(v).replace(',', '.')); return isFinite(v) && v > 0 ? Math.round(v * 100) / 100 : null; }
+  function jourJ() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
   function refProd(id) {
     var e = STATE.extra.filter(function (x) { return x.id === id; })[0];
     if (e) return e;
@@ -748,7 +749,12 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     if (k === 'st') { if (t.value === 'stock') o.st = 'stock'; else delete o.st; marquer(true); return; }
     if (k === 'ac') { var av = Math.round(parseFloat(t.value)); if (av >= 10 && av <= 100 && av !== 50) o.ac = av; else delete o.ac; marquer(true); return; }
     if (k === 'vid') { var vv = t.value.trim(); if (vv) o.vid = vv; else delete o.vid; marquer(true); return; }
-    o.px = o.px || [null, null, null]; o.px[Number(t.getAttribute('data-i'))] = nb(t.value);
+    var ii = Number(t.getAttribute('data-i')), pm = tous().filter(function (x) { return x.id === row.getAttribute('data-id'); })[0], vieux = pm && pm.px && pm.px[0] > 0 ? pm.px[0] : 0;
+    o.px = o.px || [null, null, null]; o.px[ii] = nb(t.value);
+    if (ii === 0) {
+      if (vieux > 0 && o.px[0] > 0 && o.px[0] < vieux && !o.pa) { o.pa = vieux; o.pd = jourJ(); }
+      else if (o.px[0] > 0 && o.pa && o.px[0] >= o.pa) { delete o.pa; delete o.pd; }
+    }
     marquer(true);
   });
 
@@ -872,7 +878,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   $('n-ok').addEventListener('click', function () {
     var t = $('n-t').value.trim(); if (!t) { alert('Écris le nom du produit.'); return; }
     var id = 'x' + Date.now().toString(36), f = $('n-f').files[0];
-    var p = { id: id, t: t, s: $('n-s').value.trim(), c: $('n-c').value, px: [nb($('n-p1').value), nb($('n-p5').value), nb($('n-p10').value)] };
+    var p = { id: id, da: jourJ(), t: t, s: $('n-s').value.trim(), c: $('n-c').value, px: [nb($('n-p1').value), nb($('n-p5').value), nb($('n-p10').value)] };
     var cat = (CATL[p.c] || '').toLowerCase();
     if (!p.s) p.s = (cat ? cat.charAt(0).toUpperCase() + cat.slice(1) + ', ' : '') + 'sourcé et livré par GOD DID EXPRESS';
     p.desc = ((p.px[1] > 0 || p.px[2] > 0) ? 'Prix dégressif : plus tu prends de pièces, moins chaque pièce coûte. ' : '') + 'Commande sur WhatsApp : on confirme le prix, le délai et la disponibilité avant tout paiement, puis on te livre à Kinshasa.';

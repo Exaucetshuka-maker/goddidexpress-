@@ -8,6 +8,7 @@ const ITER = 10000; // volontairement modéré : le plan gratuit limite le temps
 const TOKEN_JOURS = 30;
 const enc = new TextEncoder();
 
+const D10 = /^\d{4}-\d{2}-\d{2}$/;
 const json = (o, status = 200, extra = {}) =>
   new Response(JSON.stringify(o), {
     status,
@@ -147,6 +148,7 @@ function nettoyer(s) {
     { const ac = Math.round(nombre(p.ac)); if (ac >= 10 && ac <= 100 && ac !== 50) r.ac = ac; }
     if (p.st === 'stock') r.st = 'stock';
     if (new RegExp('^\\d{4}-\\d{2}-\\d{2}$').test(String(p.arr || ''))) r.arr = String(p.arr);
+    { const pa = nombre(p.pa, null); if (pa > 0 && D10.test(String(p.pd || ''))) { r.pa = pa; r.pd = String(p.pd); } }
     if (p.photo && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(p.photo)) r.photo = p.photo;
     { const ph = phs(p.ph); if (ph.length) r.ph = ph; }
     { const vd = vidUrl(p.vid); if (vd) r.vid = vd; }
@@ -168,6 +170,8 @@ function nettoyer(s) {
     { const ac = Math.round(nombre(e.ac)); if (ac >= 10 && ac <= 100 && ac !== 50) r.ac = ac; }
     if (e.st === 'stock') r.st = 'stock';
     if (new RegExp('^\\d{4}-\\d{2}-\\d{2}$').test(String(e.arr || ''))) r.arr = String(e.arr);
+    if (D10.test(String(e.da || ''))) r.da = String(e.da);
+    { const pa = nombre(e.pa, null); if (pa > 0 && D10.test(String(e.pd || ''))) { r.pa = pa; r.pd = String(e.pd); } }
     return r;
   });
   o.slog = {};
