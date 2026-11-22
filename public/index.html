@@ -621,6 +621,14 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 .depot small { color: var(--brume); font-size: 13px; }
 .prev { width: 100%; max-height: 240px; object-fit: cover; border-radius: 12px; border: 1px solid var(--ligne); }
 .cmd-go { min-height: 54px; font-size: 17px; border-radius: 12px; box-shadow: 0 10px 28px rgba(255, 106, 19, .35); }
+.trouve { display: grid; gap: 8px; }
+.tr-oui, .tr-non { display: grid; gap: 2px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--ok); background: rgba(76, 195, 138, .08); }
+.tr-non { border-color: var(--orange); background: rgba(255, 106, 19, .08); }
+.tr-oui span, .tr-non span { font-size: 13px; color: var(--brume); }
+.tr-c { display: flex; justify-content: space-between; align-items: center; gap: 12px; text-align: left; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--ligne); background: var(--noir); color: var(--papier); font: inherit; cursor: pointer; }
+.tr-c span { display: grid; gap: 2px; min-width: 0; }
+.tr-c small { color: var(--brume); font-size: 12.5px; }
+.tr-c em { font-style: normal; font-weight: 800; color: var(--orange-vif); white-space: nowrap; }
 .rassure { margin: -4px 0 0; text-align: center; font-size: 13px; color: var(--ok); }
 .sep-or { display: flex; align-items: center; gap: 12px; color: var(--brume); font-size: 13px; text-transform: uppercase; letter-spacing: .12em; }
 .sep-or::before, .sep-or::after { content: ""; flex: 1; height: 1px; background: var(--ligne); }
@@ -854,6 +862,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <label class="depot" for="dm-photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2.5h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg><b>Ajouter une photo du produit</b><small>Prends-la en photo ou choisis-la dans ta galerie</small></label>
       <input id="dm-photo" class="sr" type="file" accept="image/*">
       <img id="dm-prev" class="prev" alt="" hidden>
+      <div class="trouve" id="dm-trouve" aria-live="polite" hidden></div>
       <div class="champ"><label for="dm-lien">Ou le lien du produit (facultatif)</label><input id="dm-lien" inputmode="url" maxlength="300" placeholder="https://…"></div>
       <div class="champ"><label for="dm-txt">Ce que tu veux (taille, couleur, modèle…)</label><textarea id="dm-txt" rows="3" maxlength="600"></textarea></div>
       <div class="etp"><i>2</i><b>Les détails</b></div>
@@ -2135,9 +2144,39 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       im.src = url;
     });
   }
+  var STOP = ['avec', 'pour', 'dans', 'sans', 'les', 'des', 'une', 'un', 'le', 'la', 'du', 'de', 'et', 'ou', 'en', 'sur', 'par', 'aux', 'son', 'ses'];
+  function motsCles(t) {
+    var o = [];
+    norm(t).split(/[^a-z0-9]+/).forEach(function (w) { w = w.replace(/(s|x)$/, ''); if (w.length >= 3 && STOP.indexOf(w) < 0 && o.indexOf(w) < 0) o.push(w); });
+    return o;
+  }
+  function chercherPhoto(u) {
+    var z = $('dm-trouve'); if (!z) return;
+    z.hidden = false; z.innerHTML = '<p class="note" style="margin:0">Je regarde ta photo…</p>';
+    var mon = DM_PH;
+    fetch(u).then(function (r) { return r.blob(); }).then(function (bl) {
+      return fetch('/api/ia-cherche', { method: 'POST', headers: { 'content-type': 'image/jpeg' }, body: bl });
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (DM_PH !== mon) return;
+      if (!d || !d.ok) { z.hidden = true; z.innerHTML = ''; return; }
+      var tk = motsCles(d.nom + ' ' + (d.mots || []).join(' ')), tt = motsCles(d.nom);
+      var sc = PRODUITS.map(function (p) {
+        var ti = norm(p.t), tout = norm(p.t + ' ' + p.s + ' ' + (CATL[p.c] || '')), n = 0;
+        tk.forEach(function (w) { if (ti.indexOf(w) >= 0) n += tt.indexOf(w) >= 0 ? 3 : 2; else if (tout.indexOf(w) >= 0) n += 1; });
+        return { p: p, n: n };
+      }).filter(function (x) { return x.n >= 3 && prixMin(x.p) !== null; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 3);
+      setTimeout(function () { z.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'center' }); }, 60);
+      var tx = $('dm-txt'); if (tx && !tx.value && d.nom) tx.value = d.nom + (d.court ? ' : ' + d.court : '');
+      if (!sc.length) { z.innerHTML = '<div class="tr-non"><b>Pas dans notre catalogue.</b><span>Envoie ta demande, on le cherche chez nos fournisseurs et on te répond sur WhatsApp avec le devis.</span></div>'; return; }
+      z.innerHTML = '<div class="tr-oui"><b>On a des produits qui ressemblent</b><span>Touche un produit pour le voir et le commander.</span></div>' + sc.map(function (x) {
+        return '<button type="button" class="tr-c" data-open="' + h(x.p.id) + '"><span><b>' + h(x.p.t) + '</b><small>' + h(x.p.s) + '</small></span><em>' + usd(prixMin(x.p)) + '</em></button>';
+      }).join('') + '<p class="note" style="margin:0">Ce n\'est pas ça ? Envoie ta demande, on le cherche pour toi.</p>';
+    }).catch(function () { z.hidden = true; z.innerHTML = ''; });
+  }
   (function () {
     var f = $('dm-photo'); if (!f) return;
-    f.addEventListener('change', function () { var dl = document.querySelector('label.depot b'); if (dl) dl.textContent = f.files[0] ? 'Photo ajoutée ✓ (toucher pour changer)' : 'Ajouter une photo du produit'; DM_PH = ''; $('dm-prev').hidden = true; if (!f.files[0]) return; reduireDm(f.files[0]).then(function (u) { DM_PH = u; $('dm-prev').src = u; $('dm-prev').hidden = false; }).catch(function () { $('dm-msg').textContent = 'Cette photo ne peut pas être lue. Essaie une autre.'; }); });
+    if ($('dm-trouve')) $('dm-trouve').addEventListener('click', function (e) { var o = e.target.closest('[data-open]'); if (o) ouvrirProduit(o.getAttribute('data-open')); });
+    f.addEventListener('change', function () { var dl = document.querySelector('label.depot b'); if (dl) dl.textContent = f.files[0] ? 'Photo ajoutée ✓ (toucher pour changer)' : 'Ajouter une photo du produit'; DM_PH = ''; $('dm-prev').hidden = true; if (!f.files[0]) return; reduireDm(f.files[0]).then(function (u) { DM_PH = u; $('dm-prev').src = u; $('dm-prev').hidden = false; chercherPhoto(u); }).catch(function () { $('dm-msg').textContent = 'Cette photo ne peut pas être lue. Essaie une autre.'; }); });
     $('dm-ok').addEventListener('click', function () {
       var b = $('dm-ok'), m = $('dm-msg'); b.disabled = true; m.textContent = 'Envoi…';
       fetch('/api/demande', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nom: $('dm-nom').value, tel: $('dm-tel').value, lien: $('dm-lien').value.trim(), txt: $('dm-txt').value, qte: $('dm-qte').value, bud: $('dm-bud').value, mar: $('dm-mar').value, pre: !!$('dm-quand').value, voy: $('dm-quand').value === 'arrivage' ? 'Prochain arrivage' : $('dm-quand').value, photo: DM_PH }) })

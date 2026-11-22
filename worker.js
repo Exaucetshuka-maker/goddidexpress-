@@ -94,6 +94,28 @@ async function pkVerifier(env, request, b) {
 
 /* Limite en mémoire (sans écrire dans KV) pour les adresses publiques : évite le spam et protège le quota d'écriture */
 const TAUX = new Map();
+async function analyserPhoto(env, buf) {
+  const erreurs = [];
+  const essai = async (modeles, fabrique, lire) => { for (const m of modeles) { try { const r = await env.AI.run(m, fabrique(m)); const t = txt(lire(r), 800).trim(); if (t) return t; erreurs.push(m.split('/').pop() + ': vide'); } catch (e) { erreurs.push(m.split('/').pop() + ': ' + txt(e && e.message, 90)); } } return ''; };
+  let b64 = ''; for (let k = 0; k < buf.length; k += 8192) b64 += String.fromCharCode.apply(null, buf.subarray(k, k + 8192)); b64 = btoa(b64);
+  const consigne = 'Describe the product in this photo in one or two sentences: what it is, its colour, its material and what it is used for.';
+  const lireTexte = (r) => (r && (r.description || r.response || (r.choices && r.choices[0] && r.choices[0].message && r.choices[0].message.content) || r.result)) || '';
+  /* 1. Regarder la photo (plusieurs modèles, le premier qui répond) */
+  let en = await essai(['@cf/moondream/moondream3.1-9B-A2B'], () => ({ task: 'caption', image: Array.from(buf), prompt: consigne, max_tokens: 120 }), lireTexte);
+  if (!en) en = await essai(['@cf/google/gemma-4-26b-a4b-it'], () => ({ messages: [{ role: 'user', content: [{ type: 'text', text: consigne }, { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,' + b64 } }] }], max_tokens: 160 }), lireTexte);
+  if (!en) return { ok: false, raison: 'ia-erreur', detail: txt(erreurs.join(' | '), 300) };
+  /* 2. Écrire le nom et la description en français */
+  const brut = await essai(['@cf/meta/llama-3.1-8b-instruct-fast', '@cf/zai-org/glm-4.7-flash'], () => ({ messages: [
+    { role: 'system', content: 'Tu écris pour une boutique de Kinshasa. À partir de la description anglaise d\'un produit, réponds uniquement par un objet JSON {"nom":"...","court":"...","mots":["..."]} en français. "nom" : le nom du produit, 2 à 5 mots, sans marque inventée. "court" : une petite description, 8 à 18 mots, sans prix, sans promesse. "mots" : 4 à 8 mots-clés français simples (le produit, des synonymes, sa catégorie), un mot chacun.' },
+    { role: 'user', content: en }], max_tokens: 200 }), lireTexte);
+  const m = brut.match(/\{[\s\S]*\}/);
+  let o = {}; try { o = JSON.parse(m ? m[0] : '{}'); } catch (e) { o = {}; }
+  const nom = txt(o.nom, 60).replace(/[<>]/g, '').trim(), court = txt(o.court, 140).replace(/[<>]/g, '').trim().replace(/\.$/, '');
+  if (!nom) return { ok: false, raison: 'ia-erreur', detail: txt(erreurs.join(' | ') || 'texte non compris', 300) };
+  const mots = (Array.isArray(o.mots) ? o.mots : []).slice(0, 8).map((x) => txt(x, 24).replace(/[<>]/g, '').trim()).filter(Boolean);
+  return { ok: true, nom, court, mots };
+}
+
 function limite(request, nom, max) {
   const ip = request.headers.get('cf-connecting-ip') || 'x', k = nom + ':' + ip, mn = Math.floor(Date.now() / 60000), e = TAUX.get(k);
   if (TAUX.size > 3000) TAUX.clear();
@@ -479,6 +501,17 @@ async function traiter(request, env) {
       L.push({ ref, nom: nom || c.nom, txt: tx, t: Date.now() }); await env.GDE.put('avisv', JSON.stringify(L.slice(-200)));
       return json({ ok: true });
     }
+    /* Recherche par photo (public) : la photo est regardée par l'IA, rien n'est gardé. Limites strictes, jamais bloquant. */
+    if (p === '/api/ia-cherche' && request.method === 'POST') {
+      if (!env.AI) return json({ ok: false, raison: 'ia-indisponible' });
+      if (limite(request, 'iach', 4)) return json({ ok: false, raison: 'trop-vite' }, 429);
+      const ipc = request.headers.get('cf-connecting-ip') || 'x', jk = 'iach:' + ipc + ':' + new Date().toISOString().slice(0, 10), nj = Number((await env.GDE.get(jk)) || 0);
+      if (nj >= 15) return json({ ok: false, raison: 'limite-jour' }, 429);
+      const buf = new Uint8Array(await request.arrayBuffer());
+      if (!buf.length || buf.length > 900000) return json({ ok: false, raison: 'photo' }, 413);
+      await env.GDE.put(jk, String(nj + 1), { expirationTtl: 90000 });
+      return json(await analyserPhoto(env, buf));
+    }
     if (p === '/api/demande' && request.method === 'POST') {
       const ip = request.headers.get('cf-connecting-ip') || 'x', rk = 'dm:' + ip, n0 = Number((await env.GDE.get(rk)) || 0);
       if (n0 >= 5) return json({ erreur: 'Tu as déjà envoyé plusieurs demandes. Réessaie dans une heure ou écris sur WhatsApp.' }, 429);
@@ -608,24 +641,8 @@ async function traiter(request, env) {
       if (limite(request, 'iaprod', 20)) return json({ ok: false, raison: 'trop-vite' }, 429);
       const buf = new Uint8Array(await request.arrayBuffer());
       if (!buf.length || buf.length > 900000) return json({ ok: false, raison: 'photo' }, 413);
-      const erreurs = [];
-      const essai = async (modeles, fabrique, lire) => { for (const m of modeles) { try { const r = await env.AI.run(m, fabrique(m)); const t = txt(lire(r), 800).trim(); if (t) return t; erreurs.push(m.split('/').pop() + ': vide'); } catch (e) { erreurs.push(m.split('/').pop() + ': ' + txt(e && e.message, 90)); } } return ''; };
-      let b64 = ''; for (let k = 0; k < buf.length; k += 8192) b64 += String.fromCharCode.apply(null, buf.subarray(k, k + 8192)); b64 = btoa(b64);
-      const consigne = 'Describe the product in this photo in one or two sentences: what it is, its colour, its material and what it is used for.';
-      const lireTexte = (r) => (r && (r.description || r.response || (r.choices && r.choices[0] && r.choices[0].message && r.choices[0].message.content) || r.result)) || '';
-      /* 1. Regarder la photo (plusieurs modèles, le premier qui répond) */
-      let en = await essai(['@cf/moondream/moondream3.1-9B-A2B'], () => ({ task: 'caption', image: Array.from(buf), prompt: consigne, max_tokens: 120 }), lireTexte);
-      if (!en) en = await essai(['@cf/google/gemma-4-26b-a4b-it'], () => ({ messages: [{ role: 'user', content: [{ type: 'text', text: consigne }, { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,' + b64 } }] }], max_tokens: 160 }), lireTexte);
-      if (!en) return json({ ok: false, raison: 'ia-erreur', detail: txt(erreurs.join(' | '), 300) });
-      /* 2. Écrire le nom et la description en français */
-      const brut = await essai(['@cf/meta/llama-3.1-8b-instruct-fast', '@cf/zai-org/glm-4.7-flash'], () => ({ messages: [
-        { role: 'system', content: 'Tu écris pour une boutique de Kinshasa. À partir de la description anglaise d\'un produit, réponds uniquement par un objet JSON {"nom":"...","court":"..."} en français. "nom" : le nom du produit, 2 à 5 mots, sans marque inventée. "court" : une petite description, 8 à 18 mots, sans prix, sans promesse.' },
-        { role: 'user', content: en }], max_tokens: 200 }), lireTexte);
-      const m = brut.match(/\{[\s\S]*\}/);
-      let o = {}; try { o = JSON.parse(m ? m[0] : '{}'); } catch (e) { o = {}; }
-      const nom = txt(o.nom, 60).replace(/[<>]/g, '').trim(), court = txt(o.court, 140).replace(/[<>]/g, '').trim().replace(/\.$/, '');
-      if (!nom) return json({ ok: false, raison: 'ia-erreur', detail: txt(erreurs.join(' | ') || 'texte non compris', 300) });
-      return json({ ok: true, nom, court });
+      const r = await analyserPhoto(env, buf);
+      return json(r);
     }
 
     if (p === '/api/state' && request.method === 'PUT') {
