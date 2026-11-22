@@ -589,6 +589,57 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 .drap.d-wd { right: 16px; bottom: 54px; animation-delay: -0.6s; }
 @media (prefers-reduced-motion: reduce) { .drap { animation: none; } }
 @media (max-width: 340px) { .marche .flag { font-size: 24px; } .trois span { display: none; } }
+
+/* Refonte : Commander, Suivi, Plus */
+.tabbar nav { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+#t-commander { color: var(--orange-vif); }
+#t-commander svg { width: 38px; height: 38px; padding: 8px; box-sizing: border-box; border-radius: 14px; background: var(--orange); stroke: var(--sur-orange); margin-top: -16px; box-shadow: 0 6px 18px rgba(255, 106, 19, .45); }
+#t-commander[aria-current="page"] span { border-bottom: 2px solid var(--orange); }
+.menu-plus-w { position: fixed; z-index: 25; top: calc(10px + env(safe-area-inset-top, 0px)); right: max(14px, env(safe-area-inset-right, 0px)); }
+.menu-plus { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 1px solid var(--ligne); background: rgba(24, 22, 20, .86); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); color: var(--papier); cursor: pointer; box-shadow: 0 6px 20px rgba(0, 0, 0, .35); }
+.menu-plus svg { width: 22px; height: 22px; fill: currentColor; stroke: none; }
+.menu-plus[aria-current="page"] { border-color: var(--orange); color: var(--orange-vif); }
+.menu-plus span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.marque { padding-right: 56px; }
+.view > header { padding-right: 52px; }
+.cmd-hero h2 { font-size: clamp(34px, 11vw, 52px); line-height: .95; }
+.cmd-et { display: grid; gap: 8px; }
+.cmd-et .et { display: grid; grid-template-columns: 34px minmax(0, 1fr); column-gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--ligne); border-radius: 12px; background: linear-gradient(135deg, rgba(255, 106, 19, .10), rgba(24, 22, 20, .9) 60%); }
+.cmd-et i, .etp i { grid-row: span 2; font-style: normal; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--orange); color: var(--sur-orange); font-weight: 800; font-size: 14px; }
+.cmd-et b { font-size: 15px; }
+.cmd-et span { font-size: 13px; color: var(--brume); }
+.cmd-box { gap: 12px; border-radius: 16px; padding: 18px 16px; border-color: rgba(255, 106, 19, .45); box-shadow: 0 0 0 1px rgba(255, 106, 19, .08), 0 14px 40px rgba(0, 0, 0, .35); background: linear-gradient(180deg, #1d1a17, var(--carbone)); }
+.etp { display: flex; align-items: center; gap: 10px; margin-top: 6px; font-size: 16px; }
+.etp:first-child { margin-top: 0; }
+.etp i { grid-row: auto; width: 26px; height: 26px; font-size: 13px; }
+.sr { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+.depot { display: grid; justify-items: center; gap: 4px; padding: 22px 14px; text-align: center; border: 2px dashed var(--orange); border-radius: 14px; background: rgba(255, 106, 19, .07); cursor: pointer; transition: background .2s, transform .2s; }
+.depot:hover, .sr:focus + .depot { background: rgba(255, 106, 19, .14); }
+.depot:active { transform: scale(.985); }
+.depot svg { width: 44px; height: 44px; fill: none; stroke: var(--orange-vif); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.depot b { font-size: 16px; color: var(--papier); }
+.depot small { color: var(--brume); font-size: 13px; }
+.prev { width: 100%; max-height: 240px; object-fit: cover; border-radius: 12px; border: 1px solid var(--ligne); }
+.cmd-go { min-height: 54px; font-size: 17px; border-radius: 12px; box-shadow: 0 10px 28px rgba(255, 106, 19, .35); }
+.rassure { margin: -4px 0 0; text-align: center; font-size: 13px; color: var(--ok); }
+.sep-or { display: flex; align-items: center; gap: 12px; color: var(--brume); font-size: 13px; text-transform: uppercase; letter-spacing: .12em; }
+.sep-or::before, .sep-or::after { content: ""; flex: 1; height: 1px; background: var(--ligne); }
+.live-dot { display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 rgba(76, 195, 138, .6); animation: pulseDot 1.8s infinite; vertical-align: 1px; }
+@keyframes pulseDot { 70% { box-shadow: 0 0 0 9px rgba(76, 195, 138, 0); } 100% { box-shadow: 0 0 0 0 rgba(76, 195, 138, 0); } }
+.suivi-box { border-radius: 16px; border-color: rgba(255, 106, 19, .45); background: linear-gradient(135deg, rgba(255, 106, 19, .12), var(--carbone) 65%); box-shadow: 0 14px 40px rgba(0, 0, 0, .35); }
+.suivi-box .recherche { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.suivi-box .lbl { font-size: 13px; color: var(--brume); }
+.recherche-l { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+.suivi-box input { min-height: 54px; font-family: var(--f-mono); font-size: 17px; letter-spacing: .08em; text-transform: uppercase; }
+.suivi-box .btn { min-height: 54px; padding: 0 22px; border-radius: 12px; }
+.holo { border-radius: 18px; border-color: rgba(255, 106, 19, .45); box-shadow: 0 0 0 1px rgba(255, 106, 19, .1), 0 18px 50px rgba(0, 0, 0, .5), 0 0 60px rgba(255, 106, 19, .12); }
+#v-suivi .carte { border-radius: 16px; }
+.suivi li { padding-bottom: 22px; }
+.suivi li::before { left: 12px; width: 3px; border-radius: 2px; }
+.suivi .pt { width: 28px; height: 28px; }
+.suivi li.cours .pt { animation: pulsePt 1.8s infinite; }
+@keyframes pulsePt { 50% { box-shadow: 0 0 0 9px rgba(255, 106, 19, .0), 0 0 18px rgba(255, 106, 19, .7); } }
+@media (prefers-reduced-motion: reduce) { .live-dot, .suivi li.cours .pt { animation: none; } }
 </style>
 
 <div class="fond" aria-hidden="true"></div>
@@ -788,24 +839,34 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 
 <!-- 1. COMMANDER -->
   <section class="view" id="v-commander" hidden>
-    <header>
-      <div class="kicker">Commande sur mesure</div>
+    <header class="cmd-hero">
+      <div class="kicker">Commande sur mesure · Chine · Dubaï · Turquie</div>
       <h2>Demandez, on cherche</h2>
-      <p>Décrivez le produit. Vous recevez un devis détaillé : prix fournisseur, transport, douane et notre marge. Vous versez l'acompte indiqué sur le devis pour lancer l'achat, le reste à la livraison.</p>
+      <p>Une photo ou un lien suffit. On trouve le fournisseur et tu reçois un devis détaillé avant de payer quoi que ce soit.</p>
     </header>
-    <div class="carte" id="dem-box" style="margin:0 0 14px;display:grid;gap:10px">
-      <div class="kicker">Produit introuvable ?</div><h3 style="margin:0">Tu cherches un produit ? Nous le trouvons.</h3>
-      <p class="note" style="margin:0">Envoie-nous la photo du produit que tu veux, ou le lien d'un site. On le retrouve et on te donne un devis avant tout paiement.</p>
-      <div class="duo"><div class="champ"><label for="dm-nom">Ton prénom</label><input id="dm-nom" maxlength="60" autocomplete="given-name"></div><div class="champ"><label for="dm-tel">Ton numéro WhatsApp</label><input id="dm-tel" inputmode="tel" maxlength="30" autocomplete="tel" placeholder="+243…"></div></div>
-      <div class="champ"><label for="dm-photo">Photo du produit</label><input id="dm-photo" type="file" accept="image/*"><img id="dm-prev" alt="" hidden style="width:100%;max-height:220px;object-fit:cover;border-radius:6px;margin-top:6px"></div>
-      <div class="champ"><label for="dm-lien">Lien du produit (facultatif)</label><input id="dm-lien" inputmode="url" maxlength="300" placeholder="https://…"></div>
+    <div class="cmd-et" role="list" aria-label="Comment ça marche">
+      <div class="et" role="listitem"><i>1</i><b>Tu envoies</b><span>Photo, lien ou description</span></div>
+      <div class="et" role="listitem"><i>2</i><b>Tu reçois le devis</b><span>Prix fournisseur, transport, douane, notre marge</span></div>
+      <div class="et" role="listitem"><i>3</i><b>On livre</b><span>Acompte indiqué sur le devis, le reste à la livraison</span></div>
+    </div>
+    <div class="carte cmd-box" id="dem-box">
+      <div class="etp"><i>1</i><b>Le produit</b></div>
+      <label class="depot" for="dm-photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2.5h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg><b>Ajouter une photo du produit</b><small>Prends-la en photo ou choisis-la dans ta galerie</small></label>
+      <input id="dm-photo" class="sr" type="file" accept="image/*">
+      <img id="dm-prev" class="prev" alt="" hidden>
+      <div class="champ"><label for="dm-lien">Ou le lien du produit (facultatif)</label><input id="dm-lien" inputmode="url" maxlength="300" placeholder="https://…"></div>
+      <div class="champ"><label for="dm-txt">Ce que tu veux (taille, couleur, modèle…)</label><textarea id="dm-txt" rows="3" maxlength="600"></textarea></div>
+      <div class="etp"><i>2</i><b>Les détails</b></div>
       <div class="duo"><div class="champ"><label for="dm-qte">Quantité</label><input id="dm-qte" inputmode="numeric" maxlength="12" placeholder="Ex. 20"></div><div class="champ"><label for="dm-bud">Budget indicatif ($)</label><input id="dm-bud" inputmode="decimal" maxlength="12" placeholder="Ex. 500"></div></div>
-      <div class="champ"><label for="dm-quand">Quand ?</label><select id="dm-quand"><option value="">Dès que possible</option><option value="arrivage">Réserver pour le prochain arrivage (acompte indiqué sur le devis)</option></select></div>
       <div class="champ"><label for="dm-mar">Où chercher ?</label><select id="dm-mar"><option>Tous les marchés</option><option>Chine</option><option>Dubaï</option><option>Turquie</option></select></div>
-      <div class="champ"><label for="dm-txt">Ce que tu veux (taille, couleur, quantité…)</label><textarea id="dm-txt" rows="3" maxlength="600"></textarea></div>
-      <button class="btn" id="dm-ok" type="button">Envoyer ma demande</button>
+      <div class="champ"><label for="dm-quand">Quand ?</label><select id="dm-quand"><option value="">Dès que possible</option><option value="arrivage">Réserver pour le prochain arrivage (acompte indiqué sur le devis)</option></select></div>
+      <div class="etp"><i>3</i><b>Où t'envoyer le devis ?</b></div>
+      <div class="duo"><div class="champ"><label for="dm-nom">Ton prénom</label><input id="dm-nom" maxlength="60" autocomplete="given-name"></div><div class="champ"><label for="dm-tel">Ton numéro WhatsApp</label><input id="dm-tel" inputmode="tel" maxlength="30" autocomplete="tel" placeholder="+243…"></div></div>
+      <button class="btn cmd-go" id="dm-ok" type="button">Envoyer ma demande</button>
+      <p class="rassure">Aucun paiement avant le devis.</p>
       <p class="note" id="dm-msg" aria-live="polite" style="margin:0"></p>
     </div>
+    <div class="sep-or"><span>Ou commande tout de suite</span></div>
     <form id="form-cmd" autocomplete="on">
       <div class="duo">
         <div class="champ"><label for="o-nom">Votre nom</label><input id="o-nom" name="nom" required placeholder="Ex. Marie"></div>
@@ -987,15 +1048,16 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   <!-- 4. SUIVI -->
   <section class="view" id="v-suivi" hidden>
     <header>
-      <div class="kicker">Suivi avec preuves</div>
+      <div class="kicker"><span class="live-dot" aria-hidden="true"></span>Suivi en direct, avec preuves</div>
       <h2>Où est mon colis ?</h2>
-      <p>Chaque étape est confirmée par une preuve : capture, photo ou vidéo. Entrez la référence reçue sur WhatsApp.</p>
+      <p>Chaque étape est confirmée par une preuve : capture, photo ou vidéo. Entre la référence reçue sur WhatsApp.</p>
     </header>
-    <form id="form-suivi" class="recherche" autocomplete="off">
-      <label for="s-code" class="lbl" style="position:absolute;left:-9999px">Référence de commande</label>
-      <input id="s-code" value="GDE-2610-0042" aria-label="Référence de commande" spellcheck="false">
-      <button class="btn" type="submit">Voir</button>
-    </form>
+    <div class="carte suivi-box">
+      <form id="form-suivi" class="recherche" autocomplete="off">
+        <label for="s-code" class="lbl">Ta référence de commande</label>
+        <div class="recherche-l"><input id="s-code" value="GDE-2610-0042" aria-label="Référence de commande" spellcheck="false"><button class="btn" type="submit">Voir</button></div>
+      </form>
+    </div>
     <div class="holo">
       <canvas class="globe" id="g-suivi" role="img" aria-label="Globe holographique : position de ton colis entre son pays de départ et Kinshasa"></canvas>
       <div class="holo-top"><span>GOD DID EXPRESS · SUIVI</span><span class="pastille" id="holo-tag">Exemple</span></div>
@@ -1112,13 +1174,15 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   </footer>
 </div>
 
+<div class="menu-plus-w">
+    <button type="button" id="t-plus" class="menu-plus" data-v="plus" aria-label="Plus : menu"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18.5" cy="12" r="1.6"/></svg><span>Plus</span></button>
+</div>
 <div class="tabbar">
   <nav aria-label="Navigation">
     <button type="button" id="t-accueil" data-v="accueil"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.8V20h13V9.8"/><path d="M10 20v-5h4v5"/></svg><span>Accueil</span></button>
     <button type="button" id="t-catalogue" data-v="catalogue"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1"/><rect x="13.5" y="3.5" width="7" height="7" rx="1"/><rect x="3.5" y="13.5" width="7" height="7" rx="1"/><rect x="13.5" y="13.5" width="7" height="7" rx="1"/></svg><span>Catalogue</span></button>
     <button type="button" id="t-commander" data-v="commander"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg><span>Commander</span></button>
     <button type="button" id="t-suivi" data-v="suivi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Suivi</span></button>
-    <button type="button" id="t-plus" data-v="plus"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18.5" cy="12" r="1.6"/></svg><span>Plus</span></button>
   </nav>
 </div>
 <div class="listbar" id="listbar" hidden>
@@ -2073,7 +2137,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   }
   (function () {
     var f = $('dm-photo'); if (!f) return;
-    f.addEventListener('change', function () { DM_PH = ''; $('dm-prev').hidden = true; if (!f.files[0]) return; reduireDm(f.files[0]).then(function (u) { DM_PH = u; $('dm-prev').src = u; $('dm-prev').hidden = false; }).catch(function () { $('dm-msg').textContent = 'Cette photo ne peut pas être lue. Essaie une autre.'; }); });
+    f.addEventListener('change', function () { var dl = document.querySelector('label.depot b'); if (dl) dl.textContent = f.files[0] ? 'Photo ajoutée ✓ (toucher pour changer)' : 'Ajouter une photo du produit'; DM_PH = ''; $('dm-prev').hidden = true; if (!f.files[0]) return; reduireDm(f.files[0]).then(function (u) { DM_PH = u; $('dm-prev').src = u; $('dm-prev').hidden = false; }).catch(function () { $('dm-msg').textContent = 'Cette photo ne peut pas être lue. Essaie une autre.'; }); });
     $('dm-ok').addEventListener('click', function () {
       var b = $('dm-ok'), m = $('dm-msg'); b.disabled = true; m.textContent = 'Envoi…';
       fetch('/api/demande', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nom: $('dm-nom').value, tel: $('dm-tel').value, lien: $('dm-lien').value.trim(), txt: $('dm-txt').value, qte: $('dm-qte').value, bud: $('dm-bud').value, mar: $('dm-mar').value, pre: !!$('dm-quand').value, voy: $('dm-quand').value === 'arrivage' ? 'Prochain arrivage' : $('dm-quand').value, photo: DM_PH }) })
