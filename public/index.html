@@ -648,6 +648,41 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 .suivi li.cours .pt { animation: pulsePt 1.8s infinite; }
 @keyframes pulsePt { 50% { box-shadow: 0 0 0 9px rgba(255, 106, 19, .0), 0 0 18px rgba(255, 106, 19, .7); } }
 @media (prefers-reduced-motion: reduce) { .live-dot, .suivi li.cours .pt { animation: none; } }
+
+/* v2 : plus d'impact */
+.menu-plus { width: auto; height: 44px; padding: 0 16px 0 12px; border-radius: 22px; gap: 8px; grid-auto-flow: column; border-color: var(--orange); background: linear-gradient(135deg, rgba(255, 106, 19, .28), rgba(24, 22, 20, .92)); font: 700 14px var(--f-body); }
+.menu-plus span { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
+.marque { padding-right: 112px; min-height: 56px; }
+.view > header { padding-right: 0; }
+@media (max-width: 480px) { .marque .base { display: none; } }
+.cmd-hero { position: relative; overflow: hidden; padding: 22px 18px 20px; border-radius: 22px; border: 1px solid rgba(255, 106, 19, .5); background: radial-gradient(120% 90% at 100% 0%, rgba(255, 106, 19, .38), transparent 60%), linear-gradient(160deg, #241c16, #120f0d); box-shadow: 0 18px 50px rgba(0, 0, 0, .5), 0 0 60px rgba(255, 106, 19, .14); }
+.cmd-hero > * { position: relative; z-index: 1; }
+.cmd-hero h2 { font-size: clamp(34px, 10.6vw, 58px); margin: 10px 0 8px; }
+.cmd-hero h2 em { font-style: normal; background: linear-gradient(90deg, #ffb27a, var(--orange) 55%, #ff4d00); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.cmd-hero p { font-size: 14px; max-width: 46ch; }
+.cmd-pays { display: flex; gap: 6px; flex-wrap: wrap; }
+.cmd-pays span { padding: 4px 10px; border-radius: 99px; border: 1px solid rgba(255, 106, 19, .55); background: rgba(255, 106, 19, .12); color: var(--orange-vif); font: 600 12px var(--f-mono); letter-spacing: .06em; text-transform: uppercase; }
+.orbite { position: absolute; right: -60px; top: -60px; width: 220px; height: 220px; z-index: 0; pointer-events: none; }
+.orbite i { position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(255, 106, 19, .35); animation: orbiter 14s linear infinite; }
+.orbite i:nth-child(2) { inset: 28px; animation-duration: 10s; animation-direction: reverse; border-style: dashed; }
+.orbite i:nth-child(3) { inset: 58px; animation-duration: 7s; border-color: rgba(255, 106, 19, .6); }
+@keyframes orbiter { to { transform: rotate(360deg); } }
+.cmd-et { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.cmd-et .et { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; align-content: start; gap: 2px; padding: 14px 6px 12px; text-align: center; border-radius: 16px; border: 1px solid var(--ligne); background: linear-gradient(180deg, rgba(255, 106, 19, .12), rgba(24, 22, 20, .95) 70%); }
+.cmd-et .et i { grid-row: auto; width: 42px; height: 42px; border-radius: 14px; margin-bottom: 6px; background: var(--orange); box-shadow: 0 6px 16px rgba(255, 106, 19, .35); }
+.cmd-et .et svg { width: 22px; height: 22px; fill: none; stroke: var(--sur-orange); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.cmd-et .et b { font-size: 14px; }
+.cmd-et .et span { font-size: 12px; }
+.depot { padding: 26px 14px; background: radial-gradient(90% 120% at 50% 0%, rgba(255, 106, 19, .22), rgba(255, 106, 19, .05)); }
+.cam { position: relative; display: grid; place-items: center; width: 72px; height: 72px; border-radius: 50%; background: rgba(255, 106, 19, .16); }
+.cam::before { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--orange); animation: ondeCam 2s ease-out infinite; }
+.cam svg { width: 38px; height: 38px; }
+@keyframes ondeCam { from { transform: scale(.85); opacity: .9; } to { transform: scale(1.5); opacity: 0; } }
+.cmd-go { background: linear-gradient(90deg, var(--orange), #ff8b3e); }
+.suivi-live { display: inline-flex; align-items: center; justify-self: start; padding: 6px 12px; border-radius: 99px; border: 1px solid rgba(76, 195, 138, .5); background: rgba(76, 195, 138, .1); color: var(--ok); font: 600 12px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; }
+.suivi-live .live-dot { margin-right: 8px; }
+#v-suivi > header h2 { font-size: clamp(38px, 12vw, 56px); line-height: .95; }
+@media (prefers-reduced-motion: reduce) { .orbite i, .cam::before { animation: none; } }
 </style>
 
 <div class="fond" aria-hidden="true"></div>
@@ -848,18 +883,19 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 <!-- 1. COMMANDER -->
   <section class="view" id="v-commander" hidden>
     <header class="cmd-hero">
-      <div class="kicker">Commande sur mesure · Chine · Dubaï · Turquie</div>
-      <h2>Demandez, on cherche</h2>
-      <p>Une photo ou un lien suffit. On trouve le fournisseur et tu reçois un devis détaillé avant de payer quoi que ce soit.</p>
+      <div class="orbite" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="cmd-pays"><span>Chine</span><span>Dubaï</span><span>Turquie</span></div>
+      <h2>Demandez,<br><em>on cherche</em></h2>
+      <p>Une photo ou un lien suffit. Tu reçois un devis détaillé (prix fournisseur, transport, douane, notre marge) avant de payer quoi que ce soit. Acompte indiqué sur le devis, le reste à la livraison.</p>
     </header>
     <div class="cmd-et" role="list" aria-label="Comment ça marche">
-      <div class="et" role="listitem"><i>1</i><b>Tu envoies</b><span>Photo, lien ou description</span></div>
-      <div class="et" role="listitem"><i>2</i><b>Tu reçois le devis</b><span>Prix fournisseur, transport, douane, notre marge</span></div>
-      <div class="et" role="listitem"><i>3</i><b>On livre</b><span>Acompte indiqué sur le devis, le reste à la livraison</span></div>
+      <div class="et" role="listitem"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2.5h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg></i><b>Tu envoies</b><span>Photo ou lien</span></div>
+      <div class="et" role="listitem"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></i><b>Tu reçois</b><span>Le devis détaillé</span></div>
+      <div class="et" role="listitem"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg></i><b>On livre</b><span>Chez toi</span></div>
     </div>
     <div class="carte cmd-box" id="dem-box">
       <div class="etp"><i>1</i><b>Le produit</b></div>
-      <label class="depot" for="dm-photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2.5h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg><b>Ajouter une photo du produit</b><small>Prends-la en photo ou choisis-la dans ta galerie</small></label>
+      <label class="depot" for="dm-photo"><span class="cam"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2.5h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg></span><b>Ajouter une photo du produit</b><small>Prends-la en photo ou choisis-la dans ta galerie</small></label>
       <input id="dm-photo" class="sr" type="file" accept="image/*">
       <img id="dm-prev" class="prev" alt="" hidden>
       <div class="trouve" id="dm-trouve" aria-live="polite" hidden></div>
@@ -1057,7 +1093,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   <!-- 4. SUIVI -->
   <section class="view" id="v-suivi" hidden>
     <header>
-      <div class="kicker"><span class="live-dot" aria-hidden="true"></span>Suivi en direct, avec preuves</div>
+      <div class="suivi-live"><span class="live-dot" aria-hidden="true"></span>Suivi en direct, avec preuves</div>
       <h2>Où est mon colis ?</h2>
       <p>Chaque étape est confirmée par une preuve : capture, photo ou vidéo. Entre la référence reçue sur WhatsApp.</p>
     </header>
