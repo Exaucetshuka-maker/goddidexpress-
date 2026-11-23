@@ -683,6 +683,54 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 .suivi-live .live-dot { margin-right: 8px; }
 #v-suivi > header h2 { font-size: clamp(38px, 12vw, 56px); line-height: .95; }
 @media (prefers-reduced-motion: reduce) { .orbite i, .cam::before { animation: none; } }
+
+/* v3 : vivant */
+.tabbar nav { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.marque { padding-right: 0; min-height: 0; }
+@media (max-width: 480px) { .marque .base { display: block; } }
+#t-commander svg { width: 24px; height: 24px; padding: 0; margin-top: 0; border-radius: 0; background: none; stroke: currentColor; box-shadow: none; }
+#t-plus.orbe { position: relative; overflow: visible; }
+#t-plus .o { position: relative; display: grid; place-items: center; width: 56px; height: 56px; margin: -26px auto 2px; border-radius: 50%; background: radial-gradient(circle at 30% 22%, #ffc59a, var(--orange) 46%, #c63b00); box-shadow: 0 10px 28px rgba(255, 106, 19, .6), inset 0 -4px 10px rgba(0, 0, 0, .25); animation: flotte 3.2s ease-in-out infinite; }
+#t-plus .o::before { content: ""; position: absolute; inset: -5px; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0 55%, #ffd9bd 80%, transparent); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); animation: tourne 2.6s linear infinite; }
+#t-plus .o::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--orange); animation: ondeCam 2.4s ease-out infinite; }
+#t-plus .o svg { width: 26px; height: 26px; fill: var(--sur-orange); stroke: none; padding: 0; margin: 0; background: none; box-shadow: none; position: relative; z-index: 1; }
+#t-plus[aria-current="page"] .o { box-shadow: 0 0 0 3px rgba(255, 106, 19, .35), 0 10px 28px rgba(255, 106, 19, .7); }
+#t-plus > span:last-child { color: var(--orange-vif); font-weight: 700; }
+@keyframes flotte { 50% { transform: translateY(-4px); } }
+@keyframes tourne { to { transform: rotate(360deg); } }
+.rot { margin: 0 0 8px; font-size: 17px; color: var(--papier); }
+.rot b { display: inline-block; color: var(--orange-vif); transition: opacity .28s, transform .28s; }
+.rot b.sort { opacity: 0; transform: translateY(-8px); }
+.route { display: block; width: 100%; height: auto; margin: 6px 0 10px; overflow: visible; }
+.route path { fill: none; stroke: rgba(255, 106, 19, .5); stroke-width: 1.4; stroke-dasharray: 3 5; animation: marche 1.2s linear infinite; }
+.route .nd { fill: var(--orange); }
+.route .nk { fill: var(--ok); }
+.route .nk.onde { fill: none; stroke: var(--ok); stroke-width: 1.5; transform-box: fill-box; transform-origin: center; animation: ondeCam 2s ease-out infinite; }
+.route .tx { fill: var(--papier); font: 600 9px var(--f-mono); text-transform: uppercase; letter-spacing: .06em; }
+.route .tx.k { fill: var(--ok); }
+.route .pt1 { fill: #ffd9bd; filter: drop-shadow(0 0 4px var(--orange)); }
+@keyframes marche { to { stroke-dashoffset: -16; } }
+.cmd-hero::before { content: ""; position: absolute; inset: -40%; z-index: 0; background: conic-gradient(from 0deg at 80% 20%, transparent, rgba(255, 106, 19, .14), transparent 30%); animation: tourne 16s linear infinite; pointer-events: none; }
+.depot { position: relative; overflow: hidden; }
+.depot::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--orange-vif), transparent); box-shadow: 0 0 18px 4px rgba(255, 106, 19, .55); animation: scan 2.8s ease-in-out infinite; pointer-events: none; }
+@keyframes scan { 0% { top: 0; opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { top: calc(100% - 3px); opacity: 0; } }
+.cmd-go, .suivi-box .btn { position: relative; overflow: hidden; }
+.cmd-go::after, .suivi-box .btn::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40%; left: -60%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .5), transparent); transform: skewX(-20deg); animation: brille 3.2s ease-in-out infinite; }
+@keyframes brille { 55%, 100% { left: 130%; } }
+.vie-js .cmd-et .et, .vie-js .cmd-box .etp, .vie-js .cmd-box .depot, .vie-js .cmd-box .champ, .vie-js .piste, .vie-js .suivi li, .vie-js .suivi-box, .vie-js .tuile { opacity: 0; transform: translateY(22px) scale(.97); transition: opacity .55s ease, transform .55s cubic-bezier(.2, .8, .2, 1); }
+.vie-js .vu { opacity: 1 !important; transform: none !important; }
+.piste { padding: 16px 16px 12px; border-radius: 16px; border: 1px solid var(--ligne); background: linear-gradient(180deg, rgba(255, 106, 19, .1), var(--carbone)); }
+.pi-barre { position: relative; height: 10px; border-radius: 6px; background: var(--ligne); margin: 14px 4px 10px; }
+.pi-barre i { position: absolute; left: 0; top: 0; bottom: 0; width: var(--p); border-radius: 6px; background: linear-gradient(90deg, #ff4d00, var(--orange-vif)); box-shadow: 0 0 14px rgba(255, 106, 19, .7); transition: width 1.4s cubic-bezier(.2, .8, .2, 1); background-size: 200% 100%; animation: coule 2.4s linear infinite; }
+@keyframes coule { to { background-position: -200% 0; } }
+.pi-barre .veh { position: absolute; top: 50%; left: var(--p); width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; display: grid; place-items: center; background: var(--orange); box-shadow: 0 0 0 6px rgba(255, 106, 19, .22), 0 6px 18px rgba(255, 106, 19, .6); transition: left 1.4s cubic-bezier(.2, .8, .2, 1); animation: vole 2.2s ease-in-out infinite; }
+.pi-barre .veh svg { width: 18px; height: 18px; fill: var(--sur-orange); transform: rotate(90deg); }
+@keyframes vole { 50% { margin-top: -21px; } }
+.pi-noms { display: flex; justify-content: space-between; font: 600 11px var(--f-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--brume); }
+.tuile { border-radius: 16px; transition: transform .2s, border-color .2s, box-shadow .2s; }
+.tuile:active { transform: scale(.98); }
+.tuile svg { filter: drop-shadow(0 0 6px rgba(255, 106, 19, .5)); }
+@media (prefers-reduced-motion: reduce) { #t-plus .o, #t-plus .o::before, #t-plus .o::after, .route path, .route .nk.onde, .cmd-hero::before, .depot::after, .cmd-go::after, .suivi-box .btn::after, .pi-barre i, .pi-barre .veh { animation: none; } .vie-js .cmd-et .et, .vie-js .cmd-box .etp, .vie-js .cmd-box .depot, .vie-js .cmd-box .champ, .vie-js .piste, .vie-js .suivi li, .vie-js .suivi-box, .vie-js .tuile { opacity: 1; transform: none; } }
 </style>
 
 <div class="fond" aria-hidden="true"></div>
@@ -884,8 +932,17 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   <section class="view" id="v-commander" hidden>
     <header class="cmd-hero">
       <div class="orbite" aria-hidden="true"><i></i><i></i><i></i></div>
-      <div class="cmd-pays"><span>Chine</span><span>Dubaï</span><span>Turquie</span></div>
       <h2>Demandez,<br><em>on cherche</em></h2>
+      <p class="rot" aria-live="off">Je cherche <b id="cmd-rot">un téléphone</b></p>
+      <svg class="route" viewBox="0 0 320 104" role="img" aria-label="Les produits partent de Chine, Dubaï et Turquie vers Kinshasa">
+        <path id="rt1" d="M22 14 C120 14 190 40 288 48" /><path id="rt2" d="M22 48 C120 48 190 48 288 48" /><path id="rt3" d="M22 82 C120 82 190 56 288 48" />
+        <circle cx="22" cy="14" r="5" class="nd"/><circle cx="22" cy="48" r="5" class="nd"/><circle cx="22" cy="82" r="5" class="nd"/>
+        <circle cx="288" cy="48" r="8" class="nk"/><circle cx="288" cy="48" r="8" class="nk onde"/>
+        <text x="12" y="30" class="tx">Chine</text><text x="12" y="64" class="tx">Dubaï</text><text x="12" y="98" class="tx">Turquie</text><text x="262" y="74" class="tx k">Kinshasa</text>
+        <circle r="3.6" class="pt1"><animateMotion dur="3.6s" repeatCount="indefinite" begin="0s"><mpath href="#rt1"/></animateMotion></circle>
+        <circle r="3.6" class="pt1"><animateMotion dur="3.6s" repeatCount="indefinite" begin="-1.2s"><mpath href="#rt2"/></animateMotion></circle>
+        <circle r="3.6" class="pt1"><animateMotion dur="3.6s" repeatCount="indefinite" begin="-2.4s"><mpath href="#rt3"/></animateMotion></circle>
+      </svg>
       <p>Une photo ou un lien suffit. Tu reçois un devis détaillé (prix fournisseur, transport, douane, notre marge) avant de payer quoi que ce soit. Acompte indiqué sur le devis, le reste à la livraison.</p>
     </header>
     <div class="cmd-et" role="list" aria-label="Comment ça marche">
@@ -1112,6 +1169,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         <div class="holo-txt"><b id="holo-etape">En transit</b><span id="holo-sub"></span><span id="holo-km"></span></div>
       </div>
     </div>
+    <div class="piste" id="s-piste" style="--p:57%"><div class="pi-barre"><i></i><span class="veh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 13.5 21 4l-5.5 16-3.2-6.3z"/></svg></span></div><div class="pi-noms"><span>Commande</span><span>En route</span><span>Livré</span></div></div>
     <div class="carte cockpit"><div class="jauge" id="s-jauge"></div><div class="voie statut" id="s-voie"></div></div>
     <div class="carte">
       <div class="l1" style="display:flex;justify-content:space-between;gap:12px;align-items:center">
@@ -1219,13 +1277,11 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   </footer>
 </div>
 
-<div class="menu-plus-w">
-    <button type="button" id="t-plus" class="menu-plus" data-v="plus" aria-label="Plus : menu"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18.5" cy="12" r="1.6"/></svg><span>Plus</span></button>
-</div>
 <div class="tabbar">
   <nav aria-label="Navigation">
     <button type="button" id="t-accueil" data-v="accueil"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.8V20h13V9.8"/><path d="M10 20v-5h4v5"/></svg><span>Accueil</span></button>
     <button type="button" id="t-catalogue" data-v="catalogue"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1"/><rect x="13.5" y="3.5" width="7" height="7" rx="1"/><rect x="3.5" y="13.5" width="7" height="7" rx="1"/><rect x="13.5" y="13.5" width="7" height="7" rx="1"/></svg><span>Catalogue</span></button>
+    <button type="button" id="t-plus" class="orbe" data-v="plus" aria-label="Plus : menu"><span class="o"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.8"/></svg></span><span>Plus</span></button>
     <button type="button" id="t-commander" data-v="commander"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg><span>Commander</span></button>
     <button type="button" id="t-suivi" data-v="suivi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Suivi</span></button>
   </nav>
@@ -1755,6 +1811,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     $('s-jauge').innerHTML = jaugeSVG(fait);
     var cur = cran >= 7 ? 'Livré' : cran < 0 ? 'Référence non reliée' : ETAPES[cran][0];
     $('s-voie').innerHTML = '<span class="kicker">' + (cran >= 7 ? 'Colis livré' : cran < 0 ? 'Suivi' : 'Étape en cours') + '</span><b>' + cur + '</b><span class="note">' + (cran >= 7 ? 'Merci pour ta confiance.' : cran < 0 ? 'Demande son état sur WhatsApp.' : 'Preuve : ' + ETAPES[cran][1]) + '</span>';
+    var pis = $('s-piste'); if (pis) pis.style.setProperty('--p', Math.max(4, Math.min(100, fait / 7 * 100)) + '%');
     if (typeof GS !== 'undefined' && GS) GS.setStep(cran);
     $('holo-tag').textContent = $('s-tag').textContent;
     $('holo-etape').textContent = cran >= 7 ? 'Livré ✓' : cran < 0 ? 'Référence non reliée' : ETAPES[cran][0];
@@ -2591,6 +2648,22 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 
   /* Fenêtre « Plus » */
   function tuile(v, ico, t, s) { return '<button type="button" class="tuile" ' + (v === 'pay' || v === 'install' || v === 'share' ? 'data-' + v : 'data-go="' + v + '"') + '><svg viewBox="0 0 24 24" aria-hidden="true">' + ico + '</svg><span><b>' + t + '</b><span class="s">' + s + '</span></span></button>'; }
+  /* Vie : mots qui tournent sur Commander, apparition douce au défilement */
+  (function () {
+    var mots = ['un téléphone', 'des chaussures', 'une machine', 'des meubles', 'un camion de marchandises', 'des vêtements', 'du matériel pour mon hôtel', 'un générateur'], i = 0, el = $('cmd-rot');
+    if (el && !REDUIT) setInterval(function () {
+      if ($('v-commander').hidden) return;
+      el.classList.add('sort');
+      setTimeout(function () { i = (i + 1) % mots.length; el.textContent = mots[i]; el.classList.remove('sort'); }, 280);
+    }, 2400);
+    if (!('IntersectionObserver' in window) || REDUIT) return;
+    document.documentElement.classList.add('vie-js');
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('vu'); io.unobserve(e.target); } }); }, { threshold: .12 });
+    var cible = '.cmd-et .et, .cmd-box .etp, .cmd-box .depot, .cmd-box .champ, .piste, .suivi li, .suivi-box, .tuile';
+    function brancher(r) { Array.prototype.forEach.call((r || document).querySelectorAll(cible), function (n, k) { if (n.classList.contains('vu') || n.dataset.vie) return; n.dataset.vie = '1'; n.style.transitionDelay = (k % 6) * 70 + 'ms'; io.observe(n); }); }
+    brancher(); new MutationObserver(function () { brancher(); }).observe(document.body, { childList: true, subtree: true });
+  })();
+
   function ouvrirPlus() {
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Plus</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Aller plus loin</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
       tuile('pro', '<path d="M4 9h16v10H4z"/><path d="M9 9V6h6v3"/>', 'Espace commerçants', 'Devis de gros pour entreprises et revendeurs, commandes régulières') +
