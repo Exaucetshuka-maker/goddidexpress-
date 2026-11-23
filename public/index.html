@@ -647,7 +647,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 @keyframes pulsePt { 50% { box-shadow: 0 0 0 9px rgba(255, 106, 19, .0), 0 0 18px rgba(255, 106, 19, .7); } }
 @media (prefers-reduced-motion: reduce) { .live-dot, .suivi li.cours .pt { animation: none; } }
 
-/* Sobre : Commander, Suivi, Plus */
+/* Simple et fort : Commander, Suivi, Plus */
 .tabbar nav { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 #t-commander svg { width: 24px; height: 24px; padding: 0; margin: 0; border-radius: 0; background: none; stroke: currentColor; box-shadow: none; }
 #t-plus.orbe { position: relative; overflow: visible; }
@@ -655,48 +655,43 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 #t-plus .o svg { width: 22px; height: 22px; fill: var(--sur-orange); stroke: none; padding: 0; margin: 0; background: none; box-shadow: none; }
 #t-plus > span:last-child { color: var(--orange-vif); font-weight: 700; }
 #t-plus[aria-current="page"] .o { outline: 2px solid var(--orange); outline-offset: 2px; }
-.cmd-hero { padding: 20px 18px; border: 1px solid var(--ligne); border-left: 4px solid var(--orange); border-radius: 10px; background: var(--carbone); }
-.cmd-hero h2 { font-size: clamp(34px, 10.6vw, 56px); line-height: .95; margin: 0 0 10px; }
-.cmd-hero h2 em { font-style: normal; color: var(--orange); }
-.cmd-hero p { font-size: 14px; max-width: 46ch; }
-.rot { margin: 0 0 6px; font-size: 17px; color: var(--papier); }
-.rot b { display: inline-block; color: var(--orange-vif); transition: opacity .28s, transform .28s; }
-.rot b.sort { opacity: 0; transform: translateY(-6px); }
-.route { display: block; width: 100%; height: auto; margin: 4px 0 10px; overflow: visible; }
-.route path { fill: none; stroke: var(--ligne); stroke-width: 1.5; stroke-dasharray: 3 5; }
-.route .nd { fill: var(--orange); }
-.route .nk { fill: var(--ok); }
-.route .tx { fill: var(--brume); font: 600 9px var(--f-mono); text-transform: uppercase; letter-spacing: .06em; }
-.route .tx.k { fill: var(--ok); }
-.route .pt1 { fill: var(--papier); }
-.cmd-et { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.cmd-et .et { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; align-content: start; gap: 2px; padding: 14px 6px 12px; text-align: center; border-radius: 10px; border: 1px solid var(--ligne); background: var(--carbone); }
-.cmd-et .et i { grid-row: auto; width: auto; height: auto; margin-bottom: 6px; background: none; box-shadow: none; }
-.cmd-et .et svg { width: 28px; height: 28px; fill: none; stroke: var(--orange); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.cmd-et .et b { font-size: 14px; }
-.cmd-et .et span { font-size: 12px; color: var(--brume); }
-.cmd-box { border-radius: 10px; box-shadow: none; border-color: var(--ligne); background: var(--carbone); }
-.depot { background: transparent; border: 2px dashed var(--orange); border-radius: 10px; padding: 24px 14px; }
-.cam { display: grid; place-items: center; width: 56px; height: 56px; }
-.cam svg { width: 44px; height: 44px; }
-.cmd-go { background: var(--orange); box-shadow: none; border-radius: 10px; }
+.cmd-t h2, #v-suivi > header h2 { font-size: clamp(38px, 12.2vw, 64px); line-height: .94; margin: 0 0 12px; }
+.cmd-t h2 em { white-space: nowrap; }
+.carte.cockpit { display: none; }
+.cmd-t h2 em { font-style: normal; color: var(--orange); }
+.cmd-t p { font-size: 16px; color: var(--brume); max-width: 40ch; }
+.cmd-box { display: grid; gap: 14px; padding: 0; border: 0; background: none; box-shadow: none; }
+.sr { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+.depot { display: grid; justify-items: center; align-content: center; gap: 6px; min-height: 190px; padding: 24px 16px; text-align: center; border-radius: 14px; background: var(--orange); color: #140a00; cursor: pointer; transition: transform .15s; }
+.depot:active, .sr:focus + .depot { transform: scale(.985); }
+.depot svg { width: 64px; height: 64px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.depot b { font-size: 22px; line-height: 1.15; color: #140a00; }
+.depot small { font-size: 14px; color: #140a00; opacity: .75; }
+.prev { width: 100%; max-height: 260px; object-fit: cover; border-radius: 12px; }
+.plus-d { border: 1px solid var(--ligne); border-radius: 10px; padding: 0 14px; }
+.plus-d summary { padding: 14px 0; cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; }
+.plus-d summary::after { content: "+"; color: var(--orange); font-size: 22px; line-height: 1; }
+.plus-d[open] summary::after { content: "−"; }
+.plus-d[open] { padding-bottom: 6px; }
+.plus-d .champ, .plus-d .duo { margin-bottom: 12px; }
+.cmd-go { min-height: 58px; font-size: 18px; border-radius: 12px; }
+.rassure { margin: -4px 0 0; text-align: center; font-size: 13px; color: var(--brume); }
+.trouve { display: grid; gap: 8px; }
 .suivi-live { display: inline-flex; align-items: center; justify-self: start; color: var(--ok); font: 600 12px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; }
 .suivi-live .live-dot { margin-right: 8px; animation: none; }
-#v-suivi > header h2 { font-size: clamp(36px, 11vw, 54px); line-height: .95; }
-.suivi-box { border-radius: 10px; box-shadow: none; border-color: var(--ligne); background: var(--carbone); }
-.holo { box-shadow: none; border-radius: 10px; }
-.piste { padding: 16px 16px 12px; border-radius: 10px; border: 1px solid var(--ligne); background: var(--carbone); }
-.pi-barre { position: relative; height: 6px; border-radius: 3px; background: var(--ligne); margin: 16px 4px 12px; }
-.pi-barre i { position: absolute; left: 0; top: 0; bottom: 0; width: var(--p); border-radius: 3px; background: var(--orange); transition: width 1.2s cubic-bezier(.2, .8, .2, 1); animation: none; }
-.pi-barre .veh { position: absolute; top: 50%; left: var(--p); width: 28px; height: 28px; margin: -14px 0 0 -14px; border-radius: 50%; display: grid; place-items: center; background: var(--orange); border: 3px solid var(--noir); box-shadow: none; transition: left 1.2s cubic-bezier(.2, .8, .2, 1); animation: none; }
-.pi-barre .veh svg { width: 14px; height: 14px; fill: var(--sur-orange); transform: rotate(90deg); }
-.pi-noms { display: flex; justify-content: space-between; font: 600 11px var(--f-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--brume); }
-.tuile { border-radius: 10px; }
-.tuile svg { filter: none; }
+.suivi-box { padding: 0; border: 0; background: none; box-shadow: none; }
+.suivi-box .recherche-l input { min-height: 60px; font-size: 18px; }
+.suivi-box .btn { min-height: 60px; border-radius: 12px; }
+.holo { box-shadow: none; border-radius: 12px; }
+.piste { display: grid; gap: 6px; padding: 20px 18px; border-radius: 14px; background: var(--carbone); border: 1px solid var(--ligne); }
+.pi-k { font: 600 12px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--brume); }
+.pi-e { font-size: clamp(34px, 11vw, 52px); line-height: 1; color: var(--orange); }
+.pi-seg { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin: 10px 0 4px; }
+.pi-seg i { height: 8px; border-radius: 4px; background: var(--ligne); }
+.pi-seg i.on { background: var(--orange); }
+.pi-seg i.cur { background: var(--orange-vif); }
+.pi-s { font-size: 14px; color: var(--brume); }
 .suivi li.cours .pt { animation: none; }
-.vie-js .cmd-et .et, .vie-js .cmd-box .etp, .vie-js .cmd-box .depot, .vie-js .cmd-box .champ, .vie-js .piste, .vie-js .suivi li, .vie-js .suivi-box, .vie-js .tuile { opacity: 0; transform: translateY(14px); transition: opacity .45s ease, transform .45s ease; }
-.vie-js .vu { opacity: 1 !important; transform: none !important; }
-@media (prefers-reduced-motion: reduce) { .vie-js .cmd-et .et, .vie-js .cmd-box .etp, .vie-js .cmd-box .depot, .vie-js .cmd-box .champ, .vie-js .piste, .vie-js .suivi li, .vie-js .suivi-box, .vie-js .tuile { opacity: 1; transform: none; } }
 </style>
 
 <div class="fond" aria-hidden="true"></div>
@@ -896,39 +891,23 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 
 <!-- 1. COMMANDER -->
   <section class="view" id="v-commander" hidden>
-    <header class="cmd-hero">
+    <header class="cmd-t">
       <h2>Demandez,<br><em>on cherche</em></h2>
-      <p class="rot" aria-live="off">Je cherche <b id="cmd-rot">un téléphone</b></p>
-      <svg class="route" viewBox="0 0 320 104" role="img" aria-label="Les produits partent de Chine, Dubaï et Turquie vers Kinshasa">
-        <path id="rt1" d="M22 14 C120 14 190 40 288 48" /><path id="rt2" d="M22 48 C120 48 190 48 288 48" /><path id="rt3" d="M22 82 C120 82 190 56 288 48" />
-        <circle cx="22" cy="14" r="5" class="nd"/><circle cx="22" cy="48" r="5" class="nd"/><circle cx="22" cy="82" r="5" class="nd"/>
-        <circle cx="288" cy="48" r="8" class="nk"/>
-        <text x="12" y="30" class="tx">Chine</text><text x="12" y="64" class="tx">Dubaï</text><text x="12" y="98" class="tx">Turquie</text><text x="262" y="74" class="tx k">Kinshasa</text>
-        <circle r="3.6" class="pt1"><animateMotion dur="3.6s" repeatCount="indefinite" begin="0s"><mpath href="#rt1"/></animateMotion></circle>
-        <circle r="3.6" class="pt1"><animateMotion dur="3.6s" repeatCount="indefinite" begin="-1.2s"><mpath href="#rt2"/></animateMotion></circle>
-        <circle r="3.6" class="pt1"><animateMotion dur="3.6s" repeatCount="indefinite" begin="-2.4s"><mpath href="#rt3"/></animateMotion></circle>
-      </svg>
-      <p>Une photo ou un lien suffit. Tu reçois un devis détaillé (prix fournisseur, transport, douane, notre marge) avant de payer quoi que ce soit. Acompte indiqué sur le devis, le reste à la livraison.</p>
+      <p>Une photo ou un lien suffit. Tu reçois un devis détaillé avant de payer quoi que ce soit.</p>
     </header>
-    <div class="cmd-et" role="list" aria-label="Comment ça marche">
-      <div class="et" role="listitem"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2.5h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg></i><b>Tu envoies</b><span>Photo ou lien</span></div>
-      <div class="et" role="listitem"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></i><b>Tu reçois</b><span>Le devis détaillé</span></div>
-      <div class="et" role="listitem"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg></i><b>On livre</b><span>Chez toi</span></div>
-    </div>
-    <div class="carte cmd-box" id="dem-box">
-      <div class="etp"><i>1</i><b>Le produit</b></div>
-      <label class="depot" for="dm-photo"><span class="cam"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2.5h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg></span><b>Ajouter une photo du produit</b><small>Prends-la en photo ou choisis-la dans ta galerie</small></label>
+    <div class="cmd-box" id="dem-box">
+      <label class="depot" for="dm-photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2.5h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg><b>Ajouter une photo du produit</b><small>Prendre une photo ou choisir dans la galerie</small></label>
       <input id="dm-photo" class="sr" type="file" accept="image/*">
       <img id="dm-prev" class="prev" alt="" hidden>
       <div class="trouve" id="dm-trouve" aria-live="polite" hidden></div>
-      <div class="champ"><label for="dm-lien">Ou le lien du produit (facultatif)</label><input id="dm-lien" inputmode="url" maxlength="300" placeholder="https://…"></div>
+      <div class="champ"><label for="dm-lien">Ou le lien du produit</label><input id="dm-lien" inputmode="url" maxlength="300" placeholder="https://…"></div>
       <div class="champ"><label for="dm-txt">Ce que tu veux (taille, couleur, modèle…)</label><textarea id="dm-txt" rows="3" maxlength="600"></textarea></div>
-      <div class="etp"><i>2</i><b>Les détails</b></div>
-      <div class="duo"><div class="champ"><label for="dm-qte">Quantité</label><input id="dm-qte" inputmode="numeric" maxlength="12" placeholder="Ex. 20"></div><div class="champ"><label for="dm-bud">Budget indicatif ($)</label><input id="dm-bud" inputmode="decimal" maxlength="12" placeholder="Ex. 500"></div></div>
-      <div class="champ"><label for="dm-mar">Où chercher ?</label><select id="dm-mar"><option>Tous les marchés</option><option>Chine</option><option>Dubaï</option><option>Turquie</option></select></div>
-      <div class="champ"><label for="dm-quand">Quand ?</label><select id="dm-quand"><option value="">Dès que possible</option><option value="arrivage">Réserver pour le prochain arrivage (acompte indiqué sur le devis)</option></select></div>
-      <div class="etp"><i>3</i><b>Où t'envoyer le devis ?</b></div>
-      <div class="duo"><div class="champ"><label for="dm-nom">Ton prénom</label><input id="dm-nom" maxlength="60" autocomplete="given-name"></div><div class="champ"><label for="dm-tel">Ton numéro WhatsApp</label><input id="dm-tel" inputmode="tel" maxlength="30" autocomplete="tel" placeholder="+243…"></div></div>
+      <details class="plus-d"><summary>Quantité, budget, marché</summary>
+        <div class="duo"><div class="champ"><label for="dm-qte">Quantité</label><input id="dm-qte" inputmode="numeric" maxlength="12" placeholder="Ex. 20"></div><div class="champ"><label for="dm-bud">Budget indicatif ($)</label><input id="dm-bud" inputmode="decimal" maxlength="12" placeholder="Ex. 500"></div></div>
+        <div class="champ"><label for="dm-mar">Où chercher ?</label><select id="dm-mar"><option>Tous les marchés</option><option>Chine</option><option>Dubaï</option><option>Turquie</option></select></div>
+        <div class="champ"><label for="dm-quand">Quand ?</label><select id="dm-quand"><option value="">Dès que possible</option><option value="arrivage">Réserver pour le prochain arrivage (acompte indiqué sur le devis)</option></select></div>
+      </details>
+      <div class="duo"><div class="champ"><label for="dm-nom">Ton prénom</label><input id="dm-nom" maxlength="60" autocomplete="given-name"></div><div class="champ"><label for="dm-tel">Ton WhatsApp</label><input id="dm-tel" inputmode="tel" maxlength="30" autocomplete="tel" placeholder="+243…"></div></div>
       <button class="btn cmd-go" id="dm-ok" type="button">Envoyer ma demande</button>
       <p class="rassure">Aucun paiement avant le devis.</p>
       <p class="note" id="dm-msg" aria-live="polite" style="margin:0"></p>
@@ -1125,6 +1104,15 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         <div class="recherche-l"><input id="s-code" value="GDE-2610-0042" aria-label="Référence de commande" spellcheck="false"><button class="btn" type="submit">Voir</button></div>
       </form>
     </div>
+    <div class="piste" id="s-piste"><span class="pi-k" id="pi-k">Étape en cours</span><b class="pi-e" id="pi-e"></b><div class="pi-seg" id="pi-seg"></div><span class="pi-s" id="pi-s"></span></div>
+    <div class="carte cockpit"><div class="jauge" id="s-jauge"></div><div class="voie statut" id="s-voie"></div></div>
+    <div class="carte">
+      <div class="l1" style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+        <span class="mono" id="s-ref">GDE-2610-0042</span>
+        <span class="pastille" id="s-tag">Exemple</span>
+      </div>
+      <ol class="suivi" id="s-etapes"></ol>
+    </div>
     <div class="holo">
       <canvas class="globe" id="g-suivi" role="img" aria-label="Globe holographique : position de ton colis entre son pays de départ et Kinshasa"></canvas>
       <div class="holo-top"><span>GOD DID EXPRESS · SUIVI</span><span class="pastille" id="holo-tag">Exemple</span></div>
@@ -1133,15 +1121,6 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         <div class="holo-pct"><span id="holo-pct">0</span><small>%</small></div>
         <div class="holo-txt"><b id="holo-etape">En transit</b><span id="holo-sub"></span><span id="holo-km"></span></div>
       </div>
-    </div>
-    <div class="piste" id="s-piste" style="--p:57%"><div class="pi-barre"><i></i><span class="veh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 13.5 21 4l-5.5 16-3.2-6.3z"/></svg></span></div><div class="pi-noms"><span>Commande</span><span>En route</span><span>Livré</span></div></div>
-    <div class="carte cockpit"><div class="jauge" id="s-jauge"></div><div class="voie statut" id="s-voie"></div></div>
-    <div class="carte">
-      <div class="l1" style="display:flex;justify-content:space-between;gap:12px;align-items:center">
-        <span class="mono" id="s-ref">GDE-2610-0042</span>
-        <span class="pastille" id="s-tag">Exemple</span>
-      </div>
-      <ol class="suivi" id="s-etapes"></ol>
     </div>
     <div class="carte" id="s-photo-c" hidden>
       <div class="kicker">Photo de position</div>
@@ -1776,7 +1755,13 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     $('s-jauge').innerHTML = jaugeSVG(fait);
     var cur = cran >= 7 ? 'Livré' : cran < 0 ? 'Référence non reliée' : ETAPES[cran][0];
     $('s-voie').innerHTML = '<span class="kicker">' + (cran >= 7 ? 'Colis livré' : cran < 0 ? 'Suivi' : 'Étape en cours') + '</span><b>' + cur + '</b><span class="note">' + (cran >= 7 ? 'Merci pour ta confiance.' : cran < 0 ? 'Demande son état sur WhatsApp.' : 'Preuve : ' + ETAPES[cran][1]) + '</span>';
-    var pis = $('s-piste'); if (pis) pis.style.setProperty('--p', Math.max(4, Math.min(100, fait / 7 * 100)) + '%');
+    if ($('pi-e')) {
+      $('pi-k').textContent = cran >= 7 ? 'Colis livré' : cran < 0 ? 'Suivi' : 'Étape en cours';
+      $('pi-e').textContent = cur;
+      $('pi-s').textContent = cran < 0 ? '' : 'Étape ' + Math.min(7, cran + 1) + ' sur 7';
+      var sg = ''; for (var q = 0; q < 7; q++) sg += '<i class="' + (q < cran ? 'on' : q === cran ? 'cur' : '') + '"></i>';
+      $('pi-seg').innerHTML = sg;
+    }
     if (typeof GS !== 'undefined' && GS) GS.setStep(cran);
     $('holo-tag').textContent = $('s-tag').textContent;
     $('holo-etape').textContent = cran >= 7 ? 'Livré ✓' : cran < 0 ? 'Référence non reliée' : ETAPES[cran][0];
