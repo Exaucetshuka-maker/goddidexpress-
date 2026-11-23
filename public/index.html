@@ -598,6 +598,14 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 .tr-c span { display: grid; gap: 2px; min-width: 0; }
 .tr-c small { color: var(--brume); font-size: 12.5px; }
 .tr-c em { font-style: normal; font-weight: 800; color: var(--orange-vif); white-space: nowrap; }
+
+/* Live : photos ajoutées par l'admin ; Suivi : grand statut */
+.lv-photos { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 4px; }
+.lv-f { flex: 0 0 62%; max-width: 280px; margin: 0; scroll-snap-align: start; }
+.lv-f img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 12px; }
+.lv-photos[hidden] { display: none; }
+.carte.cockpit { display: none; }
+.holo-txt span { display: none; }
 </style>
 
 <div class="fond" aria-hidden="true"></div>
@@ -638,7 +646,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       </div>
     </div>
 
-    <section class="bloc" id="prochain-bloc">
+    <section class="bloc" id="prochain-bloc" hidden>
       <header><h2>Nos voyages</h2><p>Chine, Dubaï, Istanbul : on part à des dates fixes, tu commandes avant le départ.</p></header>
       <div id="prochain"></div>
       <button class="btn ghost" type="button" data-go="voyages">Tous les voyages</button>
@@ -688,6 +696,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 
     <section class="bloc rv">
       <header><div class="kicker">Salle d'attente du live</div><h2>Le prochain live arrive</h2></header>
+      <div class="rail lv-photos" id="lv-ph" hidden></div>
       <div class="carte salle">
         <div class="quand" id="lv-quand"></div>
         <div class="compte-rebours" role="timer" aria-label="Compte à rebours avant le prochain live">
@@ -970,6 +979,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <h2>Voir avant d'acheter</h2>
       <p>Le produit réel, entre nos mains, en direct. Vous posez vos questions, vous commandez pendant le live avec un acompte.</p>
     </header>
+    <div class="rail lv-photos" id="live-ph" hidden></div>
     <div class="carte date-live">
       <div class="kicker">Prochain rendez-vous proposé</div>
       <strong id="live-date">Samedi</strong>
@@ -997,9 +1007,8 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   <!-- 4. SUIVI -->
   <section class="view" id="v-suivi" hidden>
     <header>
-      <div class="kicker">Suivi avec preuves</div>
       <h2>Où est mon colis ?</h2>
-      <p>Chaque étape est confirmée par une preuve : capture, photo ou vidéo. Entrez la référence reçue sur WhatsApp.</p>
+      <p>Entre ta référence. Chaque étape a sa preuve.</p>
     </header>
     <form id="form-suivi" class="recherche" autocomplete="off">
       <label for="s-code" class="lbl" style="position:absolute;left:-9999px">Référence de commande</label>
@@ -1028,7 +1037,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <img id="s-photo" alt="Position de ton colis entre la Chine et Kinshasa" style="width:100%;border-radius:6px;background:#05080f;margin-top:8px">
       <div class="rangee" style="margin-top:10px"><button class="btn" id="s-photo-share" type="button">Envoyer cette photo</button><a class="btn ghost" id="s-photo-save" download="position-colis.png" style="text-decoration:none">Enregistrer</a></div>
     </div>
-    <p class="note" id="s-note">Cette version affiche une commande d'exemple. Pour l'état d'une vraie commande, écrivez-nous sur WhatsApp avec votre référence.</p>
+    <p class="note" id="s-note">Commande d'exemple. Pour une vraie commande, écris-nous sur WhatsApp avec ta référence.</p>
     <div class="rangee"><a class="btn" id="s-notif" href="#" target="_blank" rel="noopener">Me prévenir à chaque étape</a><a class="btn ghost" id="s-wa" href="#" target="_blank" rel="noopener">Demander l'état sur WhatsApp</a></div>
   </section>
 
@@ -2197,6 +2206,18 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   $('ent-besoin').addEventListener('click', function (e) { var b = e.target.closest('[data-i]'); if (!b) return; var i = b.getAttribute('data-i'); choixB[i] = !choixB[i]; chipsEnt($('ent-besoin'), BESOIN, choixB); majEnt(); });
   }
 
+  /* Photos du prochain live : ajoutées depuis l'admin */
+  (function () {
+    var L = (STATE.lvph || []).filter(function (x) { return typeof x === 'string'; });
+    ['lv-ph', 'live-ph'].forEach(function (id) {
+      var el = $(id); if (!el) return;
+      if (!L.length) { el.hidden = true; return; }
+      el.hidden = false;
+      el.innerHTML = L.map(function (u) { return '<figure class="lv-f"><img src="' + ea(u) + '" alt="Photo du prochain live" loading="lazy"></figure>'; }).join('');
+      if (L.length > 2) autoRail(el);
+    });
+  })();
+
   /* Programme du live : produits proposés */
   (function () {
     var l = PRODUITS.filter(function (p) { return p.l; });
@@ -2314,7 +2335,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   function rendreOcc() {
     $('occ-chips').innerHTML = OCC.map(function (o, i) { return '<button type="button" class="chip" data-occ="' + i + '" aria-pressed="' + (i === occActuel) + '">' + o[0] + '</button>'; }).join('');
     var set = OCC[occActuel][1];
-    $('occ-rail').innerHTML = PRODUITS.filter(function (p) { return set.indexOf(p.c) >= 0; }).slice(0, 10).map(function (p) { return mini(p); }).join('');
+    $('occ-rail').innerHTML = melangeAlea(PRODUITS.filter(function (p) { return set.indexOf(p.c) >= 0 && !p.gone; })).slice(0, 10).map(function (p) { return mini(p); }).join(''); autoRail($('occ-rail'));
   }
   rendreOcc();
   (function () {
@@ -2355,9 +2376,10 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     v.addEventListener('touchend', function () { clearTimeout(t); t = setTimeout(function () { v.classList.remove('pause'); }, 2500); }, { passive: true });
     v.hidden = filtreCat !== 'all' || !!requete;
   }
+  function melangeAlea(L) { var t = L.slice(); for (var i = t.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), a = t[i]; t[i] = t[j]; t[j] = a; } return t; }
   function rendreVedette() {
     var L = PRODUITS.filter(function (p) { return !p.gone; }), A = L.filter(function (p) { return p.ph && p.ph.length; }), B = L.filter(function (p) { return !(p.ph && p.ph.length); });
-    var T = melangeJour(A).concat(melangeJour(B)).slice(0, 12); $('vedette').hidden = !T.length;
+    var T = melangeAlea(A).concat(melangeAlea(B)).slice(0, 12); $('vedette').hidden = !T.length;
     $('vedette-rail').innerHTML = T.map(function (p, i) { return mini(p, i + 1); }).join('');
     autoRail($('vedette-rail'));
   }
