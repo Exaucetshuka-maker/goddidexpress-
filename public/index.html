@@ -590,35 +590,6 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 @media (prefers-reduced-motion: reduce) { .drap { animation: none; } }
 @media (max-width: 340px) { .marche .flag { font-size: 24px; } .trois span { display: none; } }
 
-/* Refonte : Commander, Suivi, Plus */
-.tabbar nav { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-#t-commander { color: var(--orange-vif); }
-#t-commander svg { width: 38px; height: 38px; padding: 8px; box-sizing: border-box; border-radius: 14px; background: var(--orange); stroke: var(--sur-orange); margin-top: -16px; box-shadow: 0 6px 18px rgba(255, 106, 19, .45); }
-#t-commander[aria-current="page"] span { border-bottom: 2px solid var(--orange); }
-.menu-plus-w { position: fixed; z-index: 25; top: calc(10px + env(safe-area-inset-top, 0px)); right: max(14px, env(safe-area-inset-right, 0px)); }
-.menu-plus { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 1px solid var(--ligne); background: rgba(24, 22, 20, .86); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); color: var(--papier); cursor: pointer; box-shadow: 0 6px 20px rgba(0, 0, 0, .35); }
-.menu-plus svg { width: 22px; height: 22px; fill: currentColor; stroke: none; }
-.menu-plus[aria-current="page"] { border-color: var(--orange); color: var(--orange-vif); }
-.menu-plus span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-.cmd-hero h2 { font-size: clamp(34px, 11vw, 52px); line-height: .95; }
-.cmd-et { display: grid; gap: 8px; }
-.cmd-et .et { display: grid; grid-template-columns: 34px minmax(0, 1fr); column-gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--ligne); border-radius: 12px; background: linear-gradient(135deg, rgba(255, 106, 19, .10), rgba(24, 22, 20, .9) 60%); }
-.cmd-et i, .etp i { grid-row: span 2; font-style: normal; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--orange); color: var(--sur-orange); font-weight: 800; font-size: 14px; }
-.cmd-et b { font-size: 15px; }
-.cmd-et span { font-size: 13px; color: var(--brume); }
-.cmd-box { gap: 12px; border-radius: 16px; padding: 18px 16px; border-color: rgba(255, 106, 19, .45); box-shadow: 0 0 0 1px rgba(255, 106, 19, .08), 0 14px 40px rgba(0, 0, 0, .35); background: linear-gradient(180deg, #1d1a17, var(--carbone)); }
-.etp { display: flex; align-items: center; gap: 10px; margin-top: 6px; font-size: 16px; }
-.etp:first-child { margin-top: 0; }
-.etp i { grid-row: auto; width: 26px; height: 26px; font-size: 13px; }
-.sr { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
-.depot { display: grid; justify-items: center; gap: 4px; padding: 22px 14px; text-align: center; border: 2px dashed var(--orange); border-radius: 14px; background: rgba(255, 106, 19, .07); cursor: pointer; transition: background .2s, transform .2s; }
-.depot:hover, .sr:focus + .depot { background: rgba(255, 106, 19, .14); }
-.depot:active { transform: scale(.985); }
-.depot svg { width: 44px; height: 44px; fill: none; stroke: var(--orange-vif); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.depot b { font-size: 16px; color: var(--papier); }
-.depot small { color: var(--brume); font-size: 13px; }
-.prev { width: 100%; max-height: 240px; object-fit: cover; border-radius: 12px; border: 1px solid var(--ligne); }
-.cmd-go { min-height: 54px; font-size: 17px; border-radius: 12px; box-shadow: 0 10px 28px rgba(255, 106, 19, .35); }
 .trouve { display: grid; gap: 8px; }
 .tr-oui, .tr-non { display: grid; gap: 2px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--ok); background: rgba(76, 195, 138, .08); }
 .tr-non { border-color: var(--orange); background: rgba(255, 106, 19, .08); }
@@ -627,71 +598,6 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 .tr-c span { display: grid; gap: 2px; min-width: 0; }
 .tr-c small { color: var(--brume); font-size: 12.5px; }
 .tr-c em { font-style: normal; font-weight: 800; color: var(--orange-vif); white-space: nowrap; }
-.rassure { margin: -4px 0 0; text-align: center; font-size: 13px; color: var(--ok); }
-.sep-or { display: flex; align-items: center; gap: 12px; color: var(--brume); font-size: 13px; text-transform: uppercase; letter-spacing: .12em; }
-.sep-or::before, .sep-or::after { content: ""; flex: 1; height: 1px; background: var(--ligne); }
-.live-dot { display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 rgba(76, 195, 138, .6); animation: pulseDot 1.8s infinite; vertical-align: 1px; }
-@keyframes pulseDot { 70% { box-shadow: 0 0 0 9px rgba(76, 195, 138, 0); } 100% { box-shadow: 0 0 0 0 rgba(76, 195, 138, 0); } }
-.suivi-box { border-radius: 16px; border-color: rgba(255, 106, 19, .45); background: linear-gradient(135deg, rgba(255, 106, 19, .12), var(--carbone) 65%); box-shadow: 0 14px 40px rgba(0, 0, 0, .35); }
-.suivi-box .recherche { display: grid; grid-template-columns: 1fr; gap: 8px; }
-.suivi-box .lbl { font-size: 13px; color: var(--brume); }
-.recherche-l { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
-.suivi-box input { min-height: 54px; font-family: var(--f-mono); font-size: 17px; letter-spacing: .08em; text-transform: uppercase; }
-.suivi-box .btn { min-height: 54px; padding: 0 22px; border-radius: 12px; }
-.holo { border-radius: 18px; border-color: rgba(255, 106, 19, .45); box-shadow: 0 0 0 1px rgba(255, 106, 19, .1), 0 18px 50px rgba(0, 0, 0, .5), 0 0 60px rgba(255, 106, 19, .12); }
-#v-suivi .carte { border-radius: 16px; }
-.suivi li { padding-bottom: 22px; }
-.suivi li::before { left: 12px; width: 3px; border-radius: 2px; }
-.suivi .pt { width: 28px; height: 28px; }
-.suivi li.cours .pt { animation: pulsePt 1.8s infinite; }
-@keyframes pulsePt { 50% { box-shadow: 0 0 0 9px rgba(255, 106, 19, .0), 0 0 18px rgba(255, 106, 19, .7); } }
-@media (prefers-reduced-motion: reduce) { .live-dot, .suivi li.cours .pt { animation: none; } }
-
-/* Simple et fort : Commander, Suivi, Plus */
-.tabbar nav { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-#t-commander svg { width: 24px; height: 24px; padding: 0; margin: 0; border-radius: 0; background: none; stroke: currentColor; box-shadow: none; }
-#t-plus.orbe { position: relative; overflow: visible; }
-#t-plus .o { display: grid; place-items: center; width: 50px; height: 50px; margin: -22px auto 3px; border-radius: 50%; background: var(--orange); border: 4px solid var(--noir); }
-#t-plus .o svg { width: 22px; height: 22px; fill: var(--sur-orange); stroke: none; padding: 0; margin: 0; background: none; box-shadow: none; }
-#t-plus > span:last-child { color: var(--orange-vif); font-weight: 700; }
-#t-plus[aria-current="page"] .o { outline: 2px solid var(--orange); outline-offset: 2px; }
-.cmd-t h2, #v-suivi > header h2 { font-size: clamp(38px, 12.2vw, 64px); line-height: .94; margin: 0 0 12px; }
-.cmd-t h2 em { white-space: nowrap; }
-.carte.cockpit { display: none; }
-.cmd-t h2 em { font-style: normal; color: var(--orange); }
-.cmd-t p { font-size: 16px; color: var(--brume); max-width: 40ch; }
-.cmd-box { display: grid; gap: 14px; padding: 0; border: 0; background: none; box-shadow: none; }
-.sr { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
-.depot { display: grid; justify-items: center; align-content: center; gap: 6px; min-height: 190px; padding: 24px 16px; text-align: center; border-radius: 14px; background: var(--orange); color: #140a00; cursor: pointer; transition: transform .15s; }
-.depot:active, .sr:focus + .depot { transform: scale(.985); }
-.depot svg { width: 64px; height: 64px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.depot b { font-size: 22px; line-height: 1.15; color: #140a00; }
-.depot small { font-size: 14px; color: #140a00; opacity: .75; }
-.prev { width: 100%; max-height: 260px; object-fit: cover; border-radius: 12px; }
-.plus-d { border: 1px solid var(--ligne); border-radius: 10px; padding: 0 14px; }
-.plus-d summary { padding: 14px 0; cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; }
-.plus-d summary::after { content: "+"; color: var(--orange); font-size: 22px; line-height: 1; }
-.plus-d[open] summary::after { content: "−"; }
-.plus-d[open] { padding-bottom: 6px; }
-.plus-d .champ, .plus-d .duo { margin-bottom: 12px; }
-.cmd-go { min-height: 58px; font-size: 18px; border-radius: 12px; }
-.rassure { margin: -4px 0 0; text-align: center; font-size: 13px; color: var(--brume); }
-.trouve { display: grid; gap: 8px; }
-.suivi-live { display: inline-flex; align-items: center; justify-self: start; color: var(--ok); font: 600 12px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; }
-.suivi-live .live-dot { margin-right: 8px; animation: none; }
-.suivi-box { padding: 0; border: 0; background: none; box-shadow: none; }
-.suivi-box .recherche-l input { min-height: 60px; font-size: 18px; }
-.suivi-box .btn { min-height: 60px; border-radius: 12px; }
-.holo { box-shadow: none; border-radius: 12px; }
-.piste { display: grid; gap: 6px; padding: 20px 18px; border-radius: 14px; background: var(--carbone); border: 1px solid var(--ligne); }
-.pi-k { font: 600 12px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--brume); }
-.pi-e { font-size: clamp(34px, 11vw, 52px); line-height: 1; color: var(--orange); }
-.pi-seg { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin: 10px 0 4px; }
-.pi-seg i { height: 8px; border-radius: 4px; background: var(--ligne); }
-.pi-seg i.on { background: var(--orange); }
-.pi-seg i.cur { background: var(--orange-vif); }
-.pi-s { font-size: 14px; color: var(--brume); }
-.suivi li.cours .pt { animation: none; }
 </style>
 
 <div class="fond" aria-hidden="true"></div>
@@ -891,28 +797,25 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 
 <!-- 1. COMMANDER -->
   <section class="view" id="v-commander" hidden>
-    <header class="cmd-t">
-      <h2>Demandez,<br><em>on cherche</em></h2>
-      <p>Une photo ou un lien suffit. Tu reçois un devis détaillé avant de payer quoi que ce soit.</p>
+    <header>
+      <div class="kicker">Commande sur mesure</div>
+      <h2>Demandez, on cherche</h2>
+      <p>Décrivez le produit. Vous recevez un devis détaillé : prix fournisseur, transport, douane et notre marge. Vous versez l'acompte indiqué sur le devis pour lancer l'achat, le reste à la livraison.</p>
     </header>
-    <div class="cmd-box" id="dem-box">
-      <label class="depot" for="dm-photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2.5h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg><b>Ajouter une photo du produit</b><small>Prendre une photo ou choisir dans la galerie</small></label>
-      <input id="dm-photo" class="sr" type="file" accept="image/*">
-      <img id="dm-prev" class="prev" alt="" hidden>
+    <div class="carte" id="dem-box" style="margin:0 0 14px;display:grid;gap:10px">
+      <div class="kicker">Produit introuvable ?</div><h3 style="margin:0">Tu cherches un produit ? Nous le trouvons.</h3>
+      <p class="note" style="margin:0">Envoie-nous la photo du produit que tu veux, ou le lien d'un site. On le retrouve et on te donne un devis avant tout paiement.</p>
+      <div class="duo"><div class="champ"><label for="dm-nom">Ton prénom</label><input id="dm-nom" maxlength="60" autocomplete="given-name"></div><div class="champ"><label for="dm-tel">Ton numéro WhatsApp</label><input id="dm-tel" inputmode="tel" maxlength="30" autocomplete="tel" placeholder="+243…"></div></div>
+      <div class="champ"><label for="dm-photo">Photo du produit</label><input id="dm-photo" type="file" accept="image/*"><img id="dm-prev" alt="" hidden style="width:100%;max-height:220px;object-fit:cover;border-radius:6px;margin-top:6px"></div>
       <div class="trouve" id="dm-trouve" aria-live="polite" hidden></div>
-      <div class="champ"><label for="dm-lien">Ou le lien du produit</label><input id="dm-lien" inputmode="url" maxlength="300" placeholder="https://…"></div>
-      <div class="champ"><label for="dm-txt">Ce que tu veux (taille, couleur, modèle…)</label><textarea id="dm-txt" rows="3" maxlength="600"></textarea></div>
-      <details class="plus-d"><summary>Quantité, budget, marché</summary>
-        <div class="duo"><div class="champ"><label for="dm-qte">Quantité</label><input id="dm-qte" inputmode="numeric" maxlength="12" placeholder="Ex. 20"></div><div class="champ"><label for="dm-bud">Budget indicatif ($)</label><input id="dm-bud" inputmode="decimal" maxlength="12" placeholder="Ex. 500"></div></div>
-        <div class="champ"><label for="dm-mar">Où chercher ?</label><select id="dm-mar"><option>Tous les marchés</option><option>Chine</option><option>Dubaï</option><option>Turquie</option></select></div>
-        <div class="champ"><label for="dm-quand">Quand ?</label><select id="dm-quand"><option value="">Dès que possible</option><option value="arrivage">Réserver pour le prochain arrivage (acompte indiqué sur le devis)</option></select></div>
-      </details>
-      <div class="duo"><div class="champ"><label for="dm-nom">Ton prénom</label><input id="dm-nom" maxlength="60" autocomplete="given-name"></div><div class="champ"><label for="dm-tel">Ton WhatsApp</label><input id="dm-tel" inputmode="tel" maxlength="30" autocomplete="tel" placeholder="+243…"></div></div>
-      <button class="btn cmd-go" id="dm-ok" type="button">Envoyer ma demande</button>
-      <p class="rassure">Aucun paiement avant le devis.</p>
+      <div class="champ"><label for="dm-lien">Lien du produit (facultatif)</label><input id="dm-lien" inputmode="url" maxlength="300" placeholder="https://…"></div>
+      <div class="duo"><div class="champ"><label for="dm-qte">Quantité</label><input id="dm-qte" inputmode="numeric" maxlength="12" placeholder="Ex. 20"></div><div class="champ"><label for="dm-bud">Budget indicatif ($)</label><input id="dm-bud" inputmode="decimal" maxlength="12" placeholder="Ex. 500"></div></div>
+      <div class="champ"><label for="dm-quand">Quand ?</label><select id="dm-quand"><option value="">Dès que possible</option><option value="arrivage">Réserver pour le prochain arrivage (acompte indiqué sur le devis)</option></select></div>
+      <div class="champ"><label for="dm-mar">Où chercher ?</label><select id="dm-mar"><option>Tous les marchés</option><option>Chine</option><option>Dubaï</option><option>Turquie</option></select></div>
+      <div class="champ"><label for="dm-txt">Ce que tu veux (taille, couleur, quantité…)</label><textarea id="dm-txt" rows="3" maxlength="600"></textarea></div>
+      <button class="btn" id="dm-ok" type="button">Envoyer ma demande</button>
       <p class="note" id="dm-msg" aria-live="polite" style="margin:0"></p>
     </div>
-    <div class="sep-or"><span>Ou commande tout de suite</span></div>
     <form id="form-cmd" autocomplete="on">
       <div class="duo">
         <div class="champ"><label for="o-nom">Votre nom</label><input id="o-nom" name="nom" required placeholder="Ex. Marie"></div>
@@ -1094,25 +997,15 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   <!-- 4. SUIVI -->
   <section class="view" id="v-suivi" hidden>
     <header>
-      <div class="suivi-live"><span class="live-dot" aria-hidden="true"></span>Suivi en direct, avec preuves</div>
+      <div class="kicker">Suivi avec preuves</div>
       <h2>Où est mon colis ?</h2>
-      <p>Chaque étape est confirmée par une preuve : capture, photo ou vidéo. Entre la référence reçue sur WhatsApp.</p>
+      <p>Chaque étape est confirmée par une preuve : capture, photo ou vidéo. Entrez la référence reçue sur WhatsApp.</p>
     </header>
-    <div class="carte suivi-box">
-      <form id="form-suivi" class="recherche" autocomplete="off">
-        <label for="s-code" class="lbl">Ta référence de commande</label>
-        <div class="recherche-l"><input id="s-code" value="GDE-2610-0042" aria-label="Référence de commande" spellcheck="false"><button class="btn" type="submit">Voir</button></div>
-      </form>
-    </div>
-    <div class="piste" id="s-piste"><span class="pi-k" id="pi-k">Étape en cours</span><b class="pi-e" id="pi-e"></b><div class="pi-seg" id="pi-seg"></div><span class="pi-s" id="pi-s"></span></div>
-    <div class="carte cockpit"><div class="jauge" id="s-jauge"></div><div class="voie statut" id="s-voie"></div></div>
-    <div class="carte">
-      <div class="l1" style="display:flex;justify-content:space-between;gap:12px;align-items:center">
-        <span class="mono" id="s-ref">GDE-2610-0042</span>
-        <span class="pastille" id="s-tag">Exemple</span>
-      </div>
-      <ol class="suivi" id="s-etapes"></ol>
-    </div>
+    <form id="form-suivi" class="recherche" autocomplete="off">
+      <label for="s-code" class="lbl" style="position:absolute;left:-9999px">Référence de commande</label>
+      <input id="s-code" value="GDE-2610-0042" aria-label="Référence de commande" spellcheck="false">
+      <button class="btn" type="submit">Voir</button>
+    </form>
     <div class="holo">
       <canvas class="globe" id="g-suivi" role="img" aria-label="Globe holographique : position de ton colis entre son pays de départ et Kinshasa"></canvas>
       <div class="holo-top"><span>GOD DID EXPRESS · SUIVI</span><span class="pastille" id="holo-tag">Exemple</span></div>
@@ -1121,6 +1014,14 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         <div class="holo-pct"><span id="holo-pct">0</span><small>%</small></div>
         <div class="holo-txt"><b id="holo-etape">En transit</b><span id="holo-sub"></span><span id="holo-km"></span></div>
       </div>
+    </div>
+    <div class="carte cockpit"><div class="jauge" id="s-jauge"></div><div class="voie statut" id="s-voie"></div></div>
+    <div class="carte">
+      <div class="l1" style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+        <span class="mono" id="s-ref">GDE-2610-0042</span>
+        <span class="pastille" id="s-tag">Exemple</span>
+      </div>
+      <ol class="suivi" id="s-etapes"></ol>
     </div>
     <div class="carte" id="s-photo-c" hidden>
       <div class="kicker">Photo de position</div>
@@ -1225,9 +1126,9 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   <nav aria-label="Navigation">
     <button type="button" id="t-accueil" data-v="accueil"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.8V20h13V9.8"/><path d="M10 20v-5h4v5"/></svg><span>Accueil</span></button>
     <button type="button" id="t-catalogue" data-v="catalogue"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1"/><rect x="13.5" y="3.5" width="7" height="7" rx="1"/><rect x="3.5" y="13.5" width="7" height="7" rx="1"/><rect x="13.5" y="13.5" width="7" height="7" rx="1"/></svg><span>Catalogue</span></button>
-    <button type="button" id="t-plus" class="orbe" data-v="plus" aria-label="Plus : menu"><span class="o"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.8"/></svg></span><span>Plus</span></button>
     <button type="button" id="t-commander" data-v="commander"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg><span>Commander</span></button>
     <button type="button" id="t-suivi" data-v="suivi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Suivi</span></button>
+    <button type="button" id="t-plus" data-v="plus"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18.5" cy="12" r="1.6"/></svg><span>Plus</span></button>
   </nav>
 </div>
 <div class="listbar" id="listbar" hidden>
@@ -1755,13 +1656,6 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     $('s-jauge').innerHTML = jaugeSVG(fait);
     var cur = cran >= 7 ? 'Livré' : cran < 0 ? 'Référence non reliée' : ETAPES[cran][0];
     $('s-voie').innerHTML = '<span class="kicker">' + (cran >= 7 ? 'Colis livré' : cran < 0 ? 'Suivi' : 'Étape en cours') + '</span><b>' + cur + '</b><span class="note">' + (cran >= 7 ? 'Merci pour ta confiance.' : cran < 0 ? 'Demande son état sur WhatsApp.' : 'Preuve : ' + ETAPES[cran][1]) + '</span>';
-    if ($('pi-e')) {
-      $('pi-k').textContent = cran >= 7 ? 'Colis livré' : cran < 0 ? 'Suivi' : 'Étape en cours';
-      $('pi-e').textContent = cur;
-      $('pi-s').textContent = cran < 0 ? '' : 'Étape ' + Math.min(7, cran + 1) + ' sur 7';
-      var sg = ''; for (var q = 0; q < 7; q++) sg += '<i class="' + (q < cran ? 'on' : q === cran ? 'cur' : '') + '"></i>';
-      $('pi-seg').innerHTML = sg;
-    }
     if (typeof GS !== 'undefined' && GS) GS.setStep(cran);
     $('holo-tag').textContent = $('s-tag').textContent;
     $('holo-etape').textContent = cran >= 7 ? 'Livré ✓' : cran < 0 ? 'Référence non reliée' : ETAPES[cran][0];
@@ -2219,7 +2113,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   (function () {
     var f = $('dm-photo'); if (!f) return;
     if ($('dm-trouve')) $('dm-trouve').addEventListener('click', function (e) { var o = e.target.closest('[data-open]'); if (o) ouvrirProduit(o.getAttribute('data-open')); });
-    f.addEventListener('change', function () { var dl = document.querySelector('label.depot b'); if (dl) dl.textContent = f.files[0] ? 'Photo ajoutée ✓ (toucher pour changer)' : 'Ajouter une photo du produit'; DM_PH = ''; $('dm-prev').hidden = true; if (!f.files[0]) return; reduireDm(f.files[0]).then(function (u) { DM_PH = u; $('dm-prev').src = u; $('dm-prev').hidden = false; chercherPhoto(u); }).catch(function () { $('dm-msg').textContent = 'Cette photo ne peut pas être lue. Essaie une autre.'; }); });
+    f.addEventListener('change', function () { DM_PH = ''; $('dm-prev').hidden = true; if (!f.files[0]) return; reduireDm(f.files[0]).then(function (u) { DM_PH = u; $('dm-prev').src = u; $('dm-prev').hidden = false; chercherPhoto(u); }).catch(function () { $('dm-msg').textContent = 'Cette photo ne peut pas être lue. Essaie une autre.'; }); });
     $('dm-ok').addEventListener('click', function () {
       var b = $('dm-ok'), m = $('dm-msg'); b.disabled = true; m.textContent = 'Envoi…';
       fetch('/api/demande', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nom: $('dm-nom').value, tel: $('dm-tel').value, lien: $('dm-lien').value.trim(), txt: $('dm-txt').value, qte: $('dm-qte').value, bud: $('dm-bud').value, mar: $('dm-mar').value, pre: !!$('dm-quand').value, voy: $('dm-quand').value === 'arrivage' ? 'Prochain arrivage' : $('dm-quand').value, photo: DM_PH }) })
@@ -2598,22 +2492,6 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 
   /* Fenêtre « Plus » */
   function tuile(v, ico, t, s) { return '<button type="button" class="tuile" ' + (v === 'pay' || v === 'install' || v === 'share' ? 'data-' + v : 'data-go="' + v + '"') + '><svg viewBox="0 0 24 24" aria-hidden="true">' + ico + '</svg><span><b>' + t + '</b><span class="s">' + s + '</span></span></button>'; }
-  /* Vie : mots qui tournent sur Commander, apparition douce au défilement */
-  (function () {
-    var mots = ['un téléphone', 'des chaussures', 'une machine', 'des meubles', 'un camion de marchandises', 'des vêtements', 'du matériel pour mon hôtel', 'un générateur'], i = 0, el = $('cmd-rot');
-    if (el && !REDUIT) setInterval(function () {
-      if ($('v-commander').hidden) return;
-      el.classList.add('sort');
-      setTimeout(function () { i = (i + 1) % mots.length; el.textContent = mots[i]; el.classList.remove('sort'); }, 280);
-    }, 2400);
-    if (!('IntersectionObserver' in window) || REDUIT) return;
-    document.documentElement.classList.add('vie-js');
-    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('vu'); io.unobserve(e.target); } }); }, { threshold: .12 });
-    var cible = '.cmd-et .et, .cmd-box .etp, .cmd-box .depot, .cmd-box .champ, .piste, .suivi li, .suivi-box, .tuile';
-    function brancher(r) { Array.prototype.forEach.call((r || document).querySelectorAll(cible), function (n, k) { if (n.classList.contains('vu') || n.dataset.vie) return; n.dataset.vie = '1'; n.style.transitionDelay = (k % 6) * 70 + 'ms'; io.observe(n); }); }
-    brancher(); new MutationObserver(function () { brancher(); }).observe(document.body, { childList: true, subtree: true });
-  })();
-
   function ouvrirPlus() {
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Plus</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Aller plus loin</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
       tuile('pro', '<path d="M4 9h16v10H4z"/><path d="M9 9V6h6v3"/>', 'Espace commerçants', 'Devis de gros pour entreprises et revendeurs, commandes régulières') +
