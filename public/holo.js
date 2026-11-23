@@ -83,7 +83,7 @@ window.makeHolo=function(cv,opts){
   if(step>=0){var p=pos(pg),q=P(p[0],p[1],hgt(pg));
    for(var k2=1;k2<22;k2++){var u2=Math.max(0,pg-k2*.007),pp=pos(u2),qq=P(pp[0],pp[1],hgt(u2));if(qq.z>0){ctx.fillStyle=(mode==='bateau'?'rgba('+C+',':'rgba(255,220,160,')+(.65*(1-k2/22))+')';ctx.beginPath();ctx.arc(qq.x,qq.y,3*(1-k2/44),0,7);ctx.fill()}}
    if(q.z>0){var pb=pos(Math.max(0,pg-.012)),qb=P(pb[0],pb[1],hgt(Math.max(0,pg-.012))),ang=Math.atan2(q.y-qb.y,q.x-qb.x);
-    ctx.save();ctx.translate(q.x,q.y);ctx.shadowColor='#fff';ctx.shadowBlur=20;ctx.fillStyle='#fff';
+    ctx.save();ctx.translate(q.x,q.y);ctx.shadowColor='#fff';ctx.shadowBlur=6;ctx.fillStyle='#fff';
     if(mode==='avion'){ctx.rotate(ang);ctx.beginPath();ctx.moveTo(11,0);ctx.lineTo(-6,-3);ctx.lineTo(-4,0);ctx.lineTo(-6,3);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(2,0);ctx.lineTo(-5,-11);ctx.lineTo(-7,-11);ctx.lineTo(-2,0);ctx.lineTo(-7,11);ctx.lineTo(-5,11);ctx.closePath();ctx.fill()}
     else{ctx.beginPath();ctx.arc(0,0,5,0,7);ctx.fill()}
     ctx.restore();ctx.shadowBlur=0;
@@ -91,9 +91,6 @@ window.makeHolo=function(cv,opts){
   // livré : onde sur Kinshasa
   if(step>=6){var kq=P(KIN[0],KIN[1],0);if(kq.z>0){for(var w=0;w<3;w++){var ph3=((t*.7)+w/3)%1;ctx.strokeStyle='rgba(60,220,130,'+(.8*(1-ph3))+')';ctx.lineWidth=2;ctx.beginPath();ctx.arc(kq.x,kq.y,6+ph3*46,0,7);ctx.stroke()}}}
   ctx.globalCompositeOperation='source-over';
-  // balayage + coins
-  var sy=((t*90)%(H+60))-30;var sc=ctx.createLinearGradient(0,sy-30,0,sy+2);sc.addColorStop(0,'rgba('+C+',0)');sc.addColorStop(1,'rgba('+C+',.09)');ctx.fillStyle=sc;ctx.fillRect(0,sy-30,W,32);
-  ctx.strokeStyle='rgba('+O+',.9)';ctx.lineWidth=2;[[10,10,1,1],[W-10,10,-1,1],[10,H-10,1,-1],[W-10,H-10,-1,-1]].forEach(function(c){ctx.beginPath();ctx.moveTo(c[0],c[1]+c[3]*20);ctx.lineTo(c[0],c[1]);ctx.lineTo(c[0]+c[2]*20,c[1]);ctx.stroke()});
   var km=Math.round((1-pg)*kmTot(orig,mode)/10)*10,pct=Math.round(pg*100);
   if(opts.onProgress&&pct+'|'+km!==lastPct){lastPct=pct+'|'+km;opts.onProgress(pct,km,mode)}
  }

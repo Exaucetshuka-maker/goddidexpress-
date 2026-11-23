@@ -605,7 +605,20 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 .lv-f img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 12px; }
 .lv-photos[hidden] { display: none; }
 .carte.cockpit { display: none; }
-.holo-txt span { display: none; }
+
+/* Suivi : carte professionnelle */
+.holo { display: flex; flex-direction: column; border-radius: 12px; background: var(--carbone); border: 1px solid var(--ligne); overflow: hidden; }
+.holo-top { order: 0; position: static; padding: 14px 16px; border-bottom: 1px solid var(--ligne); font: 600 12px var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--brume); }
+.holo-mode { order: 1; position: static; display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 12px 16px 0; border: 1px solid var(--ligne); border-radius: 8px; overflow: hidden; }
+.holo-mode button { min-height: 40px; border: 0; border-radius: 0; background: transparent; color: var(--brume); font: 600 14px var(--f-body); }
+.holo-mode button.on { background: var(--orange); color: var(--sur-orange); }
+.holo .globe { order: 2; height: clamp(250px, 78vw, 360px); background: #07070a; margin-top: 12px; }
+.holo-bas { order: 3; position: static; display: flex; align-items: center; gap: 16px; padding: 18px 16px; background: none; border-top: 1px solid var(--ligne); }
+.holo-pct { font-size: 56px; line-height: .9; text-shadow: none; }
+.holo-pct small { font-size: 24px; margin-top: 2px; }
+.holo-txt b { font-size: 26px; color: var(--papier); }
+.holo-txt span { color: var(--brume); }
+.holo-txt #holo-km { display: none; }
 </style>
 
 <div class="fond" aria-hidden="true"></div>
