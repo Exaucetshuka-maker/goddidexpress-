@@ -24,6 +24,10 @@
 .holo-txt{display:grid;gap:2px;min-width:0}.holo-txt b{font-family:var(--f-display);font-weight:800;font-size:28px;line-height:1;text-transform:uppercase;color:#fff}
 .holo-txt span{font-size:12.5px;color:rgba(255,255,255,.72)}
 .cockpit{display:none}
+.garanties{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
+.garanties li{border:1px solid var(--ligne);border-radius:8px;padding:11px 13px;display:grid;gap:2px}
+.garanties b{font-size:14px}
+.garanties span{font-size:13px;color:var(--brume)}
 .suivi li.cours .pt{box-shadow:0 0 0 5px rgba(255,106,19,.22),0 0 18px rgba(255,106,19,.6)}
 .suivi li.fait::before{background:var(--orange)}
 .suivi li.cours h3{color:var(--orange-vif)}
@@ -1050,6 +1054,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <img id="s-photo" alt="Position de ton colis entre la Chine et Kinshasa" style="width:100%;border-radius:6px;background:#05080f;margin-top:8px">
       <div class="rangee" style="margin-top:10px"><button class="btn" id="s-photo-share" type="button">Envoyer cette photo</button><a class="btn ghost" id="s-photo-save" download="position-colis.png" style="text-decoration:none">Enregistrer</a></div>
     </div>
+    <ul class="garanties"><li><b>Une preuve à chaque étape</b><span>Photo ou document, jamais une simple annonce.</span></li><li><b>Prévenu sur WhatsApp</b><span>Tu reçois un message quand ton colis change d'étape.</span></li><li><b>Paiement par acompte</b><span>Le solde se règle à l'arrivée, avant la remise.</span></li></ul>
     <p class="note" id="s-note">Commande d'exemple. Pour une vraie commande, écris-nous sur WhatsApp avec ta référence.</p>
     <div class="rangee"><a class="btn" id="s-notif" href="#" target="_blank" rel="noopener">Me prévenir à chaque étape</a><a class="btn ghost" id="s-wa" href="#" target="_blank" rel="noopener">Demander l'état sur WhatsApp</a></div>
   </section>
@@ -2543,7 +2548,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       (campActives().length ? tuile('paniers', '<path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 0 1 6 0"/>', campActives()[0].nom, 'Produits et lots du moment') : '') +
       (iphOn() ? tuile('iphone', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>', 'Prix du jour', 'Tous les prix du moment, commande en un clic') : '') +
       tuile('live', '<circle cx="12" cy="12" r="2.4"/><path d="M7.5 7.5a6.4 6.4 0 0 0 0 9M16.5 7.5a6.4 6.4 0 0 1 0 9M4.5 4.5a10.6 10.6 0 0 0 0 15M19.5 4.5a10.6 10.6 0 0 1 0 15"/>', 'Live shopping', 'Voir le produit réel avant d\'acheter') +
-      tuile('parrainer', '<rect x="3" y="9" width="18" height="4" rx="1"/><path d="M12 9v12M5 13v7h14v-7M12 9c-3 0-4.5-1-4.5-2.6S9 4 10.2 4C11.6 4 12 6 12 9zm0 0c3 0 4.5-1 4.5-2.6S15 4 13.8 4C12.4 4 12 6 12 9z"/>', 'Membre, fidélité, parrainage', 'Votre carte, le Club VIP, devenir point relais') + tuile('methode', '<circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8.2 18H13a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h4.8"/>', 'Comment on travaille', 'Les cinq métiers et le voyage du colis') + (IS_ADMIN ? tuile('admin', '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>', 'Espace admin', 'Prix, produits, photos, commandes') : ''));
+      tuile('parrainer', '<rect x="3" y="9" width="18" height="4" rx="1"/><path d="M12 9v12M5 13v7h14v-7M12 9c-3 0-4.5-1-4.5-2.6S9 4 10.2 4C11.6 4 12 6 12 9zm0 0c3 0 4.5-1 4.5-2.6S15 4 13.8 4C12.4 4 12 6 12 9z"/>', 'Membre, fidélité, parrainage', 'Votre carte, le Club VIP, devenir point relais') + tuile('methode', '<circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8.2 18H13a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h4.8"/>', 'Comment on travaille', 'Les cinq métiers et le voyage du colis') + tuile('share', '<circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="18" cy="18" r="2.4"/><path d="M8.1 10.9l7.8-3.8M8.1 13.1l7.8 3.8"/>', 'Partager GOD DID EXPRESS', 'Envoie le site à un proche, un client ou un revendeur') + (IS_ADMIN ? tuile('admin', '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>', 'Espace admin', 'Prix, produits, photos, commandes') : ''));
   }
 
   /* Lecture à voix haute d'une fiche produit */
