@@ -1542,10 +1542,10 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         '<div class="note">' + esc(c.nom) + (c.tel ? ', ' + esc(c.tel) : '') + (c.typ === 'expedition' ? ' · expédition seulement' + (c.ou ? ' (colis chez : ' + esc(c.ou) + ')' : '') : '') + ' · ' + esc(c.orig || 'Chine') + ' → Kinshasa, par ' + (c.mode === 'bateau' ? 'bateau' : 'avion') + (c.arr ? ' · arrivée ' + esc(dateFr(c.arr)) : '') + '</div>' +
         '<div class="grille g2"><div><label>Étape</label><select data-cf="cran">' + opts + '</select></div><div><label>Arrivée estimée</label><input type="date" data-cf="arr" value="' + esc(c.arr) + '"></div></div>' +
         '<div class="grille g2"><div><label>Total à payer ($)</label><input data-cf="total" inputmode="decimal" value="' + (c.total || '') + '" placeholder="Ex. 120"></div><div><label>Déjà payé ($)</label><input data-cf="paye" inputmode="decimal" value="' + (c.paye || '') + '" placeholder="Ex. 60"></div></div>' + '<div><label>Code partenaire utilisé (facultatif)</label><input data-cf="code" maxlength="30" style="text-transform:uppercase" value="' + esc(c.code || '') + '" placeholder="Ex. MARIE10"></div>' + '<div class="note" data-reste>' + (c.total > 0 ? 'Reste à payer : <b>' + Math.max(0, Math.round((c.total - (c.paye || 0)) * 100) / 100) + ' $</b>' : '') + '</div>' +
-        '<div class="rang"><button class="btn mini" data-ca="suiv" type="button">Étape suivante</button><button class="btn mini" data-ca="msg" type="button">Prévenir le client</button><button class="btn ghost mini" data-ca="photo" type="button">Photo de position</button><button class="btn danger mini" data-ca="suppr" type="button">Supprimer</button></div></div>';
+        '<div class="rang" style="align-items:center">' + (c.pr && c.pr[Math.min(6, c.cran)] ? '<img src="' + esc(c.pr[Math.min(6, c.cran)]) + '" alt="Preuve" style="width:54px;height:54px;object-fit:cover;border-radius:6px"><button class="btn ghost mini" data-ca="preuve-x" type="button">Retirer la preuve</button>' : '') + '<button class="btn ghost mini" data-ca="preuve" type="button">' + (c.pr && c.pr[Math.min(6, c.cran)] ? 'Changer la photo de preuve' : 'Ajouter la photo de preuve de cette étape') + '</button></div>' + '<div class="rang"><button class="btn mini" data-ca="suiv" type="button">Étape suivante</button><button class="btn mini" data-ca="msg" type="button">Prévenir le client</button><button class="btn ghost mini" data-ca="photo" type="button">Photo de position</button><button class="btn danger mini" data-ca="suppr" type="button">Supprimer</button></div></div>';
     }).join('') || '<p class="note">Aucune commande pour le moment.</p>';
   }
-  function cmTouch(c) { c.maj = new Date().toISOString().slice(0, 10); cmDirty = true; marquer(true); }
+  function cmTouch(c) { c.maj = new Date().toISOString().slice(0, 10); c.dts = c.dts || []; var k = Math.min(7, c.cran); for (var z = 0; z <= k; z++) if (!c.dts[z]) c.dts[z] = c.maj; cmDirty = true; marquer(true); }
   $('cm-q').addEventListener('input', rendreCmds);
   $('cm-ok').addEventListener('click', function () {
     var nom = $('cm-nom').value.trim(), prod = $('cm-prod').value.trim(); if (!nom || !prod) { alert('Écris le prénom du client et le produit.'); return; }
@@ -1560,9 +1560,18 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   $('cm-liste').addEventListener('click', function (e) {
     var b = e.target.closest('[data-ca]'); if (!b) return; var c = CMDS[Number(b.closest('[data-cm]').getAttribute('data-cm'))], a = b.getAttribute('data-ca');
     if (a === 'suiv') { c.cran = Math.min(7, c.cran + 1); cmTouch(c); rendreCmds(); }
+    else if (a === 'preuve-x') { c.pr = c.pr || []; c.pr[Math.min(6, c.cran)] = ''; cmTouch(c); rendreCmds(); }
+    else if (a === 'preuve') {
+      var fi = document.createElement('input'); fi.type = 'file'; fi.accept = 'image/*';
+      fi.onchange = function () {
+        if (!fi.files[0]) return; var st = Math.min(6, c.cran); b.disabled = true; b.textContent = 'Envoi…';
+        envoyerPhoto('pr' + c.ref.replace(/[^A-Za-z0-9]/g, '') + st, fi.files[0]).then(function (u) { c.pr = c.pr || []; c.pr[st] = u; cmTouch(c); rendreCmds(); infoEtat('Preuve ajoutée. Pense à enregistrer.', 'ok'); }).catch(function (er) { b.disabled = false; alert(er.message || 'Envoi impossible'); rendreCmds(); });
+      };
+      fi.click();
+    }
     else if (a === 'msg') {
       var et = ETAPES.concat(['Livré'])[Math.min(6, c.cran)]; if (c.typ === 'expedition' && c.cran === 3) et = 'Colis reçu chez nous';
-      var t = 'Bonjour ' + c.nom + ', mise à jour de ta commande « ' + (c.prod || 'colis') + ' » : ' + et + '.' + (c.arr ? ' Arrivée estimée : ' + dateFr(c.arr) + '.' : '') + (c.total > 0 && c.cran >= 5 && c.total - (c.paye || 0) > 0 ? ' Reste à payer : ' + Math.round((c.total - (c.paye || 0)) * 100) / 100 + ' $.' : '') + '\nSuis ton colis ici avec la référence ' + c.ref + ' : https://goddidexpress.com/#suivi' + (c.cran >= 6 ? '\nDonne ton avis ici, ça nous aide beaucoup : https://goddidexpress.com/?avis=' + c.ref : '');
+      var t = 'Bonjour ' + c.nom + ', mise à jour de ta commande « ' + (c.prod || 'colis') + ' » : ' + et + '.' + (c.arr ? ' Arrivée estimée : ' + dateFr(c.arr) + '.' : '') + (c.total > 0 && c.cran >= 5 && c.total - (c.paye || 0) > 0 ? ' Reste à payer : ' + Math.round((c.total - (c.paye || 0)) * 100) / 100 + ' $.' : '') + '\nSuis ton colis ici avec la référence ' + c.ref + ' : https://goddidexpress.com/?suivi=' + c.ref + (c.cran >= 6 ? '\nDonne ton avis ici, ça nous aide beaucoup : https://goddidexpress.com/?avis=' + c.ref : '');
       var tel = facTel(c.tel); window.open((tel ? 'https://wa.me/' + tel : 'https://wa.me/') + '?text=' + encodeURIComponent(t), '_blank');
     }
     else if (a === 'suppr') { if (!confirm('Supprimer la commande de ' + c.nom + ' ?')) return; CMDS.splice(CMDS.indexOf(c), 1); cmDirty = true; marquer(true); rendreCmds(); }

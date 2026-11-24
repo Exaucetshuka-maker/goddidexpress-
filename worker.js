@@ -606,7 +606,7 @@ async function traiter(request, env) {
       await env.GDE.put(k, String(n + 1), { expirationTtl: 600 });
       const c = (await lireListe(env, 'cmds')).find((x) => x.ref === mm[1].toUpperCase());
       if (!c) return json({ erreur: 'Référence introuvable' }, 404);
-      return json({ ref: c.ref, nom: c.nom, prod: c.prod, cran: c.cran, mode: c.mode, orig: c.orig || 'Chine', typ: c.typ || 'achat', ou: c.ou || '', arr: c.arr, maj: c.maj });
+      return json({ ref: c.ref, nom: c.nom, prod: c.prod, cran: c.cran, mode: c.mode, orig: c.orig || 'Chine', typ: c.typ || 'achat', ou: c.ou || '', arr: c.arr, maj: c.maj, pr: c.pr || [], dts: c.dts || [] });
     }
 
     /* Tout ce qui suit demande d'être connecté */
@@ -732,7 +732,7 @@ async function traiter(request, env) {
       const vues = new Set(), dt = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? String(v) : '');
       const propre = (Array.isArray(b.cmds) ? b.cmds : []).slice(0, 400).map((c) => ({
         ref: String(c.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), nom: txt(c.nom, 40), tel: txt(c.tel, 30), prod: txt(c.prod, 100),
-        cran: Math.max(0, Math.min(7, Math.round(nombre(c.cran)))), mode: c.mode === 'bateau' ? 'bateau' : 'avion', orig: ['Chine', 'Dubaï', 'Istanbul'].includes(c.orig) ? c.orig : 'Chine', typ: c.typ === 'expedition' ? 'expedition' : 'achat', ou: txt(c.ou, 80), code: txt(c.code, 30).toUpperCase().replace(/[^A-Z0-9_-]/g, ''), total: Math.max(0, Math.min(1e6, nombre(c.total))), paye: Math.max(0, Math.min(1e6, nombre(c.paye))), arr: dt(c.arr), maj: dt(c.maj) || new Date().toISOString().slice(0, 10),
+        cran: Math.max(0, Math.min(7, Math.round(nombre(c.cran)))), mode: c.mode === 'bateau' ? 'bateau' : 'avion', orig: ['Chine', 'Dubaï', 'Istanbul'].includes(c.orig) ? c.orig : 'Chine', typ: c.typ === 'expedition' ? 'expedition' : 'achat', ou: txt(c.ou, 80), code: txt(c.code, 30).toUpperCase().replace(/[^A-Z0-9_-]/g, ''), total: Math.max(0, Math.min(1e6, nombre(c.total))), paye: Math.max(0, Math.min(1e6, nombre(c.paye))), arr: dt(c.arr), maj: dt(c.maj) || new Date().toISOString().slice(0, 10), pr: (Array.isArray(c.pr) ? c.pr : []).slice(0, 8).map((x) => (typeof x === 'string' && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(x) ? x : '')), dts: (Array.isArray(c.dts) ? c.dts : []).slice(0, 8).map((x) => dt(x)),
       })).filter((c) => /^[A-Z0-9-]{4,30}$/.test(c.ref) && !vues.has(c.ref) && vues.add(c.ref));
       await env.GDE.put('cmds', JSON.stringify(propre));
       return json({ cmds: propre });

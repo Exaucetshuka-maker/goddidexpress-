@@ -24,6 +24,9 @@
 .holo-txt{display:grid;gap:2px;min-width:0}.holo-txt b{font-family:var(--f-display);font-weight:800;font-size:28px;line-height:1;text-transform:uppercase;color:#fff}
 .holo-txt span{font-size:12.5px;color:rgba(255,255,255,.72)}
 .cockpit{display:none}
+.vide .holo,.vide .carte,.vide #s-note,.vide #s-notif{display:none}
+#s-vide{display:none}.vide #s-vide{display:block}
+.lien-ex{background:none;border:0;padding:0;color:var(--orange);text-decoration:underline;font:inherit;cursor:pointer}
 .garanties{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
 .garanties li{border:1px solid var(--ligne);border-radius:8px;padding:11px 13px;display:grid;gap:2px}
 .garanties b{font-size:14px}
@@ -1022,16 +1025,17 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   </section>
 
   <!-- 4. SUIVI -->
-  <section class="view" id="v-suivi" hidden>
+  <section class="view vide" id="v-suivi" hidden>
     <header>
       <h2>Où est mon colis ?</h2>
       <p>Entre ta référence. Chaque étape a sa preuve.</p>
     </header>
     <form id="form-suivi" class="recherche" autocomplete="off">
       <label for="s-code" class="lbl" style="position:absolute;left:-9999px">Référence de commande</label>
-      <input id="s-code" value="GDE-2610-0042" aria-label="Référence de commande" spellcheck="false">
+      <input id="s-code" value="" placeholder="Ex. GDE-2611-AB3K" aria-label="Référence de commande" spellcheck="false" autocapitalize="characters">
       <button class="btn" type="submit">Voir</button>
     </form>
+    <p class="note" id="s-vide">Ta référence est dans le message que nous t'avons envoyé sur WhatsApp. <button type="button" class="lien-ex" id="s-ex">Voir un exemple</button></p>
     <div class="holo">
       <canvas class="globe" id="g-suivi" role="img" aria-label="Globe holographique : position de ton colis entre son pays de départ et Kinshasa"></canvas>
       <div class="holo-top"><span>GOD DID EXPRESS · SUIVI</span><span class="pastille" id="holo-tag">Exemple</span></div>
@@ -1676,6 +1680,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   ];
   var EXEMPLE = 'GDE-2610-0042';
   var ETAPES_EXP = [['Demande reçue', 'Message WhatsApp'], ['Devis envoyé', 'Transport et douane, avant tout paiement'], ['Acompte reçu', 'Capture du paiement'], ['Colis reçu chez nous', 'Photo du colis reçu'], ['En transit', 'Photo du colis expédié'], ['Arrivé à Kinshasa', 'Photo à l\'arrivée'], ['Livré', 'Vidéo de remise']];
+  function dateCourte(s) { if (!/^\d{4}-\d{2}-\d{2}$/.test(s || '')) return ''; var d = new Date(s + 'T12:00:00'); return d.getDate() + ' ' + ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'][d.getMonth()]; }
   function etapesCour() { return (curOrd && curOrd.typ === 'expedition') ? ETAPES_EXP : ETAPES; }
   function rendreSuivi(cran) {
     curCran = cran; var ETAPES = etapesCour();
@@ -1694,6 +1699,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       var cl = i < cran ? 'fait' : i === cran ? 'cours' : 'todo';
       var pt = i < cran ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : '';
       var pr = i < cran ? 'Preuve reçue : ' + e[1] : i === cran ? 'En cours : ' + e[1] : 'Preuve prévue : ' + e[1];
+      var dj = (curOrd && curOrd.dts && curOrd.dts[i] && i <= cran) ? dateCourte(curOrd.dts[i]) : ''; if (dj) pr += ' · ' + dj;
       var pho = (curOrd && curOrd.pr && curOrd.pr[i]) ? '<button type="button" class="ph" data-zoom="' + ea(curOrd.pr[i]) + '" data-t="' + ea(e[0]) + '" aria-label="Voir la photo : ' + ea(e[0]) + '"><img src="' + ea(curOrd.pr[i]) + '" alt="" loading="lazy"></button>' : '';
       return '<li class="' + cl + '"><span class="pt">' + pt + '</span><div><h3>' + e[0] + '</h3><div class="preuve">' + pr + '</div>' + pho + '</div></li>';
     }).join('');
@@ -3021,6 +3027,8 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     $('s-notif').href = wa('Bonjour GOD DID EXPRESS, prévenez-moi sur WhatsApp à chaque étape de ma commande ' + v + '.');
     var o = STATE.cmd[v];
     function fin(o2) {
+      $('v-suivi').classList.toggle('vide', !o2 && v !== EXEMPLE);
+      if (o2 || v === EXEMPLE) setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 30);
       if (o2) {
         afficherCmd(v, o2, 'En direct');
         $('s-note').textContent = (o2.typ === 'expedition' ? 'Expédition pour ' : 'Commande de ') + o2.nom + (o2.prod ? ', ' + o2.prod : '') + (o2.typ === 'expedition' && o2.ou ? '. Colis acheté chez : ' + o2.ou : '') + '. Touchez une photo pour la voir en grand.';
@@ -3031,7 +3039,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         majPhoto({ ref: v, nom: '', prod: 'Commande d\'exemple', cran: 4, mode: 'avion', arr: '' });
       } else {
         curOrd = null; $('s-tag').textContent = 'Non reliée'; rendreSuivi(-1); majPhoto(null);
-        $('s-note').textContent = 'Cette référence n\'est pas encore reliée au suivi en ligne. Demandez son état sur WhatsApp, on vous répond avec la dernière preuve.';
+        $('s-vide').innerHTML = 'Référence introuvable. Vérifie-la, ou demande son état sur <a class="lien-ex" href="' + wa('Bonjour GOD DID EXPRESS, je voudrais l\'état de ma commande, référence : ' + v) + '" target="_blank" rel="noopener">WhatsApp</a>.';
       }
     }
     if (o || v === EXEMPLE) { fin(o); return; }
@@ -3039,7 +3047,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     fetch('/api/cmd/' + encodeURIComponent(v)).then(function (r) {
       if (r.status === 429) { toast('Trop d\'essais, réessayez dans quelques minutes'); fin(null); return null; }
       if (!r.ok) { fin(null); return null; }
-      return r.json().then(function (j) { if (String($('s-ref').textContent) !== v) return; fin({ nom: j.nom, prod: j.prod, cran: j.cran, mode: j.mode, orig: j.orig, typ: j.typ, ou: j.ou, arr: j.arr, pr: [] }); });
+      return r.json().then(function (j) { if (String($('s-ref').textContent) !== v) return; fin({ nom: j.nom, prod: j.prod, cran: j.cran, mode: j.mode, orig: j.orig, typ: j.typ, ou: j.ou, arr: j.arr, pr: j.pr || [], dts: j.dts || [] }); });
     }).catch(function () { fin(null); });
   }
   $('form-suivi').addEventListener('submit', function (e) { e.preventDefault(); chercherCmd($('s-code').value); });
@@ -3048,7 +3056,9 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Preuve</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">' + h(b.getAttribute('data-t')) + '</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div><img class="big" src="' + ea(b.getAttribute('data-zoom')) + '" alt="Preuve en photo">');
   });
   $('s-notif').href = wa('Bonjour GOD DID EXPRESS, prévenez-moi sur WhatsApp à chaque étape de ma commande.');
+  $('s-ex').addEventListener('click', function () { $('s-code').value = EXEMPLE; chercherCmd(EXEMPLE); });
   try {
+    var qs = new URLSearchParams(location.search).get('suivi'); if (qs) { try { localStorage.setItem('gde-ref', qs.toUpperCase()); } catch (e) {} if (location.hash.replace('#', '') === '' ) location.hash = '#suivi'; }
     var dr = localStorage.getItem('gde-ref');
     if (dr) { $('s-code').value = dr; chercherCmd(dr); }
   } catch (e) {}
