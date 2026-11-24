@@ -222,6 +222,7 @@ function nettoyer(s) {
   })).filter((c) => c.v);
   o.avant = (Array.isArray(s.avant) ? s.avant : []).slice(0, 8).map((x) => txt(x, 140)).filter(Boolean);
   o.avlv = [0, 1, 2, 3].map((i) => (Array.isArray(s.avlv && s.avlv[i]) ? s.avlv[i] : []).slice(0, 3).map((x) => txt(x, 140)).filter(Boolean));
+  o.lives = (Array.isArray(s.lives) ? s.lives : []).map((x) => ({ d: String((x && x.d) || ''), h: String((x && x.h) || '18:00') })).filter((x) => /^\d{4}-\d{2}-\d{2}$/.test(x.d) && /^([01]\d|2[0-3]):[0-5]\d$/.test(x.h)).slice(0, 12);
   o.lvph = (Array.isArray(s.lvph) ? s.lvph : []).filter((x) => typeof x === 'string' && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(x)).slice(0, 8);
   o.wanum = /^\d{8,15}$/.test(String(s.wanum || '').replace(/\D/g, '')) ? String(s.wanum).replace(/\D/g, '') : '';
   o.tel2 = txt(s.tel2, 40);

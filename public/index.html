@@ -1656,17 +1656,28 @@ section header > .kicker, .bloc header > .kicker { display: none; }
 
   /* 2. Groupés : voir rendreGroupes() plus bas */
 
-  /* 3. Live */
-  (function () {
-    var n = new Date(), d = new Date(n);
-    d.setDate(n.getDate() + ((6 - n.getDay() + 7) % 7)); d.setHours(18, 0, 0, 0);
-    if (d < n) d.setDate(d.getDate() + 7);
-    $('live-date').textContent = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) + ', 18 h';
+  /* 3. Live : date et heure choisies par l'admin, sinon samedi 18 h */
+  function infoLive() {
+    var n = Date.now(), L = ((typeof STATE !== 'undefined' && STATE && STATE.lives) || []).map(function (x) {
+      var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(x.d || ''), t = /^(\d{2}):(\d{2})$/.exec(x.h || '18:00'); if (!m || !t) return null;
+      return { d: new Date(+m[1], +m[2] - 1, +m[3], +t[1], +t[2]), h: x.h || '18:00', fixe: true };
+    }).filter(function (x) { return x && x.d.getTime() > n - 2 * 3600e3; }).sort(function (p, q) { return p.d - q.d; });
+    if (L.length) return L[0];
+    var nn = new Date(), d = new Date(nn);
+    d.setDate(nn.getDate() + ((6 - nn.getDay() + 7) % 7)); d.setHours(18, 0, 0, 0);
+    if (d < nn) d.setDate(d.getDate() + 7);
+    return { d: d, h: '18:00', fixe: false };
+  }
+  function heureFr(h) { var p = String(h).split(':'); return (+p[0]) + ' h' + (p[1] && p[1] !== '00' ? ' ' + p[1] : ''); }
+  function texteLive(L) { return L.d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) + ', ' + heureFr(L.h); }
+  function majLivePage() {
+    var L = infoLive(), n = new Date(), d = L.d;
+    $('live-date').textContent = texteLive(L);
     var a = new Date(n.getFullYear(), n.getMonth(), n.getDate()), b = new Date(d.getFullYear(), d.getMonth(), d.getDate());
     var j = Math.round((b - a) / 864e5);
-    $('live-delai').textContent = (j === 0 ? 'Aujourd\'hui' : j === 1 ? 'Demain' : 'Dans ' + j + ' jours') + ', heure de Kinshasa, horaire à confirmer';
+    $('live-delai').textContent = (j === 0 ? 'Aujourd\'hui' : j === 1 ? 'Demain' : 'Dans ' + j + ' jours') + ', heure de Kinshasa' + (L.fixe ? '' : ', horaire à confirmer');
     $('live-wa').href = wa('Bonjour GOD DID EXPRESS, prévenez-moi du prochain live shopping.');
-  })();
+  }
 
   /* 4. Suivi */
   var ETAPES = [
@@ -2428,19 +2439,14 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   rendreTendance();
 
   /* Salle d'attente du live */
-  function prochainLive() {
-    var n = new Date(), d = new Date(n);
-    d.setDate(n.getDate() + ((6 - n.getDay() + 7) % 7)); d.setHours(18, 0, 0, 0);
-    if (d < n) d.setDate(d.getDate() + 7);
-    return d;
-  }
+  function prochainLive() { return infoLive().d; }
   function tic() {
     var d = prochainLive(), s = Math.max(0, Math.floor((d - Date.now()) / 1000));
     function z(n) { return String(n).padStart(2, '0'); }
     $('cr-j').textContent = z(Math.floor(s / 86400)); $('cr-h').textContent = z(Math.floor(s % 86400 / 3600));
     $('cr-m').textContent = z(Math.floor(s % 3600 / 60)); $('cr-s').textContent = z(s % 60);
   }
-  $('lv-quand').textContent = prochainLive().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) + ', 18 h (à confirmer)';
+  var LV0 = infoLive(); $('lv-quand').textContent = texteLive(LV0) + (LV0.fixe ? '' : ' (à confirmer)'); majLivePage();
   $('lv-wa').href = wa('Bonjour GOD DID EXPRESS, prévenez-moi du prochain live shopping.');
   tic(); setInterval(tic, 1000);
 

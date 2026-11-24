@@ -393,6 +393,12 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         <textarea id="r-phr" maxlength="1600"></textarea>
       </div>
       <div class="carte">
+        <h3>Jours et heures des lives</h3>
+        <p class="note">Ajoute chaque live avec son jour et son heure (heure de Kinshasa). Le site affiche le prochain et le compte à rebours. Sans date, il affiche samedi 18 h « à confirmer ».</p>
+        <div id="r-lives" class="grille"></div>
+        <button class="btn ghost" id="r-lives-add" type="button">+ Ajouter un live</button>
+      </div>
+      <div class="carte">
         <h3>Photos du prochain live</h3>
         <p class="note">Ajoute les photos du prochain live (jusqu'à 8). Elles s'affichent sur l'accueil et sur la page Live.</p>
         <input id="r-lvph-f" type="file" accept="image/*" multiple>
@@ -491,7 +497,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     s = s || {};
     s.rev = s.rev || 0; s.prod = s.prod || {}; s.extra = s.extra || []; s.slog = s.slog || {};
     s.soc = Object.assign({ tiktok: '', instagram: '', facebook: '' }, s.soc || {});
-    s.fc = Number(s.fc) || 0; s.fcd = s.fcd || ''; s.lvph = Array.isArray(s.lvph) ? s.lvph : []; s.vp = s.vp || ''; s.vpOff = !!s.vpOff; s.promo = s.promo || []; s.avis = s.avis || []; s.vip = (s.vip && s.vip.length === 3) ? s.vip : [3, 6, 10]; s.lien = s.lien || '';
+    s.fc = Number(s.fc) || 0; s.fcd = s.fcd || ''; s.lvph = Array.isArray(s.lvph) ? s.lvph : []; s.lives = Array.isArray(s.lives) ? s.lives : []; s.vp = s.vp || ''; s.vpOff = !!s.vpOff; s.promo = s.promo || []; s.avis = s.avis || []; s.vip = (s.vip && s.vip.length === 3) ? s.vip : [3, 6, 10]; s.lien = s.lien || '';
     s.voy = s.voy || []; s.info = s.info || {}; s.mail = s.mail || ''; s.wag = s.wag || WAG0; s.wac = s.wac || WAC0; s.tel2 = s.tel2 || ''; s.adr2 = s.adr2 || ''; s.wanum = s.wanum || ''; s.avant = s.avant || []; s.avlv = [0, 1, 2, 3].map(function (i) { return (s.avlv && s.avlv[i]) || []; });
     s.contacts = s.contacts || [];
     if (!s.contacts.length) { if (s.tel2) s.contacts.push({ type: 'tel', label: 'Deuxième numéro', v: s.tel2 }); if (s.mail) s.contacts.push({ type: 'mail', label: 'E-mail', v: s.mail }); if (s.adr2) s.contacts.push({ type: 'adresse', label: 'Autre adresse', v: s.adr2 }); s.tel2 = ''; s.mail = ''; s.adr2 = ''; } s.phr = s.phr || [];
@@ -1611,7 +1617,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     $('r-wanum').value = STATE.wanum; $('r-avant').value = (STATE.avant || []).join('\n'); [0, 1, 2, 3].forEach(function (i) { $('r-avl' + i).value = ((STATE.avlv || [])[i] || []).join('\n'); }); $('r-fc').value = STATE.fc || ''; $('r-gsc').value = STATE.gsc || ''; $('r-vp').value = STATE.vp || ''; $('r-vpoff').checked = !!STATE.vpOff; pkMaj(); pinMaj(); rendreContacts(); ['avion', 'bateau', 'zones', 'introuvable'].forEach(function (k) { $('r-i-' + k).value = STATE.info[k] || ''; });
     $('r-wag').value = STATE.wag; $('r-wac').value = STATE.wac;
     ['tiktok', 'instagram', 'facebook'].forEach(function (k) { $('r-' + k).value = STATE.soc[k] || ''; });
-    rendreLvph();
+    rendreLvph(); rendreLives();
     $('r-lien').value = STATE.lien; $('r-phr').value = (STATE.phr || []).join('\n');
     $('r-slog').innerHTML = MOIS.map(function (m, i) { return '<div><label for="sl-' + i + '">' + m + '</label><input id="sl-' + i + '" data-sl="' + (i + 1) + '" maxlength="160" value="' + esc(STATE.slog[String(i + 1)] || '') + '" placeholder="Slogan d\'origine"></div>'; }).join('');
     rendrePromo();
@@ -1632,6 +1638,13 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
    ['r-tiktok', function (v) { STATE.soc.tiktok = v.trim(); }], ['r-instagram', function (v) { STATE.soc.instagram = v.trim(); }], ['r-facebook', function (v) { STATE.soc.facebook = v.trim(); }],
    ['r-lien', function (v) { STATE.lien = v.trim(); }], ['r-phr', function (v) { STATE.phr = v.split('\n').map(function (x) { return x.trim(); }).filter(Boolean); }]
   ].forEach(function (c) { $(c[0]).addEventListener('input', function () { c[1](this.value); marquer(true); }); });
+  function rendreLives() {
+    var L = (STATE.lives = Array.isArray(STATE.lives) ? STATE.lives : []);
+    $('r-lives').innerHTML = L.map(function (x, k) { return '<div class="rang" style="align-items:center"><input type="date" data-lv="d" data-k="' + k + '" value="' + esc(x.d || '') + '"><input type="time" data-lv="h" data-k="' + k + '" value="' + esc(x.h || '18:00') + '"><button class="btn danger mini" type="button" data-lv="x" data-k="' + k + '">Retirer</button></div>'; }).join('') || '<p class="note">Aucun live programmé.</p>';
+  }
+  $('r-lives-add').addEventListener('click', function () { (STATE.lives = STATE.lives || []).push({ d: '', h: '18:00' }); marquer(true); rendreLives(); });
+  $('r-lives').addEventListener('change', function (e) { var f = e.target.getAttribute('data-lv'), k = Number(e.target.getAttribute('data-k')); if (f === 'd' || f === 'h') { STATE.lives[k][f] = e.target.value; marquer(true); } });
+  $('r-lives').addEventListener('click', function (e) { if (e.target.getAttribute('data-lv') === 'x') { STATE.lives.splice(Number(e.target.getAttribute('data-k')), 1); marquer(true); rendreLives(); } });
   function rendreLvph() {
     $('r-lvph').innerHTML = (STATE.lvph || []).map(function (x, i) { return '<div style="position:relative"><img src="' + esc(x) + '" alt="" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:8px"><button type="button" class="btn ghost" data-lvdel="' + i + '" style="position:absolute;top:6px;right:6px;min-height:34px;padding:0 10px" aria-label="Retirer">✕</button></div>'; }).join('');
   }
