@@ -1777,10 +1777,16 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       if (o.desc) p.desc = o.desc;
       if (o.det) p.det = o.det;
       if (o.arr) p.arr = o.arr;
+      if (o.lv) p.lv = 1;
       if (o.pa > 0 && o.pd) { p.pa = o.pa; p.pd = o.pd; }
       out.push(p);
     });
     STATE.extra.forEach(function (e) { if (!e.cache) out.push(Object.assign({ l: 0 }, e)); });
+    /* Live : produits choisis par l'admin, sinon sélection automatique qui change chaque jour */
+    var pin = out.filter(function (p) { return p.lv; }), ch;
+    if (pin.length) ch = pin;
+    else { var el = out.filter(function (p) { return !p.gone; }), pr = el.filter(function (p) { return prixMin(p) !== null; }); ch = melangeJour(pr.length >= 4 ? pr : el).slice(0, 8); }
+    out.forEach(function (p) { p.l = ch.indexOf(p) >= 0 ? 1 : 0; });
     return out;
   }
   function arrTag(p) {

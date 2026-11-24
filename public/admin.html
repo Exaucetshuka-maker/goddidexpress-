@@ -694,9 +694,9 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   function tous() {
     var base = PRODS.map(function (p) {
       var o = STATE.prod[p.id] || {};
-      return { id: p.id, t: p.t, s: p.s, c: p.c, px: o.px || [null, null, null], photo: o.photo || ('img/' + p.id + '.jpg'), custom: !!o.photo, ph: o.ph || [], desc: o.desc || '', vid: o.vid || '', ac: o.ac || 0, st: o.st || '', pq: o.pq || null, cache: !!o.cache, gone: !!o.gone, det: o.det || null, arr: o.arr || '', extra: false };
+      return { id: p.id, t: p.t, s: p.s, c: p.c, px: o.px || [null, null, null], photo: o.photo || ('img/' + p.id + '.jpg'), custom: !!o.photo, ph: o.ph || [], desc: o.desc || '', vid: o.vid || '', ac: o.ac || 0, st: o.st || '', pq: o.pq || null, cache: !!o.cache, lv: !!o.lv, gone: !!o.gone, det: o.det || null, arr: o.arr || '', extra: false };
     });
-    var ex = STATE.extra.map(function (e) { return { id: e.id, t: e.t, s: e.s, c: e.c, px: e.px || [null, null, null], photo: e.photo || '', custom: !!e.photo, ph: e.ph || [], desc: e.desc || '', vid: e.vid || '', ac: e.ac || 0, st: e.st || '', pq: e.pq || null, cache: !!e.cache, gone: false, det: e.det || null, arr: e.arr || '', extra: true }; });
+    var ex = STATE.extra.map(function (e) { return { id: e.id, t: e.t, s: e.s, c: e.c, px: e.px || [null, null, null], photo: e.photo || '', custom: !!e.photo, ph: e.ph || [], desc: e.desc || '', vid: e.vid || '', ac: e.ac || 0, st: e.st || '', pq: e.pq || null, cache: !!e.cache, lv: !!e.lv, gone: false, det: e.det || null, arr: e.arr || '', extra: true }; });
     return ex.concat(base);
   }
   function opt(v, cur, t) { return '<option value="' + v + '"' + (cur === v ? ' selected' : '') + '>' + t + '</option>'; }
@@ -728,7 +728,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         '<div><label>Acompte demandé au client (%)</label><input data-k="ac" inputmode="numeric" maxlength="3" value="' + esc(p.ac && p.ac !== 50 ? p.ac : '') + '" placeholder="50 par défaut. Mets 100 pour un paiement complet."></div>' +
         '<details' + (p.vid ? ' open' : '') + '><summary class="note">Vidéo du produit (lien)</summary><input data-k="vid" maxlength="300" inputmode="url" value="' + esc(p.vid || '') + '" placeholder="https://… YouTube, TikTok, Facebook ou fichier MP4"></details>' +
         '<details open><summary class="note" style="color:var(--orange,#FF7A1A);font-weight:700">+ Ajouter des photos : ' + (1 + (p.ph || []).length) + ' sur 6</summary><div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0">' + (p.ph || []).map(function (u, k) { return '<span style="position:relative"><img src="' + esc(u) + '" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:6px"><button type="button" data-a="ph-x:' + k + '" aria-label="Retirer cette photo" style="position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:0;background:#c0392b;color:#fff;font-size:14px">×</button></span>'; }).join('') + '</div>' + ((p.ph || []).length < 5 ? '<button class="btn ghost mini" data-a="ph-add" type="button">+ Ajouter des photos</button>' : '<span class="note">6 photos au maximum.</span>') + '<input type="file" accept="image/*" multiple class="cache" data-k="files"></details>' +
-        '<div class="rang"><button class="btn ghost mini" data-a="photo" type="button">Changer la photo</button>' +
+        '<div class="rang"><button class="btn mini' + (p.lv ? '' : ' ghost') + '" data-a="lv" type="button">' + (p.lv ? '✓ Au programme du live' : 'Mettre au live') + '</button><button class="btn ghost mini" data-a="photo" type="button">Changer la photo</button>' +
         (p.custom ? '<button class="btn ghost mini" data-a="photo-off" type="button">Enlever la photo</button>' : '') +
         '<button class="btn mini" data-a="affiche" type="button">Affiche promo</button>' +
         (p.gone ? '<button class="btn ghost mini" data-a="restaure" type="button">Restaurer</button>' : '<button class="btn ghost mini" data-a="cache" type="button">' + (p.cache ? 'Remettre en ligne' : (p.extra ? 'Masquer' : 'Retirer du site')) + '</button><button class="btn danger mini" data-a="suppr" type="button">Supprimer</button>') +
@@ -837,6 +837,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     else if (a === 'ph-add') { row.querySelector('input[data-k="files"]').click(); }
     else if (a.indexOf('ph-x:') === 0) { var oq = refProd(id); (oq.ph = oq.ph || []).splice(+a.slice(5), 1); if (!oq.ph.length) delete oq.ph; marquer(true); rendreProduits(); }
     else if (a === 'photo-off') { var o2 = refProd(id); delete o2.photo; marquer(true); rendreProduits(); }
+    else if (a === 'lv') { var ol = refProd(id); ol.lv = !ol.lv; if (!ol.lv) delete ol.lv; marquer(true); rendreProduits(); }
     else if (a === 'cache') { var o = refProd(id); o.cache = !o.cache; if (!o.cache) delete o.cache; marquer(true); rendreProduits(); }
     else if (a === 'suppr') {
       if (STATE.extra.some(function (x) { return x.id === id; })) { if (confirm('Supprimer ce produit pour de bon ?')) { STATE.extra = STATE.extra.filter(function (x) { return x.id !== id; }); marquer(true); rendreProduits(); } }

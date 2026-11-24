@@ -163,6 +163,7 @@ function nettoyer(s) {
     const r = {};
     if (Array.isArray(p.px)) r.px = [0, 1, 2].map((i) => (p.px[i] === null || p.px[i] === '' || p.px[i] === undefined ? null : nombre(p.px[i], null)));
     if (p.cache) r.cache = true;
+    if (p.lv) r.lv = true;
     if (p.gone) r.gone = true;
     if (p.desc) r.desc = txt(p.desc, 600);
     { const dd = nettoyerDet(p.det); if (dd) r.det = dd; }
@@ -186,6 +187,7 @@ function nettoyer(s) {
     { const ph = phs(e.ph); if (ph.length) r.ph = ph; }
     { const vd = vidUrl(e.vid); if (vd) r.vid = vd; }
     if (e.cache) r.cache = true;
+    if (e.lv) r.lv = true;
     if (e.desc) r.desc = txt(e.desc, 600);
     { const dd = nettoyerDet(e.det); if (dd) r.det = dd; }
     { const q = pqNet(e.pq); if (q) r.pq = q; }
