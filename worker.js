@@ -76,9 +76,9 @@ function derVersRaw(d) {
   const r = lire(); if (!r) return null; const sg = lire(); if (!sg) return null;
   const raw = new Uint8Array(64); raw.set(r, 0); raw.set(sg, 32); return raw;
 }
-async function pkVerifier(env, request, b) {
+async function pkVerifier(env, request, b, liste) {
   try {
-    const k = (await lirePk(env)).find((x) => x.id === b.id); if (!k) return false;
+    const k = (liste || (await lirePk(env))).find((x) => x.id === b.id); if (!k) return false;
     const cdj = unb64u(b.cdj), ad = unb64u(b.ad), sig = derVersRaw(unb64u(b.sig)); if (!sig || ad.length < 37) return false;
     const c = JSON.parse(new TextDecoder().decode(cdj)); if (c.type !== 'webauthn.get') return false;
     const kc = 'pkc:' + String(c.challenge).slice(0, 80); if (!(await env.GDE.get(kc))) return false; await env.GDE.delete(kc);
@@ -608,6 +608,39 @@ async function traiter(request, env) {
       if (!c || tel.length < 7 || fin(c.tel) !== tel) return json({ erreur: 'Référence ou téléphone incorrect.' }, 404);
       const mes = L.filter((x) => fin(x.tel) === tel).map((x) => ({ ref: x.ref, prod: x.prod, cran: x.cran, typ: x.typ || 'achat', orig: x.orig || 'Chine', maj: x.maj }));
       return json({ nom: c.nom, cmds: mes });
+    }
+
+    /* Face ID des clients : défi, enregistrement (après référence + téléphone), connexion */
+    const finTel = (t) => String(t || '').replace(/\D/g, '').slice(-9);
+    const espaceDe = (L, tel) => ({ nom: (L.find((x) => finTel(x.tel) === tel) || {}).nom || '', cmds: L.filter((x) => finTel(x.tel) === tel).map((x) => ({ ref: x.ref, prod: x.prod, cran: x.cran, typ: x.typ || 'achat', orig: x.orig || 'Chine', maj: x.maj })) });
+    if (p === '/api/client/defi' && request.method === 'POST') {
+      if (limite(request, 'cdefi', 12)) return json({ erreur: 'Trop d\'essais' }, 429);
+      const ch = b64u(crypto.getRandomValues(new Uint8Array(32)).buffer); await env.GDE.put('pkc:' + ch, '1', { expirationTtl: 120 });
+      return json({ challenge: ch });
+    }
+    if (p === '/api/client/pk-enregistrer' && request.method === 'POST') {
+      if (limite(request, 'cpke', 6)) return json({ erreur: 'Trop d\'essais, réessaie dans une minute.' }, 429);
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const ref = String(b.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), tel = finTel(b.tel);
+      const L = await lireListe(env, 'cmds'), c = L.find((x) => x.ref === ref);
+      if (!c || tel.length < 7 || finTel(c.tel) !== tel) return json({ erreur: 'Référence ou téléphone incorrect.' }, 404);
+      const id = String(b.id || ''), pub = String(b.pub || '');
+      if (!/^[A-Za-z0-9_-]{16,300}$/.test(id) || !/^[A-Za-z0-9+/=]{60,200}$/.test(pub)) return json({ erreur: 'Données invalides' }, 400);
+      try { await crypto.subtle.importKey('spki', unb64(pub), { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']); } catch (e) { return json({ erreur: 'Clé non acceptée' }, 400); }
+      let K = []; try { const t = await env.GDE.get('cpk'); K = t ? JSON.parse(t) : []; } catch (e) { K = []; }
+      if (!Array.isArray(K)) K = [];
+      K = K.filter((x) => x.id !== id);
+      const miens = K.filter((x) => x.tel === tel); if (miens.length >= 3) K = K.filter((x) => x !== miens[0]);
+      K.push({ id, pub, tel, t: Date.now() }); if (K.length > 3000) K = K.slice(-3000);
+      await env.GDE.put('cpk', JSON.stringify(K)); return json({ ok: true });
+    }
+    if (p === '/api/client/pk-connexion' && request.method === 'POST') {
+      if (limite(request, 'cpkc', 10)) return json({ erreur: 'Trop d\'essais, réessaie dans une minute.' }, 429);
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      let K = []; try { const t = await env.GDE.get('cpk'); K = t ? JSON.parse(t) : []; } catch (e) { K = []; }
+      const k = Array.isArray(K) ? K.find((x) => x.id === b.id) : null;
+      if (!k || !(await pkVerifier(env, request, b, K))) return json({ erreur: 'Face ID refusé' }, 401);
+      return json(espaceDe(await lireListe(env, 'cmds'), k.tel));
     }
 
     /* Position d'un colis par sa référence (public, limité) : seulement prénom, produit, étape */
