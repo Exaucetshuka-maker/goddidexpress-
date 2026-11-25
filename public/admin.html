@@ -285,6 +285,11 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
           <button class="btn" id="cm-ok" type="button">Ajouter la commande</button>
         </div>
       </details>
+      <details class="carte" id="cl-carte">
+        <summary><strong>Mes clients</strong></summary>
+        <p class="note">Chaque client avec toutes ses commandes, regroupées par téléphone. Le client les voit lui aussi sur la page Suivi, dans « Mes commandes ».</p>
+        <div id="cl-liste" class="grille"></div>
+      </details>
       <details class="carte" id="pt-carte">
         <summary><strong>Partenaires : influenceurs, équipes, marques, commerçants, stars</strong></summary>
         <p class="note">Chaque partenaire a son code. Ses fans le tapent pour avoir une remise. Dans une commande, tu écris le code utilisé, et tu vois ici ce que chaque partenaire a rapporté et la commission à lui verser. La commission ne se voit jamais sur le site.</p>
@@ -1554,7 +1559,22 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         '<div class="grille g2"><div><label>Total à payer ($)</label><input data-cf="total" inputmode="decimal" value="' + (c.total || '') + '" placeholder="Ex. 120"></div><div><label>Déjà payé ($)</label><input data-cf="paye" inputmode="decimal" value="' + (c.paye || '') + '" placeholder="Ex. 60"></div></div>' + '<div><label>Code partenaire utilisé (facultatif)</label><input data-cf="code" maxlength="30" style="text-transform:uppercase" value="' + esc(c.code || '') + '" placeholder="Ex. MARIE10"></div>' + '<div class="note" data-reste>' + (c.total > 0 ? 'Reste à payer : <b>' + Math.max(0, Math.round((c.total - (c.paye || 0)) * 100) / 100) + ' $</b>' : '') + '</div>' +
         '<div class="rang" style="align-items:center">' + (c.pr && c.pr[Math.min(etp(c).length - 1, c.cran)] ? '<img src="' + esc(c.pr[Math.min(etp(c).length - 1, c.cran)]) + '" alt="Preuve" style="width:54px;height:54px;object-fit:cover;border-radius:6px"><button class="btn ghost mini" data-ca="preuve-x" type="button">Retirer la preuve</button>' : '') + '<button class="btn ghost mini" data-ca="preuve" type="button">' + (c.pr && c.pr[Math.min(etp(c).length - 1, c.cran)] ? 'Changer la photo de preuve' : 'Ajouter la photo de preuve de cette étape') + '</button></div>' + '<div class="rang"><button class="btn mini" data-ca="suiv" type="button">Étape suivante</button><button class="btn mini" data-ca="msg" type="button">Prévenir le client</button><button class="btn ghost mini" data-ca="photo" type="button">Photo de position</button><button class="btn danger mini" data-ca="suppr" type="button">Supprimer</button></div></div>';
     }).join('') || '<p class="note">Aucune commande pour le moment.</p>';
+    rendreClients();
   }
+  function rendreClients() {
+    var G = {}, fin = function (t) { return String(t || '').replace(/\D/g, '').slice(-9); };
+    CMDS.forEach(function (c) { var k = fin(c.tel) || ('n-' + c.nom); (G[k] = G[k] || { nom: c.nom, tel: c.tel, l: [] }).l.push(c); });
+    var K = Object.keys(G).sort(function (x, y) { return G[y].l.length - G[x].l.length; });
+    $('cl-liste').innerHTML = K.map(function (k) {
+      var g = G[k], tot = 0, pay = 0; g.l.forEach(function (c) { tot += Number(c.total) || 0; pay += Number(c.paye) || 0; });
+      var d = String(g.tel || '').replace(/\D/g, '');
+      return '<div class="carte"><div class="rang" style="justify-content:space-between"><strong>' + esc(g.nom) + '</strong><span class="pastille">' + g.l.length + ' commande' + (g.l.length > 1 ? 's' : '') + '</span></div>' +
+        '<div class="note">' + esc(g.tel || 'Sans téléphone') + (tot ? ' · total ' + Math.round(tot * 100) / 100 + ' $, payé ' + Math.round(pay * 100) / 100 + ' $' : '') + '</div>' +
+        g.l.map(function (c) { return '<div class="note">' + esc(source(c)) + ' · ' + esc(c.prod) + ' · ' + esc(cranNom2(c)) + ' · ' + esc(c.ref) + '</div>'; }).join('') +
+        (d ? '<a class="btn ghost mini" target="_blank" rel="noopener" href="https://wa.me/' + d + '">Écrire sur WhatsApp</a>' : '') + '</div>';
+    }).join('') || '<p class="note">Aucun client pour le moment.</p>';
+  }
+  function cranNom2(c) { var S = etp(c); return c.cran >= S.length ? 'Livré' : S[Math.max(0, c.cran)]; }
   function cmTouch(c) { c.maj = new Date().toISOString().slice(0, 10); c.dts = c.dts || []; var k = Math.min(etp(c).length - 1, c.cran); for (var z = 0; z <= k; z++) if (!c.dts[z]) c.dts[z] = c.maj; cmDirty = true; marquer(true); }
   $('cm-q').addEventListener('input', rendreCmds);
   $('cm-ok').addEventListener('click', function () {

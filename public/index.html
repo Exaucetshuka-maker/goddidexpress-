@@ -28,6 +28,12 @@
 .vide .holo,.vide .carte,.vide #s-note,.vide #s-notif{display:none}
 #s-vide{display:none}.vide #s-vide{display:block}
 .lien-ex{background:none;border:0;padding:0;color:var(--orange);text-decoration:underline;font:inherit;cursor:pointer}
+.espace{margin-top:16px;border:1px solid var(--ligne);border-radius:8px;padding:14px;display:grid;gap:8px}
+.espace h3{margin:0;font-size:16px}
+.espace input{width:100%}
+#e-liste{display:grid;gap:8px}
+.e-c{text-align:left;background:none;border:1px solid var(--ligne);border-radius:8px;padding:11px 13px;color:inherit;font:inherit;cursor:pointer;display:grid;gap:3px}
+.e-c b{font-size:14px}.e-c span{font-size:13px;color:var(--brume)}
 .garanties{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
 .garanties li{border:1px solid var(--ligne);border-radius:8px;padding:11px 13px;display:grid;gap:2px}
 .garanties b{font-size:14px}
@@ -1058,6 +1064,17 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <div class="kicker">Photo de position</div>
       <img id="s-photo" alt="Position de ton colis entre la Chine et Kinshasa" style="width:100%;border-radius:6px;background:#05080f;margin-top:8px">
       <div class="rangee" style="margin-top:10px"><button class="btn" id="s-photo-share" type="button">Envoyer cette photo</button><a class="btn ghost" id="s-photo-save" download="position-colis.png" style="text-decoration:none">Enregistrer</a></div>
+    </div>
+    <div class="espace" id="espace">
+      <h3>Mes commandes</h3>
+      <p class="note">Toutes tes commandes au même endroit : importées de Chine ou prises en stock. Entre une référence et le téléphone donné à la commande.</p>
+      <form id="form-espace" class="grille" autocomplete="off">
+        <input id="e-ref" placeholder="Ta référence, ex. GDE-2611-AB3K" spellcheck="false" autocapitalize="characters" aria-label="Référence">
+        <input id="e-tel" inputmode="tel" placeholder="Ton téléphone" autocomplete="tel" aria-label="Téléphone">
+        <button class="btn ghost" type="submit">Voir mes commandes</button>
+      </form>
+      <p class="note" id="e-msg" aria-live="polite"></p>
+      <div id="e-liste"></div>
     </div>
     <ul class="garanties"><li><b>Une preuve à chaque étape</b><span>Photo ou document, jamais une simple annonce.</span></li><li><b>Prévenu sur WhatsApp</b><span>Tu reçois un message quand ton colis change d'étape.</span></li><li><b>Paiement par acompte</b><span>Le solde se règle à l'arrivée, avant la remise.</span></li></ul>
     <p class="note" id="s-note">Commande d'exemple. Pour une vraie commande, écris-nous sur WhatsApp avec ta référence.</p>
@@ -3066,6 +3083,24 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Preuve</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">' + h(b.getAttribute('data-t')) + '</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div><img class="big" src="' + ea(b.getAttribute('data-zoom')) + '" alt="Preuve en photo">');
   });
   $('s-notif').href = wa('Bonjour GOD DID EXPRESS, prévenez-moi sur WhatsApp à chaque étape de ma commande.');
+  $('form-espace').addEventListener('submit', function (e) {
+    e.preventDefault(); var m = $('e-msg'), L = $('e-liste'); L.innerHTML = ''; m.textContent = 'Recherche…';
+    fetch('/api/mes-commandes', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ref: $('e-ref').value, tel: $('e-tel').value }) })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (x) {
+        if (!x.ok) { m.textContent = x.j.erreur || 'Introuvable.'; return; }
+        m.textContent = 'Bonjour ' + x.j.nom + ', voici tes commandes.';
+        L.innerHTML = x.j.cmds.map(function (c) {
+          var S = c.typ === 'stock' ? ETAPES_STOCK : c.typ === 'expedition' ? ETAPES_EXP : ETAPES, fini = c.cran >= S.length;
+          var src = c.typ === 'stock' ? 'En stock' : 'Importé de ' + c.orig;
+          return '<button type="button" class="e-c" data-ref="' + ea(c.ref) + '"><b>' + ea(c.prod) + '</b><span>' + ea(src) + ' · ' + (fini ? 'Livré' : ea(S[Math.max(0, c.cran)][0])) + ' · ' + ea(c.ref) + '</span></button>';
+        }).join('');
+      }).catch(function () { m.textContent = 'Connexion impossible, réessaie.'; });
+  });
+  $('e-liste').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-ref]'); if (!b) return;
+    $('s-code').value = b.getAttribute('data-ref'); chercherCmd(b.getAttribute('data-ref')); window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
   $('s-ex').addEventListener('click', function () { $('s-code').value = EXEMPLE; chercherCmd(EXEMPLE); });
   try {
     var qs = new URLSearchParams(location.search).get('suivi'); if (qs) { try { localStorage.setItem('gde-ref', qs.toUpperCase()); } catch (e) {} if (location.hash.replace('#', '') === '' ) location.hash = '#suivi'; }

@@ -598,6 +598,18 @@ async function traiter(request, env) {
       return json({ ok: true, n: total + 1 });
     }
 
+    /* Espace client : une référence + le téléphone de la commande donnent toutes les commandes du même client */
+    if (p === '/api/mes-commandes' && request.method === 'POST') {
+      if (limite(request, 'mescmd', 6)) return json({ erreur: 'Trop d\'essais, réessaie dans une minute.' }, 429);
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const ref = String(b.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), fin = (t) => String(t || '').replace(/\D/g, '').slice(-9);
+      const tel = fin(b.tel);
+      const L = await lireListe(env, 'cmds'), c = L.find((x) => x.ref === ref);
+      if (!c || tel.length < 7 || fin(c.tel) !== tel) return json({ erreur: 'Référence ou téléphone incorrect.' }, 404);
+      const mes = L.filter((x) => fin(x.tel) === tel).map((x) => ({ ref: x.ref, prod: x.prod, cran: x.cran, typ: x.typ || 'achat', orig: x.orig || 'Chine', maj: x.maj }));
+      return json({ nom: c.nom, cmds: mes });
+    }
+
     /* Position d'un colis par sa référence (public, limité) : seulement prénom, produit, étape */
     const mm = /^\/api\/cmd\/([A-Za-z0-9-]{4,30})$/.exec(p);
     if (mm && request.method === 'GET') {
