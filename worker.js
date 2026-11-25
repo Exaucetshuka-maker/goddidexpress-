@@ -598,6 +598,8 @@ async function traiter(request, env) {
       return json({ ok: true, n: total + 1 });
     }
 
+    const finTel = (t) => String(t || '').replace(/\D/g, '').slice(-9);
+    const espaceDe = (L, tel, CA) => ({ carte: (() => { const k = (CA || []).find((x) => finTel(x.tel) === tel); return k ? { code: k.code, achats: k.achats || 0 } : null; })(), nom: (L.find((x) => finTel(x.tel) === tel) || {}).nom || '', cmds: L.filter((x) => finTel(x.tel) === tel).map((x) => ({ ref: x.ref, prod: x.prod, cran: x.cran, typ: x.typ || 'achat', orig: x.orig || 'Chine', maj: x.maj })) });
     /* Espace client : une référence + le téléphone de la commande donnent toutes les commandes du même client */
     if (p === '/api/mes-commandes' && request.method === 'POST') {
       if (limite(request, 'mescmd', 6)) return json({ erreur: 'Trop d\'essais, réessaie dans une minute.' }, 429);
@@ -606,13 +608,10 @@ async function traiter(request, env) {
       const tel = fin(b.tel);
       const L = await lireListe(env, 'cmds'), c = L.find((x) => x.ref === ref);
       if (!c || tel.length < 7 || fin(c.tel) !== tel) return json({ erreur: 'Référence ou téléphone incorrect.' }, 404);
-      const mes = L.filter((x) => fin(x.tel) === tel).map((x) => ({ ref: x.ref, prod: x.prod, cran: x.cran, typ: x.typ || 'achat', orig: x.orig || 'Chine', maj: x.maj }));
-      return json({ nom: c.nom, cmds: mes });
+      return json(espaceDe(L, tel, await lireListe(env, 'cartes')));
     }
 
     /* Face ID des clients : défi, enregistrement (après référence + téléphone), connexion */
-    const finTel = (t) => String(t || '').replace(/\D/g, '').slice(-9);
-    const espaceDe = (L, tel) => ({ nom: (L.find((x) => finTel(x.tel) === tel) || {}).nom || '', cmds: L.filter((x) => finTel(x.tel) === tel).map((x) => ({ ref: x.ref, prod: x.prod, cran: x.cran, typ: x.typ || 'achat', orig: x.orig || 'Chine', maj: x.maj })) });
     if (p === '/api/client/defi' && request.method === 'POST') {
       if (limite(request, 'cdefi', 12)) return json({ erreur: 'Trop d\'essais' }, 429);
       const ch = b64u(crypto.getRandomValues(new Uint8Array(32)).buffer); await env.GDE.put('pkc:' + ch, '1', { expirationTtl: 120 });
@@ -640,7 +639,7 @@ async function traiter(request, env) {
       let K = []; try { const t = await env.GDE.get('cpk'); K = t ? JSON.parse(t) : []; } catch (e) { K = []; }
       const k = Array.isArray(K) ? K.find((x) => x.id === b.id) : null;
       if (!k || !(await pkVerifier(env, request, b, K))) return json({ erreur: 'Face ID refusé' }, 401);
-      return json(espaceDe(await lireListe(env, 'cmds'), k.tel));
+      return json(espaceDe(await lireListe(env, 'cmds'), k.tel, await lireListe(env, 'cartes')));
     }
 
     /* Position d'un colis par sa référence (public, limité) : seulement prénom, produit, étape */
@@ -727,7 +726,7 @@ async function traiter(request, env) {
       const vues = new Set();
       const propre = (Array.isArray(b.cartes) ? b.cartes : []).slice(0, 3000).map((c) => ({
         code: String(c.code || '').toUpperCase(), nom: txt(c.nom, 40), achats: Math.max(0, Math.min(999, Math.round(nombre(c.achats)))), maj: nombre(c.maj, Date.now()),
-        parrain: String(c.parrain || '').toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 30), parr: Math.max(0, Math.min(999, Math.round(nombre(c.parr)))), util: Math.max(0, Math.min(99999, Math.round(nombre(c.util)))), bonus: c.bonus === true,
+        tel: txt(c.tel, 30), parrain: String(c.parrain || '').toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 30), parr: Math.max(0, Math.min(999, Math.round(nombre(c.parr)))), util: Math.max(0, Math.min(99999, Math.round(nombre(c.util)))), bonus: c.bonus === true,
       })).filter((c) => /^[A-Z0-9-]{4,30}$/.test(c.code) && !vues.has(c.code) && vues.add(c.code));
       await env.GDE.put('cartes', JSON.stringify(propre));
       return json({ cartes: propre });

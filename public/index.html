@@ -28,6 +28,7 @@
 .vide .holo,.vide .carte,.vide #s-note,.vide #s-notif{display:none}
 #s-vide{display:none}.vide #s-vide{display:block}
 .lien-ex{background:none;border:0;padding:0;color:var(--orange);text-decoration:underline;font:inherit;cursor:pointer}
+#mc-c[hidden]{display:none}
 .espace{margin-top:16px;border:1px solid var(--ligne);border-radius:8px;padding:14px;display:grid;gap:8px}
 .espace h3{margin:0;font-size:16px}
 .espace input{width:100%}
@@ -1075,6 +1076,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       </form>
       <button class="btn" type="button" id="e-fid" hidden>Voir mes commandes avec Face ID</button>
       <p class="note" id="e-msg" aria-live="polite"></p>
+      <p class="note" id="e-carte"></p>
       <button class="btn ghost" type="button" id="e-act" hidden>Activer Face ID sur cet appareil</button>
       <div id="e-liste"></div>
     </div>
@@ -1091,7 +1093,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <p>Votre carte, vos avantages, votre code à partager. Chaque client peut devenir un messager de la marque, chaque province peut avoir son point relais.</p>
     </header>
     <div class="passe" id="passe"><div class="l1"><b>GOD DID EXPRESS</b><span class="nom">Membre</span></div><div><div class="nom" id="p-nom-aff">Votre prénom</div><div class="code" id="p-code">Tapez votre prénom ci-dessous</div></div></div>
-    <div class="carte" id="mc-c">
+    <div class="carte" id="mc-c" hidden>
       <div class="kicker">Ma carte en image</div>
       <p class="note">Tape ton prénom plus bas (code de parrainage), puis crée ta carte avec ton code promo, tes avantages et le prochain voyage. Tu peux l'envoyer sur WhatsApp.</p>
       <div class="rangee"><button class="btn" id="mc-go" type="button">Créer ma carte en image</button></div>
@@ -1100,13 +1102,13 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     <div class="carte">
       <div class="l1f"><h3>Carte fidélité</h3><span class="pastille" id="fid-pastille">Exemple</span></div>
       <div class="champ"><label for="fid-code">Ton numéro de carte</label><input id="fid-code" autocomplete="off" style="text-transform:uppercase" placeholder="Ex. GDE-K7M2-9QXP"></div>
-      <p class="note" id="fid-res" aria-live="polite">Entre ton numéro pour voir tes achats. Sans carte, demande-la sur WhatsApp.</p>
+      <p class="note" id="fid-res" aria-live="polite">Entre ton numéro pour voir tes achats. Sans carte, demande-la : GOD DID EXPRESS la crée pour toi.</p>
       <div class="fid" id="fid-grid"></div>
       <div class="carte" id="fid-pts" hidden style="gap:6px"><div class="kicker">Mes points</div><h3 id="fp-t"></h3><p class="note" id="fp-n"></p><a class="btn" id="fp-inv" href="#" target="_blank" rel="noopener">Inviter un ami</a></div>
       <div id="fid-wallet" hidden style="display:grid;gap:8px"><img id="fw-img" alt="Ma carte fidélité GOD DID EXPRESS" style="width:100%;border-radius:14px"><div class="rang"><a class="btn mini" id="fw-save" download="carte-fidelite-gde.png">Enregistrer dans mes photos</a><button class="btn ghost mini" type="button" id="fw-inst">Mettre sur l'écran d'accueil</button></div><p class="note">Ouvre ce site à tout moment : ta carte et tes achats sont toujours à jour.</p></div>
       <div class="niveaux"><span>Bronze</span><span>Argent</span><span>Or</span><span>Diamant</span></div>
       <p class="note">2 $ reçus à chaque achat. Après 10 achats (20 $ cumulés) : un produit de 20 $ sans frais de douane et livraison gratuite. Offre limitée à 2 mois. Votre seule limite, c'est votre imagination.</p>
-      <a class="btn" id="fid-wa" href="#" target="_blank" rel="noopener">Activer ma carte sur WhatsApp</a>
+      <a class="btn" id="fid-wa" href="#" target="_blank" rel="noopener">Demander ma carte sur WhatsApp</a>
     </div>
     <div class="carte">
       <h3>Votre code de parrainage</h3>
@@ -3100,6 +3102,9 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       return '<button type="button" class="e-c" data-ref="' + ea(c.ref) + '"><b>' + ea(c.prod) + '</b><span>' + ea(src) + ' · ' + (fini ? 'Livré' : ea(S[Math.max(0, c.cran)][0])) + ' · ' + ea(c.ref) + '</span></button>';
     }).join('');
     $('e-act').hidden = !(ESP && pkDispo() && !pkLocal());
+    var ec = $('e-carte');
+    if (j.carte) ec.innerHTML = 'Ta carte fidélité : <b>' + ea(j.carte.code) + '</b> · ' + j.carte.achats + ' achat' + (j.carte.achats > 1 ? 's' : '') + ' sur 10. Retrouve-la dans Plus, puis Membre.';
+    else ec.innerHTML = 'Pas encore de carte fidélité. <a class="lien-ex" target="_blank" rel="noopener" href="' + ea(wa('Bonjour GOD DID EXPRESS, je voudrais ma carte fidélité. Prénom : ' + j.nom + '.')) + '">Demande-la ici</a>, elle est créée pour toi.';
   }
   function majBoutonFid() { $('e-fid').hidden = !(pkDispo() && pkLocal()); }
   $('form-espace').addEventListener('submit', function (e) {

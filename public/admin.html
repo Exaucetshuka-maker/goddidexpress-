@@ -337,10 +337,11 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     </section>
 
     <section id="t-fid" class="grille cache" style="gap:12px">
-      <p class="note">Chaque client reçoit un numéro de carte. Tu ajoutes un achat à chaque commande livrée. Le client tape son numéro sur le site (Plus, puis Membre) pour voir ses achats : 2 $ par achat, un produit de 20 $ à 10 achats. Seul le prénom est gardé, pas le numéro de téléphone.</p>
+      <p class="note">Le client ne peut pas fabriquer sa carte : c'est toi qui la crées ici, avec son prénom et son téléphone. Chaque client reçoit un numéro de carte. Tu ajoutes un achat à chaque commande livrée. Le client tape son numéro sur le site (Plus, puis Membre) pour voir ses achats : 2 $ par achat, un produit de 20 $ à 10 achats. Seul le prénom est gardé, pas le numéro de téléphone.</p>
       <div class="carte">
         <h3>Nouvelle carte</h3>
         <div><label for="f-nom">Prénom du client</label><input id="f-nom" maxlength="40"></div>
+        <div><label for="f-tel">Téléphone du client (le même que sa commande)</label><input id="f-tel" inputmode="tel" maxlength="30" placeholder="0810000000"></div>
         <button class="btn" id="f-ok" type="button">Créer la carte</button>
       </div>
       <div><label for="f-q">Chercher une carte</label><input id="f-q" type="search" placeholder="Prénom ou numéro"></div>
@@ -1455,9 +1456,10 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   function pts(c) { return Math.max(0, c.achats * 2 + (c.parr || 0) * 5 - (c.util || 0)); }
   function rendreCartes() {
     var q = $('f-q').value.trim().toLowerCase();
-    $('f-liste').innerHTML = CARTES.filter(function (c) { return !q || (c.nom + ' ' + c.code).toLowerCase().indexOf(q) >= 0; }).map(function (c) {
+    $('f-liste').innerHTML = CARTES.filter(function (c) { return !q || (c.nom + ' ' + c.code + ' ' + (c.tel || '')).toLowerCase().indexOf(q) >= 0; }).map(function (c) {
       var i = CARTES.indexOf(c), msg = 'Bonjour ' + c.nom + ', voici ta carte fidélité GOD DID EXPRESS : ' + c.code + '. Ouvre ce lien : ta carte et tes achats s\'affichent tout de suite. ' + location.origin + '/?c=' + c.code;
       return '<div class="carte" data-ci="' + i + '"><div class="rang" style="justify-content:space-between"><strong>' + esc(c.nom) + '</strong><span class="pastille">' + esc(c.code) + '</span></div>' +
+        (c.tel ? '<div class="note">' + esc(c.tel) + '</div>' : '') +
         '<div><label>Achats</label><div class="compteur"><button class="btn ghost" data-fa="moins" type="button" aria-label="Moins un">−</button><input data-fn="1" inputmode="numeric" value="' + esc(c.achats) + '"><button class="btn" data-fa="plus" type="button" aria-label="Plus un">+</button></div></div>' +
         '<div class="duo"><div><label>Parrainé par (code de carte)</label><input data-fparr="1" value="' + esc(c.parrain || '') + '" placeholder="GDE-XXXX-XXXX" style="text-transform:uppercase"></div><div><label>Points : <b>' + pts(c) + '</b> (' + (c.parr || 0) + ' parrainage' + ((c.parr || 0) > 1 ? 's' : '') + ')</label><button class="btn ghost mini" data-fa="util" type="button">Utiliser des points</button></div></div>' +
         '<div class="rang"><button class="btn mini" data-fa="img" type="button">Carte en image</button><a class="btn ghost mini" style="text-decoration:none;display:inline-flex;align-items:center" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(msg) + '">Message texte</a><button class="btn danger mini" data-fa="suppr" type="button">Supprimer</button></div></div>';
@@ -1485,7 +1487,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   $('f-ok').addEventListener('click', function () {
     var nom = $('f-nom').value.trim(); if (!nom) { alert('Écris le prénom du client.'); return; }
     var code = nouveauCode(); while (CARTES.some(function (c) { return c.code === code; })) code = nouveauCode();
-    CARTES.unshift({ code: code, nom: nom, achats: 0, maj: Date.now(), parrain: '', parr: 0, util: 0, bonus: false }); carDirty = true; marquer(true); $('f-nom').value = ''; rendreCartes(); infoEtat('Carte créée. Pense à enregistrer.', 'ok');
+    CARTES.unshift({ code: code, nom: nom, tel: $('f-tel').value.trim(), achats: 0, maj: Date.now(), parrain: '', parr: 0, util: 0, bonus: false }); carDirty = true; marquer(true); $('f-nom').value = ''; $('f-tel').value = ''; rendreCartes(); infoEtat('Carte créée. Pense à enregistrer.', 'ok');
   });
   $('f-liste').addEventListener('click', function (e) {
     var b = e.target.closest('[data-fa]'); if (!b) return;
