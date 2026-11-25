@@ -619,8 +619,8 @@ async function traiter(request, env) {
       if (limite(request, 'cpke', 6)) return json({ erreur: 'Trop d\'essais, réessaie dans une minute.' }, 429);
       let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const ref = String(b.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), tel = finTel(b.tel);
-      const L = await lireListe(env, 'cmds'), c = L.find((x) => x.ref === ref);
-      if (!c || tel.length < 7 || finTel(c.tel) !== tel) return json({ erreur: 'Référence ou téléphone incorrect.' }, 404);
+      const L = await lireListe(env, 'cmds');
+      if (tel.length < 8 || !L.some((x) => finTel(x.tel) === tel) || (ref && !L.some((x) => x.ref === ref && finTel(x.tel) === tel))) return json({ erreur: 'Aucune commande avec ce numéro.' }, 404);
       const id = String(b.id || ''), pub = String(b.pub || '');
       if (!/^[A-Za-z0-9_-]{16,300}$/.test(id) || !/^[A-Za-z0-9+/=]{60,200}$/.test(pub)) return json({ erreur: 'Données invalides' }, 400);
       try { await crypto.subtle.importKey('spki', unb64(pub), { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']); } catch (e) { return json({ erreur: 'Clé non acceptée' }, 400); }

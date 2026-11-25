@@ -1044,6 +1044,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <button class="btn" type="submit">Voir</button>
     </form>
     <p class="note" id="s-vide">Tape ta référence, ou le téléphone que tu as donné à la commande. <button type="button" class="lien-ex" id="s-ex">Voir un exemple</button></p>
+    <p class="note" id="e-fidp" hidden><button type="button" class="lien-ex" id="e-fid">Voir mes commandes avec Face ID</button></p>
     <div class="holo">
       <canvas class="globe" id="g-suivi" role="img" aria-label="Globe holographique : position de ton colis entre son pays de départ et Kinshasa"></canvas>
       <div class="holo-top"><span>GOD DID EXPRESS · SUIVI</span><span class="pastille" id="holo-tag">Exemple</span></div>
@@ -1070,6 +1071,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <p class="note" id="e-msg" aria-live="polite"></p>
       <div id="e-liste"></div>
       <p class="note" id="e-carte"></p>
+      <button type="button" class="lien-ex" id="e-act" hidden>Activer Face ID sur cet appareil</button>
     </div>
     <ul class="garanties"><li><b>Une preuve à chaque étape</b><span>Photo ou document, jamais une simple annonce.</span></li><li><b>Prévenu sur WhatsApp</b><span>Tu reçois un message quand ton colis change d'étape.</span></li><li><b>Paiement par acompte</b><span>Le solde se règle à l'arrivée, avant la remise.</span></li></ul>
     <p class="note" id="s-note">Commande d'exemple. Pour une vraie commande, écris-nous sur WhatsApp avec ta référence.</p>
@@ -3041,6 +3043,27 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     if (typeof GS !== 'undefined' && GS && GS.setOrig) GS.setOrig(o.orig || 'Chine');
     majPhoto({ ref: v, nom: o.nom, prod: o.prod, cran: o.cran, mode: mode, orig: o.orig || 'Chine', typ: o.typ, arr: o.arr });
   }
+  $('e-fid').addEventListener('click', function () {
+    var m = $('e-msg'); $('espace').hidden = false; m.textContent = 'Face ID…';
+    fetch('/api/client/defi', { method: 'POST' }).then(function (r) { return r.json(); }).then(function (d) {
+      return navigator.credentials.get({ publicKey: { challenge: deb64u(d.challenge), rpId: location.hostname, userVerification: 'required', timeout: 60000, allowCredentials: [{ type: 'public-key', id: deb64u(pkLocal()) }] } });
+    }).then(function (c) {
+      var r = c.response;
+      return fetch('/api/client/pk-connexion', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: b64ue(c.rawId), cdj: b64ue(r.clientDataJSON), ad: b64ue(r.authenticatorData), sig: b64ue(r.signature) }) }).then(function (x) { return x.json().then(function (j) { return { ok: x.ok, j: j }; }); });
+    }).then(function (x) { if (!x.ok) throw new Error(x.j.erreur || 'Face ID refusé'); $('v-suivi').classList.add('vide'); ESPTEL = ''; afficherEspace(x.j); })
+      .catch(function (er) { m.textContent = (er && er.name === 'NotAllowedError') ? 'Face ID annulé.' : ((er && er.message) || 'Face ID impossible.'); });
+  });
+  $('e-act').addEventListener('click', function () {
+    var m = $('e-msg'); if (!ESPTEL) return;
+    navigator.credentials.create({ publicKey: { rp: { name: 'GOD DID EXPRESS', id: location.hostname }, user: { id: crypto.getRandomValues(new Uint8Array(16)), name: 'client', displayName: 'Client' }, challenge: crypto.getRandomValues(new Uint8Array(32)), pubKeyCredParams: [{ type: 'public-key', alg: -7 }], authenticatorSelection: { userVerification: 'required', residentKey: 'discouraged' }, timeout: 60000 } }).then(function (c) {
+      var pub = c.response.getPublicKey && c.response.getPublicKey(); if (!pub) throw new Error('Appareil non compatible');
+      return fetch('/api/client/pk-enregistrer', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ tel: ESPTEL, id: b64ue(c.rawId), pub: b64e(pub) }) }).then(function (x) { return x.json().then(function (j) { return { ok: x.ok, j: j, id: b64ue(c.rawId) }; }); });
+    }).then(function (x) {
+      if (!x.ok) throw new Error(x.j.erreur || 'Impossible'); try { localStorage.setItem('gde-cpk', x.id); } catch (e) {}
+      $('e-act').hidden = true; majFid(); m.textContent = 'Face ID activé. La prochaine fois, un seul geste.';
+    }).catch(function (er) { m.textContent = (er && er.name === 'NotAllowedError') ? 'Annulé.' : ((er && er.message) || 'Impossible.'); });
+  });
+  majFid();
   function chercherCmd(raw) {
     var v = String(raw || '').trim().toUpperCase();
     if (!v) { toast('Entre ta référence ou ton téléphone'); return; }
@@ -3079,8 +3102,16 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Preuve</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">' + h(b.getAttribute('data-t')) + '</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div><img class="big" src="' + ea(b.getAttribute('data-zoom')) + '" alt="Preuve en photo">');
   });
   $('s-notif').href = wa('Bonjour GOD DID EXPRESS, prévenez-moi sur WhatsApp à chaque étape de ma commande.');
+  var ESPTEL = '';
+  function u8e(b) { return new Uint8Array(b); }
+  function b64e(buf) { var s = '', a = u8e(buf); for (var k = 0; k < a.length; k++) s += String.fromCharCode(a[k]); return btoa(s); }
+  function b64ue(buf) { return b64e(buf).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  function deb64u(t) { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; var s = atob(t), a = new Uint8Array(s.length); for (var k = 0; k < s.length; k++) a[k] = s.charCodeAt(k); return a; }
+  function pkDispo() { return !!(window.PublicKeyCredential && navigator.credentials && navigator.credentials.get); }
+  function pkLocal() { try { return localStorage.getItem('gde-cpk') || ''; } catch (e) { return ''; } }
+  function majFid() { $('e-fidp').hidden = !(pkDispo() && pkLocal()); }
   function afficherEspace(j) {
-    $('espace').hidden = false;
+    $('espace').hidden = false; $('e-act').hidden = !(ESPTEL && pkDispo() && !pkLocal());
     $('e-msg').textContent = 'Bonjour ' + j.nom + ', voici tes commandes. Touche-en une pour voir son suivi.';
     $('e-liste').innerHTML = j.cmds.map(function (c) {
       var S = c.typ === 'stock' ? ETAPES_STOCK : c.typ === 'expedition' ? ETAPES_EXP : ETAPES, fini = c.cran >= S.length;
@@ -3091,6 +3122,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     ec.innerHTML = j.carte ? 'Ta carte fidélité : <b>' + ea(j.carte.code) + '</b> · ' + j.carte.achats + ' achat' + (j.carte.achats > 1 ? 's' : '') + ' sur 10.' : '';
   }
   function chercherTel(t) {
+    ESPTEL = t;
     $('espace').hidden = false; $('e-liste').innerHTML = ''; $('e-carte').textContent = ''; $('e-msg').textContent = 'Recherche…';
     fetch('/api/mes-commandes', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ tel: t }) })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
