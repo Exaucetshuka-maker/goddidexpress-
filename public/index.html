@@ -24,6 +24,7 @@
 .holo-txt{display:grid;gap:2px;min-width:0}.holo-txt b{font-family:var(--f-display);font-weight:800;font-size:28px;line-height:1;text-transform:uppercase;color:#fff}
 .holo-txt span{font-size:12.5px;color:rgba(255,255,255,.72)}
 .cockpit{display:none}
+.stock .holo{display:none}
 .vide .holo,.vide .carte,.vide #s-note,.vide #s-notif{display:none}
 #s-vide{display:none}.vide #s-vide{display:block}
 .lien-ex{background:none;border:0;padding:0;color:var(--orange);text-decoration:underline;font:inherit;cursor:pointer}
@@ -1256,10 +1257,11 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     s += '<text x="' + A[0] + '" y="122" class="vt">CHINE</text><text x="' + B[0] + '" y="112" text-anchor="end" class="vt">KINSHASA</text></svg>';
     return s;
   }
-  function jaugeSVG(fait) {
-    return '<svg viewBox="0 0 120 120" role="img" aria-label="Avancement : ' + fait + ' étapes sur 7"><circle cx="60" cy="60" r="50" fill="none" stroke="#2C2824" stroke-width="10"/>' +
+  function jaugeSVG(fait, n) {
+    n = n || 7;
+    return '<svg viewBox="0 0 120 120" role="img" aria-label="Avancement : ' + fait + ' étapes sur ' + n + '"><circle cx="60" cy="60" r="50" fill="none" stroke="#2C2824" stroke-width="10"/>' +
       '<circle class="arc" cx="60" cy="60" r="50" fill="none" stroke="#FF6A13" stroke-width="10" stroke-linecap="round" stroke-dasharray="0 ' + CIRC + '" transform="rotate(-90 60 60)"/>' +
-      '<text x="60" y="68" text-anchor="middle" class="jn">' + fait + '<tspan class="jd">/7</tspan></text></svg>';
+      '<text x="60" y="68" text-anchor="middle" class="jn">' + fait + '<tspan class="jd">/' + n + '</tspan></text></svg>';
   }
 
 
@@ -1692,19 +1694,21 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   var EXEMPLE = 'GDE-2610-0042';
   var ETAPES_EXP = [['Demande reçue', 'Message WhatsApp'], ['Devis envoyé', 'Transport et douane, avant tout paiement'], ['Acompte reçu', 'Capture du paiement'], ['Colis reçu chez nous', 'Photo du colis reçu'], ['En transit', 'Photo du colis expédié'], ['Arrivé à Kinshasa', 'Photo à l\'arrivée'], ['Livré', 'Vidéo de remise']];
   function dateCourte(s) { if (!/^\d{4}-\d{2}-\d{2}$/.test(s || '')) return ''; var d = new Date(s + 'T12:00:00'); return d.getDate() + ' ' + ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'][d.getMonth()]; }
-  function etapesCour() { return (curOrd && curOrd.typ === 'expedition') ? ETAPES_EXP : ETAPES; }
+  var ETAPES_STOCK = [['Commande confirmée', 'Message WhatsApp'], ['Produit préparé', 'Photo du produit'], ['Remis au client', 'Photo ou vidéo de remise']];
+  function etapesCour() { return (curOrd && curOrd.typ === 'stock') ? ETAPES_STOCK : (curOrd && curOrd.typ === 'expedition') ? ETAPES_EXP : ETAPES; }
   function rendreSuivi(cran) {
-    curCran = cran; var ETAPES = etapesCour();
-    var fait = Math.max(0, Math.min(7, cran));
-    $('s-jauge').innerHTML = jaugeSVG(fait);
-    var cur = cran >= 7 ? 'Livré' : cran < 0 ? 'Référence non reliée' : ETAPES[cran][0];
-    $('s-voie').innerHTML = '<span class="kicker">' + (cran >= 7 ? 'Colis livré' : cran < 0 ? 'Suivi' : 'Étape en cours') + '</span><b>' + cur + '</b><span class="note">' + (cran >= 7 ? 'Merci pour ta confiance.' : cran < 0 ? 'Demande son état sur WhatsApp.' : 'Preuve : ' + ETAPES[cran][1]) + '</span>';
+    curCran = cran; var ETAPES = etapesCour(), N = ETAPES.length, ST = !!(curOrd && curOrd.typ === 'stock');
+    $('v-suivi').classList.toggle('stock', ST);
+    var fait = Math.max(0, Math.min(N, cran));
+    $('s-jauge').innerHTML = jaugeSVG(fait, N);
+    var cur = cran >= N ? 'Livré' : cran < 0 ? 'Référence non reliée' : ETAPES[cran][0];
+    $('s-voie').innerHTML = '<span class="kicker">' + (cran >= N ? (ST ? 'Remis' : 'Colis livré') : cran < 0 ? 'Suivi' : 'Étape en cours') + (ST ? ' · produit en stock' : '') + '</span><b>' + cur + '</b><span class="note">' + (cran >= N ? 'Merci pour ta confiance.' : cran < 0 ? 'Demande son état sur WhatsApp.' : 'Preuve : ' + ETAPES[cran][1]) + '</span>';
     if (typeof GS !== 'undefined' && GS) GS.setStep(cran);
     $('holo-tag').textContent = $('s-tag').textContent;
-    $('holo-etape').textContent = cran >= 7 ? 'Livré ✓' : cran < 0 ? 'Référence non reliée' : ETAPES[cran][0];
-    $('holo-sub').textContent = cran >= 7 ? 'Merci pour ta confiance.' : cran < 0 ? 'Demande son état sur WhatsApp.' : 'Étape ' + (cran + 1) + ' sur 7 · preuve : ' + ETAPES[cran][1].toLowerCase();
+    $('holo-etape').textContent = cran >= N ? 'Livré ✓' : cran < 0 ? 'Référence non reliée' : ETAPES[cran][0];
+    $('holo-sub').textContent = cran >= N ? 'Merci pour ta confiance.' : cran < 0 ? 'Demande son état sur WhatsApp.' : 'Étape ' + (cran + 1) + ' sur ' + N + ' · preuve : ' + ETAPES[cran][1].toLowerCase();
     requestAnimationFrame(function () { requestAnimationFrame(function () {
-      var a = $('s-jauge').querySelector('.arc'); if (a) a.setAttribute('stroke-dasharray', (CIRC * fait / 7) + ' ' + CIRC);
+      var a = $('s-jauge').querySelector('.arc'); if (a) a.setAttribute('stroke-dasharray', (CIRC * fait / N) + ' ' + CIRC);
     }); });
     $('s-etapes').innerHTML = ETAPES.map(function (e, i) {
       var cl = i < cran ? 'fait' : i === cran ? 'cours' : 'todo';
