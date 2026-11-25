@@ -1040,10 +1040,10 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     </header>
     <form id="form-suivi" class="recherche" autocomplete="off">
       <label for="s-code" class="lbl" style="position:absolute;left:-9999px">Référence de commande</label>
-      <input id="s-code" value="" placeholder="Ex. GDE-2611-AB3K" aria-label="Référence de commande" spellcheck="false" autocapitalize="characters">
+      <input id="s-code" value="" placeholder="Ta référence ou ton téléphone" aria-label="Référence ou téléphone" spellcheck="false" autocapitalize="characters">
       <button class="btn" type="submit">Voir</button>
     </form>
-    <p class="note" id="s-vide">Ta référence est dans le message que nous t'avons envoyé sur WhatsApp. <button type="button" class="lien-ex" id="s-ex">Voir un exemple</button></p>
+    <p class="note" id="s-vide">Tape ta référence, ou le téléphone que tu as donné à la commande. <button type="button" class="lien-ex" id="s-ex">Voir un exemple</button></p>
     <div class="holo">
       <canvas class="globe" id="g-suivi" role="img" aria-label="Globe holographique : position de ton colis entre son pays de départ et Kinshasa"></canvas>
       <div class="holo-top"><span>GOD DID EXPRESS · SUIVI</span><span class="pastille" id="holo-tag">Exemple</span></div>
@@ -1066,19 +1066,10 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <img id="s-photo" alt="Position de ton colis entre la Chine et Kinshasa" style="width:100%;border-radius:6px;background:#05080f;margin-top:8px">
       <div class="rangee" style="margin-top:10px"><button class="btn" id="s-photo-share" type="button">Envoyer cette photo</button><a class="btn ghost" id="s-photo-save" download="position-colis.png" style="text-decoration:none">Enregistrer</a></div>
     </div>
-    <div class="espace" id="espace">
-      <h3>Mes commandes</h3>
-      <p class="note">Toutes tes commandes au même endroit : importées de Chine ou prises en stock. Entre une référence et le téléphone donné à la commande.</p>
-      <form id="form-espace" class="grille" autocomplete="off">
-        <input id="e-ref" placeholder="Ta référence, ex. GDE-2611-AB3K" spellcheck="false" autocapitalize="characters" aria-label="Référence">
-        <input id="e-tel" inputmode="tel" placeholder="Ton téléphone" autocomplete="tel" aria-label="Téléphone">
-        <button class="btn ghost" type="submit">Voir mes commandes</button>
-      </form>
-      <button class="btn" type="button" id="e-fid" hidden>Voir mes commandes avec Face ID</button>
+    <div class="espace" id="espace" hidden>
       <p class="note" id="e-msg" aria-live="polite"></p>
-      <p class="note" id="e-carte"></p>
-      <button class="btn ghost" type="button" id="e-act" hidden>Activer Face ID sur cet appareil</button>
       <div id="e-liste"></div>
+      <p class="note" id="e-carte"></p>
     </div>
     <ul class="garanties"><li><b>Une preuve à chaque étape</b><span>Photo ou document, jamais une simple annonce.</span></li><li><b>Prévenu sur WhatsApp</b><span>Tu reçois un message quand ton colis change d'étape.</span></li><li><b>Paiement par acompte</b><span>Le solde se règle à l'arrivée, avant la remise.</span></li></ul>
     <p class="note" id="s-note">Commande d'exemple. Pour une vraie commande, écris-nous sur WhatsApp avec ta référence.</p>
@@ -3052,7 +3043,8 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   }
   function chercherCmd(raw) {
     var v = String(raw || '').trim().toUpperCase();
-    if (!v) { toast('Entrez une référence'); return; }
+    if (!v) { toast('Entre ta référence ou ton téléphone'); return; }
+    if (/^[+\d\s().-]{8,}$/.test(v) && v.replace(/\D/g, '').length >= 8) { chercherTel(v); return; }
     $('s-ref').textContent = v;
     $('s-wa').href = wa('Bonjour GOD DID EXPRESS, je voudrais l\'état de ma commande, référence : ' + v);
     $('s-notif').href = wa('Bonjour GOD DID EXPRESS, prévenez-moi sur WhatsApp à chaque étape de ma commande ' + v + '.');
@@ -3081,63 +3073,32 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       return r.json().then(function (j) { if (String($('s-ref').textContent) !== v) return; fin({ nom: j.nom, prod: j.prod, cran: j.cran, mode: j.mode, orig: j.orig, typ: j.typ, ou: j.ou, arr: j.arr, pr: j.pr || [], dts: j.dts || [] }); });
     }).catch(function () { fin(null); });
   }
-  $('form-suivi').addEventListener('submit', function (e) { e.preventDefault(); chercherCmd($('s-code').value); });
+  $('form-suivi').addEventListener('submit', function (e) { e.preventDefault(); $('espace').hidden = true; chercherCmd($('s-code').value); });
   $('s-etapes').addEventListener('click', function (e) {
     var b = e.target.closest('[data-zoom]'); if (!b) return;
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Preuve</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">' + h(b.getAttribute('data-t')) + '</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div><img class="big" src="' + ea(b.getAttribute('data-zoom')) + '" alt="Preuve en photo">');
   });
   $('s-notif').href = wa('Bonjour GOD DID EXPRESS, prévenez-moi sur WhatsApp à chaque étape de ma commande.');
-  var ESP = null;
-  function u8e(b) { return new Uint8Array(b); }
-  function b64e(buf) { var s = '', a = u8e(buf); for (var k = 0; k < a.length; k++) s += String.fromCharCode(a[k]); return btoa(s); }
-  function b64ue(buf) { return b64e(buf).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
-  function deb64u(t) { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; var s = atob(t), a = new Uint8Array(s.length); for (var k = 0; k < s.length; k++) a[k] = s.charCodeAt(k); return a; }
-  function pkDispo() { return !!(window.PublicKeyCredential && navigator.credentials && navigator.credentials.get); }
-  function pkLocal() { try { return localStorage.getItem('gde-cpk') || ''; } catch (e) { return ''; } }
   function afficherEspace(j) {
-    $('e-msg').textContent = 'Bonjour ' + j.nom + ', voici tes commandes.';
+    $('espace').hidden = false;
+    $('e-msg').textContent = 'Bonjour ' + j.nom + ', voici tes commandes. Touche-en une pour voir son suivi.';
     $('e-liste').innerHTML = j.cmds.map(function (c) {
       var S = c.typ === 'stock' ? ETAPES_STOCK : c.typ === 'expedition' ? ETAPES_EXP : ETAPES, fini = c.cran >= S.length;
       var src = c.typ === 'stock' ? 'En stock' : 'Importé de ' + c.orig;
       return '<button type="button" class="e-c" data-ref="' + ea(c.ref) + '"><b>' + ea(c.prod) + '</b><span>' + ea(src) + ' · ' + (fini ? 'Livré' : ea(S[Math.max(0, c.cran)][0])) + ' · ' + ea(c.ref) + '</span></button>';
     }).join('');
-    $('e-act').hidden = !(ESP && pkDispo() && !pkLocal());
     var ec = $('e-carte');
-    if (j.carte) ec.innerHTML = 'Ta carte fidélité : <b>' + ea(j.carte.code) + '</b> · ' + j.carte.achats + ' achat' + (j.carte.achats > 1 ? 's' : '') + ' sur 10. Retrouve-la dans Plus, puis Membre.';
-    else ec.innerHTML = 'Pas encore de carte fidélité. <a class="lien-ex" target="_blank" rel="noopener" href="' + ea(wa('Bonjour GOD DID EXPRESS, je voudrais ma carte fidélité. Prénom : ' + j.nom + '.')) + '">Demande-la ici</a>, elle est créée pour toi.';
+    ec.innerHTML = j.carte ? 'Ta carte fidélité : <b>' + ea(j.carte.code) + '</b> · ' + j.carte.achats + ' achat' + (j.carte.achats > 1 ? 's' : '') + ' sur 10.' : '';
   }
-  function majBoutonFid() { $('e-fid').hidden = !(pkDispo() && pkLocal()); }
-  $('form-espace').addEventListener('submit', function (e) {
-    e.preventDefault(); var m = $('e-msg'); $('e-liste').innerHTML = ''; m.textContent = 'Recherche…';
-    var rf = $('e-ref').value, tl = $('e-tel').value;
-    fetch('/api/mes-commandes', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ref: rf, tel: tl }) })
+  function chercherTel(t) {
+    $('espace').hidden = false; $('e-liste').innerHTML = ''; $('e-carte').textContent = ''; $('e-msg').textContent = 'Recherche…';
+    fetch('/api/mes-commandes', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ tel: t }) })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (x) {
-        if (!x.ok) { m.textContent = x.j.erreur || 'Introuvable.'; $('e-act').hidden = true; return; }
-        ESP = { ref: rf, tel: tl }; afficherEspace(x.j);
-      }).catch(function () { m.textContent = 'Connexion impossible, réessaie.'; });
-  });
-  $('e-fid').addEventListener('click', function () {
-    var m = $('e-msg'); m.textContent = 'Face ID…';
-    fetch('/api/client/defi', { method: 'POST' }).then(function (r) { return r.json(); }).then(function (d) {
-      return navigator.credentials.get({ publicKey: { challenge: deb64u(d.challenge), rpId: location.hostname, userVerification: 'required', timeout: 60000, allowCredentials: [{ type: 'public-key', id: deb64u(pkLocal()) }] } });
-    }).then(function (c) {
-      var r = c.response;
-      return fetch('/api/client/pk-connexion', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: b64ue(c.rawId), cdj: b64ue(r.clientDataJSON), ad: b64ue(r.authenticatorData), sig: b64ue(r.signature) }) }).then(function (x) { return x.json().then(function (j) { return { ok: x.ok, j: j }; }); });
-    }).then(function (x) { if (!x.ok) throw new Error(x.j.erreur || 'Face ID refusé'); afficherEspace(x.j); })
-      .catch(function (er) { m.textContent = (er && er.name === 'NotAllowedError') ? 'Face ID annulé.' : ((er && er.message) || 'Face ID impossible.'); });
-  });
-  $('e-act').addEventListener('click', function () {
-    var m = $('e-msg'); if (!ESP) return;
-    navigator.credentials.create({ publicKey: { rp: { name: 'GOD DID EXPRESS', id: location.hostname }, user: { id: crypto.getRandomValues(new Uint8Array(16)), name: 'client', displayName: 'Client' }, challenge: crypto.getRandomValues(new Uint8Array(32)), pubKeyCredParams: [{ type: 'public-key', alg: -7 }], authenticatorSelection: { userVerification: 'required', residentKey: 'discouraged' }, timeout: 60000 } }).then(function (c) {
-      var pub = c.response.getPublicKey && c.response.getPublicKey(); if (!pub) throw new Error('Appareil non compatible');
-      return fetch('/api/client/pk-enregistrer', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ref: ESP.ref, tel: ESP.tel, id: b64ue(c.rawId), pub: b64e(pub) }) }).then(function (x) { return x.json().then(function (j) { return { ok: x.ok, j: j, id: b64ue(c.rawId) }; }); });
-    }).then(function (x) {
-      if (!x.ok) throw new Error(x.j.erreur || 'Impossible'); try { localStorage.setItem('gde-cpk', x.id); } catch (e) {}
-      $('e-act').hidden = true; majBoutonFid(); m.textContent = 'Face ID activé. La prochaine fois, un seul geste.';
-    }).catch(function (er) { m.textContent = (er && er.name === 'NotAllowedError') ? 'Annulé.' : ((er && er.message) || 'Impossible.'); });
-  });
-  majBoutonFid();
+        if (!x.ok) { $('e-msg').textContent = x.j.erreur || 'Introuvable.'; return; }
+        $('v-suivi').classList.add('vide'); afficherEspace(x.j);
+      }).catch(function () { $('e-msg').textContent = 'Connexion impossible, réessaie.'; });
+  }
   $('e-liste').addEventListener('click', function (e) {
     var b = e.target.closest('[data-ref]'); if (!b) return;
     $('s-code').value = b.getAttribute('data-ref'); chercherCmd(b.getAttribute('data-ref')); window.scrollTo({ top: 0, behavior: 'smooth' });

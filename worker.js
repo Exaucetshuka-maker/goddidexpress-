@@ -602,16 +602,14 @@ async function traiter(request, env) {
     const espaceDe = (L, tel, CA) => ({ carte: (() => { const k = (CA || []).find((x) => finTel(x.tel) === tel); return k ? { code: k.code, achats: k.achats || 0 } : null; })(), nom: (L.find((x) => finTel(x.tel) === tel) || {}).nom || '', cmds: L.filter((x) => finTel(x.tel) === tel).map((x) => ({ ref: x.ref, prod: x.prod, cran: x.cran, typ: x.typ || 'achat', orig: x.orig || 'Chine', maj: x.maj })) });
     /* Espace client : une référence + le téléphone de la commande donnent toutes les commandes du même client */
     if (p === '/api/mes-commandes' && request.method === 'POST') {
-      if (limite(request, 'mescmd', 6)) return json({ erreur: 'Trop d\'essais, réessaie dans une minute.' }, 429);
+      if (limite(request, 'mescmd', 8)) return json({ erreur: 'Trop d\'essais, réessaie dans une minute.' }, 429);
       let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
-      const ref = String(b.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), fin = (t) => String(t || '').replace(/\D/g, '').slice(-9);
-      const tel = fin(b.tel);
-      const L = await lireListe(env, 'cmds'), c = L.find((x) => x.ref === ref);
-      if (!c || tel.length < 7 || fin(c.tel) !== tel) return json({ erreur: 'Référence ou téléphone incorrect.' }, 404);
+      const ref = String(b.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), tel = finTel(b.tel);
+      const L = await lireListe(env, 'cmds');
+      if (tel.length < 8 || !L.some((x) => finTel(x.tel) === tel) || (ref && !L.some((x) => x.ref === ref && finTel(x.tel) === tel))) return json({ erreur: 'Aucune commande avec ce numéro.' }, 404);
       return json(espaceDe(L, tel, await lireListe(env, 'cartes')));
     }
 
-    /* Face ID des clients : défi, enregistrement (après référence + téléphone), connexion */
     if (p === '/api/client/defi' && request.method === 'POST') {
       if (limite(request, 'cdefi', 12)) return json({ erreur: 'Trop d\'essais' }, 429);
       const ch = b64u(crypto.getRandomValues(new Uint8Array(32)).buffer); await env.GDE.put('pkc:' + ch, '1', { expirationTtl: 120 });
