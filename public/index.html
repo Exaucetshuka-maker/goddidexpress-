@@ -3137,7 +3137,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   });
   $('s-ex').addEventListener('click', function () { $('s-code').value = EXEMPLE; chercherCmd(EXEMPLE); });
   try {
-    var qs = new URLSearchParams(location.search).get('suivi'); if (qs) { try { localStorage.setItem('gde-ref', qs.toUpperCase()); } catch (e) {} if (location.hash.replace('#', '') === '' ) location.hash = '#suivi'; }
+    var qs = new URLSearchParams(location.search).get('suivi') || new URLSearchParams(location.search).get('s'); if (qs) { try { localStorage.setItem('gde-ref', qs.toUpperCase()); } catch (e) {} if (location.hash.replace('#', '') === '' ) location.hash = '#suivi'; }
     var dr = localStorage.getItem('gde-ref');
     if (dr) { $('s-code').value = dr; chercherCmd(dr); }
   } catch (e) {}
