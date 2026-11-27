@@ -359,7 +359,8 @@ footer .tel { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; co
 .mc .im { position: relative; display: block; border-radius: 8px; overflow: hidden; border: 1px solid var(--ligne); }
 .mc img { width: 156px; height: 195px; object-fit: cover; object-position: center; display: block; transition: transform .4s ease; }
 .mc:hover img { transform: scale(1.06); }
-.mc b { font-size: 13.5px; font-weight: 600; line-height: 1.25; }
+.mc b { font-size: 13.5px; font-weight: 600; line-height: 1.25; padding: 0 2px; }
+.mc .mp { font-size: 12.5px; font-weight: 600; color: var(--orange); padding: 0 2px; }
 .mc .rang { position: absolute; left: 6px; bottom: -4px; font-family: var(--f-display); font-weight: 800; font-size: 54px; line-height: 1; color: var(--papier); text-shadow: 0 2px 14px rgba(0, 0, 0, .85); }
 .compte-rebours { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .cr { background: var(--noir); border: 1px solid var(--ligne); border-radius: 8px; padding: 10px 4px 8px; text-align: center; }
@@ -2499,7 +2500,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   ];
   var occActuel = 0;
   function mini(p, rang) {
-    return '<button type="button" class="mc" data-open="' + p.id + '"><span class="im"><img src="' + img(p) + '" alt="" loading="lazy" width="156" height="195"' + rotAttr(p) + '>' + (rang ? '<span class="rang">' + rang + '</span>' : '') + '</span><b>' + p.t + '</b></button>';
+    return '<button type="button" class="mc" data-open="' + p.id + '"><span class="im"><img src="' + img(p) + '" alt="" loading="lazy" width="156" height="195"' + rotAttr(p) + '>' + (rang ? '<span class="rang">' + rang + '</span>' : '') + '</span><b>' + p.t + '</b><small class="mp">' + (p.px && p.px[0] > 0 ? usd(p.px[0]) : 'Prix sur demande') + '</small></button>';
   }
   function rendreOcc() {
     $('occ-chips').innerHTML = OCC.map(function (o, i) { return '<button type="button" class="chip" data-occ="' + i + '" aria-pressed="' + (i === occActuel) + '">' + o[0] + '</button>'; }).join('');
