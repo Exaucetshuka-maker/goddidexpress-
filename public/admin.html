@@ -1238,11 +1238,17 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       (d.pre ? '<p style="margin:6px 0"><span class="pastille">Réservation : ' + esc(d.voy || 'prochain arrivage') + ' · acompte 50 %</span></p>' : '') +
       ((d.qte || d.bud || d.mar) ? '<p class="note" style="margin:6px 0">' + [d.qte ? 'Quantité : ' + esc(d.qte) : '', d.bud ? 'Budget : ' + esc(d.bud) + ' $' : '', d.mar ? 'Marché : ' + esc(d.mar) : ''].filter(Boolean).join(' · ') + '</p>' : '') +
       (d.txt ? '<p style="margin:6px 0">' + esc(d.txt) + '</p>' : '') + (d.lien ? '<p style="margin:6px 0;word-break:break-all"><a href="' + esc(d.lien) + '" target="_blank" rel="noopener noreferrer">' + esc(d.lien) + '</a></p>' : '') +
-      '<div class="rang"><button class="btn mini" data-dma="rep" type="button">Répondre sur WhatsApp</button><button class="btn ghost mini" data-dma="vu" type="button">' + (d.vu ? 'Marquer non lu' : 'Marquer lu') + '</button><button class="btn danger mini" data-dma="x" type="button">Supprimer</button></div></div>'; }).join('') || '<p class="note">Aucune demande pour l\'instant.</p>';
+      (d.ref ? '<div class="rang"><span class="pastille">COMMANDE · ' + esc(d.ref) + '</span>' + (CMDS.some(function (c) { return c.ref === d.ref; }) ? '<span class="note">Déjà dans Commandes</span>' : '<button class="btn mini" data-dma="cmd" type="button">Créer la commande suivie</button>') + '</div>' : '') + '<div class="rang"><button class="btn mini" data-dma="rep" type="button">Répondre sur WhatsApp</button><button class="btn ghost mini" data-dma="vu" type="button">' + (d.vu ? 'Marquer non lu' : 'Marquer lu') + '</button><button class="btn danger mini" data-dma="x" type="button">Supprimer</button></div></div>'; }).join('') || '<p class="note">Aucune demande pour l\'instant.</p>';
   }
   $('dem-liste').addEventListener('click', function (e) {
     var b = e.target.closest('[data-dma]'); if (!b) return; var i = +b.closest('[data-dm]').getAttribute('data-dm'), d = DEM[i], a = b.getAttribute('data-dma');
     if (a === 'rep') { var t = 'Bonjour ' + d.nom + ', ici GOD DID EXPRESS. Nous avons bien reçu ta demande' + (d.txt ? ' (« ' + d.txt.slice(0, 60) + ' »)' : '') + '. Nous cherchons le produit et revenons vers toi avec le devis avant tout paiement.' + (d.act ? ' Nous te préparons une proposition avec nos tarifs professionnels.' : '') + (d.pre ? ' Pour ta réservation (' + (d.voy || 'prochain arrivage') + '), l\'acompte est de 50 % ; le reste se paie avant la livraison.' : '');; var tel = facTel(d.tel); window.open((tel ? 'https://wa.me/' + tel : 'https://wa.me/') + '?text=' + encodeURIComponent(t), '_blank'); if (!d.vu) { d.vu = true; demDirty = true; marquer(true); rendreDem(); } }
+    else if (a === 'cmd') {
+      if (!d.ref || CMDS.some(function (c) { return c.ref === d.ref; })) return;
+      var pr = String(d.txt || 'Commande').split('\n').filter(function (s) { return s && !/^Total/.test(s); }).slice(0, 2).join(', ').slice(0, 90) || 'Commande';
+      var c2 = { ref: d.ref, nom: d.nom, tel: d.tel, prod: pr, cran: 0, mode: 'avion', orig: 'Chine', typ: 'achat', ou: '', arr: '', total: 0, paye: 0, maj: '' };
+      cmTouch(c2); CMDS.unshift(c2); d.vu = true; demDirty = true; marquer(true); rendreCmds(); rendreDem(); infoEtat('Commande créée : ' + d.ref + '. Pense à enregistrer.', 'ok');
+    }
     else if (a === 'vu') { d.vu = !d.vu; demDirty = true; marquer(true); rendreDem(); }
     else if (a === 'x') { if (!confirm('Supprimer cette demande et sa photo ?')) return; DEM.splice(i, 1); demDirty = true; marquer(true); rendreDem(); }
   });

@@ -335,6 +335,12 @@ async function servirPageAvecEtat(request, env) {
   return new Response(html, { status: 200, headers: h });
 }
 
+/* Commandes suivies + demandes validées sur le site pas encore transformées en commande (étape 1 : demande reçue) */
+async function cmdsEtDemandes(env) {
+  const L = await lireListe(env, 'cmds'), D = await lireListe(env, 'demandes');
+  D.forEach((d) => { if (d.ref && !L.some((x) => x.ref === d.ref)) L.push({ ref: d.ref, nom: d.nom, tel: d.tel, prod: String(d.txt || 'Commande').split('\n').filter((s) => s && !/^Bonjour|^Merci|^Total/.test(s)).slice(0, 2).join(', ').slice(0, 90) || 'Commande', cran: 0, mode: 'avion', orig: 'Chine', typ: 'achat', maj: new Date(d.t || Date.now()).toISOString().slice(0, 10), pr: [], dts: [] }); });
+  return L;
+}
 async function lireObjet(request) { const b = await request.json(); if (!b || typeof b !== 'object' || Array.isArray(b)) throw new Error('corps'); return b; }
 const entetesSecurite = { 'strict-transport-security': 'max-age=31536000; includeSubDomains', 'x-content-type-options': 'nosniff', 'referrer-policy': 'strict-origin-when-cross-origin', 'content-security-policy': "frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" };
 export default {
@@ -529,8 +535,10 @@ async function traiter(request, env) {
       if (!tx && !lien && !m) return json({ erreur: 'Envoie au moins une photo, un lien ou une description.' }, 400);
       if (m) { if (m[1].length > 600000) return json({ erreur: 'Photo trop grande.' }, 413); const bin = Uint8Array.from(atob(m[1]), (c) => c.charCodeAt(0)); await env.GDE.put('img:' + id, bin, { expirationTtl: 90 * 86400 }); photo = '/api/img/' + id; }
       await env.GDE.put(rk, String(n0 + 1), { expirationTtl: 3600 });
-      const L = await lireListe(env, 'demandes'); L.push({ id, nom, tel, txt: tx, lien, photo, qte, bud, mar, pre, voy, act, freq, t: Date.now(), vu: false });
-      await env.GDE.put('demandes', JSON.stringify(L.slice(-300))); return json({ ok: true });
+      const L = await lireListe(env, 'demandes');
+      let ref = ''; if (b.commande === true) { const al = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', d0 = new Date(), yy = String(d0.getFullYear()).slice(2) + String(d0.getMonth() + 1).padStart(2, '0'); for (let z = 0; z < 20; z++) { ref = 'GDE-' + yy + '-' + Array.from(crypto.getRandomValues(new Uint8Array(4)), (v) => al[v % al.length]).join(''); if (!L.some((x) => x.ref === ref)) break; } }
+      L.push({ id, nom, tel, txt: tx, lien, photo, qte, bud, mar, pre, voy, act, freq, ref, t: Date.now(), vu: false });
+      await env.GDE.put('demandes', JSON.stringify(L.slice(-300))); return json({ ok: true, ref });
     }
     /* Votes du catalogue communautaire : un vote par personne et par produit */
     if (p === '/api/votes' && request.method === 'GET') {
@@ -605,7 +613,7 @@ async function traiter(request, env) {
       if (limite(request, 'mescmd', 8)) return json({ erreur: 'Trop d\'essais, réessaie dans une minute.' }, 429);
       let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const ref = String(b.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), tel = finTel(b.tel);
-      const L = await lireListe(env, 'cmds');
+      const L = await cmdsEtDemandes(env);
       if (tel.length < 8 || !L.some((x) => finTel(x.tel) === tel) || (ref && !L.some((x) => x.ref === ref && finTel(x.tel) === tel))) return json({ erreur: 'Aucune commande avec ce numéro.' }, 404);
       return json(espaceDe(L, tel, await lireListe(env, 'cartes')));
     }
@@ -619,7 +627,7 @@ async function traiter(request, env) {
       if (limite(request, 'cpke', 6)) return json({ erreur: 'Trop d\'essais, réessaie dans une minute.' }, 429);
       let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const ref = String(b.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), tel = finTel(b.tel);
-      const L = await lireListe(env, 'cmds');
+      const L = await cmdsEtDemandes(env);
       if (tel.length < 8 || !L.some((x) => finTel(x.tel) === tel) || (ref && !L.some((x) => x.ref === ref && finTel(x.tel) === tel))) return json({ erreur: 'Aucune commande avec ce numéro.' }, 404);
       const id = String(b.id || ''), pub = String(b.pub || '');
       if (!/^[A-Za-z0-9_-]{16,300}$/.test(id) || !/^[A-Za-z0-9+/=]{60,200}$/.test(pub)) return json({ erreur: 'Données invalides' }, 400);
@@ -637,7 +645,7 @@ async function traiter(request, env) {
       let K = []; try { const t = await env.GDE.get('cpk'); K = t ? JSON.parse(t) : []; } catch (e) { K = []; }
       const k = Array.isArray(K) ? K.find((x) => x.id === b.id) : null;
       if (!k || !(await pkVerifier(env, request, b, K))) return json({ erreur: 'Face ID refusé' }, 401);
-      return json(espaceDe(await lireListe(env, 'cmds'), k.tel, await lireListe(env, 'cartes')));
+      return json(espaceDe(await cmdsEtDemandes(env), k.tel, await lireListe(env, 'cartes')));
     }
 
     /* Position d'un colis par sa référence (public, limité) : seulement prénom, produit, étape */
@@ -647,7 +655,7 @@ async function traiter(request, env) {
       const n = Number((await env.GDE.get(k)) || 0);
       if (n >= 40) return json({ erreur: 'Trop d\'essais' }, 429);
       await env.GDE.put(k, String(n + 1), { expirationTtl: 600 });
-      const c = (await lireListe(env, 'cmds')).find((x) => x.ref === mm[1].toUpperCase());
+      const c = (await cmdsEtDemandes(env)).find((x) => x.ref === mm[1].toUpperCase());
       if (!c) return json({ erreur: 'Référence introuvable' }, 404);
       return json({ ref: c.ref, nom: c.nom, prod: c.prod, cran: c.cran, mode: c.mode, orig: c.orig || 'Chine', typ: c.typ || 'achat', ou: c.ou || '', arr: c.arr, maj: c.maj, pr: c.pr || [], dts: c.dts || [] });
     }
@@ -801,7 +809,7 @@ async function traiter(request, env) {
     if (p === '/api/demandes' && request.method === 'GET') return json({ demandes: await lireListe(env, 'demandes') });
     if (p === '/api/demandes' && request.method === 'PUT') {
       let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
-      const old = await lireListe(env, 'demandes'), L = (Array.isArray(b.demandes) ? b.demandes : []).slice(0, 300).map((d) => ({ id: String(d.id || '').slice(0, 30), nom: txt(d.nom, 60), tel: txt(d.tel, 30), txt: txt(d.txt, 600), lien: txt(d.lien, 300), qte: txt(d.qte, 20), bud: txt(d.bud, 20), mar: ['Chine', 'Dubaï', 'Turquie', 'Tous les marchés'].includes(d.mar) ? d.mar : '', pre: d.pre === true, voy: txt(d.voy, 90), act: txt(d.act, 40), freq: ['Une fois', 'Chaque mois', 'Chaque semaine'].includes(d.freq) ? d.freq : '', photo: /^\/api\/img\/d[A-Za-z0-9_-]{1,38}$/.test(d.photo || '') ? d.photo : '', t: nombre(d.t), vu: d.vu === true }));
+      const old = await lireListe(env, 'demandes'), L = (Array.isArray(b.demandes) ? b.demandes : []).slice(0, 300).map((d) => ({ id: String(d.id || '').slice(0, 30), nom: txt(d.nom, 60), tel: txt(d.tel, 30), txt: txt(d.txt, 600), lien: txt(d.lien, 300), qte: txt(d.qte, 20), bud: txt(d.bud, 20), mar: ['Chine', 'Dubaï', 'Turquie', 'Tous les marchés'].includes(d.mar) ? d.mar : '', pre: d.pre === true, voy: txt(d.voy, 90), act: txt(d.act, 40), freq: ['Une fois', 'Chaque mois', 'Chaque semaine'].includes(d.freq) ? d.freq : '', photo: /^\/api\/img\/d[A-Za-z0-9_-]{1,38}$/.test(d.photo || '') ? d.photo : '', ref: /^GDE-\d{4}-[A-Z0-9]{4}$/.test(d.ref || '') ? d.ref : '', t: nombre(d.t), vu: d.vu === true }));
       const gardes = new Set(L.map((d) => d.id));
       for (const d of old) if (!gardes.has(d.id) && d.photo) await env.GDE.delete('img:' + d.photo.slice(9));
       await env.GDE.put('demandes', JSON.stringify(L)); return json({ demandes: L });
