@@ -341,6 +341,7 @@ async function cmdsEtDemandes(env) {
   D.forEach((d) => { if (d.ref && !L.some((x) => x.ref === d.ref)) L.push({ ref: d.ref, nom: d.nom, tel: d.tel, prod: String(d.txt || 'Commande').split('\n').filter((s) => s && !/^Bonjour|^Merci|^Total/.test(s)).slice(0, 2).join(', ').slice(0, 90) || 'Commande', cran: 0, mode: 'avion', orig: 'Chine', typ: 'achat', maj: new Date(d.t || Date.now()).toISOString().slice(0, 10), pr: [], dts: [] }); });
   return L;
 }
+async function lireQc(env) { try { const t = await env.GDE.get('qc'); const o = t ? JSON.parse(t) : {}; return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; } catch (e) { return {}; } }
 async function lireObjet(request) { const b = await request.json(); if (!b || typeof b !== 'object' || Array.isArray(b)) throw new Error('corps'); return b; }
 const entetesSecurite = { 'strict-transport-security': 'max-age=31536000; includeSubDomains', 'x-content-type-options': 'nosniff', 'referrer-policy': 'strict-origin-when-cross-origin', 'content-security-policy': "frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self'" };
 export default {
@@ -609,6 +610,32 @@ async function traiter(request, env) {
     const finTel = (t) => String(t || '').replace(/\D/g, '').slice(-9);
     const espaceDe = (L, tel, CA) => ({ carte: (() => { const k = (CA || []).find((x) => finTel(x.tel) === tel); return k ? { code: k.code, achats: k.achats || 0 } : null; })(), nom: (L.find((x) => finTel(x.tel) === tel) || {}).nom || '', cmds: L.filter((x) => finTel(x.tel) === tel).map((x) => ({ ref: x.ref, prod: x.prod, cran: x.cran, typ: x.typ || 'achat', orig: x.orig || 'Chine', maj: x.maj })) });
     /* Espace client : une référence + le téléphone de la commande donnent toutes les commandes du même client */
+    /* Le client valide la photo de son produit, ou demande un changement (référence + téléphone) */
+    if (p === '/api/cmd-qc' && request.method === 'POST') {
+      if (limite(request, 'cmdqc', 8)) return json({ erreur: 'Trop d\'essais, réessaie dans une minute.' }, 429);
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const ref = String(b.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), tel = finTel(b.tel), choix = b.choix === 'non' ? 'non' : 'ok';
+      const L = await lireListe(env, 'cmds'), c = L.find((x) => x.ref === ref);
+      if (!c || tel.length < 8 || finTel(c.tel) !== tel) return json({ erreur: 'Référence ou téléphone incorrect.' }, 404);
+      const Q = await lireQc(env); Q[ref] = { c: choix, t: Date.now() };
+      const ks = Object.keys(Q); if (ks.length > 1500) delete Q[ks[0]];
+      await env.GDE.put('qc', JSON.stringify(Q)); return json({ ok: true, qc: choix });
+    }
+    /* Estimation du prix rendu à Kinshasa : seul le total est donné, jamais les marges */
+    if (p === '/api/estimer' && request.method === 'POST') {
+      if (limite(request, 'est', 30)) return json({ erreur: 'Trop d\'essais' }, 429);
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const t = await env.GDE.get('couts'); let j = {}; try { j = t ? JSON.parse(t) : {}; } catch (e) {}
+      const r = j.reglages || {}, nb = (v) => (v === '' || v == null || !isFinite(Number(v)) ? null : Number(v));
+      const prix = nb(b.prix), kg = nb(b.kg), qte = Math.max(1, Math.min(10000, Math.round(nb(b.qte) || 1))), bateau = b.mode === 'bateau';
+      if (prix === null || kg === null || prix <= 0 || kg <= 0 || prix > 1e6 || kg > 1e5) return json({ erreur: 'Entre le prix et le poids.' }, 400);
+      const tk = nb(bateau ? r.kgBateau : r.kgAvion), m1 = nb(r.m1), m5 = nb(r.m5), m10 = nb(r.m10), dou = nb(r.douane) || 0;
+      const taux = b.dev === 'CNY' ? nb(r.taux) : 1;
+      if (tk === null || m1 === null || taux === null) return json({ ok: false, raison: 'tarifs' });
+      const m = qte >= 10 && m10 !== null ? m10 : qte >= 5 && m5 !== null ? m5 : m1;
+      const base = prix * taux, tr = kg * tk, rendu = base + tr + (base + tr) * dou / 100, unit = Math.round(rendu * (1 + m / 100) * 100) / 100;
+      return json({ ok: true, unit, total: Math.round(unit * qte * 100) / 100, qte });
+    }
     if (p === '/api/mes-commandes' && request.method === 'POST') {
       if (limite(request, 'mescmd', 8)) return json({ erreur: 'Trop d\'essais, réessaie dans une minute.' }, 429);
       let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
@@ -657,7 +684,7 @@ async function traiter(request, env) {
       await env.GDE.put(k, String(n + 1), { expirationTtl: 600 });
       const c = (await cmdsEtDemandes(env)).find((x) => x.ref === mm[1].toUpperCase());
       if (!c) return json({ erreur: 'Référence introuvable' }, 404);
-      return json({ ref: c.ref, nom: c.nom, prod: c.prod, cran: c.cran, mode: c.mode, orig: c.orig || 'Chine', typ: c.typ || 'achat', ou: c.ou || '', arr: c.arr, maj: c.maj, pr: c.pr || [], dts: c.dts || [] });
+      return json({ ref: c.ref, nom: c.nom, prod: c.prod, cran: c.cran, mode: c.mode, orig: c.orig || 'Chine', typ: c.typ || 'achat', ou: c.ou || '', arr: c.arr, maj: c.maj, pr: c.pr || [], dts: c.dts || [], qc: ((await lireQc(env))[c.ref] || {}).c || '' });
     }
 
     /* Tout ce qui suit demande d'être connecté */
@@ -777,7 +804,7 @@ async function traiter(request, env) {
       const propre = (Array.isArray(b.parts) ? b.parts : []).slice(0, 100).map((x) => ({ nom: txt(x.nom, 40), typ: TY.includes(x.typ) ? x.typ : 'influenceur', code: txt(x.code, 30).toUpperCase().replace(/[^A-Z0-9_-]/g, ''), com: Math.max(0, Math.min(50, nombre(x.com))), tel: txt(x.tel, 30) })).filter((x) => x.code && !vus.has(x.code) && vus.add(x.code));
       await env.GDE.put('parts', JSON.stringify(propre)); return json({ parts: propre });
     }
-    if (p === '/api/cmds' && request.method === 'GET') return json({ cmds: await lireListe(env, 'cmds') });
+    if (p === '/api/cmds' && request.method === 'GET') return json({ cmds: await lireListe(env, 'cmds'), qc: await lireQc(env) });
     if (p === '/api/cmds' && request.method === 'PUT') {
       let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const vues = new Set(), dt = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? String(v) : '');

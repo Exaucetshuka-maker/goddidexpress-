@@ -30,7 +30,12 @@
 #s-vide{display:none}.vide #s-vide{display:block}
 .lien-ex{background:none;border:0;padding:0;color:var(--orange);text-decoration:underline;font:inherit;cursor:pointer}
 #mc-c[hidden]{display:none}
+.qc{margin-top:8px;display:grid;gap:6px}
+.qc input{width:100%}
+.qc-ok{color:#4ade80;margin:8px 0 0;font-size:14px}
+.qc-non{color:var(--orange);margin:8px 0 0;font-size:14px}
 .valide{display:grid;gap:8px}
+.valide label{font-size:13px;color:var(--brume)}
 .valide input{width:100%}
 .comment{margin-top:16px}
 .comment h3{margin:0 0 8px;font-size:16px}
@@ -1740,9 +1745,25 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       var pr = i < cran ? 'Preuve reçue : ' + e[1] : i === cran ? 'En cours : ' + e[1] : 'Preuve prévue : ' + e[1];
       var dj = (curOrd && curOrd.dts && curOrd.dts[i] && i <= cran) ? dateCourte(curOrd.dts[i]) : ''; if (dj) pr += ' · ' + dj;
       var pho = (curOrd && curOrd.pr && curOrd.pr[i]) ? '<button type="button" class="ph" data-zoom="' + ea(curOrd.pr[i]) + '" data-t="' + ea(e[0]) + '" aria-label="Voir la photo : ' + ea(e[0]) + '"><img src="' + ea(curOrd.pr[i]) + '" alt="" loading="lazy"></button>' : '';
-      return '<li class="' + cl + '"><span class="pt">' + pt + '</span><div><h3>' + e[0] + '</h3><div class="preuve">' + pr + '</div>' + pho + '</div></li>';
+      var qcb = '';
+      if (i === 3 && curOrd && curOrd.pr && curOrd.pr[3] && (!curOrd.typ || curOrd.typ === 'achat') && cran < 7 && curOrd.ref !== EXEMPLE) {
+        qcb = curOrd.qc === 'ok' ? '<p class="qc-ok">✓ Tu as validé cette photo.</p>' : curOrd.qc === 'non' ? '<p class="qc-non">Tu as demandé un changement. On te répond sur WhatsApp.</p>' :
+          '<div class="qc"><p class="note">C\'est bien le produit que tu veux ? Confirme avec ton téléphone.</p><input class="qc-tel" inputmode="tel" placeholder="Ton téléphone" autocomplete="tel" maxlength="30"><div class="rang"><button type="button" class="btn mini" data-qc="ok">Je valide</button><button type="button" class="btn ghost mini" data-qc="non">Je veux un changement</button></div><p class="note qc-msg" aria-live="polite"></p></div>';
+      }
+      return '<li class="' + cl + '"><span class="pt">' + pt + '</span><div><h3>' + e[0] + '</h3><div class="preuve">' + pr + '</div>' + pho + qcb + '</div></li>';
     }).join('');
   }
+  $('s-etapes').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-qc]'); if (!b || !curOrd) return;
+    var bx = b.closest('.qc'), t = bx.querySelector('.qc-tel').value, m = bx.querySelector('.qc-msg');
+    if (t.replace(/\D/g, '').length < 8) { m.textContent = 'Écris ton téléphone pour confirmer.'; return; }
+    var ch = b.getAttribute('data-qc'); b.disabled = true; m.textContent = 'Envoi…';
+    fetch('/api/cmd-qc', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ref: curOrd.ref, tel: t, choix: ch }) })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (x) { if (!x.ok) { b.disabled = false; m.textContent = x.j.erreur || 'Impossible.'; return; } curOrd.qc = ch; rendreSuivi(curCran);
+        if (ch === 'non') window.open(wa('Bonjour GOD DID EXPRESS, pour ma commande ' + curOrd.ref + ' je veux un changement sur la photo du produit.'), '_blank'); })
+      .catch(function () { b.disabled = false; m.textContent = 'Connexion impossible.'; });
+  });
   rendreSuivi(4);
   Array.prototype.forEach.call(document.querySelectorAll('[data-hm]'), function (b) { b.addEventListener('click', function () { Array.prototype.forEach.call(document.querySelectorAll('[data-hm]'), function (o) { o.classList.toggle('on', o === b); }); if (GS && GS.setMode) GS.setMode(b.getAttribute('data-hm')); }); });
   $('s-wa').href = wa('Bonjour GOD DID EXPRESS, je voudrais l\'état de ma commande, référence : ' + EXEMPLE);
@@ -2069,6 +2090,42 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       $('dv-q').addEventListener('input', maj); $('dv-m').addEventListener('change', maj); maj();
     }).catch(function () {});
   }
+  function ouvrirGarantie() {
+    var S = [['Prix avant paiement', 'Tu reçois le devis avec le prix final avant de payer quoi que ce soit.'],
+      ['Paiement', 'L\'acompte indiqué sur ton devis lance l\'achat. Le solde se règle à l\'arrivée à Kinshasa, avant la remise. Airtel Money, Orange Money, M-Pesa ou Africell Money.'],
+      ['Photo avant l\'envoi', 'Tu vois la photo de ton produit chez le fournisseur et tu la valides, ou tu demandes un changement, avant qu\'il parte.'],
+      ['Preuve à chaque étape', 'Photo ou document à chaque étape, vidéo de remise à la livraison. Tout est dans ton suivi avec ta référence.'],
+      ['Délais', 'Le délai estimé est indiqué sur ton devis, selon l\'avion ou le bateau. Il peut varier selon le transporteur et la douane. Si une date change, on te prévient.'],
+      ['Remboursement', 'Si ton produit n\'est pas acheté après ton acompte, l\'acompte t\'est remboursé.'],
+      ['Colis perdu ou abîmé', 'On lance la réclamation chez le transporteur ou le fournisseur et on te propose une solution : remplacement ou remboursement selon le cas.'],
+      ['Livraison', 'Livraison dans les communes de Kinshasa, avec vidéo de remise.'],
+      ['Réclamation', 'Écris-nous sur WhatsApp avec ta référence, dans les 48 heures après la réception. On te répond avec une solution.']];
+    ouvrir('<div class="sheet-tete"><div><div class="kicker">Confiance</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Garantie et conditions</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
+      S.map(function (x) { return '<div class="carte" style="padding:12px"><b>' + h(x[0]) + '</b><div class="note" style="margin-top:4px">' + h(x[1]) + '</div></div>'; }).join('') +
+      '<a class="btn" target="_blank" rel="noopener" href="' + ea(wa('Bonjour GOD DID EXPRESS, j\'ai une question sur vos conditions.')) + '">Poser une question sur WhatsApp</a>');
+  }
+  function ouvrirCalc() {
+    ouvrir('<div class="sheet-tete"><div><div class="kicker">Estimation</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Calculer mon prix</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
+      '<p class="note">Entre le prix du produit chez le fournisseur et son poids. Tu vois le prix estimé rendu à Kinshasa, transport et douane compris.</p>' +
+      '<div class="valide"><label for="ca-px">Prix du produit</label><div class="rang"><input id="ca-px" inputmode="decimal" placeholder="Ex. 12" style="flex:1"><select id="ca-dev"><option value="USD">$</option><option value="CNY">¥ yuan</option></select></div>' +
+      '<label for="ca-kg">Poids d\'une pièce (kg)</label><input id="ca-kg" inputmode="decimal" placeholder="Ex. 0.5">' +
+      '<label for="ca-q">Quantité</label><input id="ca-q" inputmode="numeric" value="1">' +
+      '<label for="ca-m">Transport</label><select id="ca-m"><option value="avion">Avion, plus rapide</option><option value="bateau">Bateau, moins cher</option></select>' +
+      '<button class="btn" type="button" data-calc-go>Calculer</button><div id="ca-res" class="note" aria-live="polite"></div></div>');
+  }
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-garantie]')) { ouvrirGarantie(); return; }
+    if (e.target.closest('[data-calc]')) { ouvrirCalc(); return; }
+    if (!e.target.closest('[data-calc-go]')) return;
+    var res = $('ca-res'); res.textContent = 'Calcul…';
+    fetch('/api/estimer', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ prix: $('ca-px').value.replace(',', '.'), dev: $('ca-dev').value, kg: $('ca-kg').value.replace(',', '.'), qte: $('ca-q').value, mode: $('ca-m').value }) })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (x) {
+        if (!x.ok) { res.textContent = x.j.erreur || 'Vérifie les valeurs.'; return; }
+        if (!x.j.ok) { res.innerHTML = 'Les tarifs ne sont pas encore affichés. <a class="lien-ex" target="_blank" rel="noopener" href="' + ea(wa('Bonjour GOD DID EXPRESS, je voudrais le prix rendu à Kinshasa pour un produit.')) + '">Demande un devis sur WhatsApp</a>.'; return; }
+        res.innerHTML = '<div class="prix" style="text-align:center">Environ <b>' + usd(x.j.unit) + '</b> la pièce' + (x.j.qte > 1 ? '<small>Total pour ' + x.j.qte + ' pièces : ' + usd(x.j.total) + '</small>' : '') + '</div><p class="note">Estimation. Le prix final est sur ton devis avant tout paiement.</p>';
+      }).catch(function () { res.textContent = 'Connexion impossible, réessaie.'; });
+  });
   function ouvrirPay(ref) {
     var P = STATE.pay || [];
     var rows = P.map(function (x) { return '<div class="carte" style="padding:12px;display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>' + h(x.op) + '</b><div class="note">' + h(x.nom || '') + '</div><div style="font-size:20px;font-weight:700">' + h(x.num) + '</div></div><button class="btn mini" type="button" data-copie="' + ea(x.num) + '">Copier</button></div>'; }).join('');
@@ -2602,9 +2659,11 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   });
 
   /* Fenêtre « Plus » */
-  function tuile(v, ico, t, s) { return '<button type="button" class="tuile" ' + (v === 'pay' || v === 'install' || v === 'share' ? 'data-' + v : 'data-go="' + v + '"') + '><svg viewBox="0 0 24 24" aria-hidden="true">' + ico + '</svg><span><b>' + t + '</b><span class="s">' + s + '</span></span></button>'; }
+  function tuile(v, ico, t, s) { return '<button type="button" class="tuile" ' + (v === 'pay' || v === 'install' || v === 'share' || v === 'garantie' || v === 'calc' ? 'data-' + v : 'data-go="' + v + '"') + '><svg viewBox="0 0 24 24" aria-hidden="true">' + ico + '</svg><span><b>' + t + '</b><span class="s">' + s + '</span></span></button>'; }
   function ouvrirPlus() {
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Plus</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Aller plus loin</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
+      tuile('calc', '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M12 12h2M8 16h2M12 16h2"/>', 'Calculer mon prix', 'Combien ça coûte rendu à Kinshasa') +
+      tuile('garantie', '<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2.2 2.2L15.5 10"/>', 'Garantie et conditions', 'Paiement, délais, remboursement, réclamations') +
       tuile('pro', '<path d="M4 9h16v10H4z"/><path d="M9 9V6h6v3"/>', 'Espace commerçants', 'Devis de gros pour entreprises et revendeurs, commandes régulières') +
       tuile('groupes', '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.6.2 4.5 2.3 4.5 5.1"/>', 'Achats groupés', 'Plus on est nombreux, moins c\'est cher') +
       tuile('voyages', '<path d="M3 17l18-6-6 9-3-4-5 1z"/><path d="M12 16v4"/>', 'Nos voyages', 'Départs, dates limites et arrivées') +
@@ -3128,7 +3187,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     fetch('/api/cmd/' + encodeURIComponent(v)).then(function (r) {
       if (r.status === 429) { toast('Trop d\'essais, réessayez dans quelques minutes'); fin(null); return null; }
       if (!r.ok) { fin(null); return null; }
-      return r.json().then(function (j) { if (String($('s-ref').textContent) !== v) return; fin({ nom: j.nom, prod: j.prod, cran: j.cran, mode: j.mode, orig: j.orig, typ: j.typ, ou: j.ou, arr: j.arr, pr: j.pr || [], dts: j.dts || [] }); });
+      return r.json().then(function (j) { if (String($('s-ref').textContent) !== v) return; fin({ ref: j.ref || v, nom: j.nom, prod: j.prod, cran: j.cran, mode: j.mode, orig: j.orig, typ: j.typ, ou: j.ou, arr: j.arr, pr: j.pr || [], dts: j.dts || [], qc: j.qc || '' }); });
     }).catch(function () { fin(null); });
   }
   $('form-suivi').addEventListener('submit', function (e) { e.preventDefault(); $('espace').hidden = true; chercherCmd($('s-code').value); });

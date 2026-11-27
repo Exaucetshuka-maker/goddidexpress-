@@ -538,7 +538,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       STATE = defState(rs[0].j); PRODS = rs[1]; api('/api/partenaires').then(function (q) { if (q.ok) { PARTS = q.j.parts || []; rendrePart(); } });
       if (rs[2].ok) COUTS = { reglages: Object.assign(COUTS.reglages, rs[2].j.reglages || {}), produits: rs[2].j.produits || {} };
       if (rs[3].ok) CARTES = rs[3].j.cartes || [];
-      if (rs[4].ok) CMDS = rs[4].j.cmds || [];
+      if (rs[4].ok) { CMDS = rs[4].j.cmds || []; QCM = rs[4].j.qc || {}; }
       if (rs[5].ok) JOINS = rs[5].j.joins || [];
       if (rs[6] && rs[6].ok) IPHS = rs[6].j.listes || {};
       if (rs[7] && rs[7].ok) CLICS = rs[7].j.clics || {};
@@ -1543,7 +1543,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   });
 
   /* ---------- Commandes et suivi (privé, sauf référence/étape) ---------- */
-  var CMDS = [], cmDirty = false, CMF = null;
+  var CMDS = [], cmDirty = false, CMF = null, QCM = {};
   var ETAPES = ['Demande reçue', 'Devis envoyé', 'Acompte reçu', 'Acheté chez le fournisseur', 'En transit', 'Arrivé à Kinshasa', 'Livré'];
   var ETAPES_STOCK = ['Commande confirmée', 'Produit préparé', 'Remis au client'];
   function etp(c) { return c.typ === 'stock' ? ETAPES_STOCK : ETAPES; }
@@ -1561,7 +1561,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     var q = $('cm-q').value.trim().toLowerCase();
     $('cm-liste').innerHTML = CMDS.filter(function (c) { return !q || (c.nom + ' ' + c.prod + ' ' + c.ref + ' ' + (c.tel || '')).toLowerCase().indexOf(q) >= 0; }).map(function (c) {
       var i = CMDS.indexOf(c), opts = (c.typ === 'stock' ? ETAPES_STOCK : ETAPES.concat(['Livré']).slice(0, 7)).map(function (e, n) { if (c.typ === 'expedition' && n === 3) e = 'Colis reçu chez nous'; return '<option value="' + n + '"' + (n === Math.min(etp(c).length - 1, c.cran) ? ' selected' : '') + '>' + (n + 1) + '. ' + esc(e) + '</option>'; }).join('');
-      return '<div class="carte" data-cm="' + i + '"><div class="rang" style="justify-content:space-between"><strong>' + esc(c.prod || 'Colis') + '</strong><span class="pastille">' + esc(source(c)) + ' · ' + esc(c.ref) + '</span></div>' +
+      return '<div class="carte" data-cm="' + i + '"><div class="rang" style="justify-content:space-between"><strong>' + esc(c.prod || 'Colis') + '</strong><span class="pastille">' + esc(source(c)) + ' · ' + esc(c.ref) + '</span></div>' + (QCM[c.ref] ? '<p class="note" style="margin:4px 0;font-weight:700;color:' + (QCM[c.ref].c === 'ok' ? '#4ade80' : '#ff6a00') + '">' + (QCM[c.ref].c === 'ok' ? '✓ Le client a validé la photo du produit' : 'Le client demande un changement sur la photo du produit') + '</p>' : '') +
         '<div class="note">' + esc(c.nom) + (c.tel ? ', ' + esc(c.tel) : '') + (c.typ === 'expedition' ? ' · expédition seulement' + (c.ou ? ' (colis chez : ' + esc(c.ou) + ')' : '') : '') + ' · ' + esc(c.orig || 'Chine') + ' → Kinshasa, par ' + (c.mode === 'bateau' ? 'bateau' : 'avion') + (c.arr ? ' · arrivée ' + esc(dateFr(c.arr)) : '') + '</div>' +
         '<div class="grille g2"><div><label>Étape</label><select data-cf="cran">' + opts + '</select></div><div><label>Arrivée estimée</label><input type="date" data-cf="arr" value="' + esc(c.arr) + '"></div></div>' +
         '<div class="grille g2"><div><label>Total à payer ($)</label><input data-cf="total" inputmode="decimal" value="' + (c.total || '') + '" placeholder="Ex. 120"></div><div><label>Déjà payé ($)</label><input data-cf="paye" inputmode="decimal" value="' + (c.paye || '') + '" placeholder="Ex. 60"></div></div>' + '<div><label>Code partenaire utilisé (facultatif)</label><input data-cf="code" maxlength="30" style="text-transform:uppercase" value="' + esc(c.code || '') + '" placeholder="Ex. MARIE10"></div>' + '<div class="note" data-reste>' + (c.total > 0 ? 'Reste à payer : <b>' + Math.max(0, Math.round((c.total - (c.paye || 0)) * 100) / 100) + ' $</b>' : '') + '</div>' +
