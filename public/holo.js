@@ -64,7 +64,7 @@ window.makeHolo=function(cv,opts){
   var R=cam.R,cx=W/2,cy=H*.41;
   var sp=ctx.createRadialGradient(cx-R*.3,cy-R*.3,R*.1,cx,cy,R);sp.addColorStop(0,'rgba(14,42,70,.95)');sp.addColorStop(1,'rgba(3,10,20,.96)');ctx.fillStyle=sp;ctx.beginPath();ctx.arc(cx,cy,R,0,7);ctx.fill();
   ctx.globalCompositeOperation='lighter';
-  var at=ctx.createRadialGradient(cx,cy,R*.94,cx,cy,R*1.13);at.addColorStop(0,'rgba('+C+',0)');at.addColorStop(.22,'rgba('+C+',.08)');at.addColorStop(1,'rgba('+C+',0)');ctx.fillStyle=at;ctx.beginPath();ctx.arc(cx,cy,R*1.13,0,7);ctx.fill();
+  var at=ctx.createRadialGradient(cx,cy,R*.94,cx,cy,R*1.13);at.addColorStop(0,'rgba('+C+',0)');at.addColorStop(.22,'rgba('+C+',.36)');at.addColorStop(1,'rgba('+C+',0)');ctx.fillStyle=at;ctx.beginPath();ctx.arc(cx,cy,R*1.13,0,7);ctx.fill();
   ctx.strokeStyle='rgba('+C+',.55)';ctx.lineWidth=1.3;ctx.beginPath();ctx.arc(cx,cy,R,0,7);ctx.stroke();
   ctx.lineWidth=.6;ctx.strokeStyle='rgba('+C+',.12)';
   for(var la=-60;la<=60;la+=20){ctx.beginPath();var on=false;for(var lo=-180;lo<=180;lo+=5){var q=P(lo,la,0);if(q.z>0){if(!on){ctx.moveTo(q.x,q.y);on=true}else ctx.lineTo(q.x,q.y)}else on=false}ctx.stroke()}
