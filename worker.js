@@ -636,6 +636,21 @@ async function traiter(request, env) {
       const base = prix * taux, tr = kg * tk, rendu = base + tr + (base + tr) * dou / 100, unit = Math.round(rendu * (1 + m / 100) * 100) / 100;
       return json({ ok: true, unit, total: Math.round(unit * qte * 100) / 100, qte });
     }
+    /* Le client déclare son paiement mobile money depuis le site : l'admin vérifie puis confirme */
+    if (p === '/api/paiement' && request.method === 'POST') {
+      if (limite(request, 'paiem', 6)) return json({ erreur: 'Trop d\'essais, réessaie dans une minute.' }, 429);
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const ref = String(b.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), de = String(b.de || '').replace(/[^\d+ ]/g, '').trim().slice(0, 20);
+      const code = String(b.code || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 30), op = String(b.op || '').slice(0, 30), montant = Number(String(b.montant || '').replace(',', '.'));
+      if (!(await cmdsEtDemandes(env)).some((x) => x.ref === ref)) return json({ erreur: 'Référence introuvable. Vérifie-la.' }, 404);
+      if (de.replace(/\D/g, '').length < 8) return json({ erreur: 'Écris le numéro qui a payé.' }, 400);
+      if (code.length < 4) return json({ erreur: 'Écris le code de la transaction (reçu par SMS).' }, 400);
+      if (!isFinite(montant) || montant <= 0 || montant > 100000) return json({ erreur: 'Écris le montant payé.' }, 400);
+      let P = await lireListe(env, 'paiements');
+      if (P.some((x) => x.code === code)) return json({ erreur: 'Ce code a déjà été déclaré.' }, 409);
+      P.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), ref, op, de, code, montant: Math.round(montant * 100) / 100, t: Date.now(), st: 'attente' });
+      await env.GDE.put('paiements', JSON.stringify(P.slice(-600))); return json({ ok: true });
+    }
     if (p === '/api/mes-commandes' && request.method === 'POST') {
       if (limite(request, 'mescmd', 8)) return json({ erreur: 'Trop d\'essais, réessaie dans une minute.' }, 429);
       let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
@@ -684,7 +699,7 @@ async function traiter(request, env) {
       await env.GDE.put(k, String(n + 1), { expirationTtl: 600 });
       const c = (await cmdsEtDemandes(env)).find((x) => x.ref === mm[1].toUpperCase());
       if (!c) return json({ erreur: 'Référence introuvable' }, 404);
-      return json({ ref: c.ref, nom: c.nom, prod: c.prod, cran: c.cran, mode: c.mode, orig: c.orig || 'Chine', typ: c.typ || 'achat', ou: c.ou || '', arr: c.arr, maj: c.maj, pr: c.pr || [], dts: c.dts || [], qc: ((await lireQc(env))[c.ref] || {}).c || '' });
+      return json({ ref: c.ref, nom: c.nom, prod: c.prod, cran: c.cran, mode: c.mode, orig: c.orig || 'Chine', typ: c.typ || 'achat', ou: c.ou || '', arr: c.arr, maj: c.maj, pr: c.pr || [], dts: c.dts || [], qc: ((await lireQc(env))[c.ref] || {}).c || '', pay: (await lireListe(env, 'paiements')).filter((x) => x.ref === c.ref).slice(-1).map((x) => ({ st: x.st, montant: x.montant }))[0] || null });
     }
 
     /* Tout ce qui suit demande d'être connecté */
@@ -832,6 +847,13 @@ async function traiter(request, env) {
       });
       await env.GDE.put('iph', JSON.stringify(out));
       return json(out);
+    }
+    if (p === '/api/paiements' && request.method === 'GET') return json({ paiements: (await lireListe(env, 'paiements')).slice(-200).reverse() });
+    if (p === '/api/paiement-statut' && request.method === 'POST') {
+      let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
+      const P = await lireListe(env, 'paiements'), x = P.find((y) => y.id === b.id);
+      if (!x || !['ok', 'non', 'attente'].includes(b.st)) return json({ erreur: 'Introuvable' }, 404);
+      x.st = b.st; await env.GDE.put('paiements', JSON.stringify(P)); return json({ ok: true });
     }
     if (p === '/api/demandes' && request.method === 'GET') return json({ demandes: await lireListe(env, 'demandes') });
     if (p === '/api/demandes' && request.method === 'PUT') {

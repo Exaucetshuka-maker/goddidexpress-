@@ -1090,6 +1090,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     </div>
     <ul class="garanties"><li><b>Une preuve à chaque étape</b><span>Photo ou document, jamais une simple annonce.</span></li><li><b>Prévenu sur WhatsApp</b><span>Tu reçois un message quand ton colis change d'étape.</span></li><li><b>Paiement par acompte</b><span>Le solde se règle à l'arrivée, avant la remise.</span></li></ul>
     <p class="note" id="s-note">Commande d'exemple. Pour une vraie commande, écris-nous sur WhatsApp avec ta référence.</p>
+    <p class="note" id="s-paiem"></p>
     <div class="rangee"><button class="btn" id="s-pay" type="button" data-pay data-ref="">Payer mon acompte</button><a class="btn ghost" id="s-notif" href="#" target="_blank" rel="noopener">Me prévenir à chaque étape</a><a class="btn ghost" id="s-wa" href="#" target="_blank" rel="noopener">Demander l'état sur WhatsApp</a></div>
   </section>
 
@@ -1728,6 +1729,8 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   function rendreSuivi(cran) {
     curCran = cran; var ETAPES = etapesCour(), N = ETAPES.length, ST = !!(curOrd && curOrd.typ === 'stock');
     $('v-suivi').classList.toggle('stock', ST);
+    var pz = curOrd && curOrd.pay, pe = $('s-paiem');
+    pe.textContent = !pz ? '' : pz.st === 'ok' ? '✓ Paiement de ' + usd(pz.montant) + ' confirmé.' : pz.st === 'non' ? 'Ton paiement de ' + usd(pz.montant) + ' n\'a pas pu être vérifié. Vérifie le code ou écris-nous.' : 'Ton paiement de ' + usd(pz.montant) + ' est en cours de vérification.';
     var fait = Math.max(0, Math.min(N, cran));
     $('s-jauge').innerHTML = jaugeSVG(fait, N);
     var cur = cran >= N ? 'Livré' : cran < 0 ? 'Référence non reliée' : ETAPES[cran][0];
@@ -2131,9 +2134,26 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var rows = P.map(function (x) { return '<div class="carte" style="padding:12px;display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>' + h(x.op) + '</b><div class="note">' + h(x.nom || '') + '</div><div style="font-size:20px;font-weight:700">' + h(x.num) + '</div></div><button class="btn mini" type="button" data-copie="' + ea(x.num) + '">Copier</button></div>'; }).join('');
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Acompte</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Payer l\'acompte</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
       (rows || '<p class="note">Demande les numéros de paiement sur WhatsApp.</p>') +
-      '<ol style="margin:6px 0 0;padding-left:20px;display:grid;gap:6px"><li>Tu reçois d\'abord le devis.</li><li>Tu envoies l\'acompte indiqué sur ton devis à l\'un des numéros ci-dessus.</li><li>Tu nous envoies la capture du paiement sur WhatsApp.</li><li>On lance l\'achat. Solde à la livraison.</li></ol>' +
-      '<a class="btn" target="_blank" rel="noopener" href="' + ea(wa('Bonjour GOD DID EXPRESS, je viens de payer l\'acompte' + (ref ? ' de ma commande ' + ref : '') + '. Voici la capture du paiement.')) + '">Envoyer la capture sur WhatsApp</a>');
+      '<ol style="margin:6px 0 0;padding-left:20px;display:grid;gap:6px"><li>Tu reçois d\'abord le devis.</li><li>Tu envoies l\'acompte indiqué sur ton devis à l\'un des numéros ci-dessus.</li><li>Tu déclares ton paiement ici, avec le code reçu par SMS.</li><li>On vérifie, puis on lance l\'achat. Solde à la livraison.</li></ol>' +
+      '<div class="valide" id="pa-form"><b>J\'ai payé : je déclare mon paiement</b>' +
+      '<label for="pa-ref">Ta référence</label><input id="pa-ref" placeholder="GDE-2611-AB3K" autocapitalize="characters" spellcheck="false" maxlength="20" value="' + ea(ref || cvLire('r')) + '">' +
+      '<label for="pa-op">Par quel service ?</label><select id="pa-op">' + (P.length ? P.map(function (x) { return '<option>' + h(x.op) + '</option>'; }).join('') : '<option>Airtel Money</option><option>Orange Money</option><option>M-Pesa</option><option>Africell Money</option>') + '</select>' +
+      '<label for="pa-de">Numéro qui a payé</label><input id="pa-de" inputmode="tel" placeholder="0810000000" maxlength="20" value="' + ea(cvLire('t')) + '">' +
+      '<label for="pa-code">Code de la transaction (dans le SMS)</label><input id="pa-code" placeholder="Ex. MP2611AB3K" maxlength="30" autocapitalize="characters">' +
+      '<label for="pa-mt">Montant payé ($)</label><input id="pa-mt" inputmode="decimal" placeholder="Ex. 50" maxlength="10">' +
+      '<button class="btn" type="button" data-pa-go>Envoyer ma déclaration</button><p class="note" id="pa-msg" aria-live="polite"></p></div>');
   }
+  document.addEventListener('click', function (e) {
+    var g = e.target.closest('[data-pa-go]'); if (!g) return;
+    var m = $('pa-msg'); g.disabled = true; m.textContent = 'Envoi…';
+    fetch('/api/paiement', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ref: $('pa-ref').value, op: $('pa-op').value, de: $('pa-de').value, code: $('pa-code').value, montant: $('pa-mt').value }) })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (x) {
+        if (!x.ok) { g.disabled = false; m.textContent = x.j.erreur || 'Impossible, réessaie.'; return; }
+        var rf = $('pa-ref').value.toUpperCase();
+        $('pa-form').innerHTML = '<div class="carte" style="padding:14px;text-align:center"><b>Paiement reçu en vérification</b><div class="note" style="margin-top:6px">On vérifie ton paiement et ton suivi se met à jour. Tu le vois avec ta référence ' + h(rf) + '.</div></div><button class="btn" type="button" data-suivre="' + ea(rf) + '">Voir mon suivi</button>';
+      }).catch(function () { g.disabled = false; m.textContent = 'Connexion impossible, réessaie.'; });
+  });
   document.addEventListener('click', function (e) { var b = e.target.closest('[data-copie]'); if (!b) return; var v = b.getAttribute('data-copie'); try { navigator.clipboard.writeText(v); } catch (er) {} b.textContent = 'Copié ✓'; setTimeout(function () { b.textContent = 'Copier'; }, 1500); });
   document.addEventListener('click', function (e) { var pb = e.target.closest('[data-pay]'); if (pb) ouvrirPay(pb.getAttribute('data-ref') || ''); });
   var INST = null; window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); INST = e; });
@@ -2286,7 +2306,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (x) {
         if (!x.ok || !x.j.ref) { btn.disabled = false; m.textContent = x.j.erreur || 'Envoi impossible, réessaie.'; return; }
-        try { localStorage.setItem('gde-cv-n', nom); localStorage.setItem('gde-cv-t', tel); localStorage.setItem('gde-ref', x.j.ref); } catch (e) {}
+        try { localStorage.setItem('gde-cv-n', nom); localStorage.setItem('gde-cv-t', tel); localStorage.setItem('gde-cv-r', x.j.ref); localStorage.setItem('gde-ref', x.j.ref); } catch (e) {}
         liste = {}; sauve(); majBarre(); rendreGrille();
         ouvrir('<div class="sheet-tete"><div><div class="kicker">Commande enregistrée</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Merci ' + h(nom) + '</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
           '<div class="carte" style="text-align:center;padding:16px"><div class="note">Ta référence de suivi</div><div style="font-size:26px;font-weight:800;letter-spacing:1px">' + h(x.j.ref) + '</div></div>' +
@@ -3187,7 +3207,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     fetch('/api/cmd/' + encodeURIComponent(v)).then(function (r) {
       if (r.status === 429) { toast('Trop d\'essais, réessayez dans quelques minutes'); fin(null); return null; }
       if (!r.ok) { fin(null); return null; }
-      return r.json().then(function (j) { if (String($('s-ref').textContent) !== v) return; fin({ ref: j.ref || v, nom: j.nom, prod: j.prod, cran: j.cran, mode: j.mode, orig: j.orig, typ: j.typ, ou: j.ou, arr: j.arr, pr: j.pr || [], dts: j.dts || [], qc: j.qc || '' }); });
+      return r.json().then(function (j) { if (String($('s-ref').textContent) !== v) return; fin({ ref: j.ref || v, nom: j.nom, prod: j.prod, cran: j.cran, mode: j.mode, orig: j.orig, typ: j.typ, ou: j.ou, arr: j.arr, pr: j.pr || [], dts: j.dts || [], qc: j.qc || '', pay: j.pay || null }); });
     }).catch(function () { fin(null); });
   }
   $('form-suivi').addEventListener('submit', function (e) { e.preventDefault(); $('espace').hidden = true; chercherCmd($('s-code').value); });

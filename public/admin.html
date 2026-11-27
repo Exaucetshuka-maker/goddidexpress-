@@ -285,6 +285,11 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
           <button class="btn" id="cm-ok" type="button">Ajouter la commande</button>
         </div>
       </details>
+      <div class="carte" id="pa-carte">
+        <h3>Paiements à vérifier</h3>
+        <p class="note">Le client déclare son paiement sur le site avec le code reçu par SMS. Vérifie sur ton téléphone, puis confirme : l'acompte est ajouté à la commande.</p>
+        <div id="pa-liste" class="grille"></div>
+      </div>
       <details class="carte" id="cl-carte">
         <summary><strong>Mes clients</strong></summary>
         <p class="note">Chaque client avec toutes ses commandes, regroupées par téléphone. Le client les voit lui aussi sur la page Suivi, dans « Mes commandes ».</p>
@@ -539,6 +544,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       if (rs[2].ok) COUTS = { reglages: Object.assign(COUTS.reglages, rs[2].j.reglages || {}), produits: rs[2].j.produits || {} };
       if (rs[3].ok) CARTES = rs[3].j.cartes || [];
       if (rs[4].ok) { CMDS = rs[4].j.cmds || []; QCM = rs[4].j.qc || {}; }
+      api('/api/paiements').then(function (q) { if (q.ok) { PAIE = q.j.paiements || []; rendrePaie(); } });
       if (rs[5].ok) JOINS = rs[5].j.joins || [];
       if (rs[6] && rs[6].ok) IPHS = rs[6].j.listes || {};
       if (rs[7] && rs[7].ok) CLICS = rs[7].j.clics || {};
@@ -1543,7 +1549,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   });
 
   /* ---------- Commandes et suivi (privé, sauf référence/étape) ---------- */
-  var CMDS = [], cmDirty = false, CMF = null, QCM = {};
+  var CMDS = [], cmDirty = false, CMF = null, QCM = {}, PAIE = [];
   var ETAPES = ['Demande reçue', 'Devis envoyé', 'Acompte reçu', 'Acheté chez le fournisseur', 'En transit', 'Arrivé à Kinshasa', 'Livré'];
   var ETAPES_STOCK = ['Commande confirmée', 'Produit préparé', 'Remis au client'];
   function etp(c) { return c.typ === 'stock' ? ETAPES_STOCK : ETAPES; }
@@ -1569,6 +1575,26 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     }).join('') || '<p class="note">Aucune commande pour le moment.</p>';
     rendreClients();
   }
+  function rendrePaie() {
+    var L = PAIE.filter(function (x) { return x.st === 'attente'; }), R = PAIE.filter(function (x) { return x.st !== 'attente'; }).slice(0, 5);
+    $('pa-liste').innerHTML = (L.map(function (x) {
+      var c = CMDS.filter(function (o) { return o.ref === x.ref; })[0];
+      return '<div class="carte"><div class="rang" style="justify-content:space-between"><strong>' + esc(x.montant) + ' $ · ' + esc(x.op) + '</strong><span class="pastille">' + esc(x.ref) + '</span></div>' +
+        '<div class="note">' + (c ? esc(c.nom) + ' · ' + esc(c.prod) : 'Commande pas encore créée : crée-la depuis Demandes') + '</div>' +
+        '<div class="note">Payé depuis ' + esc(x.de) + ' · code ' + esc(x.code) + '</div>' +
+        '<div class="rang"><button class="btn mini" type="button" data-pa="ok" data-id="' + esc(x.id) + '">Confirmer</button><button class="btn ghost mini" type="button" data-pa="non" data-id="' + esc(x.id) + '">Refuser</button></div></div>';
+    }).join('') || '<p class="note">Aucun paiement à vérifier.</p>') + R.map(function (x) { return '<div class="note">' + (x.st === 'ok' ? '✓ ' : '✗ ') + esc(x.montant) + ' $ · ' + esc(x.ref) + ' · ' + esc(x.op) + '</div>'; }).join('');
+  }
+  $('pa-liste').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-pa]'); if (!b) return; var id = b.getAttribute('data-id'), st = b.getAttribute('data-pa'), x = PAIE.filter(function (y) { return y.id === id; })[0]; if (!x) return;
+    b.disabled = true;
+    api('/api/paiement-statut', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: id, st: st }) }).then(function (r) {
+      if (!r.ok) { b.disabled = false; alert('Impossible, réessaie.'); return; }
+      x.st = st;
+      if (st === 'ok') { var c = CMDS.filter(function (o) { return o.ref === x.ref; })[0]; if (c) { c.paye = Math.round(((Number(c.paye) || 0) + x.montant) * 100) / 100; if (c.cran < 3 && c.typ !== 'stock') c.cran = 3; cmTouch(c); rendreCmds(); infoEtat('Paiement confirmé. Pense à enregistrer.', 'ok'); } else infoEtat('Paiement confirmé. Crée la commande dans Demandes.', 'ok'); }
+      rendrePaie();
+    });
+  });
   function rendreClients() {
     var G = {}, fin = function (t) { return String(t || '').replace(/\D/g, '').slice(-9); };
     CMDS.forEach(function (c) { var k = fin(c.tel) || ('n-' + c.nom); (G[k] = G[k] || { nom: c.nom, tel: c.tel, l: [] }).l.push(c); });
