@@ -1531,7 +1531,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   function rendrePaniersSite() {
     var b = $('home-pan'); if (b) b.hidden = !campActives().length;
     var L = campActives(), box = $('pan-liste'); if (!box) return;
-    if (!L.length) { box.innerHTML = '<article class="carte"><h3>Le prochain panier arrive bientôt</h3><p class="note">Demande les offres du moment sur WhatsApp.</p><a class="btn" target="_blank" rel="noopener" href="' + ea(wa('Bonjour GOD DID EXPRESS, quelles sont les offres du moment ?')) + '">Demander sur WhatsApp</a></article>'; return; }
+    if (!L.length) { box.innerHTML = '<article class="carte"><h3>Le prochain panier arrive bientôt</h3><p class="note">Pose ta question ici, on te répond.</p><button class="btn" type="button" data-ask="Quelles sont les offres du moment ?">Demander ici</button></article>'; return; }
     box.innerHTML = L.map(function (c) {
       var lim = campLim(c), cp = c.fin ? '<div><small class="note">Fin du panier dans</small><div class="cpt" data-cpt="' + h(jourApres(c.fin)) + '">' + cptTexte(jourApres(c.fin)) + '</div></div>' : '';
       var lots = (c.lots || []).map(function (l) { var msg = 'Bonjour GOD DID EXPRESS, je veux le lot « ' + l.nom + ' » du ' + c.nom + (l.prix > 0 ? ' (' + usd(l.prix) + ')' : '') + '.'; return '<div class="carte" style="padding:12px"><div style="display:flex;justify-content:space-between;gap:8px"><b>' + h(l.nom) + '</b><b style="color:var(--orange)">' + (l.prix > 0 ? usd(l.prix) : '') + '</b></div>' + (l.desc ? '<p class="note">' + h(l.desc) + '</p>' : '') + '<a class="btn" style="margin-top:6px" target="_blank" rel="noopener" href="' + ea(wa(msg)) + '">Commander ce lot</a></div>'; }).join('');
@@ -2121,6 +2121,29 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         ouvrirPay(x.j.ref, tot || '');
       }).catch(function () { g.disabled = false; m.textContent = 'Connexion impossible, réessaie.'; });
   });
+  function ouvrirQuestion(q) {
+    ouvrir('<div class="sheet-tete"><div><div class="kicker">Question</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Pose ta question</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
+      '<div class="valide"><label for="q-txt">Ta question</label><textarea id="q-txt" rows="3" maxlength="500">' + h(q || '') + '</textarea>' +
+      '<label for="q-nom">Ton prénom</label><input id="q-nom" maxlength="60" value="' + ea(cvLire('n')) + '">' +
+      '<label for="q-tel">Ton téléphone</label><input id="q-tel" inputmode="tel" maxlength="20" value="' + ea(cvLire('t')) + '">' +
+      '<button class="btn" type="button" data-q-go>Envoyer</button><p class="note" id="q-msg" aria-live="polite"></p></div>');
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-ask]'); if (a) { e.preventDefault(); ouvrirQuestion(a.getAttribute('data-ask')); return; }
+    var g = e.target.closest('[data-q-go]'); if (!g) return;
+    var m = $('q-msg'), nom = ($('q-nom').value || '').trim(), tel = ($('q-tel').value || '').trim(), t = ($('q-txt').value || '').trim();
+    if (!t) { m.textContent = 'Écris ta question.'; return; }
+    if (!nom) { m.textContent = 'Écris ton prénom.'; return; }
+    if (tel.replace(/\D/g, '').length < 8) { m.textContent = 'Écris ton numéro de téléphone.'; return; }
+    g.disabled = true; m.textContent = 'Envoi…';
+    fetch('/api/demande', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nom: nom, tel: tel, txt: 'Question : ' + t.slice(0, 560) }) })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (x) {
+        if (!x.ok) { g.disabled = false; m.textContent = x.j.erreur || 'Envoi impossible, réessaie.'; return; }
+        try { localStorage.setItem('gde-cv-n', nom); localStorage.setItem('gde-cv-t', tel); } catch (er) {}
+        $('sheet').querySelector('.valide').innerHTML = '<div class="carte" style="padding:14px;text-align:center"><b>Question envoyée</b><div class="note" style="margin-top:6px">On te répond très vite sur ton numéro.</div></div>';
+      }).catch(function () { g.disabled = false; m.textContent = 'Connexion impossible, réessaie.'; });
+  });
   function ouvrirGarantie() {
     var S = [['Prix avant paiement', 'Tu reçois le devis avec le prix final avant de payer quoi que ce soit.'],
       ['Paiement', 'L\'acompte indiqué sur ton devis lance l\'achat. Le solde se règle à l\'arrivée à Kinshasa, avant la remise. Airtel Money, Orange Money, M-Pesa ou Africell Money.'],
@@ -2153,7 +2176,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (x) {
         if (!x.ok) { res.textContent = x.j.erreur || 'Vérifie les valeurs.'; return; }
-        if (!x.j.ok) { res.innerHTML = 'Les tarifs ne sont pas encore affichés. <a class="lien-ex" target="_blank" rel="noopener" href="' + ea(wa('Bonjour GOD DID EXPRESS, je voudrais le prix rendu à Kinshasa pour un produit.')) + '">Demande un devis sur WhatsApp</a>.'; return; }
+        if (!x.j.ok) { res.innerHTML = 'Les tarifs ne sont pas encore affichés. <a class="lien-ex" href="#" data-ask="Je voudrais le prix rendu à Kinshasa pour un produit.">Demande un devis ici</a>.'; return; }
         res.innerHTML = '<div class="prix" style="text-align:center">Environ <b>' + usd(x.j.unit) + '</b> la pièce' + (x.j.qte > 1 ? '<small>Total pour ' + x.j.qte + ' pièces : ' + usd(x.j.total) + '</small>' : '') + '</div><p class="note">Estimation. Le prix final est sur ton devis avant tout paiement.</p>';
       }).catch(function () { res.textContent = 'Connexion impossible, réessaie.'; });
   });
@@ -3001,7 +3024,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     var x = MARCHES[Number(b.getAttribute('data-marche'))];
     ouvrir('<div class="sheet-tete"><div><h3 id="sheet-titre" style="font-size:22px"><span class="flag" aria-hidden="true">' + x.f + '</span> ' + x.n + '</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
       '<p>' + x.t + '</p><div class="rangee">' + '<button class="btn" type="button" data-go="catalogue">Voir le catalogue</button>' +
-      '<a class="btn ghost" href="' + ea(wa(x.m)) + '" target="_blank" rel="noopener">Demander sur WhatsApp</a></div>');
+      '<button class="btn ghost" type="button" data-ask="' + ea(x.m.replace(/^Bonjour GOD DID EXPRESS,?\s*/, '')) + '">Demander ici</button></div>');
   });
 
   /* Méthode : voyage du colis et infos remplies par l'admin */
@@ -3346,7 +3369,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       if (m.tour) s += '<button type="button" class="btn mini" data-tour>Visite guidée</button>';
       s += '</div>';
     }
-    if (m.wq) s += '<div class="rangee"><a class="btn mini" href="' + wa('Bonjour GOD DID EXPRESS, ' + m.wq) + '" target="_blank" rel="noopener">Demander sur WhatsApp</a></div>';
+    if (m.wq) s += '<div class="rangee"><button class="btn mini" type="button" data-ask="' + ea(m.wq) + '">Demander ici</button></div>';
     return s + '</div>';
   }
   function rendreChat() {
