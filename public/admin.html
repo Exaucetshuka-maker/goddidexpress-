@@ -87,7 +87,8 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
 
   <div class="wrap">
     <div class="onglets" role="tablist">
-      <button class="btn ghost" role="tab" data-t="prod" aria-selected="true">Produits</button>
+      <button class="btn ghost" role="tab" data-t="auj" aria-selected="true">Aujourd'hui</button>
+      <button class="btn ghost" role="tab" data-t="prod" aria-selected="false">Produits</button>
       <button class="btn ghost" role="tab" data-t="voy" aria-selected="false">Voyages</button>
       <button class="btn ghost" role="tab" data-t="iph" aria-selected="false">Prix du jour</button>
       <button class="btn ghost" role="tab" data-t="pan" aria-selected="false">Paniers</button>
@@ -105,7 +106,13 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       <button class="btn ghost" role="tab" data-t="reg" aria-selected="false">Réglages</button>
     </div>
 
-    <section id="t-prod" class="grille" style="gap:12px">
+    <section id="t-auj" class="grille" style="gap:12px">
+      <div class="grille g3" id="auj-tuiles"></div>
+      <div class="carte"><h3>Paiements à vérifier</h3><p class="note">Vérifie le SMS sur ton téléphone, puis touche Confirmer.</p><div id="auj-paie" class="grille"></div></div>
+      <div class="carte"><h3>Nouvelles commandes à accepter</h3><div id="auj-new" class="grille"></div></div>
+      <div class="carte"><h3>Toutes les commandes : qui, quoi, payé ou pas</h3><div id="auj-cmds" class="grille" style="gap:8px"></div></div>
+    </section>
+    <section id="t-prod" class="grille cache" style="gap:12px">
       <details class="carte" id="ajout">
         <summary>+ Ajouter un produit</summary>
         <div class="grille" style="margin-top:10px">
@@ -698,7 +705,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   Array.prototype.forEach.call(document.querySelectorAll('.onglets button'), function (b) {
     b.addEventListener('click', function () {
       Array.prototype.forEach.call(document.querySelectorAll('.onglets button'), function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
-      ['prod', 'voy', 'iph', 'pan', 'tdb', 'dem', 'tend', 'cli', 'grp', 'ins', 'avis', 'prix', 'cmd', 'fac', 'fid', 'reg'].forEach(function (t) { $('t-' + t).classList.toggle('cache', t !== b.getAttribute('data-t')); });
+      ['auj', 'prod', 'voy', 'iph', 'pan', 'tdb', 'dem', 'tend', 'cli', 'grp', 'ins', 'avis', 'prix', 'cmd', 'fac', 'fid', 'reg'].forEach(function (t) { $('t-' + t).classList.toggle('cache', t !== b.getAttribute('data-t')); });
       window.scrollTo(0, 0);
     });
   });
@@ -1238,6 +1245,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   var DEM = [], demDirty = false;
   function rendreDem() {
     var nv = DEM.filter(function (d) { return !d.vu; }).length, tb = document.querySelector('[data-t="dem"]'); if (tb) tb.textContent = 'Demandes' + (nv ? ' (' + nv + ')' : '');
+    rendreAuj();
     $('dem-liste').innerHTML = DEM.slice().reverse().map(function (d) { var i = DEM.indexOf(d); return '<div class="carte" data-dm="' + i + '">' + (d.photo ? '<a href="' + esc(d.photo) + '" target="_blank" rel="noopener"><img src="' + esc(d.photo) + '" alt="" style="width:100%;max-height:260px;object-fit:cover;border-radius:6px"></a>' : '') +
       '<div class="rang" style="justify-content:space-between;margin-top:6px"><strong>' + esc(d.nom) + '</strong><span class="note">' + new Date(d.t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) + (d.vu ? '' : ' · nouveau') + '</span></div>' +
       (d.act ? '<p style="margin:6px 0"><span class="pastille">Commerçant : ' + esc(d.act) + (d.freq ? ' · ' + esc(d.freq) : '') + '</span></p>' : '') +
@@ -1573,7 +1581,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         '<div class="grille g2"><div><label>Total à payer ($)</label><input data-cf="total" inputmode="decimal" value="' + (c.total || '') + '" placeholder="Ex. 120"></div><div><label>Déjà payé ($)</label><input data-cf="paye" inputmode="decimal" value="' + (c.paye || '') + '" placeholder="Ex. 60"></div></div>' + '<div><label>Code partenaire utilisé (facultatif)</label><input data-cf="code" maxlength="30" style="text-transform:uppercase" value="' + esc(c.code || '') + '" placeholder="Ex. MARIE10"></div>' + '<div class="note" data-reste>' + (c.total > 0 ? 'Reste à payer : <b>' + Math.max(0, Math.round((c.total - (c.paye || 0)) * 100) / 100) + ' $</b>' : '') + '</div>' +
         '<div class="rang" style="align-items:center">' + (c.pr && c.pr[Math.min(etp(c).length - 1, c.cran)] ? '<img src="' + esc(c.pr[Math.min(etp(c).length - 1, c.cran)]) + '" alt="Preuve" style="width:54px;height:54px;object-fit:cover;border-radius:6px"><button class="btn ghost mini" data-ca="preuve-x" type="button">Retirer la preuve</button>' : '') + '<button class="btn ghost mini" data-ca="etiq" type="button">Imprimer l\'étiquette QR</button><button class="btn ghost mini" data-ca="preuve" type="button">' + (c.pr && c.pr[Math.min(etp(c).length - 1, c.cran)] ? 'Changer la photo de preuve' : 'Ajouter la photo de preuve de cette étape') + '</button></div>' + '<div class="rang"><button class="btn mini" data-ca="suiv" type="button">Étape suivante</button><button class="btn mini" data-ca="msg" type="button">Prévenir le client</button><button class="btn ghost mini" data-ca="photo" type="button">Photo de position</button><button class="btn danger mini" data-ca="suppr" type="button">Supprimer</button></div></div>';
     }).join('') || '<p class="note">Aucune commande pour le moment.</p>';
-    rendreClients();
+    rendreClients(); rendreAuj();
   }
   function rendrePaie() {
     var L = PAIE.filter(function (x) { return x.st === 'attente'; }), R = PAIE.filter(function (x) { return x.st !== 'attente'; }).slice(0, 5);
@@ -1584,6 +1592,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         '<div class="note">Payé depuis ' + esc(x.de) + ' · code ' + esc(x.code) + '</div>' +
         '<div class="rang"><button class="btn mini" type="button" data-pa="ok" data-id="' + esc(x.id) + '">Confirmer</button><button class="btn ghost mini" type="button" data-pa="non" data-id="' + esc(x.id) + '">Refuser</button></div></div>';
     }).join('') || '<p class="note">Aucun paiement à vérifier.</p>') + R.map(function (x) { return '<div class="note">' + (x.st === 'ok' ? '✓ ' : '✗ ') + esc(x.montant) + ' $ · ' + esc(x.ref) + ' · ' + esc(x.op) + '</div>'; }).join('');
+    rendreAuj();
   }
   $('pa-liste').addEventListener('click', function (e) {
     var b = e.target.closest('[data-pa]'); if (!b) return; var id = b.getAttribute('data-id'), st = b.getAttribute('data-pa'), x = PAIE.filter(function (y) { return y.id === id; })[0]; if (!x) return;
@@ -1608,6 +1617,35 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
         (d ? '<a class="btn ghost mini" target="_blank" rel="noopener" href="https://wa.me/' + d + '">Écrire sur WhatsApp</a>' : '') + '</div>';
     }).join('') || '<p class="note">Aucun client pour le moment.</p>';
   }
+
+  /* ---------- Aujourd'hui : la vue simple ---------- */
+  function rendreAuj() {
+    if (!$('auj-tuiles')) return;
+    var att = PAIE.filter(function (x) { return x.st === 'attente'; });
+    var nouv = DEM.filter(function (d) { return d.ref && !CMDS.some(function (c) { return c.ref === d.ref; }); });
+    var qs = DEM.filter(function (d) { return !d.ref && !d.vu; });
+    var impayes = CMDS.filter(function (c) { return !(Number(c.paye) > 0 && Number(c.paye) >= Number(c.total)); });
+    function tuile(n, t, c) { return '<div class="carte" style="text-align:center;padding:12px"><div style="font-size:30px;font-weight:800;color:' + (n ? c : 'var(--brume)') + '">' + n + '</div><div class="note">' + t + '</div></div>'; }
+    $('auj-tuiles').innerHTML = tuile(att.length, 'paiements à vérifier', 'var(--orange)') + tuile(nouv.length, 'nouvelles commandes', 'var(--orange)') + tuile(qs.length, 'questions', 'var(--orange)');
+    $('auj-paie').innerHTML = att.map(function (x) {
+      var c = CMDS.filter(function (o) { return o.ref === x.ref; })[0], d = DEM.filter(function (o) { return o.ref === x.ref; })[0], nom = c ? c.nom : d ? d.nom : '', pr = c ? c.prod : d ? String(d.txt || '').split('\n')[0] : '';
+      return '<div class="carte"><div class="rang" style="justify-content:space-between"><strong>' + esc(x.montant) + ' $ · ' + esc(x.op) + '</strong><span class="pastille">' + esc(x.ref) + '</span></div><div class="note"><b>' + esc(nom) + '</b> · ' + esc(pr) + '</div><div class="note">Payé depuis ' + esc(x.de) + ' · code ' + esc(x.code) + '</div>' +
+        '<div class="rang"><button class="btn mini" type="button" data-aj="ok" data-id="' + esc(x.id) + '">Confirmer</button><button class="btn ghost mini" type="button" data-aj="non" data-id="' + esc(x.id) + '">Refuser</button></div></div>';
+    }).join('') || '<p class="note">Rien à vérifier.</p>';
+    $('auj-new').innerHTML = nouv.slice().reverse().map(function (d) {
+      return '<div class="carte"><div class="rang" style="justify-content:space-between"><strong>' + esc(d.nom) + '</strong><span class="pastille">' + esc(d.ref) + '</span></div><div class="note">' + esc(d.tel || '') + '</div><p style="margin:6px 0">' + esc(String(d.txt || '').slice(0, 200)) + '</p><button class="btn mini" type="button" data-an="' + esc(d.ref) + '">Accepter la commande</button></div>';
+    }).join('') || '<p class="note">Aucune nouvelle commande.</p>';
+    $('auj-cmds').innerHTML = CMDS.slice().sort(function (a, b) { return String(b.maj || '').localeCompare(String(a.maj || '')); }).map(function (c) {
+      var t = Number(c.total) || 0, p = Number(c.paye) || 0, b;
+      if (p > 0 && p >= t) b = ['PAYÉ', 'var(--ok)']; else if (p > 0) b = ['ACOMPTE ' + p + ' / ' + t + ' $', 'var(--orange)']; else b = [t ? 'PAS PAYÉ · ' + t + ' $' : 'PAS PAYÉ · prix à donner', 'var(--mal)'];
+      return '<div class="carte" style="padding:10px"><div class="rang" style="justify-content:space-between"><strong>' + esc(c.nom) + '</strong><span style="font-weight:800;color:' + b[1] + '">' + esc(b[0]) + '</span></div><div class="note">' + esc(c.prod) + ' · ' + esc(source(c)) + '</div><div class="note">' + esc(c.tel || '') + ' · ' + esc(c.ref) + ' · ' + esc(cranNom2(c)) + '</div></div>';
+    }).join('') || '<p class="note">Aucune commande pour le moment.</p>';
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-aj]'); if (b) { var t = document.querySelector('#pa-liste [data-pa="' + b.getAttribute('data-aj') + '"][data-id="' + b.getAttribute('data-id') + '"]'); if (t) { b.disabled = true; t.click(); } return; }
+    var n = e.target.closest('[data-an]'); if (n) { var q = Array.prototype.filter.call(document.querySelectorAll('#dem-liste [data-dm]'), function (el) { return el.textContent.indexOf(n.getAttribute('data-an')) >= 0; })[0]; var bb = q && q.querySelector('[data-dma="cmd"]'); if (bb) { bb.click(); n.disabled = true; } }
+  });
+  document.querySelector('[data-t="auj"]').addEventListener('click', rendreAuj);
   function cranNom2(c) { var S = etp(c); return c.cran >= S.length ? 'Livré' : S[Math.max(0, c.cran)]; }
   function cmTouch(c) { c.maj = new Date().toISOString().slice(0, 10); c.dts = c.dts || []; var k = Math.min(etp(c).length - 1, c.cran); for (var z = 0; z <= k; z++) if (!c.dts[z]) c.dts[z] = c.maj; cmDirty = true; marquer(true); }
   $('cm-q').addEventListener('input', rendreCmds);
