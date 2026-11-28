@@ -2013,7 +2013,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       '<img src="' + ea(pic(p)) + '" alt="' + ea(p.t) + '" loading="lazy" width="960" height="600"' + rotAttr(p) + '>' +
       '<span class="tag">Chine · Dubaï · Istanbul</span>' + (p.l ? '<span class="tag live">Au live</span>' : (estNouveau(p) ? '<span class="tag live nv">Nouveau</span>' : '')) + (estBaisse(p) ? '<span class="tag bs">Prix en baisse</span>' : '') + '</button>' +
       '<div class="corps"><h3>' + p.t + '</h3><p class="sub">' + p.s + '</p>' + detTags(p) + prixLigne(p) + '</div>' +
-      '<div class="act"><a class="btn mini" href="' + wa(msgProduit(p)) + '" target="_blank" rel="noopener">Commander</a>' +
+      '<div class="act"><button class="btn mini" type="button" data-payprod="' + p.id + '">Payer</button>' +
       '<button class="btn ghost mini" type="button" data-add="' + p.id + '" aria-pressed="' + dans + '">' + (dans ? 'Dans ma liste' : '+ Ma liste') + '</button></div></article>';
   }
   function rendreGrille() {
@@ -2339,8 +2339,8 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         ouvrir('<div class="sheet-tete"><div><div class="kicker">Commande enregistrée</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Merci ' + h(nom) + '</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
           '<div class="carte" style="text-align:center;padding:16px"><div class="note">Ta référence de suivi</div><div style="font-size:26px;font-weight:800;letter-spacing:1px">' + h(x.j.ref) + '</div></div>' +
           '<p class="note">On te répond avec le devis. Tu peux suivre ta commande à tout moment avec cette référence ou ton téléphone.</p>' +
-          '<button class="btn" type="button" data-suivre="' + ea(x.j.ref) + '">Suivre ma commande</button>' +
-          '<button class="btn ghost" type="button" data-pay data-ref="' + ea(x.j.ref) + '">Payer l\'acompte</button>');
+          '<button class="btn" type="button" data-pay data-ref="' + ea(x.j.ref) + '">Payer maintenant</button>' +
+          '<button class="btn ghost" type="button" data-suivre="' + ea(x.j.ref) + '">Suivre ma commande</button>');
       }).catch(function () { btn.disabled = false; m.textContent = 'Connexion impossible, réessaie.'; });
   }
   function ouvrirListe() {
@@ -2619,7 +2619,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     this.classList.add('ouvert'); this.setAttribute('aria-label', 'Voir la fiche : ' + SP.t);
     var i = $('sp-info'); i.hidden = false;
     i.innerHTML = '<div class="kicker">' + CATL[SP.c] + '</div><h3>' + SP.t + '</h3><p class="note">' + SP.s + '</p>' +
-      '<div class="rangee"><a class="btn" href="' + wa(msgProduit(SP)) + '" target="_blank" rel="noopener">Commander</a><button class="btn ghost" type="button" data-open="' + SP.id + '">Voir la fiche</button></div>';
+      '<div class="rangee"><button class="btn" type="button" data-payprod="' + SP.id + '">Payer</button><button class="btn ghost" type="button" data-open="' + SP.id + '">Voir la fiche</button></div>';
   });
 
   /* Témoignages (modèles d'affichage) et badge fondateur */
