@@ -338,7 +338,7 @@ async function servirPageAvecEtat(request, env) {
 /* Commandes suivies + demandes validées sur le site pas encore transformées en commande (étape 1 : demande reçue) */
 async function cmdsEtDemandes(env) {
   const L = await lireListe(env, 'cmds'), D = await lireListe(env, 'demandes');
-  D.forEach((d) => { if (d.ref && !L.some((x) => x.ref === d.ref)) L.push({ ref: d.ref, nom: d.nom, tel: d.tel, prod: String(d.txt || 'Commande').split('\n').filter((s) => s && !/^Bonjour|^Merci|^Total/.test(s)).slice(0, 2).join(', ').slice(0, 90) || 'Commande', cran: 0, mode: 'avion', orig: 'Chine', typ: 'achat', maj: new Date(d.t || Date.now()).toISOString().slice(0, 10), pr: [], dts: [] }); });
+  D.forEach((d) => { if (d.ref && !L.some((x) => x.ref === d.ref)) L.push({ ref: d.ref, nom: d.nom, tel: d.tel, prod: String(d.txt || 'Commande').split('\n').filter((s) => s && !/^Bonjour|^Merci|^Total/.test(s)).slice(0, 2).join(', ').slice(0, 90) || 'Commande', cran: 0, mode: 'avion', orig: 'Chine', typ: 'achat', total: Number(d.tot) || 0, att: Number(d.ac) || 0, maj: new Date(d.t || Date.now()).toISOString().slice(0, 10), pr: [], dts: [] }); });
   return L;
 }
 async function lireQc(env) { try { const t = await env.GDE.get('qc'); const o = t ? JSON.parse(t) : {}; return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; } catch (e) { return {}; } }
@@ -538,7 +538,8 @@ async function traiter(request, env) {
       await env.GDE.put(rk, String(n0 + 1), { expirationTtl: 3600 });
       const L = await lireListe(env, 'demandes');
       let ref = ''; if (b.commande === true) { const al = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', d0 = new Date(), yy = String(d0.getFullYear()).slice(2) + String(d0.getMonth() + 1).padStart(2, '0'); for (let z = 0; z < 20; z++) { ref = 'GDE-' + yy + '-' + Array.from(crypto.getRandomValues(new Uint8Array(4)), (v) => al[v % al.length]).join(''); if (!L.some((x) => x.ref === ref)) break; } }
-      L.push({ id, nom, tel, txt: tx, lien, photo, qte, bud, mar, pre, voy, act, freq, ref, t: Date.now(), vu: false });
+      const tot = b.commande === true ? Math.max(0, Math.min(1e6, Math.round(Number(b.tot) * 100) / 100 || 0)) : 0, ac = b.commande === true ? Math.max(0, Math.min(tot || 1e6, Math.round(Number(b.ac) * 100) / 100 || 0)) : 0;
+      L.push({ id, nom, tel, txt: tx, lien, photo, qte, bud, mar, pre, voy, act, freq, ref, tot, ac, t: Date.now(), vu: false });
       await env.GDE.put('demandes', JSON.stringify(L.slice(-300))); return json({ ok: true, ref });
     }
     /* Votes du catalogue communautaire : un vote par personne et par produit */
@@ -642,13 +643,14 @@ async function traiter(request, env) {
       let b; try { b = await lireObjet(request); } catch (e) { return json({ erreur: 'Requête invalide' }, 400); }
       const ref = String(b.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), de = String(b.de || '').replace(/[^\d+ ]/g, '').trim().slice(0, 20);
       const code = String(b.code || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 30), op = String(b.op || '').slice(0, 30), montant = Number(String(b.montant || '').replace(',', '.'));
-      if (!(await cmdsEtDemandes(env)).some((x) => x.ref === ref)) return json({ erreur: 'Référence introuvable. Vérifie-la.' }, 404);
+      const cible = (await cmdsEtDemandes(env)).filter((x) => x.ref === ref)[0];
+      if (!cible) return json({ erreur: 'Référence introuvable. Vérifie-la.' }, 404);
       if (de.replace(/\D/g, '').length < 8) return json({ erreur: 'Écris le numéro qui a payé.' }, 400);
       if (code.length < 4) return json({ erreur: 'Écris le code de la transaction (reçu par SMS).' }, 400);
       if (!isFinite(montant) || montant <= 0 || montant > 100000) return json({ erreur: 'Écris le montant payé.' }, 400);
       let P = await lireListe(env, 'paiements');
       if (P.some((x) => x.code === code)) return json({ erreur: 'Ce code a déjà été déclaré.' }, 409);
-      P.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), ref, op, de, code, montant: Math.round(montant * 100) / 100, t: Date.now(), st: 'attente' });
+      P.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), ref, op, de, code, montant: Math.round(montant * 100) / 100, att: Number(cible.att) > 0 ? Number(cible.att) : null, t: Date.now(), st: 'attente' });
       await env.GDE.put('paiements', JSON.stringify(P.slice(-600))); return json({ ok: true });
     }
     if (p === '/api/mes-commandes' && request.method === 'POST') {
@@ -825,7 +827,7 @@ async function traiter(request, env) {
       const vues = new Set(), dt = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? String(v) : '');
       const propre = (Array.isArray(b.cmds) ? b.cmds : []).slice(0, 400).map((c) => ({
         ref: String(c.ref || '').toUpperCase().replace(/[^A-Z0-9-]/g, ''), nom: txt(c.nom, 40), tel: txt(c.tel, 30), prod: txt(c.prod, 100),
-        cran: Math.max(0, Math.min(7, Math.round(nombre(c.cran)))), mode: c.mode === 'bateau' ? 'bateau' : 'avion', orig: ['Chine', 'Dubaï', 'Istanbul', 'Stock'].includes(c.orig) ? c.orig : 'Chine', typ: c.typ === 'expedition' ? 'expedition' : c.typ === 'stock' ? 'stock' : 'achat', ou: txt(c.ou, 80), code: txt(c.code, 30).toUpperCase().replace(/[^A-Z0-9_-]/g, ''), total: Math.max(0, Math.min(1e6, nombre(c.total))), paye: Math.max(0, Math.min(1e6, nombre(c.paye))), arr: dt(c.arr), maj: dt(c.maj) || new Date().toISOString().slice(0, 10), pr: (Array.isArray(c.pr) ? c.pr : []).slice(0, 8).map((x) => (typeof x === 'string' && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(x) ? x : '')), dts: (Array.isArray(c.dts) ? c.dts : []).slice(0, 8).map((x) => dt(x)),
+        cran: Math.max(0, Math.min(7, Math.round(nombre(c.cran)))), mode: c.mode === 'bateau' ? 'bateau' : 'avion', orig: ['Chine', 'Dubaï', 'Istanbul', 'Stock'].includes(c.orig) ? c.orig : 'Chine', typ: c.typ === 'expedition' ? 'expedition' : c.typ === 'stock' ? 'stock' : 'achat', ou: txt(c.ou, 80), code: txt(c.code, 30).toUpperCase().replace(/[^A-Z0-9_-]/g, ''), total: Math.max(0, Math.min(1e6, nombre(c.total))), att: Math.max(0, Math.min(1e6, nombre(c.att))), paye: Math.max(0, Math.min(1e6, nombre(c.paye))), arr: dt(c.arr), maj: dt(c.maj) || new Date().toISOString().slice(0, 10), pr: (Array.isArray(c.pr) ? c.pr : []).slice(0, 8).map((x) => (typeof x === 'string' && /^\/api\/img\/[A-Za-z0-9_-]{1,40}(\?v=\d+)?$/.test(x) ? x : '')), dts: (Array.isArray(c.dts) ? c.dts : []).slice(0, 8).map((x) => dt(x)),
       })).filter((c) => /^[A-Z0-9-]{4,30}$/.test(c.ref) && !vues.has(c.ref) && vues.add(c.ref));
       await env.GDE.put('cmds', JSON.stringify(propre));
       return json({ cmds: propre });

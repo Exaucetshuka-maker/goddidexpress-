@@ -1286,7 +1286,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     else if (a === 'cmd') {
       if (!d.ref || CMDS.some(function (c) { return c.ref === d.ref; })) return;
       var pr = String(d.txt || 'Commande').split('\n').filter(function (s) { return s && !/^Total/.test(s); }).slice(0, 2).join(', ').slice(0, 90) || 'Commande';
-      var c2 = { ref: d.ref, nom: d.nom, tel: d.tel, prod: pr, cran: 0, mode: 'avion', orig: 'Chine', typ: 'achat', ou: '', arr: '', total: 0, paye: 0, maj: '' };
+      var c2 = { ref: d.ref, nom: d.nom, tel: d.tel, prod: pr, cran: 0, mode: 'avion', orig: 'Chine', typ: 'achat', ou: '', arr: '', total: Number(d.tot) || 0, att: Number(d.ac) || 0, paye: 0, maj: '' };
       cmTouch(c2); CMDS.unshift(c2); d.vu = true; demDirty = true; marquer(true); rendreCmds(); rendreDem(); infoEtat('Commande créée : ' + d.ref + '. Pense à enregistrer.', 'ok');
     }
     else if (a === 'vu') { d.vu = !d.vu; demDirty = true; marquer(true); rendreDem(); }
@@ -1615,7 +1615,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       var c = CMDS.filter(function (o) { return o.ref === x.ref; })[0];
       return '<div class="carte"><div class="rang" style="justify-content:space-between"><strong>' + esc(x.montant) + ' $ · ' + esc(x.op) + '</strong><span class="pastille">' + esc(x.ref) + '</span></div>' +
         '<div class="note">' + (c ? esc(c.nom) + ' · ' + esc(c.prod) : 'Commande pas encore créée : crée-la depuis Demandes') + '</div>' +
-        '<div class="note">Payé depuis ' + esc(x.de) + ' · code ' + esc(x.code) + '</div>' +
+        '<div class="note">Payé depuis ' + esc(x.de) + ' · code ' + esc(x.code) + '</div>' + ecartTxt(x) +
         '<div class="rang"><button class="btn mini" type="button" data-pa="ok" data-id="' + esc(x.id) + '">Confirmer</button><button class="btn ghost mini" type="button" data-pa="non" data-id="' + esc(x.id) + '">Refuser</button></div></div>';
     }).join('') || '<p class="note">Aucun paiement à vérifier.</p>') + R.map(function (x) { return '<div class="note">' + (x.st === 'ok' ? '✓ ' : '✗ ') + esc(x.montant) + ' $ · ' + esc(x.ref) + ' · ' + esc(x.op) + '</div>'; }).join('');
     rendreAuj();
@@ -1645,6 +1645,10 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   }
 
   /* ---------- Aujourd'hui : la vue simple ---------- */
+  function ecartTxt(x) {
+    if (!(Number(x.att) > 0)) return '<div class="note">Pas de montant attendu enregistré : compare avec la commande.</div>';
+    return Math.abs(Number(x.montant) - Number(x.att)) > 0.5 ? '<div class="note" style="color:var(--mal);font-weight:700">⚠ Montant différent : attendu ' + esc(x.att) + ' $, déclaré ' + esc(x.montant) + ' $</div>' : '<div class="note" style="color:var(--ok);font-weight:700">✓ Montant conforme (' + esc(x.att) + ' $ attendu)</div>';
+  }
   function rendreAuj() {
     if (!$('auj-tuiles')) return;
     var att = PAIE.filter(function (x) { return x.st === 'attente'; });
@@ -1655,7 +1659,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     $('auj-tuiles').innerHTML = tuile(att.length, 'paiements à vérifier', 'var(--orange)') + tuile(nouv.length, 'nouvelles commandes', 'var(--orange)') + tuile(qs.length, 'questions', 'var(--orange)');
     $('auj-paie').innerHTML = att.map(function (x) {
       var c = CMDS.filter(function (o) { return o.ref === x.ref; })[0], d = DEM.filter(function (o) { return o.ref === x.ref; })[0], nom = c ? c.nom : d ? d.nom : '', pr = c ? c.prod : d ? String(d.txt || '').split('\n')[0] : '';
-      return '<div class="carte"><div class="rang" style="justify-content:space-between"><strong>' + esc(x.montant) + ' $ · ' + esc(x.op) + '</strong><span class="pastille">' + esc(x.ref) + '</span></div><div class="note"><b>' + esc(nom) + '</b> · ' + esc(pr) + '</div><div class="note">Payé depuis ' + esc(x.de) + ' · code ' + esc(x.code) + '</div>' +
+      return '<div class="carte"><div class="rang" style="justify-content:space-between"><strong>' + esc(x.montant) + ' $ · ' + esc(x.op) + '</strong><span class="pastille">' + esc(x.ref) + '</span></div><div class="note"><b>' + esc(nom) + '</b> · ' + esc(pr) + '</div><div class="note">Payé depuis ' + esc(x.de) + ' · code ' + esc(x.code) + '</div>' + ecartTxt(x) +
         '<div class="rang"><button class="btn mini" type="button" data-aj="ok" data-id="' + esc(x.id) + '">Confirmer</button><button class="btn ghost mini" type="button" data-aj="non" data-id="' + esc(x.id) + '">Refuser</button></div></div>';
     }).join('') || '<p class="note">Rien à vérifier.</p>';
     $('auj-new').innerHTML = nouv.slice().reverse().map(function (d) {

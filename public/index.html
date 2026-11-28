@@ -1046,8 +1046,8 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   <!-- 4. SUIVI -->
   <section class="view vide" id="v-suivi" hidden>
     <header>
-      <h2>Suivi des marchandises</h2>
-      <p>De ton fournisseur jusqu'à ta destination, suis chaque étape de ta commande au même endroit. Chine, Dubaï, Turquie ou stock à Kinshasa.</p>
+      <h2>Où est mon colis ?</h2>
+      <p>Entre ta référence. Chaque étape a sa preuve.</p>
     </header>
     <form id="form-suivi" class="recherche" autocomplete="off">
       <label for="s-code" class="lbl" style="position:absolute;left:-9999px">Référence de commande</label>
@@ -1077,10 +1077,6 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <div class="kicker">Photo de position</div>
       <img id="s-photo" alt="Position de ton colis entre la Chine et Kinshasa" style="width:100%;border-radius:6px;background:#05080f;margin-top:8px">
       <div class="rangee" style="margin-top:10px"><button class="btn" id="s-photo-share" type="button">Envoyer cette photo</button><a class="btn ghost" id="s-photo-save" download="position-colis.png" style="text-decoration:none">Enregistrer</a></div>
-    </div>
-    <div class="comment">
-      <h3>Comment ça marche</h3>
-      <ol><li>Tu passes ta commande ou tu nous confies ton approvisionnement.</li><li>On te donne une référence unique.</li><li>À chaque étape, ton suivi est mis à jour avec une preuve.</li><li>Tu reçois ta commande à Kinshasa.</li></ol>
     </div>
     <div class="espace" id="espace" hidden>
       <p class="note" id="e-msg" aria-live="polite"></p>
@@ -2093,32 +2089,47 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       $('dv-q').addEventListener('input', maj); $('dv-m').addEventListener('change', maj); maj();
     }).catch(function () {});
   }
-  function payerProduit(id) {
+  function calcCmd(p, q, code) {
+    var u = prixPour(p, q), pct = promoPct(code);
+    if (u === null) return { u: 0, tot: 0, ac: 0, pct: pct };
+    var tot = Math.round(u * q * (1 - pct / 100) * 100) / 100;
+    return { u: u, tot: tot, ac: Math.round(tot * acPct(p)) / 100, pct: pct };
+  }
+  function payerProduit(id, q0, c0) {
     var p = BY[id]; if (!p) return;
-    var u = p.px && p.px[0] > 0 ? p.px[0] : 0;
+    var qmin = qpOf(p)[0], hasPrix = prixMin(p) !== null;
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Paiement</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">' + h(p.t) + '</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
       '<div class="valide"><label for="pp-nom">Ton prénom</label><input id="pp-nom" maxlength="60" value="' + ea(cvLire('n')) + '">' +
       '<label for="pp-tel">Ton téléphone</label><input id="pp-tel" inputmode="tel" maxlength="20" value="' + ea(cvLire('t')) + '">' +
-      '<label for="pp-q">Quantité</label><input id="pp-q" inputmode="numeric" value="1" maxlength="4">' +
-      (u ? '<div class="carte" style="padding:12px;text-align:center"><div class="note">À payer</div><div id="pp-tot" style="font-size:24px;font-weight:800">' + usd(u) + '</div></div>' : '<p class="note">Prix à confirmer : on te donne le montant exact avant que tu paies.</p>') +
+      '<div class="duo"><div class="champ"><label for="pp-q">Quantité</label><input id="pp-q" inputmode="numeric" value="' + (q0 || qmin) + '" maxlength="4"></div>' +
+      '<div class="champ"><label for="pp-c">Code promo</label><input id="pp-c" autocomplete="off" placeholder="Facultatif" style="text-transform:uppercase" value="' + ea(c0 || '') + '"></div></div>' +
+      (hasPrix ? '<div class="carte" style="padding:12px;text-align:center"><div class="note">Total</div><div id="pp-tot" style="font-size:22px;font-weight:800">—</div><div class="note" id="pp-ac-l"></div><div id="pp-ac" style="font-size:24px;font-weight:800;color:var(--orange)">—</div><div class="note" id="pp-info"></div></div>' : '<p class="note">Prix à confirmer : on te donne le montant exact avant que tu paies.</p>') +
       '<button class="btn" type="button" data-pp-go="' + p.id + '">Continuer vers le paiement</button><p class="note" id="pp-msg" aria-live="polite"></p></div>');
-    var q = $('pp-q'); if (q && u) q.addEventListener('input', function () { var n = Math.max(1, Math.min(9999, parseInt(q.value, 10) || 1)); $('pp-tot').textContent = usd(Math.round(u * n * 100) / 100); });
+    function maj() {
+      if (!hasPrix) return;
+      var q = Math.max(qmin, Math.min(9999, parseInt($('pp-q').value, 10) || qmin)), r = calcCmd(p, q, $('pp-c').value);
+      $('pp-tot').textContent = r.u ? usd(r.tot) : 'Sur devis';
+      $('pp-ac-l').textContent = r.u ? (acPct(p) === 100 ? 'À payer maintenant' : 'À payer maintenant (acompte ' + acPct(p) + ' %)') : '';
+      $('pp-ac').textContent = r.u ? usd(r.ac) : '—';
+      $('pp-info').textContent = r.u ? usd(r.u) + ' la pièce' + (r.pct ? ', promo −' + r.pct + ' %' : '') + (acPct(p) < 100 ? ', solde de ' + usd(Math.round((r.tot - r.ac) * 100) / 100) + ' à la livraison.' : '.') : '';
+    }
+    $('pp-q').addEventListener('input', maj); $('pp-c').addEventListener('input', maj); maj();
   }
   document.addEventListener('click', function (e) {
-    var o = e.target.closest('[data-payprod]'); if (o) { payerProduit(o.getAttribute('data-payprod')); return; }
+    var o = e.target.closest('[data-payprod]'); if (o) { var kq = document.querySelector('#sheet [data-k="q"]'), kc = document.querySelector('#sheet [data-k="c"]'); payerProduit(o.getAttribute('data-payprod'), kq ? parseInt(kq.value, 10) : 0, kc ? kc.value : ''); return; }
     var g = e.target.closest('[data-pp-go]'); if (!g) return;
-    var p = BY[g.getAttribute('data-pp-go')], m = $('pp-msg'), nom = ($('pp-nom').value || '').trim(), tel = ($('pp-tel').value || '').trim(), n = Math.max(1, Math.min(9999, parseInt($('pp-q').value, 10) || 1));
+    var p = BY[g.getAttribute('data-pp-go')], m = $('pp-msg'), nom = ($('pp-nom').value || '').trim(), tel = ($('pp-tel').value || '').trim(), n = Math.max(qpOf(BY[g.getAttribute('data-pp-go')])[0], Math.min(9999, parseInt($('pp-q').value, 10) || 1)), cd = ($('pp-c').value || '').trim().toUpperCase();
     if (!p) return;
     if (!nom) { m.textContent = 'Écris ton prénom.'; return; }
     if (tel.replace(/\D/g, '').length < 8) { m.textContent = 'Écris ton numéro de téléphone.'; return; }
-    var u = p.px && p.px[0] > 0 ? p.px[0] : 0, tot = u ? Math.round(u * n * 100) / 100 : 0;
+    var r = calcCmd(p, n, cd), u = r.u, tot = r.tot, ac = r.ac;
     g.disabled = true; m.textContent = 'Envoi…';
-    fetch('/api/demande', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nom: nom, tel: tel, txt: (p.t + ' x' + n + (u ? ' (' + usd(u) + ')' : '') + (tot ? '\nTotal : ' + usd(tot) : '')).slice(0, 590), commande: true }) })
+    fetch('/api/demande', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nom: nom, tel: tel, txt: (p.t + ' x' + n + (u ? ' (' + usd(u) + ')' : '') + (r.pct ? '\nCode ' + cd + ' −' + r.pct + ' %' : '') + (tot ? '\nTotal : ' + usd(tot) + '\nAcompte attendu : ' + usd(ac) : '')).slice(0, 590), commande: true, tot: tot, ac: ac }) })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (x) {
         if (!x.ok || !x.j.ref) { g.disabled = false; m.textContent = x.j.erreur || 'Envoi impossible, réessaie.'; return; }
         try { localStorage.setItem('gde-cv-n', nom); localStorage.setItem('gde-cv-t', tel); localStorage.setItem('gde-cv-r', x.j.ref); localStorage.setItem('gde-ref', x.j.ref); } catch (er) {}
-        ouvrirPay(x.j.ref, tot || '');
+        ouvrirPay(x.j.ref, ac || '', tot || 0);
       }).catch(function () { g.disabled = false; m.textContent = 'Connexion impossible, réessaie.'; });
   });
   var QCMD = false;
@@ -2196,12 +2207,13 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         res.innerHTML = '<div class="prix" style="text-align:center">Environ <b>' + usd(x.j.unit) + '</b> la pièce' + (x.j.qte > 1 ? '<small>Total pour ' + x.j.qte + ' pièces : ' + usd(x.j.total) + '</small>' : '') + '</div><p class="note">Estimation. Le prix final est sur ton devis avant tout paiement.</p>';
       }).catch(function () { res.textContent = 'Connexion impossible, réessaie.'; });
   });
-  function ouvrirPay(ref, mt) {
+  function ouvrirPay(ref, mt, tot) {
     var P = STATE.pay || [];
     var rows = P.map(function (x) { return '<div class="carte" style="padding:12px;display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>' + h(x.op) + '</b><div class="note">' + h(x.nom || '') + '</div><div style="font-size:20px;font-weight:700">' + h(x.num) + '</div></div><button class="btn mini" type="button" data-copie="' + ea(x.num) + '">Copier</button></div>'; }).join('');
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Acompte</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Payer l\'acompte</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
+      (Number(mt) > 0 ? '<div class="carte" style="text-align:center;padding:14px"><div class="note">Montant à envoyer</div><div style="font-size:30px;font-weight:800;color:var(--orange)">' + usd(Number(mt)) + '</div>' + (Number(tot) > Number(mt) ? '<div class="note">sur un total de ' + usd(Number(tot)) + ' (acompte)</div>' : '') + '</div>' : '') +
       (rows || '<p class="note">Demande les numéros de paiement sur WhatsApp.</p>') +
-      '<ol style="margin:6px 0 0;padding-left:20px;display:grid;gap:6px"><li>Tu reçois d\'abord le devis.</li><li>Tu envoies l\'acompte indiqué sur ton devis à l\'un des numéros ci-dessus.</li><li>Tu déclares ton paiement ici, avec le code reçu par SMS.</li><li>On vérifie, puis on lance l\'achat. Solde à la livraison.</li></ol>' +
+      '<ol style="margin:6px 0 0;padding-left:20px;display:grid;gap:6px">' + (Number(mt) > 0 ? '<li>Envoie exactement ' + usd(Number(mt)) + ' à l\'un des numéros ci-dessus.</li>' : '<li>Tu reçois d\'abord le devis.</li><li>Tu envoies l\'acompte indiqué sur ton devis à l\'un des numéros ci-dessus.</li>') + '<li>Tu déclares ton paiement ici, avec le code reçu par SMS.</li><li>On vérifie, puis on lance l\'achat. Solde à la livraison.</li></ol>' +
       '<div class="valide" id="pa-form"><b>J\'ai payé : je déclare mon paiement</b>' +
       '<label for="pa-ref">Ta référence</label><input id="pa-ref" placeholder="GDE-2611-AB3K" autocapitalize="characters" spellcheck="false" maxlength="20" value="' + ea(ref || cvLire('r')) + '">' +
       '<label for="pa-op">Par quel service ?</label><select id="pa-op">' + (P.length ? P.map(function (x) { return '<option>' + h(x.op) + '</option>'; }).join('') : '<option>Airtel Money</option><option>Orange Money</option><option>M-Pesa</option><option>Africell Money</option>') + '</select>' +
@@ -2222,7 +2234,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       }).catch(function () { g.disabled = false; m.textContent = 'Connexion impossible, réessaie.'; });
   });
   document.addEventListener('click', function (e) { var b = e.target.closest('[data-copie]'); if (!b) return; var v = b.getAttribute('data-copie'); try { navigator.clipboard.writeText(v); } catch (er) {} b.textContent = 'Copié ✓'; setTimeout(function () { b.textContent = 'Copier'; }, 1500); });
-  document.addEventListener('click', function (e) { var pb = e.target.closest('[data-pay]'); if (pb) ouvrirPay(pb.getAttribute('data-ref') || ''); });
+  document.addEventListener('click', function (e) { var pb = e.target.closest('[data-pay]'); if (pb) ouvrirPay(pb.getAttribute('data-ref') || '', pb.getAttribute('data-mt') || '', pb.getAttribute('data-tot') || ''); });
   var INST = null; window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); INST = e; });
   document.addEventListener('click', function (e) {
     if (!e.target.closest('[data-install]')) return;
@@ -2351,7 +2363,8 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     if (k.indexOf('i:') === 0) { var q = k.slice(2).split('|'), it = (STATE.listes || []).reduce(function (a, l) { return a.concat(l.items || []); }, []).filter(function (x) { return x.m === q[0] && x.g === q[1]; })[0]; if (it) return { t: it.m + ' ' + it.g, px: it.p > 0 ? it.p : 0, img: 'icon.png' }; }
     return null;
   }
-  function totalListe() { var t = 0, inc = 0; Object.keys(liste).forEach(function (k) { var i = itemListe(k); if (i && i.px > 0) t += i.px * liste[k]; else inc++; }); return { t: Math.round(t * 100) / 100, inc: inc }; }
+  function unitListe(k) { var p = BY[k]; if (p) { var u = prixPour(p, liste[k]); return u === null ? 0 : u; } var i = itemListe(k); return i && i.px > 0 ? i.px : 0; }
+  function totalListe() { var t = 0, ac = 0, inc = 0; Object.keys(liste).forEach(function (k) { var u = unitListe(k); if (u > 0) { var l = u * liste[k]; t += l; ac += l * (BY[k] ? acPct(BY[k]) : 50) / 100; } else inc++; }); return { t: Math.round(t * 100) / 100, ac: Math.round(ac * 100) / 100, inc: inc }; }
   function messageListe() {
     var l = ['Bonjour GOD DID EXPRESS, je voudrais un devis pour :'];
     Object.keys(liste).forEach(function (k) { var i = itemListe(k); if (i) l.push('- ' + i.t + ' x' + liste[k] + (i.px > 0 ? ' (' + usd(i.px) + ')' : '')); });
@@ -2361,15 +2374,16 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   }
   function cvLire(k) { try { return localStorage.getItem('gde-cv-' + k) || ''; } catch (e) { return ''; } }
   function txtCommande() {
-    var l = []; Object.keys(liste).forEach(function (k) { var it = itemListe(k); if (it) l.push(it.t + ' x' + liste[k] + (it.px > 0 ? ' (' + usd(it.px) + ')' : '')); });
-    var tt = totalListe(); if (tt.t > 0) l.push('Total estimé : ' + usd(tt.t)); return l.join('\n');
+    var l = []; Object.keys(liste).forEach(function (k) { var it = itemListe(k); if (it) l.push(it.t + ' x' + liste[k] + (unitListe(k) > 0 ? ' (' + usd(unitListe(k)) + ')' : '')); });
+    var tt = totalListe(); if (tt.t > 0) l.push('Total estimé : ' + usd(tt.t) + '\nAcompte attendu : ' + usd(tt.ac)); return l.join('\n');
   }
   function validerCommande(btn) {
     var nom = ($('cv-nom').value || '').trim(), tel = ($('cv-tel').value || '').trim(), m = $('cv-msg');
     if (!nom) { m.textContent = 'Écris ton prénom.'; return; }
     if (tel.replace(/\D/g, '').length < 8) { m.textContent = 'Écris ton numéro de téléphone.'; return; }
+    var tt0 = totalListe(), tot0 = tt0.t, ac0 = tt0.ac;
     btn.disabled = true; m.textContent = 'Envoi…';
-    fetch('/api/demande', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nom: nom, tel: tel, txt: txtCommande().slice(0, 590), commande: true }) })
+    fetch('/api/demande', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nom: nom, tel: tel, txt: txtCommande().slice(0, 590), commande: true, tot: totalListe().t, ac: totalListe().ac }) })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (x) {
         if (!x.ok || !x.j.ref) { btn.disabled = false; m.textContent = x.j.erreur || 'Envoi impossible, réessaie.'; return; }
@@ -2378,7 +2392,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         ouvrir('<div class="sheet-tete"><div><div class="kicker">Commande enregistrée</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Merci ' + h(nom) + '</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
           '<div class="carte" style="text-align:center;padding:16px"><div class="note">Ta référence de suivi</div><div style="font-size:26px;font-weight:800;letter-spacing:1px">' + h(x.j.ref) + '</div></div>' +
           '<p class="note">On te répond avec le devis. Tu peux suivre ta commande à tout moment avec cette référence ou ton téléphone.</p>' +
-          '<button class="btn" type="button" data-pay data-ref="' + ea(x.j.ref) + '">Payer maintenant</button>' +
+          '<button class="btn" type="button" data-pay data-ref="' + ea(x.j.ref) + '" data-mt="' + ea(ac0 || '') + '" data-tot="' + ea(tot0 || '') + '">Payer maintenant</button>' +
           '<button class="btn ghost" type="button" data-suivre="' + ea(x.j.ref) + '">Suivre ma commande</button>');
       }).catch(function () { btn.disabled = false; m.textContent = 'Connexion impossible, réessaie.'; });
   }
