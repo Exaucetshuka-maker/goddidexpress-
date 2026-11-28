@@ -97,7 +97,6 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       <button class="btn ghost sec cache" role="tab" data-t="pan" aria-selected="false">Paniers</button>
       <button class="btn ghost sec cache" role="tab" data-t="tdb" aria-selected="false">Tableau de bord</button>
       <button class="btn ghost sec cache" role="tab" data-t="tend" aria-selected="false">Tendances</button>
-      <button class="btn ghost sec cache" role="tab" data-t="cli" aria-selected="false">Clients</button>
       <button class="btn ghost sec cache" role="tab" data-t="grp" aria-selected="false">Achats groupés</button>
       <button class="btn ghost sec cache" role="tab" data-t="ins" aria-selected="false">Inscrits</button>
       <button class="btn ghost sec cache" role="tab" data-t="avis" aria-selected="false">Avis</button>
@@ -107,6 +106,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
       <button class="btn ghost sec cache" role="tab" data-t="reg" aria-selected="false">Réglages</button>
     </div>
 
+    <div id="plus-liste" class="grille cache" style="gap:8px"></div>
     <section id="t-auj" class="grille" style="gap:12px">
       <div class="grille g3" id="auj-tuiles"></div>
       <div class="carte"><h3>Paiements à vérifier</h3><p class="note">Vérifie le SMS sur ton téléphone, puis touche Confirmer.</p><div id="auj-paie" class="grille"></div></div>
@@ -712,10 +712,30 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   });
 
 
+  var PLUS = [
+    ['Vendre', [['iph', 'Prix du jour', 'Les listes de prix de ton fournisseur, affichées sur le site'], ['prix', 'Calcul des prix', 'Ton prix de vente : fournisseur + transport + douane + ta marge'], ['pan', 'Paniers', 'Offres de saison avec compte à rebours (décembre, rentrée…)'], ['tend', 'Tendances', 'Les produits mis en avant sur la page d\'accueil'], ['grp', 'Achats groupés', 'Commander à plusieurs, avec compte à rebours'], ['ins', 'Inscrits', 'Les personnes qui ont rejoint un achat groupé'], ['voy', 'Voyages', 'Les dates de départ : Chine, Dubaï, Istanbul']]],
+    ['Clients', [['fid', 'Fidélité', 'Les cartes membres : toi seul les crées'], ['avis', 'Avis', 'Les vrais avis de tes clients'], ['fac', 'Factures', 'Devis, factures et reçus en image à envoyer']]],
+    ['Ton commerce', [['tdb', 'Chiffres', 'Visites, ventes : ce qui se passe'], ['reg', 'Réglages', 'Tes numéros Mobile Money et tes contacts']]]
+  ];
+  $('plus-liste').innerHTML = PLUS.map(function (g) {
+    return '<div class="kicker" style="margin-top:6px">' + g[0] + '</div>' + g[1].map(function (r) {
+      return '<button type="button" class="carte" data-pl="' + r[0] + '" style="text-align:left;padding:12px;display:grid;gap:2px;width:100%;cursor:pointer"><strong>' + r[1] + '</strong><span class="note">' + r[2] + '</span></button>';
+    }).join('');
+  }).join('');
+  var PLN = {}; PLUS.forEach(function (g) { g[1].forEach(function (r) { PLN[r[0]] = r[1]; }); });
   $('plus-t').addEventListener('click', function () {
-    var o = this.getAttribute('aria-expanded') !== 'true'; this.setAttribute('aria-expanded', o ? 'true' : 'false'); this.textContent = o ? 'Moins ▴' : 'Plus ▾';
-    Array.prototype.forEach.call(document.querySelectorAll('.onglets .sec'), function (x) { x.classList.toggle('cache', !o); });
+    var o = $('plus-liste').classList.contains('cache');
+    $('plus-liste').classList.toggle('cache', !o);
+    if (o) { Array.prototype.forEach.call(document.querySelectorAll('section[id^="t-"]'), function (x) { x.classList.add('cache'); }); window.scrollTo(0, 0); }
+    else { var cur = document.querySelector('.onglets [aria-selected="true"]'); if (!cur) document.querySelector('[data-t="auj"]').click(); }
   });
+  $('plus-liste').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-pl]'); if (!b) return; var k = b.getAttribute('data-pl');
+    document.querySelector('.onglets [data-t="' + k + '"]').click();
+    $('plus-liste').classList.add('cache');
+    var p = $('plus-t'); p.setAttribute('aria-selected', 'true'); p.textContent = PLN[k] + ' ▾';
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.onglets button[data-t]'), function (x) { if (!x.classList.contains('sec')) x.addEventListener('click', function () { $('plus-liste').classList.add('cache'); var p = $('plus-t'); p.textContent = 'Plus ▾'; p.setAttribute('aria-selected', 'false'); }); });
   /* ---------- Produits ---------- */
   function remplirSelects() {
     var opts = Object.keys(CATL).map(function (k) { return '<option value="' + k + '">' + esc(CATL[k]) + '</option>'; }).join('');
@@ -1245,7 +1265,7 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     var t = a === 'relance' ? 'Bonjour ' + g.nom + ', petit rappel de GOD DID EXPRESS : il reste ' + reste + ' $ à régler pour ta commande. Dis-moi quand tu peux le faire, merci !' : 'Bonjour ' + g.nom + ', ici GOD DID EXPRESS. ';
     var tel = facTel(g.tel); window.open((tel ? 'https://wa.me/' + tel : 'https://wa.me/') + '?text=' + encodeURIComponent(t), '_blank');
   });
-  document.querySelector('[data-t="cli"]').addEventListener('click', rendreCli);
+  var bcli = document.querySelector('[data-t="cli"]'); if (bcli) bcli.addEventListener('click', rendreCli);
 
   /* ---------- Demandes des clients ---------- */
   var DEM = [], demDirty = false;
