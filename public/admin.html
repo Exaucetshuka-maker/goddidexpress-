@@ -88,22 +88,23 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
   <div class="wrap">
     <div class="onglets" role="tablist">
       <button class="btn ghost" role="tab" data-t="auj" aria-selected="true">Aujourd'hui</button>
-      <button class="btn ghost" role="tab" data-t="prod" aria-selected="false">Produits</button>
-      <button class="btn ghost" role="tab" data-t="voy" aria-selected="false">Voyages</button>
-      <button class="btn ghost" role="tab" data-t="iph" aria-selected="false">Prix du jour</button>
-      <button class="btn ghost" role="tab" data-t="pan" aria-selected="false">Paniers</button>
-      <button class="btn ghost" role="tab" data-t="tdb" aria-selected="false">Tableau de bord</button>
-      <button class="btn ghost" role="tab" data-t="dem" aria-selected="false">Demandes</button>
-      <button class="btn ghost" role="tab" data-t="tend" aria-selected="false">Tendances</button>
-      <button class="btn ghost" role="tab" data-t="cli" aria-selected="false">Clients</button>
-      <button class="btn ghost" role="tab" data-t="grp" aria-selected="false">Achats groupés</button>
-      <button class="btn ghost" role="tab" data-t="ins" aria-selected="false">Inscrits</button>
-      <button class="btn ghost" role="tab" data-t="avis" aria-selected="false">Avis</button>
-      <button class="btn ghost" role="tab" data-t="prix" aria-selected="false">Calcul des prix</button>
       <button class="btn ghost" role="tab" data-t="cmd" aria-selected="false">Commandes</button>
-      <button class="btn ghost" role="tab" data-t="fac" aria-selected="false">Factures</button>
-      <button class="btn ghost" role="tab" data-t="fid" aria-selected="false">Fidélité</button>
-      <button class="btn ghost" role="tab" data-t="reg" aria-selected="false">Réglages</button>
+      <button class="btn ghost" role="tab" data-t="dem" aria-selected="false">Demandes</button>
+      <button class="btn ghost" role="tab" data-t="prod" aria-selected="false">Produits</button>
+      <button class="btn ghost" type="button" id="plus-t" aria-expanded="false">Plus ▾</button>
+      <button class="btn ghost sec cache" role="tab" data-t="voy" aria-selected="false">Voyages</button>
+      <button class="btn ghost sec cache" role="tab" data-t="iph" aria-selected="false">Prix du jour</button>
+      <button class="btn ghost sec cache" role="tab" data-t="pan" aria-selected="false">Paniers</button>
+      <button class="btn ghost sec cache" role="tab" data-t="tdb" aria-selected="false">Tableau de bord</button>
+      <button class="btn ghost sec cache" role="tab" data-t="tend" aria-selected="false">Tendances</button>
+      <button class="btn ghost sec cache" role="tab" data-t="cli" aria-selected="false">Clients</button>
+      <button class="btn ghost sec cache" role="tab" data-t="grp" aria-selected="false">Achats groupés</button>
+      <button class="btn ghost sec cache" role="tab" data-t="ins" aria-selected="false">Inscrits</button>
+      <button class="btn ghost sec cache" role="tab" data-t="avis" aria-selected="false">Avis</button>
+      <button class="btn ghost sec cache" role="tab" data-t="prix" aria-selected="false">Calcul des prix</button>
+      <button class="btn ghost sec cache" role="tab" data-t="fac" aria-selected="false">Factures</button>
+      <button class="btn ghost sec cache" role="tab" data-t="fid" aria-selected="false">Fidélité</button>
+      <button class="btn ghost sec cache" role="tab" data-t="reg" aria-selected="false">Réglages</button>
     </div>
 
     <section id="t-auj" class="grille" style="gap:12px">
@@ -710,6 +711,11 @@ details > summary { cursor: pointer; font-weight: 600; min-height: 36px; display
     });
   });
 
+
+  $('plus-t').addEventListener('click', function () {
+    var o = this.getAttribute('aria-expanded') !== 'true'; this.setAttribute('aria-expanded', o ? 'true' : 'false'); this.textContent = o ? 'Moins ▴' : 'Plus ▾';
+    Array.prototype.forEach.call(document.querySelectorAll('.onglets .sec'), function (x) { x.classList.toggle('cache', !o); });
+  });
   /* ---------- Produits ---------- */
   function remplirSelects() {
     var opts = Object.keys(CATL).map(function (k) { return '<option value="' + k + '">' + esc(CATL[k]) + '</option>'; }).join('');
