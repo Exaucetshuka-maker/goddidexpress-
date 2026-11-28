@@ -809,13 +809,6 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       <div class="reseaux" id="reseaux-home"></div>
     </section>
 
-    <section hidden style="display:none" class="bloc rv">
-      <header><div class="kicker">Membre fondateur</div><h2>Parmi les premiers</h2></header>
-      <div class="carte">
-        <p>Les premiers clients de GOD DID EXPRESS font partie de l'histoire de la marque. Demandez votre badge de membre fondateur.</p>
-        <a class="btn" id="fond-wa" href="#" target="_blank" rel="noopener">Je veux mon badge</a>
-      </div>
-    </section>
   </section>
 
 
@@ -2196,7 +2189,6 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   }
   document.addEventListener('click', function (e) {
     if (e.target.closest('[data-garantie]')) { ouvrirGarantie(); return; }
-    if (e.target.closest('[data-calc]')) { ouvrirCalc(); return; }
     if (!e.target.closest('[data-calc-go]')) return;
     var res = $('ca-res'); res.textContent = 'Calcul…';
     fetch('/api/estimer', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ prix: $('ca-px').value.replace(',', '.'), dev: $('ca-dev').value, kg: $('ca-kg').value.replace(',', '.'), qte: $('ca-q').value, mode: $('ca-m').value }) })
@@ -2685,7 +2677,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     return '<div class="avis-c"><q>' + a[0] + '</q><div class="qui"><span>' + a[1] + '</span><span class="pastille">Modèle</span></div></div>';
   }).join('');
   $('avis-wa').href = wa('Bonjour GOD DID EXPRESS, je veux laisser mon témoignage (avec ma photo ou une vidéo).');
-  $('fond-wa').href = wa('Bonjour GOD DID EXPRESS, je veux faire partie des premiers clients : mon badge de membre fondateur, s\'il vous plaît.');
+  if ($('fond-wa')) $('fond-wa').href = wa('Bonjour GOD DID EXPRESS, je veux faire partie des premiers clients : mon badge de membre fondateur, s\'il vous plaît.');
 
   /* Fidélité : carte numérotée, 10 diamants */
   var DIA = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12l4 6-10 11L2 10z"/><path d="M2 10h20M9 4l-2 6 5 11 5-11-2-6"/></svg>';
@@ -2763,7 +2755,6 @@ section header > .kicker, .bloc header > .kicker { display: none; }
   function tuile(v, ico, t, s) { return '<button type="button" class="tuile" ' + (v === 'pay' || v === 'install' || v === 'share' || v === 'garantie' || v === 'calc' ? 'data-' + v : 'data-go="' + v + '"') + '><svg viewBox="0 0 24 24" aria-hidden="true">' + ico + '</svg><span><b>' + t + '</b><span class="s">' + s + '</span></span></button>'; }
   function ouvrirPlus() {
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Plus</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Aller plus loin</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
-      tuile('calc', '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M12 12h2M8 16h2M12 16h2"/>', 'Calculer mon prix', 'Combien ça coûte rendu à Kinshasa') +
       tuile('garantie', '<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2.2 2.2L15.5 10"/>', 'Garantie et conditions', 'Paiement, délais, remboursement, réclamations') +
       tuile('pro', '<path d="M4 9h16v10H4z"/><path d="M9 9V6h6v3"/>', 'Espace commerçants', 'Devis de gros pour entreprises et revendeurs, commandes régulières') +
       tuile('groupes', '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.6.2 4.5 2.3 4.5 5.1"/>', 'Achats groupés', 'Plus on est nombreux, moins c\'est cher') +
