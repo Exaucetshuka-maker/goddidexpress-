@@ -1764,7 +1764,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     fetch('/api/cmd-qc', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ref: curOrd.ref, tel: t, choix: ch }) })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (x) { if (!x.ok) { b.disabled = false; m.textContent = x.j.erreur || 'Impossible.'; return; } curOrd.qc = ch; rendreSuivi(curCran);
-        if (ch === 'non') window.open(wa('Bonjour GOD DID EXPRESS, pour ma commande ' + curOrd.ref + ' je veux un changement sur la photo du produit.'), '_blank'); })
+        if (ch === 'non') ouvrirQuestion('Pour ma commande ' + curOrd.ref + ', je veux un changement sur la photo du produit.'); })
       .catch(function () { b.disabled = false; m.textContent = 'Connexion impossible.'; });
   });
   rendreSuivi(4);
@@ -2078,7 +2078,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       '<button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
       galerie(p) + videoProd(p) +
       detTags(p) + fichePrix(p) + '<div data-devis="' + p.id + '"></div>' +
-      '<div class="rangee"><button class="btn" type="button" data-payprod="' + p.id + '">Payer ce produit</button><a class="btn ghost" data-cmd-wa href="' + wa(msgProduit(p)) + '" target="_blank" rel="noopener">Discuter sur WhatsApp</a>' +
+      '<div class="rangee"><button class="btn" type="button" data-payprod="' + p.id + '">Payer ce produit</button><a class="btn ghost" data-chat data-cmd-wa href="' + wa(msgProduit(p)) + '" target="_blank" rel="noopener">Discuter sur WhatsApp</a>' +
       '<button class="btn ghost" type="button" data-add="' + p.id + '" data-sheet="1" aria-pressed="' + dans + '">' + (dans ? 'Dans ma liste' : 'Ajouter à ma liste') + '</button>' +
       '<a class="btn ghost" href="https://wa.me/?text=' + encodeURIComponent(partage) + '" target="_blank" rel="noopener">Partager à un ami</a>' +
       '<button class="btn ghost" type="button" data-vote="' + p.id + '">' + (votes[p.id] ? 'Je le veux aussi (' + votes[p.id] + ')' : 'Je veux ce produit') + '</button>' +
@@ -2121,12 +2121,14 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         ouvrirPay(x.j.ref, tot || '');
       }).catch(function () { g.disabled = false; m.textContent = 'Connexion impossible, réessaie.'; });
   });
-  function ouvrirQuestion(q) {
-    ouvrir('<div class="sheet-tete"><div><div class="kicker">Question</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Pose ta question</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
-      '<div class="valide"><label for="q-txt">Ta question</label><textarea id="q-txt" rows="3" maxlength="500">' + h(q || '') + '</textarea>' +
+  var QCMD = false;
+  function ouvrirQuestion(q, cmd) {
+    QCMD = !!cmd;
+    ouvrir('<div class="sheet-tete"><div><div class="kicker">Question</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">' + (cmd ? 'Ta commande' : 'Pose ta question') + '</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
+      '<div class="valide"><label for="q-txt">' + (cmd ? 'Ce que tu veux' : 'Ta question') + '</label><textarea id="q-txt" rows="3" maxlength="500">' + h(q || '') + '</textarea>' +
       '<label for="q-nom">Ton prénom</label><input id="q-nom" maxlength="60" value="' + ea(cvLire('n')) + '">' +
       '<label for="q-tel">Ton téléphone</label><input id="q-tel" inputmode="tel" maxlength="20" value="' + ea(cvLire('t')) + '">' +
-      '<button class="btn" type="button" data-q-go>Envoyer</button><p class="note" id="q-msg" aria-live="polite"></p></div>');
+      '<button class="btn" type="button" data-q-go>' + (cmd ? 'Valider ma commande' : 'Envoyer') + '</button><p class="note" id="q-msg" aria-live="polite"></p></div>');
   }
   document.addEventListener('click', function (e) {
     var a = e.target.closest('[data-ask]'); if (a) { e.preventDefault(); ouvrirQuestion(a.getAttribute('data-ask')); return; }
@@ -2136,14 +2138,28 @@ section header > .kicker, .bloc header > .kicker { display: none; }
     if (!nom) { m.textContent = 'Écris ton prénom.'; return; }
     if (tel.replace(/\D/g, '').length < 8) { m.textContent = 'Écris ton numéro de téléphone.'; return; }
     g.disabled = true; m.textContent = 'Envoi…';
-    fetch('/api/demande', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nom: nom, tel: tel, txt: 'Question : ' + t.slice(0, 560) }) })
+    fetch('/api/demande', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nom: nom, tel: tel, txt: (QCMD ? '' : 'Question : ') + t.slice(0, 560), commande: QCMD }) })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (x) {
         if (!x.ok) { g.disabled = false; m.textContent = x.j.erreur || 'Envoi impossible, réessaie.'; return; }
-        try { localStorage.setItem('gde-cv-n', nom); localStorage.setItem('gde-cv-t', tel); } catch (er) {}
-        $('sheet').querySelector('.valide').innerHTML = '<div class="carte" style="padding:14px;text-align:center"><b>Question envoyée</b><div class="note" style="margin-top:6px">On te répond très vite sur ton numéro.</div></div>';
+        try { localStorage.setItem('gde-cv-n', nom); localStorage.setItem('gde-cv-t', tel); if (x.j.ref) { localStorage.setItem('gde-cv-r', x.j.ref); localStorage.setItem('gde-ref', x.j.ref); } } catch (er) {}
+        $('sheet').querySelector('.valide').innerHTML = x.j.ref
+          ? '<div class="carte" style="padding:14px;text-align:center"><b>Commande enregistrée</b><div style="font-size:24px;font-weight:800;margin:6px 0">' + h(x.j.ref) + '</div><div class="note">Ta référence de suivi.</div></div><button class="btn" type="button" data-pay data-ref="' + ea(x.j.ref) + '">Payer maintenant</button><button class="btn ghost" type="button" data-suivre="' + ea(x.j.ref) + '">Suivre ma commande</button>'
+          : '<div class="carte" style="padding:14px;text-align:center"><b>Question envoyée</b><div class="note" style="margin-top:6px">On te répond très vite sur ton numéro.</div></div>';
       }).catch(function () { g.disabled = false; m.textContent = 'Connexion impossible, réessaie.'; });
   });
+  /* WhatsApp : seulement pour discuter. Le reste se fait dans le site. */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href*="wa.me"]'); if (!a) return;
+    var t = (a.textContent || '');
+    if (a.id === 'fab-wa' || a.id === 's-notif' || a.id === 'fp-inv' || a.hasAttribute('data-chat') || /Discuter|Partager|Inviter/i.test(t)) return;
+    var q = ''; try { q = decodeURIComponent((a.getAttribute('href').split('text=')[1] || '')); } catch (er) {}
+    if (/^Salut/.test(q)) return;
+    e.preventDefault(); e.stopPropagation();
+    q = q.replace(/^Bonjour GOD DID EXPRESS,?\s*/i, '').trim();
+    var cmd = /Commander|précommander|je veux (commander|le lot|:|faire)|je voudrais faire venir|je veux le devis/i.test(q + ' ' + t) && !/\?\s*$/.test(q);
+    ouvrirQuestion(q, cmd);
+  }, true);
   function ouvrirGarantie() {
     var S = [['Prix avant paiement', 'Tu reçois le devis avec le prix final avant de payer quoi que ce soit.'],
       ['Paiement', 'L\'acompte indiqué sur ton devis lance l\'achat. Le solde se règle à l\'arrivée à Kinshasa, avant la remise. Airtel Money, Orange Money, M-Pesa ou Africell Money.'],
