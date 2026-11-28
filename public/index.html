@@ -2078,7 +2078,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       '<button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
       galerie(p) + videoProd(p) +
       detTags(p) + fichePrix(p) + '<div data-devis="' + p.id + '"></div>' +
-      '<div class="rangee"><a class="btn" data-cmd-wa href="' + wa(msgProduit(p)) + '" target="_blank" rel="noopener">Commander sur WhatsApp</a>' +
+      '<div class="rangee"><button class="btn" type="button" data-payprod="' + p.id + '">Payer ce produit</button><a class="btn ghost" data-cmd-wa href="' + wa(msgProduit(p)) + '" target="_blank" rel="noopener">Discuter sur WhatsApp</a>' +
       '<button class="btn ghost" type="button" data-add="' + p.id + '" data-sheet="1" aria-pressed="' + dans + '">' + (dans ? 'Dans ma liste' : 'Ajouter à ma liste') + '</button>' +
       '<a class="btn ghost" href="https://wa.me/?text=' + encodeURIComponent(partage) + '" target="_blank" rel="noopener">Partager à un ami</a>' +
       '<button class="btn ghost" type="button" data-vote="' + p.id + '">' + (votes[p.id] ? 'Je le veux aussi (' + votes[p.id] + ')' : 'Je veux ce produit') + '</button>' +
@@ -2093,6 +2093,34 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       $('dv-q').addEventListener('input', maj); $('dv-m').addEventListener('change', maj); maj();
     }).catch(function () {});
   }
+  function payerProduit(id) {
+    var p = BY[id]; if (!p) return;
+    var u = p.px && p.px[0] > 0 ? p.px[0] : 0;
+    ouvrir('<div class="sheet-tete"><div><div class="kicker">Paiement</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">' + h(p.t) + '</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
+      '<div class="valide"><label for="pp-nom">Ton prénom</label><input id="pp-nom" maxlength="60" value="' + ea(cvLire('n')) + '">' +
+      '<label for="pp-tel">Ton téléphone</label><input id="pp-tel" inputmode="tel" maxlength="20" value="' + ea(cvLire('t')) + '">' +
+      '<label for="pp-q">Quantité</label><input id="pp-q" inputmode="numeric" value="1" maxlength="4">' +
+      (u ? '<div class="carte" style="padding:12px;text-align:center"><div class="note">À payer</div><div id="pp-tot" style="font-size:24px;font-weight:800">' + usd(u) + '</div></div>' : '<p class="note">Prix à confirmer : on te donne le montant exact avant que tu paies.</p>') +
+      '<button class="btn" type="button" data-pp-go="' + p.id + '">Continuer vers le paiement</button><p class="note" id="pp-msg" aria-live="polite"></p></div>');
+    var q = $('pp-q'); if (q && u) q.addEventListener('input', function () { var n = Math.max(1, Math.min(9999, parseInt(q.value, 10) || 1)); $('pp-tot').textContent = usd(Math.round(u * n * 100) / 100); });
+  }
+  document.addEventListener('click', function (e) {
+    var o = e.target.closest('[data-payprod]'); if (o) { payerProduit(o.getAttribute('data-payprod')); return; }
+    var g = e.target.closest('[data-pp-go]'); if (!g) return;
+    var p = BY[g.getAttribute('data-pp-go')], m = $('pp-msg'), nom = ($('pp-nom').value || '').trim(), tel = ($('pp-tel').value || '').trim(), n = Math.max(1, Math.min(9999, parseInt($('pp-q').value, 10) || 1));
+    if (!p) return;
+    if (!nom) { m.textContent = 'Écris ton prénom.'; return; }
+    if (tel.replace(/\D/g, '').length < 8) { m.textContent = 'Écris ton numéro de téléphone.'; return; }
+    var u = p.px && p.px[0] > 0 ? p.px[0] : 0, tot = u ? Math.round(u * n * 100) / 100 : 0;
+    g.disabled = true; m.textContent = 'Envoi…';
+    fetch('/api/demande', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nom: nom, tel: tel, txt: (p.t + ' x' + n + (u ? ' (' + usd(u) + ')' : '') + (tot ? '\nTotal : ' + usd(tot) : '')).slice(0, 590), commande: true }) })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (x) {
+        if (!x.ok || !x.j.ref) { g.disabled = false; m.textContent = x.j.erreur || 'Envoi impossible, réessaie.'; return; }
+        try { localStorage.setItem('gde-cv-n', nom); localStorage.setItem('gde-cv-t', tel); localStorage.setItem('gde-cv-r', x.j.ref); localStorage.setItem('gde-ref', x.j.ref); } catch (er) {}
+        ouvrirPay(x.j.ref, tot || '');
+      }).catch(function () { g.disabled = false; m.textContent = 'Connexion impossible, réessaie.'; });
+  });
   function ouvrirGarantie() {
     var S = [['Prix avant paiement', 'Tu reçois le devis avec le prix final avant de payer quoi que ce soit.'],
       ['Paiement', 'L\'acompte indiqué sur ton devis lance l\'achat. Le solde se règle à l\'arrivée à Kinshasa, avant la remise. Airtel Money, Orange Money, M-Pesa ou Africell Money.'],
@@ -2129,7 +2157,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
         res.innerHTML = '<div class="prix" style="text-align:center">Environ <b>' + usd(x.j.unit) + '</b> la pièce' + (x.j.qte > 1 ? '<small>Total pour ' + x.j.qte + ' pièces : ' + usd(x.j.total) + '</small>' : '') + '</div><p class="note">Estimation. Le prix final est sur ton devis avant tout paiement.</p>';
       }).catch(function () { res.textContent = 'Connexion impossible, réessaie.'; });
   });
-  function ouvrirPay(ref) {
+  function ouvrirPay(ref, mt) {
     var P = STATE.pay || [];
     var rows = P.map(function (x) { return '<div class="carte" style="padding:12px;display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>' + h(x.op) + '</b><div class="note">' + h(x.nom || '') + '</div><div style="font-size:20px;font-weight:700">' + h(x.num) + '</div></div><button class="btn mini" type="button" data-copie="' + ea(x.num) + '">Copier</button></div>'; }).join('');
     ouvrir('<div class="sheet-tete"><div><div class="kicker">Acompte</div><h3 id="sheet-titre" style="font-size:20px;margin-top:4px">Payer l\'acompte</h3></div><button class="btn ghost mini" type="button" data-close>Fermer</button></div>' +
@@ -2140,7 +2168,7 @@ section header > .kicker, .bloc header > .kicker { display: none; }
       '<label for="pa-op">Par quel service ?</label><select id="pa-op">' + (P.length ? P.map(function (x) { return '<option>' + h(x.op) + '</option>'; }).join('') : '<option>Airtel Money</option><option>Orange Money</option><option>M-Pesa</option><option>Africell Money</option>') + '</select>' +
       '<label for="pa-de">Numéro qui a payé</label><input id="pa-de" inputmode="tel" placeholder="0810000000" maxlength="20" value="' + ea(cvLire('t')) + '">' +
       '<label for="pa-code">Code de la transaction (dans le SMS)</label><input id="pa-code" placeholder="Ex. MP2611AB3K" maxlength="30" autocapitalize="characters">' +
-      '<label for="pa-mt">Montant payé ($)</label><input id="pa-mt" inputmode="decimal" placeholder="Ex. 50" maxlength="10">' +
+      '<label for="pa-mt">Montant payé ($)</label><input id="pa-mt" inputmode="decimal" placeholder="Ex. 50" maxlength="10" value="' + ea(mt || '') + '">' +
       '<button class="btn" type="button" data-pa-go>Envoyer ma déclaration</button><p class="note" id="pa-msg" aria-live="polite"></p></div>');
   }
   document.addEventListener('click', function (e) {
